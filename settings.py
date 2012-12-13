@@ -1,4 +1,9 @@
 # Django settings for dhlab_backend project.
+import os
+
+CURRENT_FILE = os.path.abspath(__file__)
+PROJECT_ROOT = os.path.dirname(CURRENT_FILE)
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -52,7 +57,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join( PROJECT_ROOT, 'static_deploy' )
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -60,9 +65,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_ROOT, 'static/'),
 )
 
 # List of finder classes that know how to find static files in
@@ -93,15 +96,13 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = 'urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_ROOT, 'templates'),
 )
 
 INSTALLED_APPS = (
@@ -117,11 +118,15 @@ INSTALLED_APPS = (
     'django.contrib.admin',     # Needed for Django Admin stuff
 )
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+# Set up 2Factor authentication settings
+AUTHENTICATION_BACKENDS = (
+    'twofactor.auth_backends.TwoFactorAuthBackend',
+)
+
+TWOFACTOR_ENCRYPTION_KEY = ''
+
+ACCOUNT_ACTIVATION_DAYS = 1
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

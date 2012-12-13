@@ -1,0 +1,23 @@
+{% load i18n %}
+
+<div class='navbar navbar-fixed-top'>
+	<div class='navbar-inner'>
+		<div class = "container">
+		    <div class="row">
+	      		<div class="span9">
+					<a class="brand" href="/" title="formhub">DHLab</a>
+				</div>
+				<div class='span3'>
+					<ul class='nav'>
+						{% if user.is_authenticated %}
+						<li> <a href="/accounts/logout"> Log Out </a> </li>
+						{% else %}
+						<li> <a href="/accounts/register/"> Sign Up </a> </li>
+						<li> <a href="{% url auth_login %}"> Log In </a> </li>
+						{% endif %}
+					</ul>
+				</div>
+		  	</div>
+		</div>
+	</div>
+</div>

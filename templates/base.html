@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}MedSDK{% endblock %}</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <style type='text/css'>
+        body {
+            margin-top:64px;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+
+    <!-- spot to insert stuff for google maps -->
+    {% block additional-headers %}{% endblock %}
+</head>
+{% block body %}
+<body>
+    {% include "topbar.html" %}
+    <div class="container">
+        {% block content %}
+        {% if template %}{% include template %}{% endif %}
+        {{ content|safe }}
+        {% endblock %}
+    </div>
+    {% include "footer.html" %}
+</body>
+{% endblock %}
+</html>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<section id="register">
+  <div class="page-header">
+	<h1>{% trans "Sign Up" %}</h1>
+</div>
+
+<div class="row">
+	<div class="span8">
+		<p>{% trans "Fields marked wth an asterisk (*) are required." %}</p>
+		<form class="well" method="post" action=".">
+			{% csrf_token %}
+			{% for field in form %}
+				{{ field.label_tag }}
+				{{ field }}
+				{% if field.field.required %}*{% endif %}
+				<span class='help-block'>{{ field.errors }}</span>
+	  		{% endfor %}
+	  		<p>
+	  			{% blocktrans %}
+	  			By clicking the 'Sign Up' button, you acknowledge
+	  			that this is beta software; we make no guarantees about the
+	  			reliability or continuity of our service. We reserve the right
+	  			to pause or terminate your service, or delete your account and
+	  			data, at any time without notice. We will not be liable for any
+	  			losses, either direct or indirect, that such service interruption
+	  			or data loss may cause you. Use the service at your own risk.
+	  			{% endblocktrans %}
+	  		</p>
+	  		<input type="submit" class="btn large btn-primary" value="{% trans 'Sign Up' %}" />
+  		</form>
+	</div>
+</div>
+</section>
+{% endblock %}
