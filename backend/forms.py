@@ -10,44 +10,20 @@ from registration.models import RegistrationProfile
 from twofactor.models import UserAuthToken
 
 
+class UploadXForm( forms.Form ):
+    file  = forms.FileField(label='XForm File')
+
+
 class RegistrationFormUserProfile( RegistrationFormUniqueEmail ):
     class Meta:
         pass
 
     _reserved_usernames = [
-        'accounts',
-        'about',
-        'admin',
-        'clients',
-        'crowdform',
-        'crowdforms',
-        'data',
-        'formhub',
-        'forms',
-        'maps',
-        'odk',
-        'people',
-        'submit',
-        'submission',
-        'support',
-        'syntax',
-        'xls2xform',
-        'users',
-        'worldbank',
-        'unicef',
-        'who',
-        'wb',
-        'wfp',
-        'save',
-        'ei',
-        'modilabs',
-        'mvp',
-        'unido',
-        'unesco',
-        'savethechildren',
-        'worldvision',
-        'afsis'
-    ]
+        'accounts', 'about', 'admin', 'clients', 'crowdform', 'crowdforms',
+        'data', 'forms', 'maps', 'odk', 'people', 'submit', 'submission',
+        'support', 'syntax', 'xls2xform', 'users', 'worldbank', 'unicef',
+        'who', 'wb', 'wfp', 'save', 'ei', 'modilabs', 'mvp', 'unido',
+        'unesco', 'savethechildren', 'worldvision', 'afsis']
 
     username = forms.CharField(widget=forms.TextInput(), max_length=30)
     email    = forms.EmailField(widget=forms.TextInput())
@@ -75,7 +51,7 @@ class RegistrationFormUserProfile( RegistrationFormUniqueEmail ):
             password=self.cleaned_data['password1'],
             email=self.cleaned_data['email'],
             site='http://distributedhealth.org',
-            send_email=False )
+            send_email=False)
 
         new_user.is_active = True
         #RegistrationProfile.objects.activate_user( new_user.activation_key )

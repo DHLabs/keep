@@ -1,5 +1,24 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Dashboard</h1>
+<div class='row'>
+	<div class='span6'>
+		<div class='well'>
+			<form action='{% url dashboard %}' method='post' enctype='multipart/form-data'>
+				{% csrf_token %}
+				<fieldset>
+					<legend>Upload XForm</legend>
+					{{ form.file }}
+					<button type='submit' class='btn btn-primary'>Upload!</button>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	<div class='span6'>
+		<h4>Recent Submissions</h4>
+		<div>
+			Blah blah
+		</div>
+	</div>
+</div>
 {% endblock %}

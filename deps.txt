@@ -1,9 +1,13 @@
 Django==1.4.3
 Fabric==1.5.1
 django-registration==0.8
+djangorestframework==2.1.9
 gunicorn==0.16.1
+modilabs-python-utils==0.1.5
 paramiko==1.9.0
 pycrypto==2.6
 pymongo==2.4.1
 python-googauth==0.1.0
+pyxform==0.9.8
 wsgiref==0.1.2
+xlrd==0.8.0
