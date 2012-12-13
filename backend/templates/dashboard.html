@@ -21,4 +21,28 @@
 		</div>
 	</div>
 </div>
+<div class='row'>
+	<div class='span12'>
+		{% if user_forms|length == 0 %}
+		<div style='margin-bottom:32px;'>You have no forms uploaded =[</div>
+		{% else %}
+		<table class='table table-striped'>
+			<thead>
+				<tr>
+					<th>Form Name</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for xform in user_forms %}
+					<tr>
+						<td>{{ xform.name }}</td>
+						<td>&nbsp;</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
+	</div>
+</div>
 {% endblock %}
