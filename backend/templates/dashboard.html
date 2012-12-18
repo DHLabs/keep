@@ -23,13 +23,15 @@
 </div>
 <div class='row'>
 	<div class='span12'>
+		<h3>Your Forms</h3>
 		{% if user_forms|length == 0 %}
 		<div style='margin-bottom:32px;'>You have no forms uploaded =[</div>
 		{% else %}
-		<table class='table table-striped'>
+		<table class='table table-bordered table-striped'>
 			<thead>
 				<tr>
-					<th>Form Name</th>
+					<th>Name</th>
+					<th># of Submissions</th>
 					<th>Actions</th>
 				</tr>
 			</thead>
@@ -37,7 +39,12 @@
 				{% for xform in user_forms %}
 					<tr>
 						<td>{{ xform.name }}</td>
-						<td>&nbsp;</td>
+						<td>100</td>
+						<td>
+							<a href='/visualize/{{xform.mongo_id}}' class='btn'><i class='icon-search'></i> Visualize</a>
+							<a href='/webform/{{xform.mongo_id}}' class='btn'><i class='icon-pencil'></i> Web Form</a>
+							<a href='/forms/delete/{{xform.mongo_id}}' class='btn btn-danger'><i class='icon-trash'></i> Delete</a>
+						</td>
 					</tr>
 				{% endfor %}
 			</tbody>

@@ -116,6 +116,7 @@ INSTALLED_APPS = (
     'twofactor',                # Needed to harden login/database
     'registration',             # Needed for user signup
     'django.contrib.admin',     # Needed for Django Admin stuff
+    'tastypie',                 # Needed for our RESTful API
 )
 
 # Set up 2Factor authentication settings

@@ -18,6 +18,13 @@ from registration.views import activate
 from backend.views import register
 
 urlpatterns = patterns('',
+    # Generate/Delete API Keys
+    url( r'^generate_key', 'backend.views.generate_api_key',
+        name='generate_api_key' ),
+
+    url( r'^delete_key/(?P<key>\w+)', 'backend.views.delete_api_key',
+        name='delete_api_key' ),
+
     url(r'^activate/(?P<activation_key>\w+)/$',
         activate,
         name='registration_activate'),

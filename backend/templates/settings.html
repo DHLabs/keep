@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class='row'>
+	<div class='span12'>
+		<h3>API Keys</h3>
+		<table class='table table-bordered table-striped'>
+			<thead>
+				<tr>
+					<th>Key Name</th>
+					<th>Secret Key</th>
+					<th>Date Created</th>
+					<th>&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<form class='form' action='/accounts/generate_key' method='GET'>
+					<td><input type='text' name='name' placeholder='iODK Key'></td>
+					<td colspan='3'>
+						<button type='submit' class='btn btn-primary'>
+							Generate Key
+						</button>
+					</td>
+					</form>
+				</tr>
+				{% for token in api_tokens %}
+					<tr>
+						<td>{{ token.name }}</td>
+						<td>{{ token.key }}</td>
+						<td>{{ token.created }}</td>
+						<td>
+							<a href='/accounts/delete_key/{{ token.id }}' class='btn btn-danger btn-small'>
+								<i class='icon-trash'></i>
+							</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

@@ -7,6 +7,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 admin.autodiscover()
 
+from twofactor.api_auth import UserResource
+
+from tastypie.api import Api
+v1_api = Api( api_name='v1' )
+v1_api.register( UserResource() )
+
 urlpatterns = patterns( '',
 
     # Landing page / standard copy pages
@@ -17,6 +23,9 @@ urlpatterns = patterns( '',
 
     # Django Admin pages
     url(r'^admin/', include(admin.site.urls)),
+
+    # DHLab REST API
+    url(r'^api/', include( v1_api.urls ) ),
 
 )
 
