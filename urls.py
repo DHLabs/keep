@@ -7,11 +7,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 admin.autodiscover()
 
-from twofactor.api_auth import UserResource
+from backend.api import FormResource
 
+# Register resources to make API available
 from tastypie.api import Api
 v1_api = Api( api_name='v1' )
-v1_api.register( UserResource() )
+v1_api.register( FormResource() )
 
 urlpatterns = patterns( '',
 

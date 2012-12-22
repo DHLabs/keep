@@ -99,4 +99,7 @@ def settings( request ):
 
     api_tokens = UserAPIToken.objects.filter(user=request.user)
 
-    return render_to_response( 'settings.html', {'api_tokens': api_tokens} )
+    return render_to_response(
+                'settings.html',
+                {'api_tokens': api_tokens},
+                context_instance=RequestContext(request))
