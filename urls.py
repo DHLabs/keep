@@ -8,6 +8,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 from backend.api import FormResource
+from backend.xforms.openrosa_urls import openrosa_urls
 
 # Register resources to make API available
 from tastypie.api import Api
@@ -29,6 +30,9 @@ urlpatterns = patterns( '',
     url(r'^api/', include( v1_api.urls ) ),
 
 )
+
+# Handle the ODKCollect APIs
+urlpatterns += openrosa_urls
 
 # Handle uploaded files
 urlpatterns += static(  r'^media/<?P<path>.*)$',
