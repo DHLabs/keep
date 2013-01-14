@@ -3,10 +3,13 @@
 
     Functions and helpers to handle OpenROSA API support.
 '''
+import json
 import StringIO
 
 from backend.db import db
 from bson import ObjectId
+
+from django.shortcuts import render_to_response
 
 from tastypie.serializers import Serializer
 
@@ -19,11 +22,26 @@ class XFormSerializer( Serializer ):
         Uses the pyxform provided classes to convert from JSON -> XForm xml
         and back again.
     '''
-    formats = [ 'xform', 'json' ]
+    formats = [ 'xform', 'json', 'html' ]
     content_types = {
+        'html': 'text/html',
         'json': 'application/json',
         'xform': 'application/xml',
     }
+
+    def to_html( self, data, options=None ):
+        '''
+            Direct user to an HTML version of the form
+        '''
+        options = options or {}
+        data    = self.to_simple( data, options )
+        print data
+        return render_to_response( 'forms/get.html', {'form': data} )
+
+    def from_html( self, content ):
+        '''
+        '''
+        return 'adfda'
 
     def to_xform( self, data, options=None ):
         options = options or {}

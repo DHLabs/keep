@@ -13,6 +13,12 @@ from twofactor.api_auth import ApiTokenAuthentication
 class FormResource( MongoDBResource ):
     id          = fields.CharField( attribute='_id' )
     name        = fields.CharField( attribute='name', null=True )
+    title       = fields.CharField( attribute='title', null=True )
+    default_language = fields.CharField( attribute='default_language',
+                                         null=True )
+    id_string   = fields.CharField( attribute='id_string', null=True )
+    type        = fields.CharField( attribute='type', null=True )
+    children    = fields.ListField( attribute='children', null=True )
     owner       = fields.CharField( attribute='user', null=True )
 
     class Meta:

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Doknosis - {{ form.name }}
+{% endblock %}
+
+{% block content %}
+<div id="xform_view">
+	<h1>Form: {{ form.name }}</h1>
+	<div class="row">
+		<div class="span10 offset2">
+			<div id="formDiv"></div>
+		</div>
+	</div>
+	<div class='row'>
+		<div class='span12'>
+			<a href="#" class='btn btn-primary' id="button-validate">
+				Validate
+			</a>
+		</div>
+	</div>
+</div>
+<script src="/static/js/vendor/json2.js"></script>
+<script src="/static/js/vendor/underscore.js"></script>
+<script src="/static/js/backbone-min.js"></script>
+<script src="/static/js/bootstrap.js"></script>
+
+<script src="/static/js/distribution/backbone-forms.min.js"></script>
+<script src="/static/js/distribution/templates/bootstrap.js"></script>
+<script src="/static/js/distribution/editors/list.min.js"></script>
+
+<script src="/static/js/backbone-localstorage.js"></script>
+<script src="/static/js/xform_web.js"></script>
+<script src='/static/js/swipe.min.js'></script>
+
+{% endblock %}

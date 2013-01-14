@@ -19,3 +19,7 @@ def formlist( request, username ):
         }) )
 
     return redirect( api_url )
+
+
+def submission_detail( request ):
+    pass
