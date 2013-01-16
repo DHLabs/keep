@@ -3,14 +3,14 @@ var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 $(function() {
-  var App, getForm, item_dict, mobileView, swipeFrame, xFormModel, xFormView, _data, _fieldsets, _schema;
+  var App, item_dict, mobileView, renderedForm, swipeFrame, xFormModel, xFormView, _data, _fieldsets, _schema;
   mobileView = false;
-  getForm = null;
   _fieldsets = [];
   _schema = {};
   _data = {};
   item_dict = {};
   swipeFrame = null;
+  renderedForm = null;
   xFormModel = (function(_super) {
 
     __extends(xFormModel, _super);
@@ -39,6 +39,10 @@ $(function() {
 
     xFormView.prototype.model = new xFormModel();
 
+    xFormView.prototype.events = {
+      'click #submit-xform': 'validate'
+    };
+
     xFormView.prototype.initialize = function() {
       this.listenTo(this.model, 'change', this.render);
       this.model.fetch({
@@ -54,6 +58,11 @@ $(function() {
         this.loadForm();
       }
       return this;
+    };
+
+    xFormView.prototype.validate = function() {
+      console.log(renderedForm.getValue());
+      return $.get('/submission', renderedForm.getValue(), null);
     };
 
     xFormView.prototype.recursiveAdd = function(child) {
@@ -152,17 +161,15 @@ $(function() {
       _.each(this.model.attributes.children, function(child) {
         return _this.recursiveAdd(child);
       });
-      getForm = new Backbone.Form({
+      renderedForm = new Backbone.Form({
         template: 'customForm',
         schema: item_dict,
         data: _data,
         fields: _fieldsets
-      });
-      getForm.render();
-      $('#formDiv').html("");
-      $('#formDiv').html(getForm.el);
+      }).render();
+      $('#formDiv').html('');
+      $('#formDiv').html(renderedForm.el);
       swipeFrame = new Swipe(document.getElementById('slider2'));
-      console.log(swipeFrame);
       return this;
     };
 
@@ -174,21 +181,21 @@ $(function() {
       item_dict = {};
       swipeFrame = null;
       Backbone.Form.setTemplates({
-        unsupportedField: '<div><label for="{{id}}"><strong>Unsupported:</strong> {{title}}</label></div>',
-        noteField: '<div><strong>Note: </strong>{{title}}</div>',
+        unsupportedField: '<div class="control-group"><label for="{{id}}"><strong>Unsupported:</strong> {{title}}</label></div>',
+        noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>',
         groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>',
         groupEnd: '<div><hr></div>'
       });
       _.each(this.model.attributes.children, function(child) {
         return _this.recursiveAdd(child);
       });
-      getForm = new Backbone.Form({
+      renderedForm = new Backbone.Form({
         schema: item_dict,
         data: _data,
         fields: _fieldsets
       }).render();
-      $('#formDiv').html("");
-      $('#formDiv').html(getForm.el);
+      $('#formDiv').html('');
+      $('#formDiv').html(renderedForm.el);
       return this;
     };
 

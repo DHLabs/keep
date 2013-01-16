@@ -1,11 +1,13 @@
 $ ->
     mobileView = false
-    getForm = null
     _fieldsets = []
     _schema = {}
     _data = {}
     item_dict = {}
     swipeFrame = null
+
+    # Rendered form values will be handled with this variable
+    renderedForm = null
 
 
     class xFormModel extends Backbone.Model
@@ -23,6 +25,9 @@ $ ->
         # Current form this view is representing
         model: new xFormModel()
 
+        events:
+            'click #submit-xform': 'validate'
+
         initialize: ->
             # Begin render when the model is finished fetching from the server
             @listenTo( @model, 'change', @render )
@@ -38,6 +43,11 @@ $ ->
                 @loadForm()
 
             @
+
+        validate: ->
+            console.log( renderedForm.getValue() )
+
+            $.get( '/submission', renderedForm.getValue(), null )
 
         recursiveAdd: ( child ) ->
 
@@ -177,19 +187,17 @@ $ ->
                 @recursiveAdd( child )
             )
 
-            getForm = new Backbone.Form(
+            renderedForm = new Backbone.Form(
                 template: 'customForm'
                 schema: item_dict
                 data: _data
                 fields: _fieldsets
-            )
-            getForm.render()
+            ).render()
 
-            $('#formDiv').html("")
-            $('#formDiv').html(getForm.el)
+            $('#formDiv').html( '' )
+            $('#formDiv').html( renderedForm.el )
 
-            swipeFrame = new Swipe(document.getElementById('slider2'))
-            console.log(swipeFrame)
+            swipeFrame = new Swipe( document.getElementById('slider2') )
 
             @
 
@@ -201,8 +209,8 @@ $ ->
             swipeFrame = null
 
             Backbone.Form.setTemplates(
-                unsupportedField: '<div><label for="{{id}}"><strong>Unsupported:</strong> {{title}}</label></div>'
-                noteField: '<div><strong>Note: </strong>{{title}}</div>'
+                unsupportedField: '<div class="control-group"><label for="{{id}}"><strong>Unsupported:</strong> {{title}}</label></div>'
+                noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>'
                 groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
                 groupEnd: '<div><hr></div>'
             )
@@ -211,15 +219,16 @@ $ ->
                 @recursiveAdd( child )
             )
 
-            getForm = new Backbone.Form(
+            renderedForm = new Backbone.Form(
                 schema: item_dict
                 data:   _data
                 fields: _fieldsets
             ).render()
 
-            $('#formDiv').html("")
-            $('#formDiv').html(getForm.el)
+            $('#formDiv').html( '' )
+            $('#formDiv').html( renderedForm.el )
 
             @
+
 
     App = new xFormView()
