@@ -52,6 +52,7 @@ $(function() {
     };
 
     xFormView.prototype.render = function() {
+      $('#xform_debug').html(JSON.stringify(this.model.attributes));
       if (mobileView) {
         this.loadMobileForm();
       } else {
@@ -62,23 +63,22 @@ $(function() {
 
     xFormView.prototype.validate = function() {
       console.log(renderedForm.getValue());
-      return $.get('/submission', renderedForm.getValue(), null);
+      return $.post('/submission', renderedForm.getValue(), null);
     };
 
     xFormView.prototype.recursiveAdd = function(child) {
-      var option_array, schema_dict, _ref, _ref1,
+      var schema_dict, _ref, _ref1,
         _this = this;
-      schema_dict = {};
-      schema_dict['help'] = child.hint;
-      schema_dict['title'] = child.label;
+      schema_dict = {
+        help: child.hint,
+        title: child.label
+      };
       if (_fieldsets.length === 0 && mobileView) {
         schema_dict['template'] = 'firstField';
       }
       if ((_ref = child.type) === 'string' || _ref === 'text') {
         schema_dict['type'] = 'Text';
-      } else if ((_ref1 = child.type) === 'int' || _ref1 === 'integer') {
-        schema_dict['type'] = 'Number';
-      } else if (child.type === 'decimal') {
+      } else if ((_ref1 = child.type) === 'decimal' || _ref1 === 'int' || _ref1 === 'integer') {
         schema_dict['type'] = 'Number';
       } else if (child.type === 'date') {
         schema_dict['type'] = 'Date';
@@ -96,38 +96,37 @@ $(function() {
         schema_dict['type'] = 'DateTime';
       } else if (child.type === 'select all that apply') {
         schema_dict['type'] = 'Checkboxes';
-        option_array = [];
+        schema_dict['options'] = [];
         _.each(child.choices, function(option) {
-          return option_array.push({
+          return schema_dict['options'].push({
             val: option.name,
             label: option.label
           });
         });
-        schema_dict['options'] = option_array;
       } else if (child.type === 'group') {
         schema_dict['type'] = 'Text';
         schema_dict['template'] = 'groupBegin';
         _.each(child.children, function(_child) {
           return _this.recursiveAdd(_child);
         });
-        schema_dict = {};
-        schema_dict['type'] = 'Text';
-        schema_dict['help'] = child.hint;
-        schema_dict['title'] = child.label;
-        schema_dict['template'] = 'groupEnd';
+        schema_dict = {
+          type: 'Text',
+          help: child.hint,
+          title: child.label,
+          template: 'groupEnd'
+        };
         item_dict[child.name + '-end'] = schema_dict;
         _fieldsets.push(child.name + '-end');
         return this;
       } else if (child.type === 'select one') {
         schema_dict['type'] = 'Select';
-        option_array = [];
+        schema_dict['options'] = [];
         _.each(child.choices, function(option) {
-          return option_array.push({
+          return schema_dict['options'].push({
             val: option.name,
             label: option.label
           });
         });
-        schema_dict['options'] = option_array;
       } else {
         schema_dict['type'] = 'Text';
         schema_dict['template'] = 'unsupportedField';

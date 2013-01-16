@@ -1,3 +1,11 @@
+# TODO
+#   - Handle xform bindings
+#       - Required
+#       - Constraints
+#       - etc
+#
+#
+
 $ ->
     mobileView = false
     _fieldsets = []
@@ -37,6 +45,8 @@ $ ->
 
         render: ->
 
+            $( '#xform_debug' ).html( JSON.stringify( @model.attributes ) )
+
             if mobileView
                 @loadMobileForm()
             else
@@ -46,14 +56,14 @@ $ ->
 
         validate: ->
             console.log( renderedForm.getValue() )
-
-            $.get( '/submission', renderedForm.getValue(), null )
+            $.post( '/submission', renderedForm.getValue(), null )
 
         recursiveAdd: ( child ) ->
 
-            schema_dict = {}
-            schema_dict['help'] = child.hint
-            schema_dict['title'] = child.label
+            schema_dict =
+                help: child.hint
+                title: child.label
+
 
             if _fieldsets.length is 0 and mobileView
                 schema_dict['template'] = 'firstField'
@@ -63,11 +73,7 @@ $ ->
 
                 schema_dict['type'] = 'Text'
 
-            else if child.type in [ 'int', 'integer' ]
-
-                schema_dict['type'] = 'Number'
-
-            else if child.type is 'decimal'
+            else if child.type in [ 'decimal', 'int', 'integer' ]
 
                 schema_dict['type'] = 'Number'
 
@@ -83,7 +89,6 @@ $ ->
             else if child.type is 'time'
 
                 schema_dict['type'] = 'DateTime'
-
 
             else if child.type is 'trigger'
 
@@ -101,18 +106,14 @@ $ ->
             else if child.type is 'select all that apply'
 
                 schema_dict['type'] = 'Checkboxes'
-                option_array = []
+                schema_dict['options'] = []
 
                 _.each( child.choices, ( option ) ->
-
-                    option_array.push(
+                    schema_dict['options'].push(
                         val:    option.name
                         label:  option.label
                     )
-
                 )
-
-                schema_dict['options'] = option_array
 
             else if child.type is 'group'
                 # this is a hack
@@ -123,11 +124,11 @@ $ ->
                     @recursiveAdd( _child )
                 )
 
-                schema_dict = {};
-                schema_dict['type'] = 'Text';
-                schema_dict['help'] = child.hint
-                schema_dict['title'] = child.label
-                schema_dict['template'] = 'groupEnd'
+                schema_dict =
+                    type:       'Text'
+                    help:       child.hint
+                    title:      child.label
+                    template:   'groupEnd'
 
                 item_dict[child.name + '-end'] = schema_dict
                 _fieldsets.push(child.name + '-end')
@@ -137,22 +138,17 @@ $ ->
             else if child.type is 'select one'
 
                 schema_dict['type'] = 'Select'
-
-                option_array = []
+                schema_dict['options'] = []
 
                 _.each( child.choices, ( option ) ->
-
-                    option_array.push(
+                    schema_dict['options'].push(
                         val:    option.name
                         label:  option.label
                     )
                 )
 
-                schema_dict['options'] = option_array;
-
             else
-
-                schema_dict['type'] = 'Text';
+                schema_dict['type']     = 'Text'
                 schema_dict['template'] = 'unsupportedField'
 
             item_dict[child.name] = schema_dict
