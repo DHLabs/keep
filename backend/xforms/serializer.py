@@ -35,13 +35,7 @@ class XFormSerializer( Serializer ):
         '''
         options = options or {}
         data    = self.to_simple( data, options )
-        print data
         return render_to_response( 'forms/get.html', {'form': data} )
-
-    def from_html( self, content ):
-        '''
-        '''
-        return 'adfda'
 
     def to_xform( self, data, options=None ):
         options = options or {}
