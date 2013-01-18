@@ -12,6 +12,7 @@ Setting up your Python Dev Environment
 ======================================
 
 Make sure you have the following Python modules installed:
+
 - pip ( http://pypi.python.org/pypi/pip )
 - virtualenv ( http://pypi.python.org/pypi/virtualenv )
 - virtualenvwrapper ( http://www.doughellmann.com/projects/virtualenvwrapper )
@@ -21,15 +22,15 @@ Ensure that virtualenvwrapper is correctly setup. You should be able to run mkvi
 
 ## Create your development workspace
 
-mkvirtualenv dhlab_backend
-pip install -r deps.txt
+    mkvirtualenv dhlab_backend
+    pip install -r deps.txt
 
 
 ## Setting up the Databases
 
-python manage syncdb
-fab restore_db
+    python manage syncdb
+    fab restore_db
 
 ## Running the Django server
 
-python manage runserver
+    python manage runserver
