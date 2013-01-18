@@ -46,6 +46,7 @@ You may now log in to the system using the following credentials along with the
 6 digit authentication token provided by the Google Authenticator application.
 
 **Username:** admin
+
 **Password:** test
 
 
