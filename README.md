@@ -1,5 +1,4 @@
-Installing Dependencies
-=======================
+# Installing Dependencies
 
 Make sure the following dependencies are installed:
 
@@ -8,8 +7,8 @@ Make sure the following dependencies are installed:
 - Python 2.7 ( http://www.python.org )
 
 
-Setting up your Python Dev Environment
-======================================
+# Setting up your Python Dev Environment
+
 
 Make sure you have the following Python modules installed:
 
@@ -34,3 +33,12 @@ Ensure that virtualenvwrapper is correctly setup. You should be able to run mkvi
 ## Running the Django server
 
     python manage runserver
+
+# Setting up Two Factor Authentication
+
+Download the Google Authenticator app on your smartphone.
+
+Scan the following barcode:
+![2FA Token](https://chart.googleapis.com/chart?chl=otpauth%3A%2F%2Ftotp%2Fadmin%40DHLab%3Fsecret%3DNTSRUTMVFKM44XTW&chs=200x200&cht=qr&chld=M%7C0)
+
+
