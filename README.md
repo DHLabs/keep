@@ -39,6 +39,13 @@ Ensure that virtualenvwrapper is correctly setup. You should be able to run mkvi
 Download the Google Authenticator app on your smartphone.
 
 Scan the following barcode:
+
 ![2FA Token](https://chart.googleapis.com/chart?chl=otpauth%3A%2F%2Ftotp%2Fadmin%40DHLab%3Fsecret%3DNTSRUTMVFKM44XTW&chs=200x200&cht=qr&chld=M%7C0)
+
+You may now log in to the system using the following credentials along with the
+6 digit authentication token provided by the Google Authenticator application.
+
+**Username:** admin
+**Password:** test
 
 
