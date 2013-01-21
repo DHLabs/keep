@@ -27,12 +27,12 @@ Ensure that virtualenvwrapper is correctly setup. You should be able to run mkvi
 
 ## Setting up the Databases
 
-    python manage syncdb
+    python manage.py syncdb
     fab restore_db
 
 ## Running the Django server
 
-    python manage runserver
+    python manage.py runserver
 
 # Setting up Two Factor Authentication
 
