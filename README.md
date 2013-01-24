@@ -24,6 +24,10 @@ Ensure that virtualenvwrapper is correctly setup. You should be able to run mkvi
     mkvirtualenv dhlab_backend
     pip install -r deps.txt
 
+## Initializing Submodules
+
+    git submodule init
+    git submodule update
 
 ## Setting up the Databases
 
