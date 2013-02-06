@@ -37,9 +37,12 @@ $ ->
             'click #submit-xform': 'validate'
 
         initialize: ->
+            # Grab the form_id from the page
+            @form_id = $( '#form_id' ).html()
+
             # Begin render when the model is finished fetching from the server
             @listenTo( @model, 'change', @render )
-            @model.fetch( { url: "/api/v1/forms/50ca6a9ca14cd282229139fa/?user=admin&key=c308c86bd454486273a603b573de4342&format=json" } )
+            @model.fetch( { url: "/api/v1/forms/" + @form_id + "/?user=admin&key=c308c86bd454486273a603b573de4342&format=json" } )
 
             @
 
@@ -56,7 +59,14 @@ $ ->
 
         validate: ->
             console.log( renderedForm.getValue() )
-            $.post( '/submission', renderedForm.getValue(), null )
+
+            posted_data =
+                form: @form_id
+                values: renderedForm.getValue()
+
+            console.log( posted_data )
+
+            $.post( '/submission', posted_data, null )
 
         recursiveAdd: ( child ) ->
 

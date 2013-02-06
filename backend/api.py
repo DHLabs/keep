@@ -27,7 +27,7 @@ class FormResource( MongoDBResource ):
         object_class = Document
 
         list_allowed_methods = [ 'get' ]
-        detail_allowed_methods = [ 'get' ]
+        detail_allowed_methods = [ 'get', 'post' ]
 
         # Only return JSON & XForm xml
         serializer = XFormSerializer()

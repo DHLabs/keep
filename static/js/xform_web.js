@@ -44,9 +44,10 @@ $(function() {
     };
 
     xFormView.prototype.initialize = function() {
+      this.form_id = $('#form_id').html();
       this.listenTo(this.model, 'change', this.render);
       this.model.fetch({
-        url: "/api/v1/forms/50ca6a9ca14cd282229139fa/?user=admin&key=c308c86bd454486273a603b573de4342&format=json"
+        url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=c308c86bd454486273a603b573de4342&format=json"
       });
       return this;
     };
@@ -62,8 +63,14 @@ $(function() {
     };
 
     xFormView.prototype.validate = function() {
+      var posted_data;
       console.log(renderedForm.getValue());
-      return $.post('/submission', renderedForm.getValue(), null);
+      posted_data = {
+        form: this.form_id,
+        values: renderedForm.getValue()
+      };
+      console.log(posted_data);
+      return $.post('/submission', posted_data, null);
     };
 
     xFormView.prototype.recursiveAdd = function(child) {

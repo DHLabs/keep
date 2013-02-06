@@ -1,3 +1,5 @@
+from bson import ObjectId
+
 from backend.db import db
 from backend.forms import RegistrationFormUserProfile, UploadXForm
 
@@ -5,12 +7,39 @@ from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.utils import simplejson
+from django.views.decorators.csrf import csrf_exempt
 
 from twofactor.models import UserAPIToken
 
 from pyxform.xls2json import SurveyReader
+
+
+def webform( request, form_id ):
+    '''
+        Simply grab the survey data and send it on the webform. The webform
+        will handle rendering and submission of the final data to the server.
+    '''
+    data = db.survey.find_one( { '_id': ObjectId( form_id ) } )
+    return render_to_response( 'forms/get.html',
+                                { 'form': data,
+                                  # Convert the form id to a string for easy
+                                  # access
+                                  'form_id': str( data[ '_id' ] ) } )
+
+
+@csrf_exempt
+def submission( request ):
+
+    if request.method == 'POST':
+        print request.POST
+        data = simplejson.dumps( { 'success': True } )
+        return HttpResponse( data, mimetype='application/json' )
+
+    return HttpResponseNotAllowed( ['POST'] )
 
 
 def home( request ):
