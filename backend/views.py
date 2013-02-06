@@ -35,7 +35,6 @@ def webform( request, form_id ):
 def submission( request ):
 
     if request.method == 'POST':
-        print request.POST
         data = simplejson.dumps( { 'success': True } )
         return HttpResponse( data, mimetype='application/json' )
 
