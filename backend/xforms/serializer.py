@@ -8,6 +8,8 @@ import StringIO
 from backend.db import db
 from bson import ObjectId
 
+from lxml import etree
+
 from tastypie.serializers import Serializer
 
 from pyxform.builder import create_survey_element_from_dict
@@ -31,7 +33,33 @@ class XFormSerializer( Serializer ):
 
         # We only want to return the special xform format when there is an
         # survey id present.
-        if 'id' not in data:
+        if 'id' not in data and 'objects' in data:
+            root = etree.Element( 'xforms' )
+            root.set( 'xmlns', 'http://openrosa.org/xforms/xformsList' )
+
+            for xform in data[ 'objects' ]:
+                element = etree.Element( 'xform' )
+
+                formId = etree.Element( 'formID' )
+                formId.text = xform[ 'title' ]
+                element.append( formId )
+
+                name = etree.Element( 'name' )
+                name.text = xform[ 'name' ]
+                element.append( name )
+
+                downloadUrl = etree.Element( 'downloadUrl' )
+                downloadUrl.text = 'http://localhost:8000/api/v1/forms/%s/?format=xform' % \
+                                    ( xform[ 'id' ] )
+                element.append( downloadUrl )
+
+                element.append( etree.Element( 'descriptionText' ) )
+                element.append( etree.Element( 'manifestUrl' ) )
+
+                root.append( element )
+
+            return etree.tostring( root )
+        elif 'id' not in data:
             return self.to_xml( data )
 
         # Grab the form & convert into the xform format!

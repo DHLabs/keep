@@ -33,7 +33,7 @@ class FormResource( MongoDBResource ):
         serializer = XFormSerializer()
 
         # Ensure we have an API token before returning any data.
-        authentication = ApiTokenAuthentication()
+        # authentication = ApiTokenAuthentication()
 
         # TODO: Authorize based on sharing preferences.
         # authorization = BlahBlah()

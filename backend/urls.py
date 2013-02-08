@@ -14,8 +14,6 @@ urlpatterns = patterns('',
 
     ## Webform/Data submission ##
 
-    url( r'^submission', 'backend.views.submission', name='submission' ),
-
     url( r'^webform/(?P<form_id>\w+)',
          'backend.views.webform', name='webform' ),
 )

@@ -6,12 +6,15 @@ from backend.forms import RegistrationFormUserProfile, UploadXForm
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import simplejson
 from django.views.decorators.csrf import csrf_exempt
+
+from lxml import etree
 
 from twofactor.models import UserAPIToken
 
@@ -32,9 +35,32 @@ def webform( request, form_id ):
 
 
 @csrf_exempt
-def submission( request ):
+def xml_submission( request, username ):
 
     if request.method == 'POST':
+        root = etree.fromstring(request.FILES[ 'xml_submission_file' ].read())
+
+        # Find the user object associated with this username
+        user = User.objects.get(username=username)
+
+        # The find the suervey object associated with this form name & user
+        survey_name = root.tag
+        survey = db.survey.find_one( { 'name': survey_name, 'user': user.id } )
+
+        survey_data = {
+            'user': user.id,
+            'survey': survey[ '_id' ]
+        }
+
+        # Parse the xml data
+        # TODO: Format specific values correctly instead of treating everything
+        # as strings. i.e, time -> timestamps, location -> lat/lng, etc
+        for element in root:
+            survey_data[ element.tag ] = element.text
+
+        # Insert into the database
+        db.survey_data.insert( survey_data )
+
         data = simplejson.dumps( { 'success': True } )
         return HttpResponse( data, mimetype='application/json' )
 
