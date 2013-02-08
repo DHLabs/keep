@@ -42,14 +42,27 @@ $ ->
 
             # Begin render when the model is finished fetching from the server
             @listenTo( @model, 'change', @render )
-            @model.fetch( { url: "/api/v1/forms/" + @form_id + "/?user=admin&key=c308c86bd454486273a603b573de4342&format=json" } )
+            @model.fetch( { url: "/api/v1/forms/" + @form_id + "/?user=admin&key=4f9941aced32d9ee1a4ec73fb3fe5bb9&format=json" } )
 
             @
 
+        isRelevant: ( child ) ->
+            relevance = true
+            if child.bind
+                if child.bind.relevant
+                   splitArr = child.bind.relevant.split "="
+                   key = ( splitArr[0])[2 .. (splitArr[0]).length - 3]
+                   value = ( splitArr[1])[2 .. (splitArr[1]).length - 2]
+                   values = renderedForm.getValue()
+                   relevance = (values[key] is value)
+            return relevance
+
+            @     
+
         render: ->
 
-            $( '#xform_debug' ).html( JSON.stringify( @model.attributes ) )
-
+            #$( '#xform_debug' ).html( JSON.stringify( @model.attributes ) )
+                    
             if mobileView
                 @loadMobileForm()
             else
@@ -65,9 +78,10 @@ $ ->
                 values: renderedForm.getValue()
 
             console.log( posted_data )
-
+           
             $.post( '/submission', posted_data, null )
 
+        
         recursiveAdd: ( child ) ->
 
             schema_dict =
@@ -230,6 +244,13 @@ $ ->
                 data:   _data
                 fields: _fieldsets
             ).render()
+
+            # check and display relevance as debug output
+            relevance = ( for child in @model.attributes.children 
+                child.name + ":" + @isRelevant( child )
+            )            
+               
+            $( '#xform_debug' ).html( JSON.stringify( relevance ) )
 
             $('#formDiv').html( '' )
             $('#formDiv').html( renderedForm.el )
