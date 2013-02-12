@@ -39,7 +39,7 @@
 				{% for xform in user_forms %}
 					<tr>
 						<td>{{ xform.name }}</td>
-						<td>100</td>
+						<td>{{ xform.submission_count }}</td>
 						<td>
 							<a href='/visualize/{{xform.mongo_id}}' class='btn'><i class='icon-search'></i> Visualize</a>
 							<a href='/webform/{{xform.mongo_id}}' class='btn'><i class='icon-pencil'></i> Web Form</a>
