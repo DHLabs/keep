@@ -1,7 +1,8 @@
 from bson import ObjectId
 
-from backend.db import db
+from backend.db import db, encrypt_survey
 from backend.forms import RegistrationFormUserProfile, UploadXForm
+from backend.xforms import validate_and_format
 
 from datetime import datetime
 
@@ -38,6 +39,8 @@ def webform( request, form_id ):
 def xml_submission( request, username ):
 
     if request.method == 'POST':
+        iphone_id = request.GET.get( 'iphone_id', None )
+
         root = etree.fromstring(request.FILES[ 'xml_submission_file' ].read())
 
         # Find the user object associated with this username
@@ -47,16 +50,29 @@ def xml_submission( request, username ):
         survey_name = root.tag
         survey = db.survey.find_one( { 'name': survey_name, 'user': user.id } )
 
+        # Parse the xml data
+        xml_data = {}
+        for element in root:
+            xml_data[ element.tag ] = element.text
+
+        # Do basic validation of the data
+        valid_data = validate_and_format( survey, xml_data )
+
+        # Include some metadata with the survey data
         survey_data = {
-            'user': user.id,
-            'survey': survey[ '_id' ]
+            # User ID of the person who uploaded the form (not the data)
+            'user':         user.id,
+            # Survey/form ID associated with this data
+            'survey':       survey[ '_id' ],
+            # Timestamp of when this submission was received
+            'timestamp':    datetime.now(),
+            # The validated & formatted survey data.
+            'data':         encrypt_survey( valid_data )
         }
 
-        # Parse the xml data
-        # TODO: Format specific values correctly instead of treating everything
-        # as strings. i.e, time -> timestamps, location -> lat/lng, etc
-        for element in root:
-            survey_data[ element.tag ] = element.text
+        # Save the iphone_id ( if passed in by the submitter )
+        if iphone_id:
+            survey_data[ 'uuid' ] = iphone_id
 
         # Insert into the database
         db.survey_data.insert( survey_data )

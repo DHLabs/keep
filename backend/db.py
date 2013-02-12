@@ -8,8 +8,22 @@ from pymongo import MongoClient
 from tastypie.bundle import Bundle
 from tastypie.resources import Resource
 
+from twofactor.util import encrypt_value, decrypt_value
+
 connection = MongoClient()
 db = connection[ 'dhlab' ]
+
+
+def encrypt_survey( data ):
+    for key in data:
+        data[ key ] = encrypt_value( data[ key ] )
+    return data
+
+
+def decrypt_survey( data ):
+    for key in data:
+        data[ key ] = decrypt_value( data[ key ] )
+    return data
 
 
 class Document( dict ):
