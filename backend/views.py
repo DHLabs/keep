@@ -40,7 +40,9 @@ def visualize( request, form_id ):
 
 
 def insert_data( request ):
-    import time
+    '''
+        For testing purposes only!
+    '''
     import random
 
     valid_data = {
@@ -97,7 +99,7 @@ def xml_submission( request, username ):
             # Survey/form ID associated with this data
             'survey':       survey[ '_id' ],
             # Timestamp of when this submission was received
-            'timestamp':    datetime.now(),
+            'timestamp':    datetime.utcnow(),
             # The validated & formatted survey data.
             'data':         encrypt_survey( valid_data )
         }
