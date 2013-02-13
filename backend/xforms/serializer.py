@@ -7,6 +7,7 @@ import StringIO
 
 from backend.db import db
 from bson import ObjectId
+from django.conf import settings
 
 from lxml import etree
 
@@ -49,8 +50,15 @@ class XFormSerializer( Serializer ):
                 element.append( name )
 
                 downloadUrl = etree.Element( 'downloadUrl' )
-                downloadUrl.text = 'http://localhost:8000/api/v1/forms/%s/?format=xform' % \
-                                    ( xform[ 'id' ] )
+
+                if settings.DEBUG:
+                    base_url = 'localhost:8000'
+                else:
+                    base_url = 'odk.distributedhealth.org'
+
+                downloadUrl.text = 'http://%s/api/v1/forms/%s/?format=xform' %\
+                                        ( base_url, xform[ 'id' ] )
+
                 element.append( downloadUrl )
 
                 element.append( etree.Element( 'descriptionText' ) )
