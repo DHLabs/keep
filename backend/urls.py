@@ -16,4 +16,11 @@ urlpatterns = patterns('',
 
     url( r'^webform/(?P<form_id>\w+)',
          'backend.views.webform', name='webform' ),
+
+
+    ## Data Visualization ##
+    url( r'^visualize/(?P<form_id>\w+)', 'backend.views.visualize',
+         name='visualize' ),
+
+    #url( r'^insert_data/', 'backend.views.insert_data' ),
 )

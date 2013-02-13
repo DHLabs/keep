@@ -1,5 +1,7 @@
-from backend.db import MongoDBResource, Document
+from backend.db import db, MongoDBResource, Document, decrypt_survey
 from backend.xforms.serializer import XFormSerializer
+
+from bson import ObjectId
 
 from django.conf.urls import url
 from django.contrib.auth.models import User
@@ -8,6 +10,39 @@ from tastypie import fields
 from tastypie.utils import trailing_slash
 
 from twofactor.api_auth import ApiTokenAuthentication
+
+
+class DataResource( MongoDBResource ):
+    id          = fields.CharField( attribute='_id' )
+    survey_id   = fields.CharField( attribute='survey' )
+    timestamp   = fields.DateTimeField( attribute='timestamp' )
+    data        = fields.DictField( attribute='data' )
+
+    class Meta:
+        collection = 'survey_data'
+        resource_name = 'data'
+        object_class = Document
+
+        list_allowed_methos     = []
+        detail_allowed_methods  = [ 'get' ]
+
+    def get_detail( self, request, **kwargs ):
+        # Grab the survey that we're querying survey data for
+        survey_id = kwargs[ 'pk' ]
+
+        # Query the database for the data
+        cursor = db.survey_data.find( { 'survey': ObjectId( survey_id ) })
+
+        # Decrypt survey values
+        data = []
+        for row in cursor:
+            row[ 'data' ] = decrypt_survey( row[ 'data' ] )
+            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
+            data.append( row )
+
+        print data
+
+        return self.create_response( request, data )
 
 
 class FormResource( MongoDBResource ):
@@ -19,7 +54,7 @@ class FormResource( MongoDBResource ):
     id_string   = fields.CharField( attribute='id_string', null=True )
     type        = fields.CharField( attribute='type', null=True )
     children    = fields.ListField( attribute='children', null=True )
-    owner       = fields.CharField( attribute='user', null=True )
+    owner       = fields.IntegerField( attribute='user', null=True )
 
     class Meta:
         collection = 'survey'
@@ -33,6 +68,8 @@ class FormResource( MongoDBResource ):
         serializer = XFormSerializer()
 
         # Ensure we have an API token before returning any data.
+        # TODO: Make sure this API token concept works with public/private
+        # data.
         # authentication = ApiTokenAuthentication()
 
         # TODO: Authorize based on sharing preferences.

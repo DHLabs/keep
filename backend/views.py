@@ -35,6 +35,38 @@ def webform( request, form_id ):
                                   'form_id': str( data[ '_id' ] ) } )
 
 
+def visualize( request, form_id ):
+    return render_to_response( 'visualize.html', { 'form_id': form_id } )
+
+
+def insert_data( request ):
+    import time
+    import random
+
+    valid_data = {
+        'patient_id':   'test_patient1',
+        'heart_rate':   random.randint( 40, 120 ),
+        'respiratory_rate': random.randint( 10, 40 ),
+    }
+
+    # Include some metadata with the survey data
+    survey_data = {
+        # User ID of the person who uploaded the form (not the data)
+        'user':         1,
+        # Survey/form ID associated with this data
+        'survey':       ObjectId( '511a80c04ed7071bc5db0b8c' ),
+        # Timestamp of when this submission was received
+        'timestamp':    datetime.utcnow(),
+        # The validated & formatted survey data.
+        'data':         encrypt_survey( valid_data )
+    }
+
+    db.survey_data.insert( survey_data )
+
+    data = simplejson.dumps( { 'success': True } )
+    return HttpResponse( data, mimetype='application/json' )
+
+
 @csrf_exempt
 def xml_submission( request, username ):
 

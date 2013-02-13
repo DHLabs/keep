@@ -7,13 +7,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 admin.autodiscover()
 
-from backend.api import FormResource
+from backend.api import FormResource, DataResource
 from backend.xforms.openrosa_urls import openrosa_urls
 
 # Register resources to make API available
 from tastypie.api import Api
 v1_api = Api( api_name='v1' )
 v1_api.register( FormResource() )
+v1_api.register( DataResource() )
 
 urlpatterns = patterns( '',
 
