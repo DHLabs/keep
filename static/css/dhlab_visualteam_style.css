@@ -1,0 +1,137 @@
+#addLayerButton
+{
+  background: url(../img/preferences.png) no-repeat;
+  background-size: 50px 50px;
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  border: none;
+  opacity: 0.7;
+}
+
+#addLayerdialog
+{
+	background: black;
+	opacity: 0.7;
+	color: white;
+}
+/* dialog form title bar */
+.ui-dialog-titlebar {
+	background: black;
+	opacity: 0.7;
+	color: white;
+	font-weight: bold;
+	font-size: 20px;
+	padding-left: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	cursor: move;
+}
+/* dialog form body */
+.ui-dialog-content{
+	padding-left: 10px;
+}
+
+/* dialog form close button */
+.ui-dialog-titlebar-close {
+	background: url(../img/x2.ico) no-repeat;
+	background-size: 25px 25px;
+	background-position: center;
+	height: 20px;
+	width: 20px;
+	color: black;
+	margin-left: 10px;
+	border-style: none;
+	opacity: 1.0;
+}
+
+/* disable the button text */
+.ui-button-text {
+	display: none;
+}
+
+/* dialog form add button */
+#confirm_add {
+	margin-bottom: 10px;
+	background: url(../img/submit_bttn2.jpg) no-repeat;
+	height: 25px;
+	width: 80px;
+	background-size: 100px 40px;
+	background-position: center;
+	opacity: 1.0;
+	
+}
+
+#addLayerdialog form input {
+	color: black;
+}
+
+
+/*****/
+	/* prevent nonused hyperlinks to be highlighted */
+	a {
+		text-decoration:none;
+	}	
+	a:hover {
+		text-decoration: none;
+	}
+	
+	#dropdown {
+		/* cancel the default list style */
+		list-style:none;
+		margin:0;
+		padding:0;
+		position:relative;
+	}
+		
+	#dropdown li a.parent {
+		display:block; 
+		width:150px; height:40px;
+		font-weight:bold;
+		padding-left: 10px;
+		line-height:35px;
+		color: white;
+		background: black;
+		opacity: 0.7;
+		border-left: double;
+	}
+	
+	#dropdown li .children {
+		border-left: double;
+		
+	}
+	
+	checkbox property
+	#dropdown li .children input {
+		padding-right: 5px;
+	}
+		
+	#dropdown ul {
+			/* cancel the default list style */
+			margin:0;
+			padding:0;
+			list-style:none;	
+			display:none;
+			
+			/* make sure it has the highest z-index */
+			position:absolute;
+			left:0;
+			z-index:500;
+			background:#fff;
+			width:150px;
+			background: black;
+			opacity: 0.7;
+			color: white;
+			padding-right: 5px;
+			padding-left: 5px;
+			}
+		
+			#dropdown ul li {
+				font-size:11px;	
+				padding: 5px;
+			}
+				
+			#dropdown ul li a:hover {
+				color:#e11	
+			}
+

@@ -190,7 +190,12 @@ def dashboard( request ):
                 { 'form': form, 'user_forms': user_forms },
                 context_instance=RequestContext(request) )
 
-
+def vis_team( request, form_id=1 ):
+	return render_to_response( 'map_visualize.html', { 'form_id': form_id } )
+#	tpl = loader.get_template('map_visualize.html')
+#	ctx = Context({}) 
+#	return HttpResponse(tpl.render(ctx))
+				
 @login_required
 def generate_api_key( request ):
     UserAPIToken.objects.create( user=request.user,
