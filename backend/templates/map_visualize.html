@@ -16,6 +16,12 @@
 	<script src="/static/js/backbone-min.js"></script>
 	<script src='/static/js/d3.v3.min.js'></script>
 	<script src="/static/js/bootstrap.js"></script>
+	
+	<script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet-src.js"></script>
+	<script type="text/javascript" src="/static/js/vis_team/heatmap.js"></script>
+	<script type="text/javascript" src="/static/js/vis_team/heatmap-leaflet.js"></script>
+	
+	
 </head>
 <body>
 	<div>
@@ -29,9 +35,8 @@
 		<div id ="addLayerdialog" title = "Add Layer">
 		  <form id = "addLayer_form">
 			 Layer Name<br> <input id="layerName" type="text" name="layerName"><br>
-			 Layer Id<br> <input id = "layerId" type="text" name="leyerId"><br>
-			 Minimum Range<br> <input type= "text" name="min-range"><br>
-			 Maximum Range<br> <input type= "text" name="max-range">     
+			 Minimum Range<br> <input id = "minVal" type= "text" name="min-range"><br>
+			 Maximum Range<br> <input id = "maxVal" type= "text" name="max-range">     
 		  </form>
 		  <input id = "confirm_add" type="button" name ="add">
 		</div>
@@ -41,10 +46,8 @@
 		<div id = "list">
 		  <ul id="dropdown">
 			<li><a href="#" class="parent">Layer List</a>	
-				<ul class="children" style="display: none;">
-					<li><input id="RedLayer" type="checkbox">&nbspRed Layer</li>
-					<li><input id="YellowLayer" type="checkbox">&nbspYellow Layer 2</li>
-					<li><input id="BlueLayer" type="checkbox">&nbspBlue Layer 3</li>
+				<ul id = 'layerList' class="children" style="display: none;">
+			<!--		<li><input id="layer50" type="checkbox">&nbspRed Layer</li> -->
 				</ul>
 			</li>
 		  </ul>
