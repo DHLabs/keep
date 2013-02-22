@@ -1,7 +1,7 @@
 #addLayerButton
 {
   background: url(../img/preferences.png) no-repeat;
-  background-size: 50px 50px;
+  background-size: 40px 40px;
   cursor: pointer;
   width: 50px;
   height: 50px;
@@ -86,7 +86,7 @@
 		
 	#dropdown li a.parent {
 		display:block; 
-		width:150px; height:40px;
+		width:80px; height:40px;
 		font-weight:bold;
 		padding-left: 10px;
 		line-height:35px;
@@ -135,3 +135,17 @@
 				color:#e11	
 			}
 
+/* temporarilty added */
+#addLayerButton {
+	background-image: url(../static/img/preferences.png) no-repet;
+	background-size : 20px 20px;
+	width: 20px;
+	height: 20px;
+}
+
+#addLayerButton:hover {
+	background-image: url(../static/img/hover_preferences.png) no-repet;
+	background-size : 20px 20px;
+	width: 20px;
+	height: 20px;
+}

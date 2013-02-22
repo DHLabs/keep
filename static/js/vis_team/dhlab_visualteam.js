@@ -58,6 +58,7 @@ function createMap(){
 			var container = L.DomUtil.get("list");
 			return container;}
 	});	
+/*
 	var vTeamAddButtonControl = L.Control.extend({
 		options:{
 			position: 'bottomleft'
@@ -68,6 +69,7 @@ function createMap(){
 		}
 	});	
 	map.addControl(new vTeamAddButtonControl());	
+*/
 	map.addControl(new vTeamLayerControl());
 }
 
@@ -115,7 +117,7 @@ function adddropdownEvent(){
 }
 
 function addLayerEvent(){
-	$('#addLayerdialog').hide();
+//	$('#addLayerdialog').hide();
 	$('#addLayerButton').click(
 		function() {
 			$("#addLayerdialog").dialog({
