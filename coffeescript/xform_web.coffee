@@ -46,23 +46,12 @@ $ ->
 
             @
 
-        isRelevance: ( child ) ->
-            relevance = true
-            if child.bind
-                if child.bind.relevant
-                   splitArr = child.bind.relevant.split "="
-                   key = ( splitArr[0])[2 .. (splitArr[0]).length - 3]
-                   value = ( splitArr[1])[2 .. (splitArr[1]).length - 2]
-                   values = renderedForm.getValue()
-                   relevance = (values[key] is value)
-            return relevance
-
         passesConstraint: ( question, answers ) ->
             passesConstraint = true
             if question.bind and question.bind.constraint
                 constraint = question.bind.constraint
-                expression = @evaluateSelectedInExpression(constraint, answers, question["path"])
-                return @evaluateExpression(expression, answers, question["path"])
+                expression = @evaluateSelectedInExpression(constraint, answers, question["name"])
+                return @evaluateExpression(expression, answers, question["name"])
 
             return passesConstraint
 
@@ -70,9 +59,9 @@ $ ->
             containsRelevant = question.bind and question.bind.relevant
             if containsRelevant
                 relevantString = question.bind.relevant
-                expression = relevantString.replace /./, question["path"]
-                expression = @evaluateSelectedInExpression(expression, answers, question["path"])
-                return @evaluateExpression(expression, answers, question["path"])
+                expression = relevantString.replace /\./, question["name"]
+                expression = @evaluateSelectedInExpression(expression, answers, question["name"])
+                return @evaluateExpression(expression, answers, question["name"])
             else
                 return true
 
@@ -206,9 +195,10 @@ $ ->
             leftAnwer = null
             rightAnswer = null
 
-            # check if leftString ias a path to question
-            if (leftString.indexOf "/") != -1
-                leftAnswer = answers[leftString]
+            # check if leftString is a path to question
+            if (leftString.indexOf "$") != -1
+                lName = leftString[2...(leftString.length - 1)]
+                leftAnswer = answers[lName]
 
                 if leftAnswer instanceof Array
                     leftAnswer = "''"
@@ -216,8 +206,9 @@ $ ->
                 # left string is not a path, return false
                 return false
 
-            if (rightString.indexOf "/") != -1
-                rightAnswer = answers[rightString]
+            if (rightString.indexOf "$") != -1
+                rName = rightString[2...(rightString.length - 1)]
+                rightAnswer = answers[rName]
 
                 if rightAnswer instanceof Array
                     rightAnswer = "''"
@@ -250,7 +241,7 @@ $ ->
             else
                 number = parseInt(rightAnswer)
 
-                if not(isNan(number))
+                if not(isNaN(number))
 
                     leftFloat = parseFloat(leftAnswer)
                     rightFloat = parseFloat(rightAnswer)
@@ -467,7 +458,7 @@ $ ->
                 fields: _fieldsets
             ).render()
 
-            debugger
+	    #debugger
             answers = renderedForm.getValue()
 
             # check and display relevance as debug output

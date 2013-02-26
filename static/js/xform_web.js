@@ -53,28 +53,13 @@
         return this;
       };
 
-      xFormView.prototype.isRelevance = function(child) {
-        var key, relevance, splitArr, value, values;
-        relevance = true;
-        if (child.bind) {
-          if (child.bind.relevant) {
-            splitArr = child.bind.relevant.split("=");
-            key = splitArr[0].slice(2, +(splitArr[0].length - 3) + 1 || 9e9);
-            value = splitArr[1].slice(2, +(splitArr[1].length - 2) + 1 || 9e9);
-            values = renderedForm.getValue();
-            relevance = values[key] === value;
-          }
-        }
-        return relevance;
-      };
-
       xFormView.prototype.passesConstraint = function(question, answers) {
         var constraint, expression, passesConstraint;
         passesConstraint = true;
         if (question.bind && question.bind.constraint) {
           constraint = question.bind.constraint;
-          expression = this.evaluateSelectedInExpression(constraint, answers, question["path"]);
-          return this.evaluateExpression(expression, answers, question["@path"]);
+          expression = this.evaluateSelectedInExpression(constraint, answers, question["name"]);
+          return this.evaluateExpression(expression, answers, question["name"]);
         }
         return passesConstraint;
       };
@@ -84,9 +69,9 @@
         containsRelevant = question.bind && question.bind.relevant;
         if (containsRelevant) {
           relevantString = question.bind.relevant;
-          expression = relevantString.replace(/./, question["path"]);
-          expression = this.evaluateSelectedInExpression(expression, answers, question["path"]);
-          return this.evaluateExpression(expression, answers, question["path"]);
+          expression = relevantString.replace(/\./, question["name"]);
+          expression = this.evaluateSelectedInExpression(expression, answers, question["name"]);
+          return this.evaluateExpression(expression, answers, question["name"]);
         } else {
           return true;
         }
@@ -181,7 +166,7 @@
       };
 
       xFormView.prototype.passesTest = function(expression, answers, currentPath) {
-        var compareString, comps, leftAnswer, leftAnwer, leftFloat, leftString, number, rightAnswer, rightFloat, rightString;
+        var compareString, comps, lName, leftAnswer, leftAnwer, leftFloat, leftString, number, rName, rightAnswer, rightFloat, rightString;
         if (expression === "YES") {
           return true;
         } else if (expression === "NO") {
@@ -210,16 +195,18 @@
         rightString = comps[1].replace(/^\s+|\s+$/g, "");
         leftAnwer = null;
         rightAnswer = null;
-        if ((leftString.indexOf("/")) !== -1) {
-          leftAnswer = answers[leftString];
+        if ((leftString.indexOf("$")) !== -1) {
+          lName = leftString.slice(2, leftString.length - 1);
+          leftAnswer = answers[lName];
           if (leftAnswer instanceof Array) {
             leftAnswer = "''";
           }
         } else {
           return false;
         }
-        if ((rightString.indexOf("/")) !== -1) {
-          rightAnswer = answers[rightString];
+        if ((rightString.indexOf("$")) !== -1) {
+          rName = rightString.slice(2, rightString.length - 1);
+          rightAnswer = answers[rName];
           if (rightAnswer instanceof Array) {
             rightAnswer = "''";
           }
@@ -250,7 +237,7 @@
           return false;
         } else {
           number = parseInt(rightAnswer);
-          if (!(isNan(nunber))) {
+          if (!(isNaN(number))) {
             leftFloat = parseFloat(leftAnswer);
             rightFloat = parseFloat(rightAnswer);
             if (compareString === "<") {
@@ -427,7 +414,6 @@
           data: _data,
           fields: _fieldsets
         }).render();
-        debugger;
         answers = renderedForm.getValue();
         relevance = (function() {
           var _i, _len, _ref, _results;
