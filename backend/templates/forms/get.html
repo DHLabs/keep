@@ -5,23 +5,42 @@ Doknosis - {{ form.name }}
 {% endblock %}
 
 {% block content %}
-<div id="xform_view">
-	<h1>Form: {{ form.name }}</h1>
-	<div class="row">
-		<div class="span10 offset2">
-			<div id="formDiv"></div>
-		</div>
+<script src="/static/js/formdisplay.js"></script>
+<div class="row">
+  <div class="span3">
+    <br><br><br>
+    <button id="show1" class="btn btn-primary" type="button">Show1</button><br>
+    <button id="show2" class="btn btn-primary" type="button">Show2</button><br>
+    <button id="show3" class="btn btn-primary" type="button">Show3</button><br>
+    <button id="show4" class="btn btn-primary" type="button">Show4</button><br>
+    <button id="show5" class="btn btn-primary" type="button">Show5</button><br>
+    <button id="show6" class="btn btn-primary" type="button">Show6</button><br>
+    <button id="show7" class="btn btn-primary" type="button">Show7</button><br>
+    <button id="show8" class="btn btn-primary" type="button">Show8</button><br>
+    <button id="show9" class="btn btn-primary" type="button">Show9</button><br>
+    <button id="show10" class="btn btn-primary" type="button">Show10</button><br><br><br>
+    <button id="hide" class="btn btn-primary" type="button">Hide</button>
+  </div>
+  <div id="xform_view" class="span9">
+    <h1>Form: {{ form.name }}</h1>
+    <div id="formcontent">
+      <div class="row">
+	<div class="span10">
+	  <div id="formDiv"></div>
 	</div>
-	<div class='row'>
-		<div class='span2 offset10'>
-			<a href="#" class='btn btn-primary' id="submit-xform">
-				Submit Form
-			</a>
-		</div>
+      </div>
+      <div class='row'>
+	<div class='span2 offset8'>
+	  <a href="#" class='btn btn-primary' id="submit-xform">
+	    Submit Form
+	  </a>
 	</div>
+      </div>
+    </div>
+  </div>
 </div>
 <div id='form_id' style='display:none;'>{{ form_id }}</div>
-<div id='xform_debug' style='margin-top:16px;'></div>
+<!--<div id='xform_debug' style='margin-top:16px;'></div>-->
 <script src="/static/js/vendor/json2.js"></script>
 <script src="/static/js/vendor/underscore.js"></script>
 <script src="/static/js/backbone-min.js"></script>
