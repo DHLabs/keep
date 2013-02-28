@@ -81,7 +81,7 @@ class FormResource( MongoDBResource ):
         # authentication = ApiTokenAuthentication()
 
         # TODO: Authorize based on sharing preferences.
-        authorization = BasicAuthorization()
+        # authorization = BasicAuthorization()
 
         # Don't include resource uri
         include_resource_uri = False
