@@ -9,7 +9,7 @@ URLConf to include this URLConf for any URL beginning with
 
 
 from django.conf.urls.defaults import patterns, url
-from django.views.generic.simple import direct_to_template
+from django.shortcuts import render
 from django.contrib.auth import views as auth_views
 
 from twofactor.auth_forms import TwoFactorAuthenticationForm
@@ -70,7 +70,7 @@ urlpatterns = patterns('',
         name='registration_register'),
 
     url(r'^register/complete/$',
-        direct_to_template,
+        render,
         {'template': 'registration/registration_complete.html'},
         name='registration_complete'),
     )

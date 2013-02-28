@@ -2,6 +2,7 @@ from bson import ObjectId
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
 
 from pymongo import MongoClient
 
@@ -48,7 +49,8 @@ class MongoDBResource(Resource):
         """
         Maps mongodb documents to Document class.
         """
-        return map(Document, self.get_collection().find())
+        user = User.objects.get( username=request.GET[ 'user' ] )
+        return map(Document, self.get_collection().find(user=user.id))
 
     def obj_get(self, request=None, **kwargs):
         """
@@ -88,7 +90,7 @@ class MongoDBResource(Resource):
         """
         self.get_collection().remove()
 
-    def get_resource_uri(self, item):
+    def get_resource_uri(self, item=None):
         """
         Returns resource URI for bundle or object.
         """

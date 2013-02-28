@@ -3,13 +3,12 @@ from backend.xforms.serializer import XFormSerializer
 
 from bson import ObjectId
 
-from django.conf.urls import url
 from django.contrib.auth.models import User
 
 from tastypie import fields
-from tastypie.utils import trailing_slash
+from tastypie.authorization import Authorization
 
-from twofactor.api_auth import ApiTokenAuthentication
+#from twofactor.api_auth import ApiTokenAuthentication
 
 
 class DataResource( MongoDBResource ):
@@ -40,9 +39,18 @@ class DataResource( MongoDBResource ):
             row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
             data.append( row )
 
-        print data
-
         return self.create_response( request, data )
+
+
+class BasicAuthorization(Authorization):
+    def is_authorized(self, request, object=None):
+        '''
+            SUPER basic authorization. Checks to see if user exists.
+        '''
+        try:
+            return User.objects.get( username=request.GET.get( 'user', None ) ) is not None
+        except:
+            return False
 
 
 class FormResource( MongoDBResource ):
@@ -73,7 +81,7 @@ class FormResource( MongoDBResource ):
         # authentication = ApiTokenAuthentication()
 
         # TODO: Authorize based on sharing preferences.
-        # authorization = BlahBlah()
+        authorization = BasicAuthorization()
 
         # Don't include resource uri
         include_resource_uri = False
@@ -85,14 +93,3 @@ class FormResource( MongoDBResource ):
         '''
         user = User.objects.get( id=bundle.data['owner'] )
         return user.username
-
-    def override_urls( self ):
-        return [
-            url( r"^(?P<resource_name>%s)/(?P<username>\w+)/formList%s$" %
-                ( self._meta.resource_name, trailing_slash() ),
-                self.wrap_view('formList'),
-                name="api_form_list"),
-        ]
-
-    def formList( self, request, **kwargs ):
-        return self.create_response( request, [] )
