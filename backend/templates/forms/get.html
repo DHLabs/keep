@@ -5,7 +5,6 @@ Doknosis - {{ form.name }}
 {% endblock %}
 
 {% block content %}
-<script src="/static/js/formdisplay.js"></script>
 <div class="row">
   <div id="xform_view" class="span9 offset3">
     <h1>Form: {{ form.name }}</h1>
@@ -16,6 +15,10 @@ Doknosis - {{ form.name }}
 	</div>
       </div>
       <div class='row'>
+	<div class='span2'>
+	  <a href="#" class='btn btn-primary' id="prev">Previous</a>
+	  <!--<a href="#" class='btn btn-primary' id="getsize">Get Size</a>-->
+	</div>
 	<div class='span2 offset8'>
 	  <a href="#" class='btn btn-primary' id="next">Next</a>
 	  <a href="#" class='btn btn-primary' id="submit-xform">
@@ -40,5 +43,5 @@ Doknosis - {{ form.name }}
 <script src='/static/js/swipe.min.js'></script>
 
 <script src="/static/js/xform_web.js"></script>
-
+<script src="/static/js/formdisplay.js"></script>
 {% endblock %}

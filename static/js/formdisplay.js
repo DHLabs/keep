@@ -1,56 +1,44 @@
 $(document).ready(function(){
-    var i = 0;
-    $(".control-group").hide();
-    $(".control-group").eq(i).show();
-    
+    var i = -1;
+    var size = 0;
+    alert("this");
+
     $("#next").click(function(){
+	$("#submit-xform").hide();
+	size = $(".control-group").length; //used to determine last element
 	$(".control-group").hide();
+	i = i + 1;
+
+	//TODO: do relevancy check on item i in while loop
+	//if passes, display item i, exit loop
+	//else, increment i, repeat loop
+
 	$(".control-group").eq(i).show();
-	i++;
+	$("#prev").show();
+	
+	//if element i is last element, hide next button, display submit button
+	//else, display next button
+	if ( i == size-1 ){
+	    $("#next").hide();
+	    $("#submit-xform").show();
+	}else{
+	    $("#next").show();
+	}
     });
-    /*
-    $("#hide").click(function(){
+
+    $("#prev").click(function(){
+	$("#next").show();
+	$("#submit-xform").hide();
 	$(".control-group").hide();
-    });
-    $("#show1").click(function(){
-	$(".control-group").hide();
+	i = i - 1;
 	$(".control-group").eq(i).show();
+	if (i == 0){
+	    $("#prev").hide();
+	}
     });
-    $("#show2").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(1)").show();
+
+    $("#submit-xform").click(function(){
+	alert("Thank you for your time!");
+	//TODO: process form submit
     });
-    $("#show3").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(2)").show();
-    });
-    $("#show4").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(3)").show();
-    });
-    $("#show5").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(4)").show();
-    });
-    $("#show6").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(5)").show();
-    });
-    $("#show7").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(6)").show();
-    });
-    $("#show8").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(7)").show();
-    });
-    $("#show9").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(8)").show();
-    });
-    $("#show10").click(function(){
-	$(".control-group").hide();
-	$(".control-group:eq(9)").show();
-    });
-    */
 });
