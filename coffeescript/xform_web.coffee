@@ -42,7 +42,7 @@ $ ->
 
             # Begin render when the model is finished fetching from the server
             @listenTo( @model, 'change', @render )
-            @model.fetch( { url: "/api/v1/forms/" + @form_id + "/?user=admin&key=15bce3859cfa7146d02a5f4455413da9&format=json" } )
+            @model.fetch( { url: "/api/v1/forms/" + @form_id + "/?user=admin&key=9ad84a8f34368d01ff55d4c344d33c92&format=json" } )
 
             @
 
@@ -339,6 +339,11 @@ $ ->
             else if child.type is 'datetime'
 
                 schema_dict['type'] = 'DateTime'
+                
+            else if child.type is 'photo'
+
+                schema_dict['type'] = 'Text'
+                schema_dict['template'] = 'photo'
 
             else if child.type is 'select all that apply'
 
@@ -446,6 +451,7 @@ $ ->
                 noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>'
                 groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
                 groupEnd: '<div><hr></div>'
+                photo: '<div class="bbf-field field-{{key}}"><label for="{{id}}">{{title}}</label><div class="bbf-photo"><input type="file" accept="image/*"\></div></div>'
             )
 
             _.each( @model.attributes.children, ( child ) =>
