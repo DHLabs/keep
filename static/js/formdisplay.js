@@ -1,7 +1,7 @@
 $(document).ready(function(){
     var i = -1;
     var size = 0;
-    alert("this");
+    //alert("this is");
 
     $("#next").click(function(){
 	$("#submit-xform").hide();

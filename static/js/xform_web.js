@@ -48,7 +48,7 @@
         this.form_id = $('#form_id').html();
         this.listenTo(this.model, 'change', this.render);
         this.model.fetch({
-          url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=15bce3859cfa7146d02a5f4455413da9&format=json"
+          url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=35ec69714b23a33e79b0d859f51fa458&format=json"
         });
         return this;
       };
@@ -88,10 +88,10 @@
             endRange = substring.indexOf(")");
             selected = substring.slice(0, +endRange + 1 || 9e9);
             components = selected.split(",");
-            leftString = components[0].replace(/^\s+|\s+$/g, "");
-            rightString = components[0].replace(/^\s+|\s+$/g, "");
+            leftString = components[0].replace(/\s+/g, "");
+            rightString = components[0].replace(/\s+/g, "");
             if (leftString === ".") {
-              leftString = currentPath;
+              leftString = "${" + currentPath + "}";
             }
             rightString = rightString.slice(1, +(rightString.length - 2) + 1 || 9e9);
             answer = answers[leftString];
@@ -116,15 +116,15 @@
         notRange = expression.indexOf("not(", 0);
         range = scopeRange;
         rangeLength = 1;
-        if (andRange !== -1 && andRange < range) {
+        if (andRange !== -1 && andRange > range) {
           range = andRange;
           rangeLength = 5;
         }
-        if (orRange !== -1 && orRange < range) {
+        if (orRange !== -1 && orRange > range) {
           range = orRange;
           rangeLength = 4;
         }
-        if (notRange !== -1 && notRange < range) {
+        if (notRange !== -1 && notRange > range) {
           range = notR;
           rangeLength = 4;
         }
@@ -137,9 +137,9 @@
               orLocation = leftOverString.indexOf(" or ");
               andLocation = leftOverString.indexOf(" and ");
               if (orLocation !== 0) {
-                return this.evaluateExpression(parentrString, answers, currentPath) || evaluateExpression(leftOverString, answers, currentPath);
+                return this.evaluateExpression(parentrString, answers, currentPath) || this.evaluateExpression(leftOverString, answers, currentPath);
               } else if (andLocation !== 0) {
-                return this.evaluateExpression(parentrString, answers, currentPath) && evaluateExpression(leftOverString, answers, currentPath);
+                return this.evaluateExpression(parentrString, answers, currentPath) && this.evaluateExpression(leftOverString, answers, currentPath);
               } else if (andLocation !== -1 || orLocation !== -1) {
                 return this.evaluateExpression(parentString, answers, currentPath);
               }
@@ -149,11 +149,11 @@
           } else if (range === andRange) {
             leftExpression = expression.slice(0, +range + 1 || 9e9);
             rightExpression = expression.slice(range + rangeLength);
-            return this.evaluateExpression(leftExpression, answers, currentPath) && evaluateExpression(rightExpression, answers, currentPath);
+            return this.evaluateExpression(leftExpression, answers, currentPath) && this.evaluateExpression(rightExpression, answers, currentPath);
           } else if (range === orRange) {
             leftExpression = expression.slice(0, +range + 1 || 9e9);
             rightExpression = expression.slice(range + rangeLength);
-            return this.evaluateExpression(leftExpression, answers, currentPath) || evaluateExpression(rightExpression, answers, currentPath);
+            return this.evaluateExpression(leftExpression, answers, currentPath) || this.evaluateExpression(rightExpression, answers, currentPath);
           } else if (range === notRange) {
             closeRange = expression.lastIndexOf(")");
             newExpression = expression.slice(range + rangeLength, +(closeRange - (range + rangeLength)) + 1 || 9e9);
@@ -188,11 +188,11 @@
           return true;
         }
         comps = expression.split(compareString);
-        leftString = comps[0].replace(/^\s+|\s+$/g, "");
+        leftString = comps[0].replace(/\s+/g, "");
         if (leftString === ".") {
-          leftString = currentPath;
+          leftString = "${" + currentPath + "}";
         }
-        rightString = comps[1].replace(/^\s+|\s+$/g, "");
+        rightString = comps[1].replace(/\s+/g, "");
         leftAnwer = null;
         rightAnswer = null;
         if ((leftString.indexOf("$")) !== -1) {
@@ -254,7 +254,7 @@
               return leftFloat !== rightFloat;
             }
           } else {
-            rightAnswer = (rightAnswer.split("'"))[1].replace(/^\s+|\s+$/g, "");
+            rightAnswer = (rightAnswer.split("'"))[1].replace(/\s+/g, "");
             if (compareString === "=") {
               return leftAnswer === rightAnswer;
             } else if (compareString === "!=") {
@@ -434,7 +434,51 @@
       return xFormView;
 
     })(Backbone.View);
-    return App = new xFormView();
+    App = new xFormView();
+    return $(document).ready(function() {
+      var i, size;
+      i = -1;
+      size = 0;
+      $("#next").click(function() {
+        $("#submit-xform").hide();
+        size = $(".control-group").length;
+        $(".control-group").hide();
+        if (i === -1) {
+          i = i + 1;
+        } else if (App.passesConstraint(App.model.attributes.children[i], renderedForm.getValue())) {
+          i = i + 1;
+          while (!App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())) {
+            i = i + 1;
+          }
+        } else {
+          alert("Answer doesn't pass constraint:" + App.model.attributes.children[i].bind.constraint);
+        }
+        $(".control-group").eq(i).show();
+        $("#prev").show();
+        if (i === size - 1) {
+          $("#next").hide();
+          return $("#submit-xform").show();
+        } else {
+          return $("#next").show();
+        }
+      });
+      $("#prev").click(function() {
+        $("#next").show();
+        $("#submit-xform").hide();
+        $(".control-group").hide();
+        i = i - 1;
+        while (!App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())) {
+          i = i - 1;
+        }
+        $(".control-group").eq(i).show();
+        if (i === 0) {
+          return $("#prev").hide();
+        }
+      });
+      return $("#submit-xform").click(function() {
+        return alert("Thank you for your time!");
+      });
+    });
   });
 
 }).call(this);

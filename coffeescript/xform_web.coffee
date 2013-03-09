@@ -42,7 +42,7 @@ $ ->
 
             # Begin render when the model is finished fetching from the server
             @listenTo( @model, 'change', @render )
-            @model.fetch( { url: "/api/v1/forms/" + @form_id + "/?user=admin&key=15bce3859cfa7146d02a5f4455413da9&format=json" } )
+            @model.fetch( { url: "/api/v1/forms/" + @form_id + "/?user=admin&key=35ec69714b23a33e79b0d859f51fa458&format=json" } )
 
             @
 
@@ -81,11 +81,11 @@ $ ->
                     components = selected.split ","
 
                     # check for answer
-                    leftString = components[0].replace /^\s+|\s+$/g, ""
-                    rightString = components[0].replace /^\s+|\s+$/g, ""
+                    leftString = components[0].replace /\s+/g, ""
+                    rightString = components[0].replace /\s+/g, ""
 
                     if leftString is "."
-                        leftString = currentPath
+                        leftString = "${" + currentPath + "}"
 
                     # remove quotes from rightstring
                     rightString = rightString[1 .. rightString.length - 2]
@@ -112,15 +112,15 @@ $ ->
             range = scopeRange
             rangeLength = 1
 
-            if andRange != -1 and andRange < range
+            if andRange != -1 and andRange > range
                 range = andRange
                 rangeLength = 5
 
-            if orRange != -1 and orRange < range
+            if orRange != -1 and orRange > range
                 range = orRange
                 rangeLength = 4
 
-            if notRange != -1 and notRange < range
+            if notRange != -1 and notRange > range
                 range = notR
                 rangeLength = 4
 
@@ -135,9 +135,9 @@ $ ->
                         andLocation = leftOverString.indexOf " and "
 
                         if orLocation != 0
-                            return (@evaluateExpression(parentrString, answers, currentPath) or evaluateExpression(leftOverString, answers, currentPath))
+                            return (@evaluateExpression(parentrString, answers, currentPath) or @evaluateExpression(leftOverString, answers, currentPath))
                         else if andLocation != 0
-                            return (@evaluateExpression(parentrString, answers, currentPath) and evaluateExpression(leftOverString, answers, currentPath))
+                            return (@evaluateExpression(parentrString, answers, currentPath) and @evaluateExpression(leftOverString, answers, currentPath))
                         else if andLocation != -1 or orLocation != -1
                             return @evaluateExpression(parentString, answers, currentPath)
                     else
@@ -145,11 +145,11 @@ $ ->
                 else if range == andRange
                     leftExpression = expression[0 .. range]
                     rightExpression = expression[(range + rangeLength) .. ]
-                    return (@evaluateExpression(leftExpression, answers, currentPath) and evaluateExpression(rightExpression, answers, currentPath))
+                    return (@evaluateExpression(leftExpression, answers, currentPath) and @evaluateExpression(rightExpression, answers, currentPath))
                 else if range == orRange
                     leftExpression = expression[0 .. range]
                     rightExpression = expression[(range + rangeLength) .. ]
-                    return (@evaluateExpression(leftExpression, answers, currentPath) or evaluateExpression(rightExpression, answers, currentPath))
+                    return (@evaluateExpression(leftExpression, answers, currentPath) or @evaluateExpression(rightExpression, answers, currentPath))
                 else if range == notRange
                     closeRange = expression.lastIndexOf ")"
                     newExpression = expression[(range + rangeLength) .. (closeRange - (range + rangeLength))]
@@ -185,12 +185,12 @@ $ ->
 
             comps = expression.split compareString
 
-            leftString = comps[0].replace /^\s+|\s+$/g, ""
+            leftString = comps[0].replace /\s+/g, ""
 
             if leftString is "."
-                leftString = currentPath
+                leftString = "${" + currentPath + "}"
 
-            rightString = comps[1].replace /^\s+|\s+$/g, ""
+            rightString = comps[1].replace /\s+/g, ""
 
             leftAnwer = null
             rightAnswer = null
@@ -262,7 +262,7 @@ $ ->
                     # string comparisons are only equal or not equal
                     
                     # remove surrounding quotes
-                    rightAnswer = ((rightAnswer.split "'")[1]).replace /^\s+|\s+$/g, ""
+                    rightAnswer = ((rightAnswer.split "'")[1]).replace /\s+/g, ""
 
                     if compareString is "="
                         return leftAnswer is rightAnswer
@@ -475,3 +475,47 @@ $ ->
 
 
     App = new xFormView()
+    $(document).ready ->
+      i = -1
+      size = 0
+  
+      #alert("this is");
+      $("#next").click ->
+        $("#submit-xform").hide()
+        size = $(".control-group").length #used to determine last element
+        $(".control-group").hide()
+    
+        #TODO: do relevancy check on item i in while loop
+        #if passes, display item i, exit loop
+        #else, increment i, repeat loop
+        if i is -1
+          i = i + 1
+        else if App.passesConstraint(App.model.attributes.children[i], renderedForm.getValue())
+          i = i + 1
+          i = i + 1  until App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())
+        else
+          alert "Answer doesn't pass constraint:" + App.model.attributes.children[i].bind.constraint
+        $(".control-group").eq(i).show()
+        $("#prev").show()
+    
+        #if element i is last element, hide next button, display submit button
+        #else, display next button
+        if i is size - 1
+          $("#next").hide()
+          $("#submit-xform").show()
+        else
+          $("#next").show()
+
+      $("#prev").click ->
+        $("#next").show()
+        $("#submit-xform").hide()
+        $(".control-group").hide()
+        i = i - 1
+        i = i - 1  until App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())
+        $(".control-group").eq(i).show()
+        $("#prev").hide()  if i is 0
+
+      $("#submit-xform").click ->
+        alert "Thank you for your time!"
+    #TODO: process form submit
+    
