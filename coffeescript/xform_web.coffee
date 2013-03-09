@@ -339,6 +339,11 @@ $ ->
             else if child.type is 'datetime'
 
                 schema_dict['type'] = 'DateTime'
+                
+            else if child.type is 'photo'
+
+                schema_dict['type'] = 'Text'
+                schema_dict['template'] = 'photo'
 
             else if child.type is 'select all that apply'
 
@@ -446,6 +451,7 @@ $ ->
                 noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>'
                 groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
                 groupEnd: '<div><hr></div>'
+                photo: '<div class="control-group"><label for="{{id}}">{{title}}</label><input type="file" accept="image/*"></input></div></div>'
             )
 
             _.each( @model.attributes.children, ( child ) =>

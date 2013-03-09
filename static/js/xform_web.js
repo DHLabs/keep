@@ -314,6 +314,9 @@
           schema_dict['template'] = 'noteField';
         } else if (child.type === 'datetime') {
           schema_dict['type'] = 'DateTime';
+        } else if (child.type === 'photo') {
+          schema_dict['type'] = 'Text';
+          schema_dict['template'] = 'photo';
         } else if (child.type === 'select all that apply') {
           schema_dict['type'] = 'Checkboxes';
           schema_dict['options'] = [];
@@ -404,7 +407,8 @@
           unsupportedField: '<div class="control-group"><label for="{{id}}"><strong>Unsupported:</strong> {{title}}</label></div>',
           noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>',
           groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>',
-          groupEnd: '<div><hr></div>'
+          groupEnd: '<div><hr></div>',
+          photo: '<div class="control-group"><label for="{{id}}">{{title}}</label><input type="file" accept="image/*"></input></div></div>'
         });
         _.each(this.model.attributes.children, function(child) {
           return _this.recursiveAdd(child);
