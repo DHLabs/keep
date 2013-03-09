@@ -408,7 +408,7 @@
           noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>',
           groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>',
           groupEnd: '<div><hr></div>',
-          photo: '<div class="bbf-field field-{{key}}"><label for="{{id}}">{{title}}</label><div class="bbf-photo"><input type="file" accept="image/*"\></div></div>'
+          photo: '<div class="control-group"><label for="{{id}}">{{title}}</label><input type="file" accept="image/*"></input></div></div>'
         });
         _.each(this.model.attributes.children, function(child) {
           return _this.recursiveAdd(child);
