@@ -4,7 +4,7 @@
 <div class='row'>
 	<div class='span6'>
 		<div class='well'>
-			<form action='{% url dashboard %}' method='post' enctype='multipart/form-data'>
+			<form action='{% url "dashboard" %}' method='post' enctype='multipart/form-data'>
 				{% csrf_token %}
 				<fieldset>
 					<legend>Upload XForm</legend>

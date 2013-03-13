@@ -23,17 +23,17 @@
 				<input type="hidden" name="next" value="/dashboard" />
 			</form>
 			<p>
-				{% url resend_activation as resend_activation_url %}
+				{% url "resend_activation" as resend_activation_url %}
 				Missed your activation email? <a href='{{ resend_activation_url }}'>Re-send activation email.</a>
 			</p>
 			<p>
-				{% url auth_password_reset as reset_url %}
+				{% url "auth_password_reset" as reset_url %}
 				{% blocktrans %}
 				Can't access your account? <a href="{{ reset_url }}">Reset your password.</a>
 				{% endblocktrans %}
 			</p>
 			<p>
-				{% url registration_register as registration_url %}
+				{% url "registration_register" as registration_url %}
 
 				{% blocktrans %}
 				New to DHLab? <a href="{{ registration_url }}">Create an account.</a>
