@@ -17,17 +17,28 @@ from registration.views import activate
 
 from backend.views import register
 
-urlpatterns = patterns('',
-    # Generate/Delete API Keys
-    url( r'^generate_key', 'backend.views.generate_api_key',
-        name='generate_api_key' ),
+# Generate/Delete API Keys URLs
+urlpatterns = patterns( 'backend.views',
+    url( r'^generate_key', 'generate_api_key', name='generate_api_key' ),
+    url( r'^delete_key/(?P<key>\w+)', 'delete_api_key',
+         name='delete_api_key' ), )
 
-    url( r'^delete_key/(?P<key>\w+)', 'backend.views.delete_api_key',
-        name='delete_api_key' ),
+
+# Registration/Login URLs
+urlpatterns += patterns('',
 
     url(r'^activate/(?P<activation_key>\w+)/$',
         activate,
+        { 'backend': 'registration.backends.default.DefaultBackend' },
         name='registration_activate'),
+
+    url(r'^registration_complete',
+        'backend.views.registration_complete',
+        name='registration_activate_complete'),
+
+
+    url( r'^resend_activation/', 'backend.views.resend_activation',
+         name='resend_activation' ),
 
     url(r'^login/$',
         auth_views.login,
@@ -72,5 +83,4 @@ urlpatterns = patterns('',
     url(r'^register/complete/$',
         render,
         {'template': 'registration/registration_complete.html'},
-        name='registration_complete'),
-    )
+        name='registration_complete'), )

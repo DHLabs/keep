@@ -2,10 +2,12 @@ from bson import ObjectId
 
 from backend.db import db, encrypt_survey
 from backend.forms import RegistrationFormUserProfile, UploadXForm
+from backend.forms import ResendActivationForm
 from backend.xforms import validate_and_format
 
 from datetime import datetime
 
+from django.contrib.sites.models import RequestSite
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
@@ -16,6 +18,8 @@ from django.utils import simplejson
 from django.views.decorators.csrf import csrf_exempt
 
 from lxml import etree
+
+from registration.models import RegistrationProfile
 
 from twofactor.models import UserAPIToken
 
@@ -29,10 +33,10 @@ def webform( request, form_id ):
     '''
     data = db.survey.find_one( { '_id': ObjectId( form_id ) } )
     return render_to_response( 'forms/get.html',
-                                { 'form': data,
-                                  # Convert the form id to a string for easy
-                                  # access
-                                  'form_id': str( data[ '_id' ] ) } )
+                               { 'form': data,
+                                 # Convert the form id to a string for easy
+                                 # access
+                                 'form_id': str( data[ '_id' ] ) } )
 
 
 def visualize( request, form_id ):
@@ -130,14 +134,55 @@ def register( request ):
         if form.is_valid():
             ( new_user, user_token ) = form.save()
 
+            # Send activation email
+            for profile in RegistrationProfile.objects.filter(user=new_user):
+                profile.send_activation_email( RequestSite( request ) )
+
             return render_to_response('registration/reg_complete.html',
                                       {'user_token': user_token.google_url()})
     else:
         form = RegistrationFormUserProfile()
 
     return render_to_response( 'registration/registration_form.html',
-                                {'form': form },
-                                context_instance=RequestContext(request) )
+                               {'form': form },
+                               context_instance=RequestContext(request) )
+
+
+def registration_complete( request ):
+    return HttpResponseRedirect( '/login' )
+
+
+def resend_activation( request ):
+
+    status = None
+
+    if request.method == 'POST':
+
+        form = ResendActivationForm( request.POST )
+
+        if form.is_valid():
+            email = form.cleaned_data[ 'email' ]
+            users = User.objects.filter( email=email, is_active=0 )
+
+            site = RequestSite( request )
+
+            if users.count() == 0:
+                form._errors[ 'email' ] = '''Account for email address is not
+                                             recognized'''
+            else:
+                user = users[0]
+                for profile in RegistrationProfile.objects.filter(user=user):
+                    if not profile.activation_key_expired():
+                        profile.send_activation_email( site )
+
+                status = 'Email Activation Sent!'
+    else:
+        form = ResendActivationForm()
+
+    return render_to_response( 'registration/resend_activation.html',
+                               { 'form': form,
+                                 'status': status },
+                               context_instance=RequestContext( request ) )
 
 
 @login_required
@@ -181,14 +226,14 @@ def dashboard( request ):
         xform[ 'mongo_id' ] = xform[ '_id' ]
         del xform[ '_id' ]
 
-        xform[ 'submission_count' ] = db.survey_data.find({'survey': \
-                                            ObjectId(xform[ 'mongo_id' ])})\
-                                            .count()
+        xform[ 'submission_count' ] = db.survey_data\
+                                        .find( {'survey':
+                                               ObjectId(xform[ 'mongo_id' ])})\
+                                        .count()
 
-    return render_to_response(
-                'dashboard.html',
-                { 'form': form, 'user_forms': user_forms },
-                context_instance=RequestContext(request) )
+    return render_to_response( 'dashboard.html',
+                               { 'form': form, 'user_forms': user_forms },
+                               context_instance=RequestContext(request) )
 
 
 @login_required
@@ -210,7 +255,6 @@ def settings( request ):
 
     api_tokens = UserAPIToken.objects.filter(user=request.user)
 
-    return render_to_response(
-                'settings.html',
-                {'api_tokens': api_tokens},
-                context_instance=RequestContext(request))
+    return render_to_response( 'settings.html',
+                               {'api_tokens': api_tokens},
+                               context_instance=RequestContext(request))

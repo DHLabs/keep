@@ -2,8 +2,9 @@
 import os
 
 CURRENT_FILE = os.path.abspath(__file__)
-PROJECT_ROOT = os.path.dirname(CURRENT_FILE)
+PROJECT_ROOT = os.path.join( os.path.dirname(CURRENT_FILE), '..' )
 
+print PROJECT_ROOT
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -73,7 +74,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
