@@ -149,7 +149,7 @@ def register( request ):
 
 
 def registration_complete( request ):
-    return HttpResponseRedirect( '/login' )
+    return render_to_response( 'registration/activate.html' )
 
 
 def resend_activation( request ):

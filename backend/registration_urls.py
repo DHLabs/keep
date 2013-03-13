@@ -34,7 +34,7 @@ urlpatterns += patterns('',
 
     url(r'^registration_complete',
         'backend.views.registration_complete',
-        name='registration_activate_complete'),
+        name='registration_activation_complete'),
 
 
     url( r'^resend_activation/', 'backend.views.resend_activation',
