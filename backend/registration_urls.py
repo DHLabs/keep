@@ -47,9 +47,8 @@ urlpatterns += patterns('',
         name='auth_login'),
 
     url(r'^logout/$',
-        auth_views.login,
-        {'template_name': 'registration/login.html',
-        'authentication_form': TwoFactorAuthenticationForm},
+        auth_views.logout,
+        {'template_name': 'registration/logout.html'},
         name='auth_logout'),
 
     url(r'^password/change/$',
