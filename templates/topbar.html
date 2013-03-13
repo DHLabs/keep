@@ -14,7 +14,7 @@
 						<li> <a href="/accounts/logout"> Log Out </a> </li>
 						{% else %}
 						<li> <a href="/accounts/register/"> Sign Up </a> </li>
-						<li> <a href="{% url auth_login %}"> Log In </a> </li>
+						<li> <a href="{% url "auth_login" %}"> Log In </a> </li>
 						{% endif %}
 					</ul>
 				</div>
