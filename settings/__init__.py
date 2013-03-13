@@ -4,8 +4,6 @@ import os
 CURRENT_FILE = os.path.abspath(__file__)
 PROJECT_ROOT = os.path.join( os.path.dirname(CURRENT_FILE), '..' )
 
-print PROJECT_ROOT
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -48,6 +46,8 @@ USE_TZ = True
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = os.path.join( PROJECT_ROOT, 'media' )
+
+ADMIN_MEDIA_PREFIX = '/static/admin'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
