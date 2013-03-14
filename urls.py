@@ -1,7 +1,6 @@
-import settings
-
+from django.conf import settings
 from django.conf.urls import patterns, include, url
-from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 # Turn on Django Admin
 from django.contrib import admin
@@ -35,10 +34,6 @@ urlpatterns = patterns( '',
 # Handle the ODKCollect APIs
 urlpatterns += openrosa_urls
 
-# Handle uploaded files
-urlpatterns += static(  r'^media/<?P<path>.*)$',
-                        document_root=settings.MEDIA_ROOT )
-
 # Handle static files
-urlpatterns += static(  r'^static/<?P<path>.*)$',
-                        document_root=settings.STATIC_ROOT )
+if settings.DEBUG:
+    urlpatterns += staticfiles_urlpatterns()
