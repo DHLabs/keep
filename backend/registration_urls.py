@@ -8,7 +8,7 @@ URLConf to include this URLConf for any URL beginning with
 """
 
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.shortcuts import render
 from django.contrib.auth import views as auth_views
 

@@ -1,14 +1,16 @@
+
 from backend.db import db, MongoDBResource, Document, decrypt_survey
 from backend.xforms.serializer import XFormSerializer
 
 from bson import ObjectId
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 from tastypie import fields
 from tastypie.authorization import Authorization
 
-#from twofactor.api_auth import ApiTokenAuthentication
+from twofactor.api_auth import ApiTokenAuthentication
 
 
 class DataResource( MongoDBResource ):
@@ -42,15 +44,30 @@ class DataResource( MongoDBResource ):
         return self.create_response( request, data )
 
 
-class BasicAuthorization(Authorization):
-    def is_authorized(self, request, object=None):
-        '''
-            SUPER basic authorization. Checks to see if user exists.
-        '''
+class BasicAuthorization( Authorization ):
+
+    def read_list( self, object_list, bundle ):
+        user = bundle.request.GET.get( 'user', None )
+
         try:
-            return User.objects.get( username=request.GET.get( 'user', None ) ) is not None
-        except:
-            return False
+            user = User.objects.get( username=user )
+        except ObjectDoesNotExist:
+            return []
+
+        return object_list.find({ 'user': user.id } )
+
+    def read_detail( self, object_detail, bundle ):
+        user = bundle.request.GET.get( 'user', None )
+
+        try:
+            user = User.objects.get( username=user )
+        except ObjectDoesNotExist:
+            raise ValueError
+
+        if object_detail[ 'user' ] != user.id:
+            raise ValueError
+
+        return object_detail
 
 
 class FormResource( MongoDBResource ):
@@ -81,7 +98,7 @@ class FormResource( MongoDBResource ):
         # authentication = ApiTokenAuthentication()
 
         # TODO: Authorize based on sharing preferences.
-        # authorization = BasicAuthorization()
+        authorization = BasicAuthorization()
 
         # Don't include resource uri
         include_resource_uri = False

@@ -57,7 +57,7 @@ class XFormSerializer( Serializer ):
                     base_url = 'odk.distributedhealth.org'
 
                 downloadUrl.text = 'http://%s/api/v1/forms/%s/?format=xform' %\
-                                        ( base_url, xform[ 'id' ] )
+                                   ( base_url, xform[ 'id' ] )
 
                 element.append( downloadUrl )
 
@@ -71,8 +71,7 @@ class XFormSerializer( Serializer ):
             return self.to_xml( data )
 
         # Grab the form & convert into the xform format!
-        survey_data = db[ 'survey' ].find_one(
-                            {'_id': ObjectId( data[ 'id' ] ) } )
+        survey_data = db[ 'survey' ].find_one({'_id': ObjectId( data['id'])})
         survey  = create_survey_element_from_dict( survey_data )
 
         return survey._to_pretty_xml()

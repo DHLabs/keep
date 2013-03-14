@@ -2,11 +2,12 @@ from bson import ObjectId
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
 
 from pymongo import MongoClient
 
 from tastypie.bundle import Bundle
+from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.http import HttpUnauthorized
 from tastypie.resources import Resource
 
 from twofactor.util import encrypt_value, decrypt_value
@@ -45,20 +46,28 @@ class MongoDBResource(Resource):
         except AttributeError:
             raise ImproperlyConfigured("Define a collection in your resource.")
 
-    def obj_get_list(self, request=None, **kwargs):
+    def obj_get_list(self, bundle, **kwargs):
         """
         Maps mongodb documents to Document class.
         """
-        user = User.objects.get( username=request.GET[ 'user' ] )
-        return map(Document, self.get_collection().find(user=user.id))
 
-    def obj_get(self, request=None, **kwargs):
+        objects = map( Document,
+                       self.authorized_read_list( self.get_collection(),
+                                                  bundle ) )
+        return objects
+
+    def obj_get(self, bundle, **kwargs):
         """
         Returns mongodb document from provided id.
         """
-        return Document(self.get_collection().find_one({
-            "_id": ObjectId(kwargs.get("pk"))
-        }))
+
+        obj = self.get_collection()\
+                  .find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
+
+        try:
+            return Document( self.authorized_read_detail( obj, bundle ) )
+        except ValueError:
+            raise ImmediateHttpResponse( HttpUnauthorized() )
 
     def obj_create(self, bundle, **kwargs):
         """
@@ -94,11 +103,18 @@ class MongoDBResource(Resource):
         """
         Returns resource URI for bundle or object.
         """
+        if item is None:
+            return reverse( 'api_dispatch_list',
+                            kwargs={
+                                'api_name': 'v1',
+                                'resource_name': self._meta.resource_name })
+
         if isinstance(item, Bundle):
             pk = item.obj._id
         else:
             pk = item._id
-        return reverse("api_dispatch_detail", kwargs={
-            "resource_name": self._meta.resource_name,
-            "pk": pk
-        })
+        return reverse( "api_dispatch_detail",
+                        kwargs={
+                            'api_name': 'v1',
+                            'resource_name': self._meta.resource_name,
+                            'pk': pk })
