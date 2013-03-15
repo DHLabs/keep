@@ -2,27 +2,25 @@
 
 {% block content %}
 <div class='row'>
-	<div class='span6'>
-		<div class='well'>
+	<div class='span4'>
+		<div>
 			<form action='{% url "dashboard" %}' method='post' enctype='multipart/form-data'>
+				<h4>XForm Upload</h4>
 				{% csrf_token %}
-				<fieldset>
-					<legend>Upload XForm</legend>
-					{{ form.file }}
-					<button type='submit' class='btn btn-primary'>Upload!</button>
-				</fieldset>
+				{{ form.file }}
+				<button type='submit' class='btn btn-primary'>Upload!</button>
 			</form>
 		</div>
-	</div>
-	<div class='span6'>
-		<h4>Recent Submissions</h4>
+		<hr/>
 		<div>
-			Blah blah
+			<h4>Form Submissions</h4>
+			<div id='submissions_feed'></div>
+		</div>
+		<div>
+			<h4>
 		</div>
 	</div>
-</div>
-<div class='row'>
-	<div class='span12'>
+	<div class='span8'>
 		<h3>Your Forms</h3>
 		{% if user_forms|length == 0 %}
 		<div style='margin-bottom:32px;'>You have no forms uploaded =[</div>
@@ -31,7 +29,7 @@
 			<thead>
 				<tr>
 					<th>Name</th>
-					<th># of Submissions</th>
+					<th>Submissions</th>
 					<th>Actions</th>
 				</tr>
 			</thead>
@@ -41,6 +39,7 @@
 						<td>{{ xform.name }}</td>
 						<td>{{ xform.submission_count }}</td>
 						<td>
+							<a href='/api/v1/data/{{xform.mongo_id}}' class='btn'><i class='icon-file'></i> Download</a>
 							<a href='/visualize/{{xform.mongo_id}}' class='btn'><i class='icon-search'></i> Visualize</a>
 							<a href='/webform/{{xform.mongo_id}}' class='btn'><i class='icon-pencil'></i> Web Form</a>
 							<a href='/forms/delete/{{xform.mongo_id}}' class='btn btn-danger'><i class='icon-trash'></i> Delete</a>

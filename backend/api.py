@@ -1,5 +1,6 @@
 
 from backend.db import db, MongoDBResource, Document, decrypt_survey
+from backend.serializers import CSVSerializer
 from backend.xforms.serializer import XFormSerializer
 
 from bson import ObjectId
@@ -10,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from tastypie import fields
 from tastypie.authorization import Authorization
 
-from twofactor.api_auth import ApiTokenAuthentication
+# from twofactor.api_auth import ApiTokenAuthentication
 
 
 class DataResource( MongoDBResource ):
@@ -23,6 +24,7 @@ class DataResource( MongoDBResource ):
         collection = 'survey_data'
         resource_name = 'data'
         object_class = Document
+        serializer = CSVSerializer()
 
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get' ]
