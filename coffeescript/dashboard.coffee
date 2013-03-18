@@ -15,7 +15,7 @@ $ ->
 
 				info =
 					label: 'submission received'
-					time: moment( datum.timestamp ).fromNow()
+					time: moment.utc( datum.timestamp ).fromNow()
 					link: "/api/v1/data/#{ datum.survey }"
 
 				$( '#submissions_feed' ).append( feed_tmpl( info ) )

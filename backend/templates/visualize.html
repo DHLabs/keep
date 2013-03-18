@@ -1,49 +1,37 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href='{% static "/static/css/viz.css" %}'>
+{% endblock %}
+
+{% block js %}
+<div id='form_id' style='display:none;'>{{form_id}}</div>
+
+<script src='{% static "/static/js/vendor/json2.js" %}'></script>
+<script src='{% static "/static/js/vendor/underscore.js" %}'></script>
+<script src='{% static "/static/js/vendor/backbone-min.js" %}'></script>
+
+<script src='{% static "/static/js/vendor/d3.v3.min.js" %}'></script>
+<script src='{% static "/static/js/viz.js" %}'></script>
+{% endblock %}
 
 {% block content %}
-<style type='text/css'>
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-}
-
-.line {
-    fill: none;
-    stroke: orange;
-    stroke-width: 2px;
-}
-</style>
-
 <div class='container' id='viz'>
 	<div class='row'>
 		<div class='offset2 span10'>
 			<div class='btn-toolbar'>
 				<div class='btn-group' id='chart_options'>
-					<a href='#' class='active btn'><i class='icon-signal'></i> Line</a>
+					<a href='#' class='btn'><i class='icon-map-marker'></i> Map</a>
+					<a href='#' class='btn'><i class='icon-signal'></i> Line</a>
 					<a href='#' class='btn'><i class='icon-signal'></i> Bar</a>
 					<a href='#' class='btn'><i class='icon-signal'></i> Pie</a>
 				</div>
 			</div>
 		</div>
 	</div>
-	<div class='row'>
-		<div class='span2'>
-			<h4>Y-Axis</h4>
-	        <div id='fields'></div>
-		</div>
-	    <div class='span10'>
-	        <div id='chart'></div>
-	    </div>
+	<div class='row' id='viz_area'>
+		Detecting visualization options...
 	</div>
 </div>
-
-<div id='form_id' style='display:none;'>{{form_id}}</div>
-
-<script src="/static/js/vendor/json2.js"></script>
-<script src="/static/js/vendor/underscore.js"></script>
-<script src="/static/js/backbone-min.js"></script>
-
-<script src='/static/js/d3.v3.min.js'></script>
-<script src='/static/js/viz.js'></script>
 {% endblock %}
