@@ -1,3 +1,4 @@
+import pymongo
 
 from backend.db import db, MongoDBResource, Document, decrypt_survey
 from backend.serializers import CSVSerializer
@@ -12,38 +13,6 @@ from tastypie import fields
 from tastypie.authorization import Authorization
 
 # from twofactor.api_auth import ApiTokenAuthentication
-
-
-class DataResource( MongoDBResource ):
-    id          = fields.CharField( attribute='_id' )
-    survey_id   = fields.CharField( attribute='survey' )
-    timestamp   = fields.DateTimeField( attribute='timestamp' )
-    data        = fields.DictField( attribute='data' )
-
-    class Meta:
-        collection = 'survey_data'
-        resource_name = 'data'
-        object_class = Document
-        serializer = CSVSerializer()
-
-        list_allowed_methos     = []
-        detail_allowed_methods  = [ 'get' ]
-
-    def get_detail( self, request, **kwargs ):
-        # Grab the survey that we're querying survey data for
-        survey_id = kwargs[ 'pk' ]
-
-        # Query the database for the data
-        cursor = db.survey_data.find( { 'survey': ObjectId( survey_id ) })
-
-        # Decrypt survey values
-        data = []
-        for row in cursor:
-            row[ 'data' ] = decrypt_survey( row[ 'data' ] )
-            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
-            data.append( row )
-
-        return self.create_response( request, data )
 
 
 class BasicAuthorization( Authorization ):
@@ -70,6 +39,61 @@ class BasicAuthorization( Authorization ):
             raise ValueError
 
         return object_detail
+
+
+class DataResource( MongoDBResource ):
+    id          = fields.CharField( attribute='_id' )
+    survey_id   = fields.CharField( attribute='survey' )
+    timestamp   = fields.DateTimeField( attribute='timestamp' )
+    data        = fields.DictField( attribute='data' )
+
+    class Meta:
+        collection = 'survey_data'
+        resource_name = 'data'
+        object_class = Document
+        serializer = CSVSerializer()
+
+        list_allowed_methos     = []
+        detail_allowed_methods  = [ 'get', 'list' ]
+
+        authorization = BasicAuthorization()
+
+    def get_detail( self, request, **kwargs ):
+        # Grab the survey that we're querying survey data for
+        survey_id = kwargs[ 'pk' ]
+
+        # Query the database for the data
+        cursor = db.survey_data.find( { 'survey': ObjectId( survey_id ) })
+
+        # Decrypt survey values
+        data = []
+        for row in cursor:
+            row[ 'data' ] = decrypt_survey( row[ 'data' ] )
+            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
+            data.append( row )
+
+        return self.create_response( request, data )
+
+    def get_list( self, request, **kwargs ):
+        user = request.GET.get( 'user', None )
+        user = User.objects.get( username=user )
+
+        # Don't show encrypted data information and user id.
+        # Limit to the last 5 submissions
+        # Sort by latest submission first
+        cursor = db.survey_data.find( { 'user': user.id },
+                                      { 'data': False, 'user': False } )\
+                               .limit( 5 )\
+                               .sort( 'timestamp', pymongo.DESCENDING )
+
+        # Format timestamp correctly such that Javascript can correctly parse
+        # the information
+        data = []
+        for row in cursor:
+            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
+            data.append( row )
+
+        return self.create_response( request, data )
 
 
 class FormResource( MongoDBResource ):

@@ -19,7 +19,6 @@
     <!-- spot to insert stuff for google maps -->
     {% block additional-headers %}{% endblock %}
 </head>
-{% block body %}
 <body>
     {% include "topbar.html" %}
     <div class="container">
@@ -29,6 +28,6 @@
         {% endblock %}
     </div>
     {% include "footer.html" %}
+    {% block js %}{% endblock %}
 </body>
-{% endblock %}
 </html>
