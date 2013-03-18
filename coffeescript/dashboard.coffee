@@ -13,10 +13,18 @@ $ ->
 
 			for datum in data
 
+				label = 'Submission from '
+
+				if datum.uuid
+					label += 'mobile device'
+				else
+					label += 'web'
+
 				info =
-					label: 'submission received'
+					label: label
 					time: moment.utc( datum.timestamp ).fromNow()
 					link: "/api/v1/data/#{ datum.survey }"
+					survey_name: if datum.survey_label then datum.survey_label else datum.survey
 
 				$( '#submissions_feed' ).append( feed_tmpl( info ) )
 	)

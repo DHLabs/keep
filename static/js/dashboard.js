@@ -4,7 +4,7 @@ $(function() {
   return $.getJSON('/api/v1/data/', {
     'user': $('#user').html()
   }, function(data) {
-    var datum, feed_tmpl, info, _i, _len, _results;
+    var datum, feed_tmpl, info, label, _i, _len, _results;
     console.log(moment().format());
     $('#submissions_feed').html('');
     if (data.length === 0) {
@@ -14,10 +14,17 @@ $(function() {
       _results = [];
       for (_i = 0, _len = data.length; _i < _len; _i++) {
         datum = data[_i];
+        label = 'Submission from ';
+        if (datum.uuid) {
+          label += 'mobile device';
+        } else {
+          label += 'web';
+        }
         info = {
-          label: 'submission received',
+          label: label,
           time: moment.utc(datum.timestamp).fromNow(),
-          link: "/api/v1/data/" + datum.survey
+          link: "/api/v1/data/" + datum.survey,
+          survey_name: datum.survey_label ? datum.survey_label : datum.survey
         };
         _results.push($('#submissions_feed').append(feed_tmpl(info)));
       }
