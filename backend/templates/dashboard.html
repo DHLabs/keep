@@ -25,7 +25,7 @@
 		{% if user_forms|length == 0 %}
 		<div style='margin-bottom:32px;'>You have no forms uploaded =[</div>
 		{% else %}
-		<table class='table table-bordered table-striped'>
+		<table class='table table-striped table-condensed'>
 			<thead>
 				<tr>
 					<th>Name</th>
@@ -36,11 +36,48 @@
 			<tbody>
 				{% for xform in user_forms %}
 					<tr>
-						<td>{{ xform.name }}</td>
+						<td>
+							<div class='btn-group'>
+								<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
+									{{ xform.name }}
+									<span class='caret'></span>
+								</a>
+								<ul class='dropdown-menu'>
+									<li>
+										<a href='/api/v1/forms/{{ xform.mongo_id }}?format=json&amp;user={{ user.username }}'>
+											Download as JSON
+										</a>
+									</li>
+									<li>
+										<a href='/api/v1/forms/{{ xform.mongo_id }}?format=xform&amp;user={{ user.username }}'>
+											Download as XForm
+										</a>
+									</li>
+								</ul>
+							</div>
+						</td>
 						<td>{{ xform.submission_count }}</td>
 						<td>
-							<a href='/api/v1/data/{{xform.mongo_id}}' class='btn'><i class='icon-file'></i> Download</a>
-							<a href='/visualize/{{xform.mongo_id}}' class='btn'><i class='icon-search'></i> Visualize</a>
+							<div class='btn-group'>
+								<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
+									<i class='icon-file'></i> Data
+									<span class='caret'></span>
+								</a>
+								<ul class='dropdown-menu'>
+									<li>
+										<a href='/api/v1/data/{{xform.mongo_id}}?format=csv'>
+											<i class='icon-download'></i>
+											Download
+										</a>
+									</li>
+									<li>
+										<a href='/visualize/{{ xform.mongo_id }}'>
+											<i class='icon-search'></i>
+											Visualize
+										</a>
+									</li>
+								</ul>
+							</div>
 							<a href='/webform/{{xform.mongo_id}}' class='btn'><i class='icon-pencil'></i> Web Form</a>
 							<a href='/forms/delete/{{xform.mongo_id}}' class='btn btn-danger'><i class='icon-trash'></i> Delete</a>
 						</td>

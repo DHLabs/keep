@@ -5,6 +5,8 @@ from backend.forms import RegistrationFormUserProfile, UploadXForm
 from backend.forms import ResendActivationForm
 from backend.xforms import validate_and_format
 
+from cStringIO import StringIO
+
 from datetime import datetime
 
 from django.contrib.sites.models import RequestSite
@@ -37,6 +39,13 @@ def webform( request, form_id ):
                                  # Convert the form id to a string for easy
                                  # access
                                  'form_id': str( data[ '_id' ] ) } )
+
+
+def delete_form( request, form_id ):
+    db.survey.remove( { '_id': ObjectId( form_id ) } )
+    db.survey_data.remove( { 'survey': ObjectId( form_id ) } )
+
+    return HttpResponseRedirect( '/dashboard' )
 
 
 def visualize( request, form_id ):
