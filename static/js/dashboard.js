@@ -16,7 +16,7 @@ $(function() {
         datum = data[_i];
         info = {
           label: 'submission received',
-          time: moment(datum.timestamp).fromNow(),
+          time: moment.utc(datum.timestamp).fromNow(),
           link: "/api/v1/data/" + datum.survey
         };
         _results.push($('#submissions_feed').append(feed_tmpl(info)));
