@@ -1,6 +1,6 @@
 import pymongo
 
-from backend.db import db, MongoDBResource, Document, decrypt_survey
+from backend.db import db, MongoDBResource, Document, dehydrate_survey
 from backend.serializers import CSVSerializer
 from backend.xforms.serializer import XFormSerializer
 
@@ -65,12 +65,7 @@ class DataResource( MongoDBResource ):
         # Query the database for the data
         cursor = db.survey_data.find( { 'survey': ObjectId( survey_id ) })
 
-        # Decrypt survey values
-        data = []
-        for row in cursor:
-            row[ 'data' ] = decrypt_survey( row[ 'data' ] )
-            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
-            data.append( row )
+        data = dehydrate_survey( cursor )
 
         return self.create_response( request, data )
 
@@ -88,10 +83,7 @@ class DataResource( MongoDBResource ):
 
         # Format timestamp correctly such that Javascript can correctly parse
         # the information
-        data = []
-        for row in cursor:
-            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
-            data.append( row )
+        data = dehydrate_survey( cursor )
 
         return self.create_response( request, data )
 

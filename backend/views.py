@@ -1,11 +1,12 @@
+import json
+
 from bson import ObjectId
 
-from backend.db import db, encrypt_survey
+from backend.db import db, encrypt_survey, dehydrate_survey
+
 from backend.forms import RegistrationFormUserProfile, UploadXForm
 from backend.forms import ResendActivationForm
 from backend.xforms import validate_and_format
-
-from cStringIO import StringIO
 
 from datetime import datetime
 
@@ -49,7 +50,12 @@ def delete_form( request, form_id ):
 
 
 def visualize( request, form_id ):
-    return render_to_response( 'visualize.html', { 'form_id': form_id } )
+    data = db.survey_data.find( {'survey': ObjectId( form_id )} )
+
+    return render_to_response( 'visualize.html',
+                               { 'form_id': form_id,
+                                 'data': json.dumps(dehydrate_survey(data))},
+                               context_instance=RequestContext(request) )
 
 
 def insert_data( request ):
@@ -111,6 +117,10 @@ def xml_submission( request, username ):
             'user':         user.id,
             # Survey/form ID associated with this data
             'survey':       survey[ '_id' ],
+
+            # Survey name (used for feed purposes)
+            'survey_label': survey[ 'name' ],
+
             # Timestamp of when this submission was received
             'timestamp':    datetime.utcnow(),
             # The validated & formatted survey data.

@@ -1,0 +1,17 @@
+.viz {
+  display: none; }
+
+.viz-active {
+  display: block !important; }
+
+#line .axis path, #line .axis line {
+  fill: none;
+  stroke: #000; }
+#line .line {
+  fill: none;
+  stroke: orange;
+  stroke-width: 2px; }
+
+#map {
+  height: 384px;
+  border: 4px solid #aaaaaa; }
