@@ -39,6 +39,11 @@ $(document).ready(function(){
 
     $("#submit-xform").click(function(){
 	alert("Thank you for your time!");
-	//TODO: process form submit
+	i = 0;
+	$(".control-group").hide();
+	$(".control-group").eq(i).show();
+	$("#prev").hide();
+	$("#next").show();
+	$("#submit-xform").hide();
     });
 });
