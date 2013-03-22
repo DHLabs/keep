@@ -30,11 +30,33 @@ def webform( request, form_id ):
                                   # access
                                   'form_id': str( data[ '_id' ] ) } )
 
-
+'''
 @csrf_exempt
-def submission( request ):
+def submission2( request ):
 
     if request.method == 'POST':
+        data = simplejson.dumps( { 'success': True } )
+        return HttpResponse( data, mimetype='application/json' )
+
+    return HttpResponseNotAllowed( ['POST'] )
+'''
+
+def submission( request,username ):
+
+    if request.method == 'POST':
+        user = User.objects.get(username=username)
+        survey_data = {
+            # User ID of the person who uploaded the form (not the data)
+            'user':         user.id,
+            # Survey/form ID associated with this data
+            'survey':       survey[ '_id' ],
+            # Timestamp of when this submission was received
+            'timestamp':    datetime.utcnow(),
+            # The validated & formatted survey data.
+            'data':         encrypt_survey( valid_data )
+        }
+        db.survey_data.insert(survey_data)
+
         data = simplejson.dumps( { 'success': True } )
         return HttpResponse( data, mimetype='application/json' )
 

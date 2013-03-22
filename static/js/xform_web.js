@@ -48,7 +48,7 @@
         this.form_id = $('#form_id').html();
         this.listenTo(this.model, 'change', this.render);
         this.model.fetch({
-          url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=35ec69714b23a33e79b0d859f51fa458&format=json"
+          url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=15bce3859cfa7146d02a5f4455413da9&format=json"
         });
         return this;
       };
