@@ -481,12 +481,7 @@
       });
       return $("#submit-xform").click(function() {
         alert("Thank you for your time!");
-	i = 0;
-	$(".control-group").hide();
-	$(".control-group").eq(i).show();
-	$("#prev").hide();
-	$("#next").show();
-	return $("#submit-xform").hide();
+	return window.location.replace("/");
       });
     });
   });
