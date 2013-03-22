@@ -487,7 +487,7 @@
       });
       return $("#submit-xform").click(function() {
         alert("Thank you for your time!");
-        return window.location.replace("/");
+	return window.location.replace("/");
       });
     });
   });
