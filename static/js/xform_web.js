@@ -48,7 +48,7 @@
         this.form_id = $('#form_id').html();
         this.listenTo(this.model, 'change', this.render);
         this.model.fetch({
-          url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=15bce3859cfa7146d02a5f4455413da9&format=json"
+          url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=35ec69714b23a33e79b0d859f51fa458&format=json"
         });
         return this;
       };
@@ -444,15 +444,21 @@
       i = -1;
       size = 0;
       $("#next").click(function() {
+        var child;
         $("#submit-xform").hide();
         size = $(".control-group").length;
         $(".control-group").hide();
         if (i === -1) {
           i = i + 1;
         } else if (App.passesConstraint(App.model.attributes.children[i], renderedForm.getValue())) {
-          i = i + 1;
-          while (!App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())) {
+          child = App.model.attributes.children[i];
+          if (child.bind && child.bind.required && (renderedForm.getValue()[child.name] === "")) {
+            alert("Answer is required");
+          } else {
             i = i + 1;
+            while (!App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())) {
+              i = i + 1;
+            }
           }
         } else {
           alert("Answer doesn't pass constraint:" + App.model.attributes.children[i].bind.constraint);
@@ -481,12 +487,7 @@
       });
       return $("#submit-xform").click(function() {
         alert("Thank you for your time!");
-	i = 0;
-	$(".control-group").hide();
-	$(".control-group").eq(i).show();
-	$("#prev").hide();
-	$("#next").show();
-	return $("#submit-xform").hide();
+        return window.location.replace("/");
       });
     });
   });

@@ -484,28 +484,23 @@ $ ->
     $(document).ready ->
       i = -1
       size = 0
-  
-      #alert("this is");
       $("#next").click ->
         $("#submit-xform").hide()
-        size = $(".control-group").length #used to determine last element
+        size = $(".control-group").length
         $(".control-group").hide()
-    
-        #TODO: do relevancy check on item i in while loop
-        #if passes, display item i, exit loop
-        #else, increment i, repeat loop
         if i is -1
           i = i + 1
         else if App.passesConstraint(App.model.attributes.children[i], renderedForm.getValue())
-          i = i + 1
-          i = i + 1  until App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())
+          child = App.model.attributes.children[i]
+          if child.bind and child.bind.required and (renderedForm.getValue()[child.name] is "")
+            alert "Answer is required"
+          else
+            i = i + 1
+            i = i + 1  until App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())
         else
           alert "Answer doesn't pass constraint:" + App.model.attributes.children[i].bind.constraint
         $(".control-group").eq(i).show()
         $("#prev").show()
-    
-        #if element i is last element, hide next button, display submit button
-        #else, display next button
         if i is size - 1
           $("#next").hide()
           $("#submit-xform").show()
@@ -523,5 +518,7 @@ $ ->
 
       $("#submit-xform").click ->
         alert "Thank you for your time!"
-    #TODO: process form submit
+        window.location.replace "/"
+      
+        
     
