@@ -26,7 +26,6 @@ def dehydrate_survey( cursor ):
     for row in cursor:
 
         for key in row.keys():
-            print key
             if isinstance( row[ key ], ObjectId ):
                 row[ key ] = str( row[ key ] )
 
