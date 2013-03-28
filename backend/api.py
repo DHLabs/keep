@@ -1,15 +1,44 @@
-from backend.db import db, MongoDBResource, Document, decrypt_survey
+import pymongo
+
+from backend.db import db, MongoDBResource, Document, dehydrate_survey
+from backend.serializers import CSVSerializer
 from backend.xforms.serializer import XFormSerializer
 
 from bson import ObjectId
 
-from django.conf.urls import url
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 from tastypie import fields
-from tastypie.utils import trailing_slash
+from tastypie.authorization import Authorization
 
-from twofactor.api_auth import ApiTokenAuthentication
+# from twofactor.api_auth import ApiTokenAuthentication
+
+
+class BasicAuthorization( Authorization ):
+
+    def read_list( self, object_list, bundle ):
+        user = bundle.request.GET.get( 'user', None )
+
+        try:
+            user = User.objects.get( username=user )
+        except ObjectDoesNotExist:
+            return []
+
+        return object_list.find({ 'user': user.id } )
+
+    def read_detail( self, object_detail, bundle ):
+        user = bundle.request.GET.get( 'user', None )
+
+        try:
+            user = User.objects.get( username=user )
+        except ObjectDoesNotExist:
+            raise ValueError
+
+        if object_detail[ 'user' ] != user.id:
+            raise ValueError
+
+        return object_detail
 
 
 class DataResource( MongoDBResource ):
@@ -22,9 +51,12 @@ class DataResource( MongoDBResource ):
         collection = 'survey_data'
         resource_name = 'data'
         object_class = Document
+        serializer = CSVSerializer()
 
         list_allowed_methos     = []
-        detail_allowed_methods  = [ 'get' ]
+        detail_allowed_methods  = [ 'get', 'list' ]
+
+        authorization = BasicAuthorization()
 
     def get_detail( self, request, **kwargs ):
         # Grab the survey that we're querying survey data for
@@ -33,14 +65,25 @@ class DataResource( MongoDBResource ):
         # Query the database for the data
         cursor = db.survey_data.find( { 'survey': ObjectId( survey_id ) })
 
-        # Decrypt survey values
-        data = []
-        for row in cursor:
-            row[ 'data' ] = decrypt_survey( row[ 'data' ] )
-            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
-            data.append( row )
+        data = dehydrate_survey( cursor )
 
-        print data
+        return self.create_response( request, data )
+
+    def get_list( self, request, **kwargs ):
+        user = request.GET.get( 'user', None )
+        user = User.objects.get( username=user )
+
+        # Don't show encrypted data information and user id.
+        # Limit to the last 5 submissions
+        # Sort by latest submission first
+        cursor = db.survey_data.find( { 'user': user.id },
+                                      { 'data': False, 'user': False } )\
+                               .limit( 5 )\
+                               .sort( 'timestamp', pymongo.DESCENDING )
+
+        # Format timestamp correctly such that Javascript can correctly parse
+        # the information
+        data = dehydrate_survey( cursor )
 
         return self.create_response( request, data )
 
@@ -73,7 +116,7 @@ class FormResource( MongoDBResource ):
         # authentication = ApiTokenAuthentication()
 
         # TODO: Authorize based on sharing preferences.
-        # authorization = BlahBlah()
+        authorization = BasicAuthorization()
 
         # Don't include resource uri
         include_resource_uri = False
@@ -85,14 +128,3 @@ class FormResource( MongoDBResource ):
         '''
         user = User.objects.get( id=bundle.data['owner'] )
         return user.username
-
-    def override_urls( self ):
-        return [
-            url( r"^(?P<resource_name>%s)/(?P<username>\w+)/formList%s$" %
-                ( self._meta.resource_name, trailing_slash() ),
-                self.wrap_view('formList'),
-                name="api_form_list"),
-        ]
-
-    def formList( self, request, **kwargs ):
-        return self.create_response( request, [] )

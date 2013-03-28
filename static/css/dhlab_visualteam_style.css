@@ -9,19 +9,143 @@
   opacity: 0.7;
 }
 
+.clear {
+	clear: both;
+}
+#paddingOption{
+	padding-top: 15px;
+}
+
+#timeVariables {
+	text-indent: 5px;
+}
+
+#list,
+#list_button {
+	float: left;
+}
+
+#list_button {
+	background-color: black;
+	width: 40px;
+	height: 40px;
+	opacity: 0.4;
+}
+
+#list_button:hover {
+	opacity: 0.7;
+}
+
+#settingButton {
+	background: black url(../img/icon2.png) no-repeat;
+	cursor: pointer;
+	width: 30px;
+	height: 30px;
+	margin: 5px;
+	border: none;
+}
+
+#setupbutton {
+	background: url(../img/icon1.png) no-repeat;
+	background-size: 30px 25px;
+	margin-top: 7px;
+	cursor: pointer;
+	width: 30px;
+	height: 30px;
+	margin: 5px;
+	border: none;
+}
+
+.buttonbox {
+	background-color: #3E4028;
+	width: 40px;
+	height: 40px;
+	float: left;
+	opacity: 0.4;
+}
+
+.buttonbox:hover {
+	opacity: 0.7;
+}
+
+#binLayerButton {
+	cursor: pointer;
+	width: 20px;
+	height: 20px;
+	border: none;
+	background: url(../img/trashbin.png) no-repeat;
+	z-index: 1000;
+}
+
+#addLayerButton {
+	cursor: pointer;
+	width: 20px;
+	height: 20px;
+	border: none;
+	z-index: 1000;
+	font-size: 20pt;
+	background-color: black;
+	color: white;
+}
+
 #addLayerdialog
 {
 	background: black;
 	opacity: 0.7;
 	color: white;
 }
+
+/* dialog form buttons */
+.mapSelect_bttn {
+	width: 450px;
+	height: 40px;
+	padding: 10px 25px 10px 25px;
+	font-size: 30px;
+	font-family: Arial;
+	text-decoration: none;
+	color: #ffffff;
+	background-color: black;
+	cursor: pointer;
+	opacity:0.7;
+	border: 0px solid;
+	position: relative;
+
+}
+.mapSelect_bttn:hover {
+	background-color: grey;
+	color:black;
+	opacity:1.0;
+}
+
+.mapSelect_title {
+padding-top: 0px;
+padding-bottom: 0px;
+line-height: 0px;
+}
+
+.addLayer_bttn {
+	margin-bottom: 10px;
+	background-color: white;
+	border:1px solid #ccc;
+	border-radius: 4px;
+	height: 25px;
+	width: 80px;
+	background-size: 100px 40px;
+	background-position: center;
+	opacity: 1.0;
+	font-size: 15px;
+	float: none;
+	font-weight: bold;
+	position: abolute;
+}
+
 /* dialog form title bar */
 .ui-dialog-titlebar {
 	background: black;
 	opacity: 0.7;
 	color: white;
 	font-weight: bold;
-	font-size: 20px;
+	font-size: 30px;
 	padding-left: 10px;
 	padding-top: 5px;
 	padding-bottom: 5px;
@@ -59,7 +183,6 @@
 	background-size: 100px 40px;
 	background-position: center;
 	opacity: 1.0;
-	
 }
 
 #addLayerdialog form input {
@@ -71,11 +194,11 @@
 	/* prevent nonused hyperlinks to be highlighted */
 	a {
 		text-decoration:none;
-	}	
+	}
 	a:hover {
 		text-decoration: none;
 	}
-	
+
 	#dropdown {
 		/* cancel the default list style */
 		list-style:none;
@@ -83,9 +206,9 @@
 		padding:0;
 		position:relative;
 	}
-		
+
 	#dropdown li a.parent {
-		display:block; 
+		display:block;
 		width:80px; height:40px;
 		font-weight:bold;
 		padding-left: 10px;
@@ -95,24 +218,24 @@
 		opacity: 0.7;
 		border-left: double;
 	}
-	
+
 	#dropdown li .children {
 		border-left: double;
-		
+
 	}
-	
+
 	checkbox property
 	#dropdown li .children input {
 		padding-right: 5px;
 	}
-		
+
 	#dropdown ul {
 			/* cancel the default list style */
 			margin:0;
 			padding:0;
-			list-style:none;	
+			list-style:none;
 			display:none;
-			
+
 			/* make sure it has the highest z-index */
 			position:absolute;
 			left:0;
@@ -125,14 +248,14 @@
 			padding-right: 5px;
 			padding-left: 5px;
 			}
-		
+
 			#dropdown ul li {
-				font-size:11px;	
+				font-size:11px;
 				padding: 5px;
 			}
-				
+
 			#dropdown ul li a:hover {
-				color:#e11	
+				color:#e11
 			}
 
 /* temporarilty added */

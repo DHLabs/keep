@@ -8,8 +8,8 @@ URLConf to include this URLConf for any URL beginning with
 """
 
 
-from django.conf.urls.defaults import patterns, url
-from django.views.generic.simple import direct_to_template
+from django.conf.urls import patterns, url
+from django.shortcuts import render
 from django.contrib.auth import views as auth_views
 
 from twofactor.auth_forms import TwoFactorAuthenticationForm
@@ -17,17 +17,28 @@ from registration.views import activate
 
 from backend.views import register
 
-urlpatterns = patterns('',
-    # Generate/Delete API Keys
-    url( r'^generate_key', 'backend.views.generate_api_key',
-        name='generate_api_key' ),
+# Generate/Delete API Keys URLs
+urlpatterns = patterns( 'backend.views',
+    url( r'^generate_key', 'generate_api_key', name='generate_api_key' ),
+    url( r'^delete_key/(?P<key>\w+)', 'delete_api_key',
+         name='delete_api_key' ), )
 
-    url( r'^delete_key/(?P<key>\w+)', 'backend.views.delete_api_key',
-        name='delete_api_key' ),
+
+# Registration/Login URLs
+urlpatterns += patterns('',
 
     url(r'^activate/(?P<activation_key>\w+)/$',
         activate,
+        { 'backend': 'registration.backends.default.DefaultBackend' },
         name='registration_activate'),
+
+    url(r'^registration_complete',
+        'backend.views.registration_complete',
+        name='registration_activation_complete'),
+
+
+    url( r'^resend_activation/', 'backend.views.resend_activation',
+         name='resend_activation' ),
 
     url(r'^login/$',
         auth_views.login,
@@ -36,9 +47,8 @@ urlpatterns = patterns('',
         name='auth_login'),
 
     url(r'^logout/$',
-        auth_views.login,
-        {'template_name': 'registration/login.html',
-        'authentication_form': TwoFactorAuthenticationForm},
+        auth_views.logout,
+        {'template_name': 'registration/logout.html'},
         name='auth_logout'),
 
     url(r'^password/change/$',
@@ -70,7 +80,6 @@ urlpatterns = patterns('',
         name='registration_register'),
 
     url(r'^register/complete/$',
-        direct_to_template,
+        render,
         {'template': 'registration/registration_complete.html'},
-        name='registration_complete'),
-    )
+        name='registration_complete'), )

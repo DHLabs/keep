@@ -9,52 +9,83 @@
 	<link rel="stylesheet" href="/static/css/dhlab_visualteam_style.css">
     <script src='//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'></script>
     <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
+
+	<link rel="stylesheet" href="/static/css/colorPicker/farbtastic.css">
+    <script src='//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'></script>
+    <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet-src.js"></script>
+
 	<script src="/static/js/vis_team/leaflet.js"></script>
-	<script src="/static/js/vis_team/dhlab_visualteam.js">
+	<script src="/static/js/vis_team/dhlab_visualteam.js"></script>
+
 	<script src="/static/js/vendor/json2.js"></script>
 	<script src="/static/js/vendor/underscore.js"></script>
 	<script src="/static/js/backbone-min.js"></script>
 	<script src='/static/js/d3.v3.min.js'></script>
 	<script src="/static/js/bootstrap.js"></script>
-	
+
 	<script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet-src.js"></script>
 	<script type="text/javascript" src="/static/js/vis_team/heatmap.js"></script>
 	<script type="text/javascript" src="/static/js/vis_team/heatmap-leaflet.js"></script>
-	
-	
+
+
 </head>
 <body>
+<img src="/static/img/pin.png" id="pinImg" class="hidden_pro"/>
 	<div>
 		<div class="display_leafletMap"></div>
 
 		<!-- addLayerButton template -->
-		<div id = "addLayer">
-		  <input id= "addLayerButton" name="add Layer">  
-		</div>
-
-		<div id ="addLayerdialog" title = "Add Layer">
+		<div id ="addLayerdialog" title = "Heat Map">
 		  <form id = "addLayer_form">
-			 Layer Name<br> <input id="layerName" type="text" name="layerName"><br>
-			 Minimum Range<br> <input id = "minVal" type= "text" name="min-range"><br>
-			 Maximum Range<br> <input id = "maxVal" type= "text" name="max-range">     
+			 <br> <input id="layerName" type="text" name="layerName" placeholder="Variable Name" style="width: 	400" ><br>
+			 Range <input id = "minVal" type= "text" name="min-range" placeholder="Lowest" style="margin-left: 10px; width: 60px">
+				   <input id = "maxVal" type= "text" name="max-range" placeholder="Highest" style="margin-left: 10px; width: 60px"><br>
+			<div id="paddingOption">
+			Options<span id="option_bttn" class="bttn_nc"></span>
+			<span id="gradient_select" class="option_hidden">
+					<div id="paddingOption">Select Color Range </div>
+					<div id="slider-range" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all">
+					</div>
+					<div id="cSlider">
+						<button type="button" id="colorAddBttn">+</button>
+					</div>
+			<br>
+			Select Time Variables<br>
+
+			<form>
+				<div id= "timeVariables" >Starts <input id="inputDate" type="text" name="sDate" style="margin-left: 10px; width: 100px;"> <input id="startTime" type="text" name="sTime" style="margin-left: 5px; width: 70px;"><br> </div>
+				<div id= "timeVariables" >Ends   <input id="endDate" type="text" name="eDate" style="margin-left: 14px; width: 100px;"> <input id="endTime" type="text" name="eTime" style="margin-left: 5px; width: 70px;"><br></div>
+				<div id= "timeVariables" >Play Over Speed <input id="speed" type="text" name="speedData" style="margin-left: 48px; width: 70px;"> hour/sec</div>
+			<form>
+
+			</span>
 		  </form>
-		  <input id = "confirm_add" type="button" name ="add">
+
+			<div style="text-align: right; padding-top = -5px; margin-right: 10px">
+				<input id = "confirm_add" type="button" name ="cancel" value="Cancel" style="margin-right: 3px" >
+				<input id = "confirm_add" type="button" name ="add" value="Submit">
+			</div>
 		</div>
 
+		</div>
+		<div id="mapSelectionWrap">
+			<div id="mapSelection" style="position: absolute"/>
+		</div>
 
 		<!-- dropdown menu template -->
 		<div id = "list">
   		  <span id = "addLayer">
-			<input id= "addLayerButton" name="add Layer">  
+			<input id= "addLayerButton" name="add Layer">
 		  </span>
 		  <ul id="dropdown">
 			<li>
-			  <a href="#" class="parent">Layer List</a>	
+			  <a href="#" class="parent">Layer List</a>
 				<ul id = 'layerList' class="children" style="display: none;">
 			<!--		<li><input id="layer50" type="checkbox">&nbspRed Layer</li> -->
 				</ul>
 			</li>
-		  </ul>		  
+		  </ul>
 		</div>
 	</div>
 </body>

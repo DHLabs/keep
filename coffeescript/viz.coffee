@@ -1,72 +1,268 @@
-$ ->
-    class DataModel extends Backbone.Model
-        defaults:
-            data: []
+class DataModel extends Backbone.Model
+    defaults:
+        data: []
 
-    class DataCollection extends Backbone.Collection
-        model: DataModel
+class FormModel extends Backbone.Model
+    initialize: ->
+        @form_id = $( '#form_id' ).html()
+        @user    = $( '#user' ).html()
 
-        initialize: ->
-            # Grab the form_id from the page
-            @form_id = $( '#form_id' ).html()
-            @url = '/api/v1/data/' + @form_id + '/?format=json'
+        @url = "/api/v1/forms/#{@form_id}/?format=json&user=#{@user}"
 
-        comparator: ( data ) ->
-            return data.get( 'timestamp' )
+class DataCollection extends Backbone.Collection
+    model: DataModel
 
-    class DataView extends Backbone.View
+    initialize: ->
+        # Grab the form_id from the page
+        @form_id = $( '#form_id' ).html()
+        @url = "/api/v1/data/#{@form_id}/?format=json"
 
-        # The HTML element where the viz will be rendered
-        el: $( '#viz' )
+    comparator: ( data ) ->
+        return data.get( 'timestamp' )
 
-        # Current list of survey data
-        data: new DataCollection()
+class DataView extends Backbone.View
 
-        initialize: ->
-            # Begin render when the list is finished syncing with the server
-            @listenTo( @data, 'sync', @render )
-            @data.fetch()
+    # The HTML element where the viz will be rendered
+    el: $( '#viz' )
 
-            # Prep the SVG
-            @svg = d3.select( '#viz' ).append( 'svg' )
-                        .attr( 'width', 850 )
-                        .attr( 'height', 250 )
-                        .append( 'g' )
-                        .attr( 'transform', 'translate( 32, 16 )' )
+    events:
+        "click #yaxis_options input":   "change_y_axis"
+        "click #chart_options a.btn":   "switch_viz"
 
-            @
+    # Current list of survey data
+    data: new DataCollection()
 
-        render: ->
-            console.log( @data )
-            parseDate = d3.time.format( '%Y-%m-%dT%H:%M:%S' ).parse
+    # Current form that this data was for
+    form: new FormModel()
 
-            start = parseDate( @data.models[0].get( 'timestamp' ) )
-            end   = parseDate( @data.models[ @data.length - 1 ].get( 'timestamp' ) )
+    # Raw data stuff
+    raw_headers: []         # Headers used for the raw data table header
 
-            x = d3.time.scale().domain( [ start, end ] ).range( [ 0, 800 ] )
-            y = d3.scale.linear().domain( [ 20.0, 140.0 ] ).range( [ 200, 0 ] )
+    # Map related stuff
+    map_headers: null       # Map related headers (geopoint datatype)
+    map_enabled: false      # Did we detect any geopoints in the data?
+    map: null               # Map object
 
-            xAxis = d3.svg.axis().scale( x ).orient( 'bottom' )
-            yAxis = d3.svg.axis().scale( y ).orient( 'left' )
+    # Yaxis chosen by the user
+    yaxis: null
+    chart_fields: []
 
-            line = d3.svg.line()
-                    .x( ( d ) => return x( parseDate(  d.get( 'timestamp' ) ) ) )
-                    .y( ( d ) -> return y( parseFloat( d.get( 'data' )[ 'heart_rate' ] ) ))
+    # In pixels
+    width:  750
+    height: 250
 
-            @svg.append( 'g' )
-                .attr( 'class', 'x axis' )
-                .attr( 'transform', 'translate( 0, 200 )' )
-                .call( xAxis )
+    initialize: ->
+        # Begin render when the list is finished syncing with the server
+        @listenTo( @form, 'sync', @render )
+        @form.fetch()
 
-            @svg.append( "g" )
-                .attr( "class", "y axis" )
-                .call( yAxis )
+        @data = document.initial_data
 
-            @svg.append( 'path' )
-                .datum( @data.models )
-                .attr( 'class', 'line' )
-                .attr( 'd', line )
+        @
 
-            @
+    switch_viz: (event) ->
 
-    VizApp = new DataView()
+        viz_type = $( event.currentTarget ).data( 'type' )
+
+        $( '.active' ).removeClass( 'active' )
+        $( event.currentTarget ).addClass( 'active' )
+
+        $( '.viz-active' ).fadeOut( 'fast', ()->
+            $( @ ).removeClass( 'viz-active' )
+            $( '#' + viz_type + '_viz' ).fadeIn().addClass( 'viz-active' )
+        )
+
+
+    change_y_axis: (event) ->
+        # Ensure everything else is unchecked
+        $( '#yaxis_options input' ).attr( 'checked', false )
+        $( event.target ).attr( 'checked', true )
+
+        # Assign the yaxis
+        @yaxis = event.target.value
+
+        # Re-render chart
+        @renderCharts()
+
+
+    render: ->
+        # Don't render until we get both the form & survey data
+        if( !@form.attributes.children || !@data )
+            return
+
+        # Loop through the form fields and check to see what type of visualizations
+        # we can do.
+        for field in @form.attributes.children
+
+            # Don't show notes in the raw data table
+            if field.type not in [ 'note' ]
+                @raw_headers.push( field.name )
+
+            # Only chart fields that are some sort of number
+            if field.type in [ 'decimal', 'int', 'integer' ]
+
+                @chart_fields.push( field.name )
+
+                # If we haven't set a default Y-axis yet, set it!
+                if not @yaxis
+                    @yaxis = field.name
+
+            # Detect geopoints
+            if field.type in [ 'geopoint' ]
+                @map_enabled = true
+                @map_headers = field.name
+
+        # Only render data if we actually have data!
+        if @data.models.length > 0
+            @renderRaw()
+
+            # Can we render a map?
+            if @map_enabled
+                @renderMap()
+            else
+                $( '#map' ).hide()
+
+            # Can we render any charts?
+            if @chart_fields.length > 0
+                @renderCharts()
+            else
+                $( '#line_btn' ).addClass( 'disabled' )
+        @
+
+    renderRaw: ->
+
+        $( '#raw' ).html( '' )
+
+        html = '<table class="table table-striped">'
+
+        html += '<thead><tr>'
+        headers = ''
+        for key in @raw_headers
+            html += "<th>#{key}</th>"
+        html += '</tr></thead>'
+
+        # Render the actual data
+        html += '<tbody>'
+        for datum in @data.models
+
+            html += '<tr>'
+            for key in @raw_headers
+
+                value = datum.get( 'data' )[ key ]
+
+                if value
+                    html += "<td>#{value}</td>"
+                else
+                    html += "<td>N/A</td>"
+
+            html += '</tr>'
+
+        html += '</tbody></table>'
+
+
+        $( '#raw' ).html( html )
+        @
+
+    renderCharts: ->
+        d3.select( 'svg' ).remove()
+
+        # Render the yaxis options
+        $( '#yaxis_options' ).html( '' )
+        yaxis_tmpl = _.template( $( '#yaxis_tmpl' ).html() )
+        for option in @chart_fields
+            $( '#yaxis_options' ).append( yaxis_tmpl(
+                    label: option
+                    value: option
+                    checked: if @yaxis == option then 'checked' else ''
+            ))
+
+        # Render the actual line chart
+        parseDate = d3.time.format( '%Y-%m-%dT%H:%M:%S' ).parse
+
+        start = parseDate( @data.models[0].get( 'timestamp' ) )
+        end   = parseDate( @data.models[ @data.length - 1 ].get( 'timestamp' ) )
+
+        # Find our range
+        min = null
+        max = null
+        for model in @data.models
+            value = parseFloat( model.get( 'data' )[ @yaxis ] )
+
+            if !min || value < min
+                min = value
+
+            if !max || value > max
+                max = value
+
+        x = d3.time.scale().domain( [ start, end ] ).range( [ 0, 800 ] )
+        y = d3.scale.linear().domain( [ min, max ] ).range( [ 200, 0 ] )
+
+        xAxis = d3.svg.axis().scale( x ).orient( 'bottom' )
+        yAxis = d3.svg.axis().scale( y ).orient( 'left' )
+
+        line = d3.svg.line()
+                .x( ( d ) => return x( parseDate(  d.get( 'timestamp' ) ) ) )
+                .y( ( d ) => return y( parseFloat( d.get( 'data' )[ @yaxis ] ) ))
+
+        # Prep the SVG
+        @svg = d3.select( '#line' ).append( 'svg' )
+                    .attr( 'width', @width )
+                    .attr( 'height', @height )
+                .append( 'g' )
+                    .attr( 'transform', 'translate( 32, 16 )' )
+
+        @svg.append( 'g' )
+            .attr( 'class', 'x axis' )
+            .attr( 'transform', 'translate( 0, 200 )' )
+            .call( xAxis )
+
+        @svg.append( "g" )
+            .attr( "class", "y axis" )
+            .call( yAxis )
+
+        @svg.append( 'path' )
+            .datum( @data.models )
+            .attr( 'class', 'line' )
+            .attr( 'd', line )
+
+        @
+
+    renderMap: ->
+        # Calculate the center of the data
+        center = [ 0, 0 ]
+        for datum in @data.models
+            geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
+
+            center[0] += parseFloat( geopoint[0] )
+            center[1] += parseFloat( geopoint[1] )
+
+        center[0] = center[0] / @data.models.length
+        center[1] = center[1] / @data.models.length
+
+        @map = L.map('map').setView( center, 13)
+
+        L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                     maxZoom: 18 }).addTo( @map )
+
+        myIcon = L.icon(
+                    iconUrl: '/static/img/leaflet/marker-icon.png'
+                    iconRetinaUrl: '/static/img/leaflet/marker-icon@2x.png'
+                    iconSize: [25, 41]
+                    iconAnchor: [12, 41]
+                    popupAnchor: [1, -34]
+                    shadowUrl: '/static/img/leaflet/marker-shadow.png'
+                    shadowSize: [41, 41]
+                    shadowAnchor: [15, 41] )
+
+        for datum in @data.models
+            geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
+
+            marker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon}).addTo( @map )
+
+            html = ''
+            for key, value of datum.get( 'data' )
+                html += "<div><strong>#{key}:</strong> #{value}</div>"
+            marker.bindPopup( html )
+
+        @

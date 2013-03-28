@@ -6,12 +6,39 @@ from django.core.urlresolvers import reverse
 from pymongo import MongoClient
 
 from tastypie.bundle import Bundle
+from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.http import HttpUnauthorized
 from tastypie.resources import Resource
 
 from twofactor.util import encrypt_value, decrypt_value
 
 connection = MongoClient()
 db = connection[ 'dhlab' ]
+
+
+def dehydrate_survey( cursor ):
+    '''
+        Decrypt survey data and turn any timestamps into javascript-readable
+        values.
+    '''
+
+    data = []
+    for row in cursor:
+
+        for key in row.keys():
+            if isinstance( row[ key ], ObjectId ):
+                row[ key ] = str( row[ key ] )
+
+        # Decrypt survey values
+        if 'data' in row:
+            row[ 'data' ] = decrypt_survey( row[ 'data' ] )
+
+        # Reformat python DateTime into JS DateTime
+        if 'timestamp' in row:
+            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
+
+        data.append( row )
+    return data
 
 
 def encrypt_survey( data ):
@@ -44,19 +71,28 @@ class MongoDBResource(Resource):
         except AttributeError:
             raise ImproperlyConfigured("Define a collection in your resource.")
 
-    def obj_get_list(self, request=None, **kwargs):
+    def obj_get_list(self, bundle, **kwargs):
         """
         Maps mongodb documents to Document class.
         """
-        return map(Document, self.get_collection().find())
 
-    def obj_get(self, request=None, **kwargs):
+        objects = map( Document,
+                       self.authorized_read_list( self.get_collection(),
+                                                  bundle ) )
+        return objects
+
+    def obj_get(self, bundle, **kwargs):
         """
         Returns mongodb document from provided id.
         """
-        return Document(self.get_collection().find_one({
-            "_id": ObjectId(kwargs.get("pk"))
-        }))
+
+        obj = self.get_collection()\
+                  .find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
+
+        try:
+            return Document( self.authorized_read_detail( obj, bundle ) )
+        except ValueError:
+            raise ImmediateHttpResponse( HttpUnauthorized() )
 
     def obj_create(self, bundle, **kwargs):
         """
@@ -88,15 +124,22 @@ class MongoDBResource(Resource):
         """
         self.get_collection().remove()
 
-    def get_resource_uri(self, item):
+    def get_resource_uri(self, item=None):
         """
         Returns resource URI for bundle or object.
         """
+        if item is None:
+            return reverse( 'api_dispatch_list',
+                            kwargs={
+                                'api_name': 'v1',
+                                'resource_name': self._meta.resource_name })
+
         if isinstance(item, Bundle):
             pk = item.obj._id
         else:
             pk = item._id
-        return reverse("api_dispatch_detail", kwargs={
-            "resource_name": self._meta.resource_name,
-            "pk": pk
-        })
+        return reverse( "api_dispatch_detail",
+                        kwargs={
+                            'api_name': 'v1',
+                            'resource_name': self._meta.resource_name,
+                            'pk': pk })
