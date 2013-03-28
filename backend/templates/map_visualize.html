@@ -7,26 +7,26 @@
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="/static/css/leaflet.css">
 	<link rel="stylesheet" href="/static/css/dhlab_visualteam_style.css">
-	<link rel="stylesheet" href="/static/css/colorPicker/farbtastic.css">	
+	<link rel="stylesheet" href="/static/css/colorPicker/farbtastic.css">
     <script src='//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'></script>
     <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
 	<script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet-src.js"></script>
 
 	<script src="/static/js/vis_team/leaflet.js"></script>
-	<script src="/static/js/vis_team/dhlab_visualteam.js">
+	<script src="/static/js/vis_team/dhlab_visualteam.js"></script>
 	<script src="/static/js/vendor/json2.js"></script>
 	<script src="/static/js/vendor/underscore.js"></script>
 	<script src="/static/js/backbone-min.js"></script>
 	<script src='/static/js/d3.v3.min.js'></script>
 	<script src="/static/js/bootstrap.js"></script>
 	<script type="text/javascript" src="/static/js/vis_team/heatmap.js"></script>
-	<script type="text/javascript" src="/static/js/vis_team/heatmap-leaflet.js"></script>	
+	<script type="text/javascript" src="/static/js/vis_team/heatmap-leaflet.js"></script>
 	<script src="/static/js/vis_team/colorPicker/farbtastic.js"></script>
-	
-	
+
+
 </head>
 <body>
-<img src="/static/img/pin.png" id="pinImg" class="hidden_pro"/>	
+<img src="/static/img/pin.png" id="pinImg" class="hidden_pro"/>
 	<div>
 		<div class="display_leafletMap"></div>
 
@@ -34,7 +34,7 @@
 		<div id ="addLayerdialog" title = "Heat Map">
 		  <form id = "addLayer_form">
 			 <br> <input id="layerName" type="text" name="layerName" placeholder="Variable Name" style="width: 	400" ><br>
-			 Range <input id = "minVal" type= "text" name="min-range" placeholder="Lowest" style="margin-left: 10px; width: 60px"> 
+			 Range <input id = "minVal" type= "text" name="min-range" placeholder="Lowest" style="margin-left: 10px; width: 60px">
 				   <input id = "maxVal" type= "text" name="max-range" placeholder="Highest" style="margin-left: 10px; width: 60px"><br>
 			<div id="paddingOption">
 			Options<span id="option_bttn" class="bttn_nc"></span>
@@ -44,25 +44,25 @@
 					</div>
 					<div id="cSlider">
 						<button type="button" id="colorAddBttn">+</button>
-					</div>		
+					</div>
 			<br>
 			Select Time Variables<br>
-			
+
 			<form>
 				<div id= "timeVariables" >Starts <input id="inputDate" type="text" name="sDate" style="margin-left: 10px; width: 100px;"> <input id="startTime" type="text" name="sTime" style="margin-left: 5px; width: 70px;"><br> </div>
 				<div id= "timeVariables" >Ends   <input id="endDate" type="text" name="eDate" style="margin-left: 14px; width: 100px;"> <input id="endTime" type="text" name="eTime" style="margin-left: 5px; width: 70px;"><br></div>
 				<div id= "timeVariables" >Play Over Speed <input id="speed" type="text" name="speedData" style="margin-left: 48px; width: 70px;"> hour/sec</div>
 			<form>
-			
+
 			</span>
 		  </form>
-		  
+
 			<div style="text-align: right; padding-top = -5px; margin-right: 10px">
 				<input id = "confirm_add" type="button" name ="cancel" value="Cancel" style="margin-right: 3px" >
 				<input id = "confirm_add" type="button" name ="add" value="Submit">
 			</div>
 		</div>
-		
+
 		</div>
 		<div id="mapSelectionWrap">
 			<div id="mapSelection" style="position: absolute"/>
@@ -73,7 +73,7 @@
 		<div id="list">
 		  <ul id="dropdown">
 			<li>
-			  <a href="#" class="parent" style="font-size: 15pt"><input id="setupButton" name="add Layer">Layers</a>	
+			  <a href="#" class="parent" style="font-size: 15pt"><input id="setupButton" name="add Layer">Layers</a>
 			  <div class="clear"></div>
 				<ul id="layerList" class="children" style="display: none;">
 				<li><div class="addLayer_icons"><input id="binLayerButton" name="add Layer" /></div>
@@ -115,4 +115,4 @@
 		</div>
 	</div>
 </body>
-</html>	
+</html>

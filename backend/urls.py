@@ -28,4 +28,7 @@ urlpatterns += patterns( 'backend.views',
     url( r'^visualize/(?P<form_id>\w+)', 'visualize',
          name='visualize' ),
 
+    url( r'^map_visualize/', 'map_visualize',
+         name='map_visualize' ),
+
 )

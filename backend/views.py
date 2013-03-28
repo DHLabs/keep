@@ -58,6 +58,11 @@ def visualize( request, form_id ):
                                context_instance=RequestContext(request) )
 
 
+def map_visualize( request ):
+    return render_to_response( 'map_visualize.html',
+                               context_instance=RequestContext(request) )
+
+
 def insert_data( request ):
     '''
         For testing purposes only!
