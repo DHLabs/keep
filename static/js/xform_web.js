@@ -47,13 +47,225 @@ $(function() {
       this.form_id = $('#form_id').html();
       this.listenTo(this.model, 'change', this.render);
       this.model.fetch({
-        url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=c308c86bd454486273a603b573de4342&format=json"
+        url: "/api/v1/forms/" + this.form_id + "/?user=admin&key=35ec69714b23a33e79b0d859f51fa458&format=json"
       });
       return this;
     };
 
+    xFormView.prototype.passesConstraint = function(question, answers) {
+      var constraint, expression, passesConstraint;
+      passesConstraint = true;
+      if (question.bind && question.bind.constraint) {
+        constraint = question.bind.constraint;
+        expression = this.evaluateSelectedInExpression(constraint, answers, question["name"]);
+        return this.evaluateExpression(expression, answers, question["name"]);
+      }
+      return passesConstraint;
+    };
+
+    xFormView.prototype.isRelevant = function(question, answers) {
+      var containsRelevant, expression, relevantString;
+      containsRelevant = question.bind && question.bind.relevant;
+      if (containsRelevant) {
+        relevantString = question.bind.relevant;
+        expression = relevantString.replace(/\./, question["name"]);
+        expression = this.evaluateSelectedInExpression(expression, answers, question["name"]);
+        return this.evaluateExpression(expression, answers, question["name"]);
+      } else {
+        return true;
+      }
+    };
+
+    xFormView.prototype.evaluateSelectedInExpression = function(expression, answers, currentPath) {
+      var answer, components, endRange, keepGoing, leftString, range, replaceString, rightString, selected, string, substring;
+      keepGoing = true;
+      string = expression;
+      while (keepGoing) {
+        range = expression.indexOf("selected(");
+        if (range !== -1) {
+          substring = expression.slice(range + 9);
+          endRange = substring.indexOf(")");
+          selected = substring.slice(0, +endRange + 1 || 9e9);
+          components = selected.split(",");
+          leftString = components[0].replace(/\s+/g, "");
+          rightString = components[0].replace(/\s+/g, "");
+          if (leftString === ".") {
+            leftString = "${" + currentPath + "}";
+          }
+          rightString = rightString.slice(1, +(rightString.length - 2) + 1 || 9e9);
+          answer = answers[leftString];
+          replaceString = expression.slice(range, +endRange + 1 || 9e9);
+          if (answer === rightString) {
+            string = string.replace(replaceString, "YES");
+          } else {
+            string = string.replace(replaceString, "NO");
+          }
+        } else {
+          keepGoing = false;
+        }
+      }
+      return string;
+    };
+
+    xFormView.prototype.evaluateExpression = function(expression, answers, currentPath) {
+      var andLocation, andRange, closeRange, leftExpression, leftOverString, newExpression, notRange, orLocation, orRange, parentString, range, rangeLength, rightExpression, scopeRange;
+      scopeRange = expression.indexOf("(");
+      andRange = expression.indexOf(" and ");
+      orRange = expression.indexOf(" or ");
+      notRange = expression.indexOf("not(", 0);
+      range = scopeRange;
+      rangeLength = 1;
+      if (andRange !== -1 && andRange > range) {
+        range = andRange;
+        rangeLength = 5;
+      }
+      if (orRange !== -1 && orRange > range) {
+        range = orRange;
+        rangeLength = 4;
+      }
+      if (notRange !== -1 && notRange > range) {
+        range = notR;
+        rangeLength = 4;
+      }
+      if (range !== -1) {
+        if (range === scopeRange) {
+          closeRange = expression.lastIndexOf(")");
+          parentString = expression.slice(range + 1, +(closeRange - range - 2) + 1 || 9e9);
+          if (closeRange < (expression.length - 1)) {
+            leftOverString = expression.slice(closeRange + 1);
+            orLocation = leftOverString.indexOf(" or ");
+            andLocation = leftOverString.indexOf(" and ");
+            if (orLocation !== 0) {
+              return this.evaluateExpression(parentrString, answers, currentPath) || this.evaluateExpression(leftOverString, answers, currentPath);
+            } else if (andLocation !== 0) {
+              return this.evaluateExpression(parentrString, answers, currentPath) && this.evaluateExpression(leftOverString, answers, currentPath);
+            } else if (andLocation !== -1 || orLocation !== -1) {
+              return this.evaluateExpression(parentString, answers, currentPath);
+            }
+          } else {
+            return this.evaluateExpression(parentString, answers, currentPath);
+          }
+        } else if (range === andRange) {
+          leftExpression = expression.slice(0, +range + 1 || 9e9);
+          rightExpression = expression.slice(range + rangeLength);
+          return this.evaluateExpression(leftExpression, answers, currentPath) && this.evaluateExpression(rightExpression, answers, currentPath);
+        } else if (range === orRange) {
+          leftExpression = expression.slice(0, +range + 1 || 9e9);
+          rightExpression = expression.slice(range + rangeLength);
+          return this.evaluateExpression(leftExpression, answers, currentPath) || this.evaluateExpression(rightExpression, answers, currentPath);
+        } else if (range === notRange) {
+          closeRange = expression.lastIndexOf(")");
+          newExpression = expression.slice(range + rangeLength, +(closeRange - (range + rangeLength)) + 1 || 9e9);
+          return !(this.evaluateExpression(newExpression, answers, currentPath));
+        }
+      } else {
+        return this.passesTest(expression, answers, currentPath);
+      }
+      return true;
+    };
+
+    xFormView.prototype.passesTest = function(expression, answers, currentPath) {
+      var compareString, comps, lName, leftAnswer, leftAnwer, leftFloat, leftString, number, rName, rightAnswer, rightFloat, rightString;
+      if (expression === "YES") {
+        return true;
+      } else if (expression === "NO") {
+        return false;
+      }
+      if ((expression.indexOf("<=")) !== -1) {
+        compareString = "<=";
+      } else if ((expression.indexOf(">=")) !== -1) {
+        compareString = ">=";
+      } else if ((expression.indexOf("!=")) !== -1) {
+        compareString = "!=";
+      } else if ((expression.indexOf("=")) !== -1) {
+        compareString = "=";
+      } else if ((expression.indexOf("<")) !== -1) {
+        compareString = "<";
+      } else if ((expression.indexOf(">")) !== -1) {
+        compareString = ">";
+      } else {
+        return true;
+      }
+      comps = expression.split(compareString);
+      leftString = comps[0].replace(/\s+/g, "");
+      if (leftString === ".") {
+        leftString = "${" + currentPath + "}";
+      }
+      rightString = comps[1].replace(/\s+/g, "");
+      leftAnwer = null;
+      rightAnswer = null;
+      if ((leftString.indexOf("$")) !== -1) {
+        lName = leftString.slice(2, leftString.length - 1);
+        leftAnswer = answers[lName];
+        if (leftAnswer instanceof Array) {
+          leftAnswer = "''";
+        }
+      } else {
+        return false;
+      }
+      if ((rightString.indexOf("$")) !== -1) {
+        rName = rightString.slice(2, rightString.length - 1);
+        rightAnswer = answers[rName];
+        if (rightAnswer instanceof Array) {
+          rightAnswer = "''";
+        }
+      } else {
+        rightAnswer = rightString;
+      }
+      if (leftAnswer === null || rightAnswer === null) {
+        if (leftAnswer !== null) {
+          if (compareString === "!=") {
+            return true;
+          }
+        } else if (rightAnswer !== null) {
+          if (compareString === "!=" && rightAnswer === "''") {
+            return false;
+          } else if (compareString === "=" && rightAnswer === "''") {
+            return true;
+          } else if (compareString === "!=") {
+            return true;
+          }
+        } else {
+          if (compareString === "=") {
+            return true;
+          }
+        }
+        return false;
+      }
+      if (rightAnswer === "today()") {
+        return false;
+      } else {
+        number = parseInt(rightAnswer);
+        if (!(isNaN(number))) {
+          leftFloat = parseFloat(leftAnswer);
+          rightFloat = parseFloat(rightAnswer);
+          if (compareString === "<") {
+            return leftFloat < rightFloat;
+          } else if (compareString === ">") {
+            return leftFloat > rightFloat;
+          } else if (compareString === "=") {
+            return leftFloat === rightFloat;
+          } else if (compareString === "<=") {
+            return leftFloat <= rightFloat;
+          } else if (compareString === ">=") {
+            return leftFloat >= rightFloat;
+          } else {
+            return leftFloat !== rightFloat;
+          }
+        } else {
+          rightAnswer = (rightAnswer.split("'"))[1].replace(/\s+/g, "");
+          if (compareString === "=") {
+            return leftAnswer === rightAnswer;
+          } else if (compareString === "!=") {
+            return leftAnswer !== rightAnswer;
+          } else {
+            return false;
+          }
+        }
+      }
+    };
+
     xFormView.prototype.render = function() {
-      $('#xform_debug').html(JSON.stringify(this.model.attributes));
       if (mobileView) {
         this.loadMobileForm();
       } else {
@@ -101,6 +313,9 @@ $(function() {
         schema_dict['template'] = 'noteField';
       } else if (child.type === 'datetime') {
         schema_dict['type'] = 'DateTime';
+      } else if (child.type === 'photo') {
+        schema_dict['type'] = 'Text';
+        schema_dict['template'] = 'photo';
       } else if (child.type === 'select all that apply') {
         schema_dict['type'] = 'Checkboxes';
         schema_dict['options'] = [];
@@ -180,7 +395,8 @@ $(function() {
     };
 
     xFormView.prototype.loadForm = function() {
-      var _this = this;
+      var answers, child, relevance,
+        _this = this;
       _fieldsets = [];
       _schema = {};
       _data = {};
@@ -190,7 +406,8 @@ $(function() {
         unsupportedField: '<div class="control-group"><label for="{{id}}"><strong>Unsupported:</strong> {{title}}</label></div>',
         noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>',
         groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>',
-        groupEnd: '<div><hr></div>'
+        groupEnd: '<div><hr></div>',
+        photo: '<div class="control-group"><label for="{{id}}">{{title}}</label><input type="file" accept="image/*"></input></div></div>'
       });
       _.each(this.model.attributes.children, function(child) {
         return _this.recursiveAdd(child);
@@ -200,6 +417,18 @@ $(function() {
         data: _data,
         fields: _fieldsets
       }).render();
+      answers = renderedForm.getValue();
+      relevance = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.model.attributes.children;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          child = _ref[_i];
+          _results.push(child.name + ":" + this.isRelevant(child, answers));
+        }
+        return _results;
+      }).call(this);
+      $('#xform_debug').html(JSON.stringify(relevance));
       $('#formDiv').html('');
       $('#formDiv').html(renderedForm.el);
       return this;
@@ -208,5 +437,56 @@ $(function() {
     return xFormView;
 
   })(Backbone.View);
-  return App = new xFormView();
+  App = new xFormView();
+  return $(document).ready(function() {
+    var i, size;
+    i = -1;
+    size = 0;
+    $("#next").click(function() {
+      var child;
+      $("#submit-xform").hide();
+      size = $(".control-group").length;
+      $(".control-group").hide();
+      if (i === -1) {
+        i = i + 1;
+      } else if (App.passesConstraint(App.model.attributes.children[i], renderedForm.getValue())) {
+        child = App.model.attributes.children[i];
+        if (child.bind && child.bind.required && (renderedForm.getValue()[child.name] === "")) {
+          alert("Answer is required");
+        } else {
+          i = i + 1;
+          while (!App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())) {
+            i = i + 1;
+          }
+        }
+      } else {
+        alert("Answer doesn't pass constraint:" + App.model.attributes.children[i].bind.constraint);
+      }
+      $(".control-group").eq(i).show();
+      $("#prev").show();
+      if (i === size - 1) {
+        $("#next").hide();
+        return $("#submit-xform").show();
+      } else {
+        return $("#next").show();
+      }
+    });
+    $("#prev").click(function() {
+      $("#next").show();
+      $("#submit-xform").hide();
+      $(".control-group").hide();
+      i = i - 1;
+      while (!App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())) {
+        i = i - 1;
+      }
+      $(".control-group").eq(i).show();
+      if (i === 0) {
+        return $("#prev").hide();
+      }
+    });
+    return $("#submit-xform").click(function() {
+      alert("Thank you for your time!");
+      return window.location.replace("/");
+    });
+  });
 });

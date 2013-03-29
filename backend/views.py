@@ -95,7 +95,6 @@ def insert_data( request ):
 
 @csrf_exempt
 def xml_submission( request, username ):
-
     if request.method == 'POST':
         iphone_id = request.GET.get( 'iphone_id', None )
 
@@ -138,6 +137,28 @@ def xml_submission( request, username ):
 
         # Insert into the database
         db.survey_data.insert( survey_data )
+
+        data = simplejson.dumps( { 'success': True } )
+        return HttpResponse( data, mimetype='application/json' )
+
+    return HttpResponseNotAllowed( ['POST'] )
+
+
+def submission( request, username ):
+
+    if request.method == 'POST':
+        user = User.objects.get(username=username)
+        survey_data = {
+            # User ID of the person who uploaded the form (not the data)
+            'user':         user.id,
+            # Survey/form ID associated with this data
+            'survey':       survey[ '_id' ],
+            # Timestamp of when this submission was received
+            'timestamp':    datetime.utcnow(),
+            # The validated & formatted survey data.
+            'data':         encrypt_survey( valid_data )
+        }
+        db.survey_data.insert(survey_data)
 
         data = simplejson.dumps( { 'success': True } )
         return HttpResponse( data, mimetype='application/json' )
@@ -259,12 +280,7 @@ def dashboard( request ):
                                { 'form': form, 'user_forms': user_forms },
                                context_instance=RequestContext(request) )
 
-def vis_team( request, form_id=1 ):
-	return render_to_response( 'map_visualize.html', { 'form_id': form_id } )
-#	tpl = loader.get_template('map_visualize.html')
-#	ctx = Context({}) 
-#	return HttpResponse(tpl.render(ctx))
-				
+
 @login_required
 def generate_api_key( request ):
     UserAPIToken.objects.create( user=request.user,

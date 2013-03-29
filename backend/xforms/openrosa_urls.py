@@ -21,6 +21,9 @@ openrosa_urls = [
     # Returns a list of submissions for a specified form & user
     url( r'^bs/(?P<username>\w+)/forms/(?P<form_id>[^/]+)/submission/(?P<sub_id>[^/]+)$',
             'backend.xforms.submission_detail' ),
+
+    #Adds the submissions 
+    #url( r'^bs/(?P<username>\w+)/submission', 'backend.views.submission'),
 ]
 
 # # odk data urls
