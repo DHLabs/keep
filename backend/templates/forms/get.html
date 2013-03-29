@@ -4,6 +4,22 @@
 Doknosis - {{ form.name }}
 {% endblock %}
 
+{% block js %}
+<!--<div id='xform_debug' style='margin-top:16px;'></div>-->
+<script src="/static/js/vendor/json2.js"></script>
+<script src="/static/js/vendor/underscore.js"></script>
+<script src="/static/js/backbone-min.js"></script>
+<script src="/static/js/bootstrap.js"></script>
+
+<script src="/static/js/distribution/backbone-forms.min.js"></script>
+<script src="/static/js/distribution/templates/bootstrap.js"></script>
+<script src="/static/js/distribution/editors/list.min.js"></script>
+<script src="/static/js/backbone-localstorage.js"></script>
+<script src='/static/js/swipe.min.js'></script>
+
+<script src="/static/js/xform_web.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="row">
   <div class="span3 sidebar">
@@ -36,18 +52,4 @@ Doknosis - {{ form.name }}
   </div>
 </div>
 <div id='form_id' style='display:none;'>{{ form_id }}</div>
-<!--<div id='xform_debug' style='margin-top:16px;'></div>-->
-<script src="/static/js/vendor/json2.js"></script>
-<script src="/static/js/vendor/underscore.js"></script>
-<script src="/static/js/backbone-min.js"></script>
-<script src="/static/js/bootstrap.js"></script>
-
-<script src="/static/js/distribution/backbone-forms.min.js"></script>
-<script src="/static/js/distribution/templates/bootstrap.js"></script>
-<script src="/static/js/distribution/editors/list.min.js"></script>
-<script src="/static/js/backbone-localstorage.js"></script>
-<script src='/static/js/swipe.min.js'></script>
-
-<script src="/static/js/xform_web.js"></script>
-<!--<script src="/static/js/formdisplay.js"></script>>
 {% endblock %}

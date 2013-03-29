@@ -28,11 +28,6 @@ urlpatterns = patterns( '',
 
     # DHLab REST API
     url(r'^api/', include( v1_api.urls ) ),
-
-	# visualization team part
-	url(r'^map_visualize/$', 'backend.views.vis_team'),
-	url(r'^map_visualize/(?P<form_id>\w+)/$', 'backend.views.vis_team'),
-	
 )
 
 # Handle the ODKCollect APIs

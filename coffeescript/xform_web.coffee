@@ -1,11 +1,3 @@
-# TODO
-#   - Handle xform bindings
-#       - Required
-#       - Constraints
-#       - etc
-#
-#
-
 $ ->
     mobileView = false
     _fieldsets = []
@@ -233,7 +225,7 @@ $ ->
                 return false
 
             # evaluate the expression
-            
+
             # special function cases
             if rightAnswer is "today()"
                 # do the date comparison stuff
@@ -260,7 +252,7 @@ $ ->
                 else
                     # if it's not a number, then it should be a selection choice (string)
                     # string comparisons are only equal or not equal
-                    
+
                     # remove surrounding quotes
                     rightAnswer = ((rightAnswer.split "'")[1]).replace /\s+/g, ""
 
@@ -273,9 +265,8 @@ $ ->
                         return false
 
         render: ->
-
             #$( '#xform_debug' ).html( JSON.stringify( @model.attributes ) )
-                    
+
             if mobileView
                 @loadMobileForm()
             else
@@ -291,10 +282,10 @@ $ ->
                 values: renderedForm.getValue()
 
             console.log( posted_data )
-           
+
             $.post( '/submission', posted_data, null )
 
-        
+
         recursiveAdd: ( child ) ->
 
             schema_dict =
@@ -339,7 +330,7 @@ $ ->
             else if child.type is 'datetime'
 
                 schema_dict['type'] = 'DateTime'
-                
+
             else if child.type is 'photo'
 
                 schema_dict['type'] = 'Text'
@@ -455,7 +446,7 @@ $ ->
             )
 
             _.each( @model.attributes.children, ( child ) =>
-                @recursiveAdd( child )
+                 @recursiveAdd( child )
             )
 
             renderedForm = new Backbone.Form(
@@ -471,7 +462,7 @@ $ ->
             relevance = ( for child in @model.attributes.children
                 child.name + ":" + @isRelevant( child, answers )
             )
-               
+
             $( '#xform_debug' ).html( JSON.stringify( relevance ) )
 
             $('#formDiv').html( '' )
@@ -519,6 +510,6 @@ $ ->
       $("#submit-xform").click ->
         alert "Thank you for your time!"
         window.location.replace "/"
-      
-        
-    
+
+
+
