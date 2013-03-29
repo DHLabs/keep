@@ -51,10 +51,8 @@ var idCnt = 0;
 
 $(function(){
 
-
-	var mapdiv = '<div id="map" style="width: 100%; height: 100%; position: relative;" class="leaflet-container leaflet-fade-anim" tabindex="0"></div>'
-	$(".display_leafletMap").append(mapdiv);
 	createMap();
+	console.log( 'called' );
 
 	$('#layerList').on("change", ":checkbox", function(event) {
 		checkBoxEvent($(event.target).attr('id'));
@@ -70,12 +68,12 @@ $(function(){
 		}
 	});
 
+
 	//Taking care of adding a layer
 	addLayerEvent();
 
 	//Taking care of layer list
 	adddropdownEvent();
-});
 
 
 
@@ -137,6 +135,7 @@ $(function(){
 });
 
 
+
 function createMap(){
 	map = L.map('map').setView([32.73646, 242.86652], 10);
 
@@ -186,31 +185,11 @@ function adddropdownEvent(){
 	});
 }
 
+
 function addLayerEvent(){
 //	$('#addLayerdialog').hide();
 	$('#addLayerButton').click(
 		function() {
-			$("#addLayerdialog").dialog({
-				close: function(){
-					$('#addLayer_form')[0].reset();}
-			});
-	});
-	$(function(){
-	  $("#confirm_add").click(function(){
-		  var layerName = $('#layerName').val();
-		  var minVal = $('#minVal').val();
-		  var maxVal = $('#maxVal').val();
-
-		  if(layerName!='' && minVal != '' && maxVal != '') {
-			  addLayer(layerName,'layer' + idCnt++, parseInt(minVal), parseInt(maxVal));
-			  $(this).closest('.ui-dialog-content').dialog("close");
-	      } else{
-			  var warning = 'You should fill both name, minVal and maxVal';
-			  alert(warning);
-		  }
-		});
-	});
-
 			$("#mapSelection").dialog({
 				width: 450,
 				position: "top",
@@ -253,37 +232,53 @@ function addLayerEvent(){
 				//widget.css('top', '-40em');
 	});
 
-	//Add layer to the list
-	function addLayer(layerName, id, minVal, maxVal){
-		var newLayer = createHeatMap(minVal, maxVal);
-		layerArray.push(newLayer);
-		var newitem = '<li><input id=\"'+ id + '"type="checkbox">'+ " "+layerName + '</li>';
-		$('.children').append(newitem);
+	$("#confirm_add").click(function(){
+		var layerName = $('#layerName').val();
+		var minVal = $('#minVal').val();
+		var maxVal = $('#maxVal').val();
 
-	}
+		if(layerName !== '' && minVal !== '' && maxVal !== '') {
+			addLayer(layerName,'layer' + idCnt++, parseInt(minVal, 10), parseInt(maxVal, 10));
+			$(this).closest('.ui-dialog-content').dialog("close");
+		} else{
+			var warning = 'You should fill both name, minVal and maxVal';
+			alert(warning);
+		}
+	});
+}
+
+//Add layer to the list
+function addLayer(layerName, id, minVal, maxVal){
+	var newLayer = createHeatMap(minVal, maxVal);
+	layerArray.push(newLayer);
+	var newitem = '<li><input id=\"'+ id + '"type="checkbox">'+ " "+layerName + '</li>';
+	$('.children').append(newitem);
+
 }
 
 function createHeatMap(minVal, maxVal) {
-	var heatmapLayer = L.TileLayer.heatMap({
-		radius: 40,
-		opacity: 0.9,
-	});
-	var newDataArr = []
+	var newDataArr = [];
 
+	var options = {
+	radius: 100000,// radius in pixels or in meters (see useAbsoluteRadius)
+	useAbsoluteRadius: true, // true: r in meters, false: r in pixels
+	color: 'transparent', // the color of the layer
+	opacity: 0.5, // opacity of the not coverted area
+
+	minValue: minVal,
+	maxValue: maxVal
+	};
 	//build an array for the new layer
 	for(var i = 0; i < testData.data.length; i++) {
-		var temp = testData.data[i].value;
-		if(temp >= minVal && temp <= maxVal)
-			newDataArr.push(testData.data[i]);
+		var temp = testData.data[i];
+		if(minVal > temp.value || maxVal < temp.value)
+			continue;
+
+		newDataArr.push( [temp.lat, temp.lon, temp.value, ]);
 	}
 
-	var newData = {
-		max: testData.max,
-		data: newDataArr
-	};
-
-	heatmapLayer.addData(newData.data);
-	return heatmapLayer;
+	var layer = L.TileLayer.maskCanvas(options, newDataArr);
+	map.addLayer(layer);
 }
 
 // color slider
