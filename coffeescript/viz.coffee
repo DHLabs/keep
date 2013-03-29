@@ -69,7 +69,12 @@ class DataView extends Backbone.View
 
         $( '.viz-active' ).fadeOut( 'fast', ()->
             $( @ ).removeClass( 'viz-active' )
-            $( '#' + viz_type + '_viz' ).fadeIn().addClass( 'viz-active' )
+
+            $( '#' + viz_type + '_viz' ).fadeIn( 'fast', ()=>
+                # Remember to redraw the map when we switch tabs
+                if viz_type == 'map'
+                    document.vizApp.map.invalidateSize( false )
+            ).addClass( 'viz-active' )
         )
 
 

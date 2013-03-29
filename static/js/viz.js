@@ -108,8 +108,13 @@ DataView = (function(_super) {
     $('.active').removeClass('active');
     $(event.currentTarget).addClass('active');
     return $('.viz-active').fadeOut('fast', function() {
+      var _this = this;
       $(this).removeClass('viz-active');
-      return $('#' + viz_type + '_viz').fadeIn().addClass('viz-active');
+      return $('#' + viz_type + '_viz').fadeIn('fast', function() {
+        if (viz_type === 'map') {
+          return document.vizApp.map.invalidateSize(false);
+        }
+      }).addClass('viz-active');
     });
   };
 
