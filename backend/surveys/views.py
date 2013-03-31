@@ -77,7 +77,7 @@ def visualize( request, form_id ):
 
     # Check to see if the user has access to view this survey
     if not form.get( 'public', False ):
-        if request.user.id is None or request.user.id != data[ 'user' ]:
+        if request.user.id is None or request.user.id != form[ 'user' ]:
             return HttpResponse( 'Unauthorized', status=401 )
 
     return render_to_response( 'visualize.html',
