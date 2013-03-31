@@ -16,29 +16,30 @@ connection = MongoClient()
 db = connection[ 'dhlab' ]
 
 
+def dehydrate( survey ):
+    for key in survey.keys():
+        if isinstance( survey[ key ], ObjectId ):
+            survey[ key ] = str( survey[ key ] )
+
+    # Decrypt survey values
+    if 'data' in survey:
+        survey[ 'data' ] = decrypt_survey( survey[ 'data' ] )
+
+    # Reformat python DateTime into JS DateTime
+    if 'timestamp' in survey:
+        survey[ 'timestamp' ] = survey[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
+    return survey
+
+
 def dehydrate_survey( cursor ):
     '''
         Decrypt survey data and turn any timestamps into javascript-readable
         values.
     '''
+    if isinstance( cursor, dict ):
+        return dehydrate( cursor )
 
-    data = []
-    for row in cursor:
-
-        for key in row.keys():
-            if isinstance( row[ key ], ObjectId ):
-                row[ key ] = str( row[ key ] )
-
-        # Decrypt survey values
-        if 'data' in row:
-            row[ 'data' ] = decrypt_survey( row[ 'data' ] )
-
-        # Reformat python DateTime into JS DateTime
-        if 'timestamp' in row:
-            row[ 'timestamp' ] = row[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
-
-        data.append( row )
-    return data
+    return [ dehydrate( row ) for row in cursor ]
 
 
 def encrypt_survey( data ):

@@ -7,7 +7,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 from backend.api import FormResource, DataResource
-from backend.xforms.openrosa_urls import openrosa_urls
+from backend.xforms.urls import openrosa_urls
 
 # Register resources to make API available
 from tastypie.api import Api
@@ -19,6 +19,9 @@ urlpatterns = patterns( '',
 
     # Landing page / standard copy pages
     url(r'', include( 'backend.urls' ) ),
+
+    # Form related actions
+    url(r'', include( 'backend.surveys.urls' ) ),
 
     # Account registration / login
     url(r'^accounts/', include( 'backend.registration_urls' ) ),

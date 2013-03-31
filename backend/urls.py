@@ -12,23 +12,3 @@ urlpatterns = patterns( 'backend.views',
     # User settings
     url( r'^settings', 'settings', name='settings' ),
 )
-
-# Webform/Data submission ##
-urlpatterns += patterns( 'backend.views',
-
-    # Delete form
-    url( r'^forms/delete/(?P<form_id>\w+)', 'delete_form',
-         name='delete_form'),
-
-    # Web form
-    url( r'^webform/(?P<form_id>\w+)', 'webform',
-         name='webform' ),
-
-    # Data Visualization
-    url( r'^visualize/(?P<form_id>\w+)', 'visualize',
-         name='visualize' ),
-
-    url( r'^map_visualize/', 'map_visualize',
-         name='map_visualize' ),
-
-)

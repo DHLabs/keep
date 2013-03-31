@@ -16,13 +16,13 @@ openrosa_urls = [
     url( r'^bs/(?P<username>\w+)/formList$',
             'backend.xforms.formlist' ),
 
-    url( r'^bs/(?P<username>\w+)/submission', 'backend.views.xml_submission'),
+    url( r'^bs/(?P<username>\w+)/submission', 'backend.xforms.views.xml_submission'),
 
     # Returns a list of submissions for a specified form & user
     url( r'^bs/(?P<username>\w+)/forms/(?P<form_id>[^/]+)/submission/(?P<sub_id>[^/]+)$',
             'backend.xforms.submission_detail' ),
 
-    #Adds the submissions 
+    #Adds the submissions
     #url( r'^bs/(?P<username>\w+)/submission', 'backend.views.submission'),
 ]
 

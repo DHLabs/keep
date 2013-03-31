@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block js %}
-<script id='form_id' type='text/plain'>{{form_id}}</script>
+<script id='form_id' type='text/plain'>{{ sid }}</script>
 <script id='user' type='text/plain'>{{ user.username }}</script>
 <script id='yaxis_tmpl' type='text/html'>
 	<label class="radio">
@@ -19,6 +19,10 @@
 <script src='{% static "/static/js/vendor/json2.js" %}'></script>
 <script src='{% static "/static/js/vendor/underscore-1.4.4.js" %}'></script>
 <script src='{% static "/static/js/vendor/backbone-min.js" %}'></script>
+
+<!-- DataTables -->
+<script src='{% static "/static/js/vendor/jquery.dataTables.min.js" %}'></script>
+<script src='{% static "/static/js/vendor/bootstrap.dataTables.js" %}'></script>
 
 <!-- Geo viz -->
 <script src='{% static "/static/js/vendor/leaflet.js" %}'></script>
@@ -40,13 +44,16 @@
 
 {% block content %}
 <div class='container' id='viz'>
-	<div class='row'>
+	<div class='row' style='margin-bottom:32px;'>
 		<div class='span12'>
-			<div class='btn-toolbar'>
+			<div class='btn-toolbar' style='text-align:center;'>
 				<div class='btn-group' id='chart_options'>
-					<a href='#' data-type='raw' class='btn active'><i class='icon-list'></i> Raw</a>
-					<a href='#' data-type='map' class='btn'><i class='icon-map-marker'></i> Map</a>
+					<a href='#' id='raw_btn' data-type='raw' class='btn active'><i class='icon-list'></i> Raw</a>
+					<a href='#' id='map_btn' data-type='map' class='btn disabled'><i class='icon-map-marker'></i> Map</a>
 					<a href='#' id='line_btn' data-type='line' class='btn'><i class='icon-signal'></i> Line</a>
+					{% if not user.is_anonymous %}
+					<a data-type='share' class='btn btn-primary'>Share Data</a>
+					{% endif %}
 				</div>
 			</div>
 		</div>
@@ -64,5 +71,66 @@
 		</div>
 		<div class='span10' id='line'></div>
 	</div>
+	{% if not user.is_anonymous %}
+	<div class='row viz' id='share_viz'>
+		<div class='span12'>
+			<h4>Data Sharing Settings</h4>
+			<hr>
+		</div>
+		<div class='span12'>
+			<div class='span3'>
+				<strong>Who can see this data?</strong>
+			</div>
+			<div class='span6'>
+				<label class='checkbox'>
+					<input id='sharing_toggle' type='checkbox' {% if not survey.public %}checked='checked'{% endif %}>
+					Allow data sharing
+				</label>
+				<span class='help-block'>
+					WARNING: Checking this box will make the data in this repository completely <strong>public</strong>.
+				</span>
+			</div>
+		</div>
+		<div style='display:none;'>
+		<div class='span12'><hr></div>
+		<div class='span12'>
+			<div class='span3'>
+				<strong>How is my data shown?</strong>
+			</div>
+			<div class='span6'>
+				<div>
+					<label class='checkbox'>
+						<input type='checkbox'>
+						Preserve Data Privacy
+					</label>
+					<span class='help-block'>
+						If you allow data sharing, by default we will ensure that
+						the data shown will also preserve the privacy of any
+						individuals who entered data.
+					</span>
+				</div>
+				<div>
+					<label class='checkbox'>
+						<input type='checkbox'>
+						Show Raw Data
+					</label>
+				</div>
+				<div>
+					<label class='checkbox'>
+						<input type='checkbox'>
+						Show Map Data
+					</label>
+				</div>
+				<div>
+					<label class='checkbox'>
+						<input type='checkbox'>
+						Show Line Data
+					</label>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	{% endif %}
 </div>
 {% endblock %}

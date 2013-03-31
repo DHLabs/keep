@@ -15,7 +15,7 @@ from tastypie.authorization import Authorization
 # from twofactor.api_auth import ApiTokenAuthentication
 
 
-class BasicAuthorization( Authorization ):
+class DataAuthorization( Authorization ):
 
     def read_list( self, object_list, bundle ):
         user = bundle.request.GET.get( 'user', None )
@@ -28,6 +28,36 @@ class BasicAuthorization( Authorization ):
         return object_list.find({ 'user': user.id } )
 
     def read_detail( self, object_detail, bundle ):
+        user = bundle.request.GET.get( 'user', None )
+
+        try:
+            user = User.objects.get( username=user )
+        except ObjectDoesNotExist:
+            raise ValueError
+
+        if object_detail[ 'user' ] != user.id:
+            raise ValueError
+
+        return object_detail
+
+
+class FormAuthorization( Authorization ):
+
+    def read_list( self, object_list, bundle ):
+        user = bundle.request.GET.get( 'user', None )
+
+        try:
+            user = User.objects.get( username=user )
+        except ObjectDoesNotExist:
+            return []
+
+        return object_list.find({ 'user': user.id } )
+
+    def read_detail( self, object_detail, bundle ):
+
+        if object_detail.get( 'public', False ):
+            return object_detail
+
         user = bundle.request.GET.get( 'user', None )
 
         try:
@@ -56,7 +86,7 @@ class DataResource( MongoDBResource ):
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get', 'list' ]
 
-        authorization = BasicAuthorization()
+        authorization = DataAuthorization()
 
     def get_detail( self, request, **kwargs ):
         # Grab the survey that we're querying survey data for
@@ -116,7 +146,7 @@ class FormResource( MongoDBResource ):
         # authentication = ApiTokenAuthentication()
 
         # TODO: Authorize based on sharing preferences.
-        authorization = BasicAuthorization()
+        authorization = FormAuthorization()
 
         # Don't include resource uri
         include_resource_uri = False

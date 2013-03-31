@@ -265,6 +265,7 @@ $ ->
                         return false
 
         render: ->
+
             #$( '#xform_debug' ).html( JSON.stringify( @model.attributes ) )
 
             if mobileView
@@ -446,7 +447,7 @@ $ ->
             )
 
             _.each( @model.attributes.children, ( child ) =>
-                 @recursiveAdd( child )
+                @recursiveAdd( child )
             )
 
             renderedForm = new Backbone.Form(
@@ -455,7 +456,7 @@ $ ->
                 fields: _fieldsets
             ).render()
 
-	    #debugger
+        #debugger
             answers = renderedForm.getValue()
 
             # check and display relevance as debug output
@@ -510,6 +511,3 @@ $ ->
       $("#submit-xform").click ->
         alert "Thank you for your time!"
         window.location.replace "/"
-
-
-
