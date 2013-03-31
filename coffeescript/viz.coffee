@@ -28,6 +28,7 @@ class DataView extends Backbone.View
     events:
         "click #yaxis_options input":   "change_y_axis"
         "click #chart_options a.btn":   "switch_viz"
+        "change #sharing_toggle":       "toggle_public"
 
     # Current list of survey data
     data: new DataCollection()
@@ -36,7 +37,7 @@ class DataView extends Backbone.View
     form: new FormModel()
 
     # Raw data stuff
-    raw_headers: []         # Headers used for the raw data table header
+    raw_headers: [ 'uuid' ] # Headers used for the raw data table header
 
     # Map related stuff
     map_headers: null       # Map related headers (geopoint datatype)
@@ -60,9 +61,23 @@ class DataView extends Backbone.View
 
         @
 
+    toggle_public: (event) ->
+        $.post( '/forms/share/' + @form.form_id, {}, ( response ) =>
+            if response.success
+                $( event.currentTarget ).attr( 'checked', response.public )
+        )
+
+        @
+
     switch_viz: (event) ->
 
         viz_type = $( event.currentTarget ).data( 'type' )
+
+        # Check that the viz is enabled
+        if viz_type == 'map' and not @map_enabled
+            return
+        else if viz_type == 'line' and @chart_fields.length == 0
+            return
 
         $( '.active' ).removeClass( 'active' )
         $( event.currentTarget ).addClass( 'active' )
@@ -114,6 +129,9 @@ class DataView extends Backbone.View
 
             # Detect geopoints
             if field.type in [ 'geopoint' ]
+                # Enable the map button
+                $( '#map_btn' ).removeClass( 'disabled' )
+
                 @map_enabled = true
                 @map_headers = field.name
 
@@ -138,7 +156,7 @@ class DataView extends Backbone.View
 
         $( '#raw' ).html( '' )
 
-        html = '<table class="table table-striped">'
+        html = '<table id="raw_table" class="table table-striped table-bordered">'
 
         html += '<thead><tr>'
         headers = ''
@@ -166,6 +184,21 @@ class DataView extends Backbone.View
 
 
         $( '#raw' ).html( html )
+
+        # Render the table using jQuery's DataTable
+        #
+        # NOTE: Elements taken from DataTables blog post about using DT with
+        # Bootstrap, http://www.datatables.net/blog/Twitter_Bootstrap_2
+        #
+        $( '#raw_table' ).dataTable(
+            'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>"
+            'sPaginationType': 'bootstrap'
+        )
+
+        $.extend( $.fn.dataTableExt.oStdClasses, {
+            "sWrapper": "dataTables_wrapper form-inline"
+        } )
+
         @
 
     renderCharts: ->

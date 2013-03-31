@@ -72,14 +72,15 @@ DataView = (function(_super) {
 
   DataView.prototype.events = {
     "click #yaxis_options input": "change_y_axis",
-    "click #chart_options a.btn": "switch_viz"
+    "click #chart_options a.btn": "switch_viz",
+    "change #sharing_toggle": "toggle_public"
   };
 
   DataView.prototype.data = new DataCollection();
 
   DataView.prototype.form = new FormModel();
 
-  DataView.prototype.raw_headers = [];
+  DataView.prototype.raw_headers = ['uuid'];
 
   DataView.prototype.map_headers = null;
 
@@ -102,9 +103,24 @@ DataView = (function(_super) {
     return this;
   };
 
+  DataView.prototype.toggle_public = function(event) {
+    var _this = this;
+    $.post('/forms/share/' + this.form.form_id, {}, function(response) {
+      if (response.success) {
+        return $(event.currentTarget).attr('checked', response["public"]);
+      }
+    });
+    return this;
+  };
+
   DataView.prototype.switch_viz = function(event) {
     var viz_type;
     viz_type = $(event.currentTarget).data('type');
+    if (viz_type === 'map' && !this.map_enabled) {
+      return;
+    } else if (viz_type === 'line' && this.chart_fields.length === 0) {
+      return;
+    }
     $('.active').removeClass('active');
     $(event.currentTarget).addClass('active');
     return $('.viz-active').fadeOut('fast', function() {
@@ -143,6 +159,7 @@ DataView = (function(_super) {
         }
       }
       if ((_ref3 = field.type) === 'geopoint') {
+        $('#map_btn').removeClass('disabled');
         this.map_enabled = true;
         this.map_headers = field.name;
       }
@@ -166,7 +183,7 @@ DataView = (function(_super) {
   DataView.prototype.renderRaw = function() {
     var datum, headers, html, key, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
     $('#raw').html('');
-    html = '<table class="table table-striped">';
+    html = '<table id="raw_table" class="table table-striped table-bordered">';
     html += '<thead><tr>';
     headers = '';
     _ref = this.raw_headers;
@@ -194,6 +211,13 @@ DataView = (function(_super) {
     }
     html += '</tbody></table>';
     $('#raw').html(html);
+    $('#raw_table').dataTable({
+      'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+      'sPaginationType': 'bootstrap'
+    });
+    $.extend($.fn.dataTableExt.oStdClasses, {
+      "sWrapper": "dataTables_wrapper form-inline"
+    });
     return this;
   };
 
