@@ -1,3 +1,0 @@
-[submodule "twofactor"]
-	path = twofactor
-	url = git@bitbucket.org:distributedhealth/twofactor.git
