@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+
+<section id="login">
+	<div class="page-header">
+		<h1>{% trans "Log In" %}</h1>
+	</div>
+
+	<div class="row">
+		<div class="span8">
+			<form class="well" method="post" action=".">
+				<table id='login'>
+					{{ form.as_table }}
+					<tfoot>
+						<tr>
+							<td>&nbsp;</td>
+							<td><input type="submit" class="btn btn-primary" value="{% trans 'Log In' %}" /></td>
+						</tr>
+					</tfoot>
+				</table>
+				{% csrf_token %}
+				<input type="hidden" name="next" value="/dashboard" />
+			</form>
+			<p>
+				{% url "resend_activation" as resend_activation_url %}
+				Missed your activation email? <a href='{{ resend_activation_url }}'>Re-send activation email.</a>
+			</p>
+			<p>
+				{% url "auth_password_reset" as reset_url %}
+				{% blocktrans %}
+				Can't access your account? <a href="{{ reset_url }}">Reset your password.</a>
+				{% endblocktrans %}
+			</p>
+			<p>
+				{% url "registration_register" as registration_url %}
+
+				{% blocktrans %}
+				New to DHLab? <a href="{{ registration_url }}">Create an account.</a>
+				{% endblocktrans %}
+			</p>
+		</div>
+	</div>
+</section>
+
+{% endblock %}

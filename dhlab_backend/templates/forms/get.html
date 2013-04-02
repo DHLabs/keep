@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Doknosis - {{ form.name }}
+{% endblock %}
+
+{% block js %}
+<!--<div id='xform_debug' style='margin-top:16px;'></div>-->
+<script src="/static/js/vendor/json2.js"></script>
+<script src="/static/js/vendor/underscore.js"></script>
+<script src="/static/js/backbone-min.js"></script>
+<script src="/static/js/bootstrap.2.3.1.min.js"></script>
+
+<script src="/static/js/distribution/backbone-forms.min.js"></script>
+<script src="/static/js/distribution/editors/list.min.js"></script>
+<script src="/static/js/backbone-localstorage.js"></script>
+<script src='/static/js/swipe.min.js'></script>
+
+<script src="/static/js/xform_web.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="span3 sidebar">
+    <h1>Hey!</h1>
+    <p>stuff is over here!</p>
+  </div>
+  <div id="xform_view" class="span9">
+    <h1>Form: {{ form.name }}</h1>
+    <div id="formcontent" class="formbox">
+      <div class="row">
+	<div class="span10">
+	  <div id="formDiv"></div>
+	</div>
+      </div>
+      <div class='row'>
+	<div class='span8'>
+	  <a href="#" class='btn prevButton' id="prev">Previous</a>
+	  <a href="#" class='btn btn-primary pull-right nextButton' id="submit-xform">Submit Form</a>
+	  <a href="#" class='btn pull-right nextButton' id="next">Next</a>
+	  <!--<a href="#" class='btn btn-primary' id="getsize">Get Size</a>-->
+	</div>
+	<!--<div class='span2 offset8 row'>
+	  <a href="#" class='btn btn-primary' id="next">Next</a>
+	  <a href="#" class='btn btn-primary' id="submit-xform">
+	    Submit Form
+	  </a>
+	</div>-->
+      </div>
+    </div>
+  </div>
+</div>
+<div id='form_id' style='display:none;'>{{ form_id }}</div>
+{% endblock %}
