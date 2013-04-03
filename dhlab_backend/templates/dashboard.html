@@ -46,9 +46,6 @@
 		</div>
 	</div>
 	<div class='span8'>
-		{% if user_forms|length == 0 %}
-		<div style='margin-bottom:32px;'>You have no forms uploaded =[</div>
-		{% else %}
 		<table class='table table-striped table-bordered'>
 			<thead>
 				<tr>
@@ -58,6 +55,13 @@
 				</tr>
 			</thead>
 			<tbody>
+				{% if user_forms|length == 0 %}
+					<tr>
+						<td style='text-align:center;' colspan='4'>
+							You have no forms uploaded =[
+						</td>
+					</tr>
+				{% endif %}
 				{% for xform in user_forms %}
 					{% if xform.public or user.username == account.username %}
 					<tr>
@@ -86,7 +90,6 @@
 				{% endfor %}
 			</tbody>
 		</table>
-		{% endif %}
 	</div>
 </div>
 {% endblock %}
