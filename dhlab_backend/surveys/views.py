@@ -1,14 +1,14 @@
 import json
-
-from backend.db import db, dehydrate_survey
-
 from bson import ObjectId
 
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+
+from backend.db import db, dehydrate_survey
 
 
 @require_POST
@@ -70,10 +70,13 @@ def webform( request, form_id ):
 
 
 @require_GET
-def visualize( request, form_id ):
+def visualize( request, username, form_id ):
+
+    user = User.objects.get(username=username)
 
     data = db.survey_data.find( {'survey': ObjectId( form_id )} )
-    form = db.survey.find_one( { '_id': ObjectId( form_id ) } )
+    form = db.survey.find_one( { '_id': ObjectId( form_id ), 'user': user.id } )
+
 
     # Check to see if the user has access to view this survey
     if not form.get( 'public', False ):

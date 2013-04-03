@@ -96,7 +96,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'backend.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'backend.wsgi.application'
@@ -113,6 +113,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'backend',
+    'surveys',
     'twofactor',                # Needed to harden login/database
     'registration',             # Needed for user signup
     'django.contrib.admin',     # Needed for Django Admin stuff
