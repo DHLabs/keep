@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+<div class='container'>
+	<div class='row'>
+		<div class='span12'>
+			<form action='/repo/new/' method='post' enctype='multipart/form-data'>
+				{% csrf_token %}
+
+				<label {% if form.name.errors %}style='color:red'{%endif%}>
+					<strong>Repository name</strong>
+				</label>
+				{{ form.name }}
+				{{ form.name.errors }}
+
+				<label>
+					<strong>Description (optional)</strong>
+				</label>
+				<textarea rows='5' name='desc' class='input-xxlarge'></textarea>
+				{{ form.desc.errors }}
+
+				<hr/>
+
+				<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
+					<strong>XForm File</strong>
+				</label>
+			    {{ form.xform_file }}
+			    <span class='help-block'>
+			    	Learn more about XForms <a href='http://en.wikipedia.org/wiki/XForms'>here</a>
+			    </span>
+			    {{ form.xform_file.errors }}
+
+			    <hr/>
+
+			    <label class='radio'>
+			    	<input type='radio' name='privacy' value='public' style='margin-top:16px;'>
+			    	<div class='pull-left' style='width:32px;text-align:center;padding-top:8px;'>
+			    		<img src='/static/img/public_repo.png'>
+			    	</div>
+			    	<div class='pull-left'>
+			    		<strong>Public</strong>
+			    		<span class='help-block'>
+			    			Anyone can see this repository and the data associated
+			    			with it.
+			    		</span>
+			    	</div>
+			    </label>
+			    <label class='radio' style='clear:both;'>
+			    	<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
+			    	<div class='pull-left' style='width:32px;text-align:center;padding-top:8px;'>
+			    		<img src='/static/img/private_repo.gif'>
+			    	</div>
+			    	<div class='pull-left'>
+			    		<strong>Private</strong>
+			    		<span class='help-block'>
+			    			You choose who can see this repository and the data
+			    			associated with it.
+			    		</span>
+			    	</div>
+			    </label>
+			    <div style='clear:both;'>
+			    	<hr/>
+			    	<button type='submit' class='btn btn-success'>Create Repository</button>
+			    </div>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}
