@@ -164,8 +164,8 @@ DataView = (function(_super) {
         this.map_headers = field.name;
       }
     }
+    this.renderRaw();
     if (this.data.models.length > 0) {
-      this.renderRaw();
       if (this.map_enabled) {
         this.renderMap();
       } else {

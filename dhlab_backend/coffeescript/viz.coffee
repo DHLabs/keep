@@ -135,10 +135,10 @@ class DataView extends Backbone.View
                 @map_enabled = true
                 @map_headers = field.name
 
-        # Only render data if we actually have data!
-        if @data.models.length > 0
-            @renderRaw()
+        @renderRaw()
 
+        # Only render other vizs if we actually have data!
+        if @data.models.length > 0
             # Can we render a map?
             if @map_enabled
                 @renderMap()
