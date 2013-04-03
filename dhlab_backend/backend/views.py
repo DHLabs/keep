@@ -130,6 +130,10 @@ def user_dashboard( request, username ):
                     print 'Warnings parsing xls file!'
 
                 data = survey.to_json_dict()
+
+                # Is this form public?
+                data[ 'public' ]    = False
+
                 # Store who uploaded this form
                 data[ 'user' ]      = request.user.id
                 # Store when this form was uploaded
