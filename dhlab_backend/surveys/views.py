@@ -11,7 +11,6 @@ from django.views.decorators.http import require_POST, require_GET
 from backend.db import db, dehydrate_survey
 
 
-@require_POST
 def delete_form( request, form_id ):
 
     survey = db.survey.find_one( { '_id': ObjectId( form_id ) },
@@ -77,6 +76,8 @@ def visualize( request, username, form_id ):
     data = db.survey_data.find( {'survey': ObjectId( form_id )} )
     form = db.survey.find_one( { '_id': ObjectId( form_id ), 'user': user.id } )
 
+    if form is None:
+        return HttpResponse( status=404 )
 
     # Check to see if the user has access to view this survey
     if not form.get( 'public', False ):
