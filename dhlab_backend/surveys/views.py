@@ -87,7 +87,8 @@ def visualize( request, username, form_id ):
     return render_to_response( 'visualize.html',
                                { 'survey': form,
                                  'sid': form[ '_id' ],
-                                 'data': json.dumps( dehydrate_survey(data) )},
+                                 'data': json.dumps( dehydrate_survey(data) ),
+                                 'account': user},
                                context_instance=RequestContext(request) )
 
 

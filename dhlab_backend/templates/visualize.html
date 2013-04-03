@@ -47,7 +47,7 @@
 	<div class='row'>
 		<div class='span12'>
 			<h3>
-				<a href='/{{ user.username }}'>{{ user.username }}</a> /
+				<a href='/{{ account.username }}'>{{ account.username }}</a> /
 				<div class='btn-group'>
 					<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
 						{{ survey.name }}
@@ -55,12 +55,12 @@
 					</a>
 					<ul class='dropdown-menu'>
 						<li>
-							<a href='/api/v1/forms/{{ sid }}?format=json&amp;user={{ user.username }}'>
+							<a href='/api/v1/forms/{{ sid }}?format=json&amp;user={{ account.username }}'>
 								Download as JSON
 							</a>
 						</li>
 						<li>
-							<a href='/api/v1/forms/{{ sid }}?format=xform&amp;user={{ user.username }}'>
+							<a href='/api/v1/forms/{{ sid }}?format=xform&amp;user={{ account.username }}'>
 								Download as XForm
 							</a>
 						</li>
@@ -83,7 +83,7 @@
 					<a href='#' id='raw_btn' data-type='raw' class='btn active'><i class='icon-list'></i> Raw</a>
 					<a href='#' id='map_btn' data-type='map' class='btn disabled'><i class='icon-map-marker'></i> Map</a>
 					<a href='#' id='line_btn' data-type='line' class='btn'><i class='icon-signal'></i> Line</a>
-					{% if not user.is_anonymous %}
+					{% if not user.is_anonymous and user.id == account.id %}
 					<a data-type='settings' class='btn'>
 						<i class='icon-cog'></i>
 						Settings

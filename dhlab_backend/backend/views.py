@@ -163,7 +163,9 @@ def user_dashboard( request, username ):
                                         .count()
 
     return render_to_response( 'dashboard.html',
-                               { 'form': form, 'user_forms': user_forms },
+                               { 'form': form,
+                                 'user_forms': user_forms,
+                                 'account': user },
                                context_instance=RequestContext(request) )
 
 
