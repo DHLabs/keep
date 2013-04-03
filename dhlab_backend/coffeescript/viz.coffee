@@ -146,10 +146,14 @@ class DataView extends Backbone.View
                 $( '#map' ).hide()
 
             # Can we render any charts?
-            if @chart_fields.length > 0
+            if @chart_fields.length
                 @renderCharts()
             else
                 $( '#line_btn' ).addClass( 'disabled' )
+        else
+            # Disable all the data viz buttons if we have no data
+            $( '#line_btn' ).addClass( 'disabled' )
+            $( '#map_btn' ).addClass( 'disabled' )
         @
 
     renderRaw: ->

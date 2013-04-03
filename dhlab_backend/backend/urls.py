@@ -21,7 +21,7 @@ urlpatterns = patterns( 'backend.views',
     url( r'^settings/$', 'settings', name='settings' ),
 
     # User dashboard
-    url( r'^(?P<username>\w+)$', 'user_dashboard', name='user_dashboard' ),
+    url( r'^(?P<username>\w+)/$', 'user_dashboard', name='user_dashboard' ),
 
 )
 

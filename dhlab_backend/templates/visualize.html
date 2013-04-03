@@ -47,29 +47,60 @@
 	<div class='row'>
 		<div class='span12'>
 			<h3>
-				<a href='#'>{{ user.username }}</a> /
-				{{ survey.name }}
+				<a href='/{{ user.username }}'>{{ user.username }}</a> /
+				<div class='btn-group'>
+					<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
+						{{ survey.name }}
+						<span class='caret'></span>
+					</a>
+					<ul class='dropdown-menu'>
+						<li>
+							<a href='/api/v1/forms/{{ sid }}?format=json&amp;user={{ user.username }}'>
+								Download as JSON
+							</a>
+						</li>
+						<li>
+							<a href='/api/v1/forms/{{ sid }}?format=xform&amp;user={{ user.username }}'>
+								Download as XForm
+							</a>
+						</li>
+					</ul>
+				</div>
 			</h3>
 		</div>
 	</div>
 </div>
 <div class='container' id='viz'>
-	<div class='row' style='margin-bottom:32px;'>
+	<div class='row'>
 		<div class='span12'>
-			<div class='btn-toolbar' style='text-align:center;'>
+			<div class='pull-right'>
+				<a class='btn' href='/api/v1/data/{{ sid }}?format=csv'>
+					<i class='icon-download'></i> Download Data
+				</a>
+			</div>
+			<div class='btn-toolbar'>
 				<div class='btn-group' id='chart_options'>
 					<a href='#' id='raw_btn' data-type='raw' class='btn active'><i class='icon-list'></i> Raw</a>
 					<a href='#' id='map_btn' data-type='map' class='btn disabled'><i class='icon-map-marker'></i> Map</a>
 					<a href='#' id='line_btn' data-type='line' class='btn'><i class='icon-signal'></i> Line</a>
 					{% if not user.is_anonymous %}
+					<a data-type='settings' class='btn'>
+						<i class='icon-cog'></i>
+						Settings
+					</a>
 					<a data-type='share' class='btn btn-primary'>Share Data</a>
 					{% endif %}
 				</div>
 			</div>
 		</div>
 	</div>
+	<hr/>
 	<div class='row viz viz-active' id='raw_viz'>
-		<div class='span12' id='raw'></div>
+		<div class='span12' id='raw'>
+			<div style='text-align:center;color:#AAA;'>
+				You have no data at the moment =[
+			</div>
+		</div>
 	</div>
 	<div class='row viz' id='map_viz'>
 		<div class='span12' id='map'></div>
@@ -82,6 +113,8 @@
 		<div class='span10' id='line'></div>
 	</div>
 	{% if not user.is_anonymous %}
+	<div class='row viz' id='settings_viz'>
+	</div>
 	<div class='row viz' id='share_viz'>
 		<div class='span12'>
 			<h4>Data Sharing Settings</h4>

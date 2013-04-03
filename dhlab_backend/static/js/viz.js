@@ -171,11 +171,14 @@ DataView = (function(_super) {
       } else {
         $('#map').hide();
       }
-      if (this.chart_fields.length > 0) {
+      if (this.chart_fields.length) {
         this.renderCharts();
       } else {
         $('#line_btn').addClass('disabled');
       }
+    } else {
+      $('#line_btn').addClass('disabled');
+      $('#map_btn').addClass('disabled');
     }
     return this;
   };
