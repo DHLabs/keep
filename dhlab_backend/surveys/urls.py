@@ -21,7 +21,7 @@ urlpatterns = patterns( 'surveys.views',
     url( r'^(?P<username>\w+)/(?P<form_id>\w+)/$', 'visualize',
          name='form_visualize' ),
 
-    url( r'^map_visualize/$', 'map_visualize',
+    url( r'^forms/viz/map_visualize/$', 'map_visualize',
          name='map_visualize' ),
 
 )
