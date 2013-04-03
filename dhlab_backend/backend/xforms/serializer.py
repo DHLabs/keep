@@ -56,7 +56,7 @@ class XFormSerializer( Serializer ):
                 else:
                     base_url = 'odk.distributedhealth.org'
 
-                downloadUrl.text = 'http://%s/api/v1/forms/%s/?format=xform&user=%s' %\
+                downloadUrl.text = 'http://%s/api/v1/repos/%s/?format=xform&user=%s' %\
                                    ( base_url, xform[ 'id' ], xform[ 'owner'] )
 
                 element.append( downloadUrl )

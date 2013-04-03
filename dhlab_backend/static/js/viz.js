@@ -30,7 +30,7 @@ FormModel = (function(_super) {
   FormModel.prototype.initialize = function() {
     this.form_id = $('#form_id').html();
     this.user = $('#user').html();
-    return this.url = "/api/v1/forms/" + this.form_id + "/?format=json&user=" + this.user;
+    return this.url = "/api/v1/repos/" + this.form_id + "/?format=json&user=" + this.user;
   };
 
   return FormModel;
@@ -105,7 +105,7 @@ DataView = (function(_super) {
 
   DataView.prototype.toggle_public = function(event) {
     var _this = this;
-    $.post('/forms/share/' + this.form.form_id, {}, function(response) {
+    $.post("/repo/share/" + this.form.form_id + "/", {}, function(response) {
       if (response.success) {
         return $(event.currentTarget).attr('checked', response["public"]);
       }

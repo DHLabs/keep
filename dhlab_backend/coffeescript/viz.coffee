@@ -7,7 +7,7 @@ class FormModel extends Backbone.Model
         @form_id = $( '#form_id' ).html()
         @user    = $( '#user' ).html()
 
-        @url = "/api/v1/forms/#{@form_id}/?format=json&user=#{@user}"
+        @url = "/api/v1/repos/#{@form_id}/?format=json&user=#{@user}"
 
 class DataCollection extends Backbone.Collection
     model: DataModel
@@ -62,7 +62,7 @@ class DataView extends Backbone.View
         @
 
     toggle_public: (event) ->
-        $.post( '/forms/share/' + @form.form_id, {}, ( response ) =>
+        $.post( "/repo/share/#{@form.form_id}/", {}, ( response ) =>
             if response.success
                 $( event.currentTarget ).attr( 'checked', response.public )
         )

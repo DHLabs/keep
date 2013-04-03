@@ -55,12 +55,12 @@
 					</a>
 					<ul class='dropdown-menu'>
 						<li>
-							<a href='/api/v1/forms/{{ sid }}?format=json&amp;user={{ account.username }}'>
+							<a href='/api/v1/repos/{{ sid }}?format=json&amp;user={{ account.username }}'>
 								Download as JSON
 							</a>
 						</li>
 						<li>
-							<a href='/api/v1/forms/{{ sid }}?format=xform&amp;user={{ account.username }}'>
+							<a href='/api/v1/repos/{{ sid }}?format=xform&amp;user={{ account.username }}'>
 								Download as XForm
 							</a>
 						</li>
@@ -124,7 +124,7 @@
 				</span>
 			</div>
 			<div class='span8' style='text-align:right;padding-top:16px;'>
-				<a href='/forms/delete/{{ sid }}' class='btn btn-danger'>
+				<a href='/repo/delete/{{ sid }}' class='btn btn-danger'>
 					<i class='icon-trash'></i> Delete Repository
 				</a>
 			</div>

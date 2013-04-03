@@ -41,7 +41,7 @@ class DataAuthorization( Authorization ):
         return object_detail
 
 
-class FormAuthorization( Authorization ):
+class RepoAuthorization( Authorization ):
 
     def read_list( self, object_list, bundle ):
         user = bundle.request.GET.get( 'user', None )
@@ -118,7 +118,7 @@ class DataResource( MongoDBResource ):
         return self.create_response( request, data )
 
 
-class FormResource( MongoDBResource ):
+class RepoResource( MongoDBResource ):
     id          = fields.CharField( attribute='_id' )
     name        = fields.CharField( attribute='name', null=True )
     title       = fields.CharField( attribute='title', null=True )
@@ -131,7 +131,7 @@ class FormResource( MongoDBResource ):
 
     class Meta:
         collection = 'survey'
-        resource_name = 'forms'
+        resource_name = 'repos'
         object_class = Document
 
         list_allowed_methods = [ 'get' ]
@@ -146,7 +146,7 @@ class FormResource( MongoDBResource ):
         # authentication = ApiTokenAuthentication()
 
         # TODO: Authorize based on sharing preferences.
-        authorization = FormAuthorization()
+        authorization = RepoAuthorization()
 
         # Don't include resource uri
         include_resource_uri = False

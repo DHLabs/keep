@@ -34,7 +34,7 @@ $ ->
 
             # Begin render when the model is finished fetching from the server
             @listenTo( @model, 'change', @render )
-            @model.fetch( { url: "/api/v1/forms/" + @form_id + "/?user=admin&key=35ec69714b23a33e79b0d859f51fa458&format=json" } )
+            @model.fetch( { url: "/api/v1/repos/" + @form_id + "/?user=admin&key=35ec69714b23a33e79b0d859f51fa458&format=json" } )
 
             @
 

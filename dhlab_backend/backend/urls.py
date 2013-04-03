@@ -2,13 +2,13 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
-from backend.api import FormResource, DataResource
+from backend.api import RepoResource, DataResource
 from backend.xforms.urls import openrosa_urls
 
 # Register resources to make API available
 from tastypie.api import Api
 v1_api = Api( api_name='v1' )
-v1_api.register( FormResource() )
+v1_api.register( RepoResource() )
 v1_api.register( DataResource() )
 
 # User views URLs
