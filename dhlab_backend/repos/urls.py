@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 
 ## Webform/Data submission ##
-urlpatterns = patterns( 'surveys.views',
+urlpatterns = patterns( 'repos.views',
 
     # Create new data repository
     url( r'^repo/new/$', 'new_repo', name='repo_new' ),
@@ -20,11 +20,11 @@ urlpatterns = patterns( 'surveys.views',
     url( r'^forms/webform/(?P<form_id>\w+)/$', 'webform',
          name='form_webform' ),
 
-    # Data Visualization
-    url( r'^(?P<username>\w+)/(?P<form_id>\w+)/$', 'visualize',
-         name='form_visualize' ),
-
     url( r'^forms/viz/map_visualize/$', 'map_visualize',
          name='map_visualize' ),
+
+    # View data repository
+    url( r'^(?P<username>\w+)/(?P<form_id>\w+)/$', 'visualize',
+         name='form_visualize' ),
 
 )

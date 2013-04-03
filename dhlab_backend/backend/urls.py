@@ -32,7 +32,7 @@ urlpatterns += patterns( '', url(r'^api/', include( v1_api.urls ) ) )
 urlpatterns += patterns( '', url( r'^accounts/',
                                   include( 'backend.registration_urls' ) ) )
 
-urlpatterns += patterns( '', url( r'', include( 'surveys.urls' ) ) )
+urlpatterns += patterns( '', url( r'', include( 'repos.urls' ) ) )
 
 
 # Handle the ODKCollect APIs

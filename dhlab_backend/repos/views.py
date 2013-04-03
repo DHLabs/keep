@@ -67,7 +67,7 @@ def new_repo( request ):
     else:
         form = NewRepoForm()
 
-    return render_to_response( 'repo/new.html', { 'form': form },
+    return render_to_response( 'new.html', { 'form': form },
                                context_instance=RequestContext(request) )
 
 
@@ -121,7 +121,7 @@ def webform( request, form_id ):
         will handle rendering and submission of the final data to the server.
     '''
     data = db.survey.find_one( { '_id': ObjectId( form_id ) } )
-    return render_to_response( 'forms/get.html',
+    return render_to_response( 'get.html',
                                { 'form': data,
                                  # Convert the form id to a string for easy
                                  # access
@@ -134,7 +134,7 @@ def visualize( request, username, form_id ):
     user = User.objects.get(username=username)
 
     data = db.survey_data.find( {'survey': ObjectId( form_id )} )
-    form = db.survey.find_one( { '_id': ObjectId( form_id ), 'user': user.id } )
+    form = db.survey.find_one({ '_id': ObjectId( form_id ), 'user': user.id })
 
     if form is None:
         return HttpResponse( status=404 )
