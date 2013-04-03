@@ -23,7 +23,7 @@ def delete_form( request, form_id ):
     db.survey.remove( { '_id': ObjectId( form_id ) } )
     db.survey_data.remove( { 'survey': ObjectId( form_id ) } )
 
-    return HttpResponseRedirect( '/dashboard' )
+    return HttpResponseRedirect( '/' )
 
 
 @csrf_exempt

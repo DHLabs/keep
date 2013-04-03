@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse, HttpResponseNotAllowed
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils import simplejson
 
@@ -47,7 +47,7 @@ def submission( request, username ):
 
 def home( request ):
     if request.user.username:
-        return HttpResponseRedirect( '/dashboard' )
+        return HttpResponseRedirect( '/%s' % ( request.user.username ) )
     else:
         return HttpResponseRedirect( '/accounts/login' )
 
@@ -110,7 +110,10 @@ def resend_activation( request ):
 
 
 @login_required
-def dashboard( request ):
+def user_dashboard( request, username ):
+
+    user = get_object_or_404( User, username=username )
+
     # Handle XForm upload
     if request.method == 'POST':
 
@@ -140,7 +143,7 @@ def dashboard( request ):
         form = UploadXForm()
 
     # Grab a list of forms uploaded by the user
-    user_forms = db.survey.find( { 'user': request.user.id } )
+    user_forms = db.survey.find( { 'user': user.id } )
 
     # TODO: Find better way of converting _id to mongo_id
     user_forms = [ xform for xform in user_forms ]

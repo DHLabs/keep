@@ -17,11 +17,12 @@ urlpatterns = patterns( 'backend.views',
     # Basic index page
     url( r'^$', 'home', name='home' ),
 
-    # User dashboard
-    url( r'^dashboard', 'dashboard', name='dashboard' ),
-
     # User settings
-    url( r'^settings', 'settings', name='settings' ),
+    url( r'^settings/$', 'settings', name='settings' ),
+
+    # User dashboard
+    url( r'^(?P<username>\w+)$', 'user_dashboard', name='user_dashboard' ),
+
 )
 
 # Add API urls
@@ -32,6 +33,7 @@ urlpatterns += patterns( '', url( r'^accounts/',
                                   include( 'backend.registration_urls' ) ) )
 
 urlpatterns += patterns( '', url( r'', include( 'surveys.urls' ) ) )
+
 
 # Handle the ODKCollect APIs
 urlpatterns += openrosa_urls

@@ -20,7 +20,7 @@
 					</tfoot>
 				</table>
 				{% csrf_token %}
-				<input type="hidden" name="next" value="/dashboard" />
+				<input type="hidden" name="next" value="/" />
 			</form>
 			<p>
 				{% url "resend_activation" as resend_activation_url %}
