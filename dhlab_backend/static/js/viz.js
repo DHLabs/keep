@@ -107,7 +107,12 @@ DataView = (function(_super) {
     var _this = this;
     $.post("/repo/share/" + this.form.form_id + "/", {}, function(response) {
       if (response.success) {
-        return $(event.currentTarget).attr('checked', response["public"]);
+        $(event.currentTarget).attr('checked', response["public"]);
+        if (response["public"]) {
+          return $('#privacy').html('<img src=\'/static/img/public_repo.png\'>&nbsp;PUBLIC');
+        } else {
+          return $('#privacy').html('<img src=\'/static/img/private_repo.png\'>&nbsp;PRIVATE');
+        }
       }
     });
     return this;

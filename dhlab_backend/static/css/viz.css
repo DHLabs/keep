@@ -4,6 +4,9 @@
 .viz-active {
   display: block !important; }
 
+#privacy {
+  margin-top: 10px; }
+
 #line .axis path, #line .axis line {
   fill: none;
   stroke: #000; }

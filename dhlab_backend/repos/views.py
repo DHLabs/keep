@@ -134,19 +134,19 @@ def visualize( request, username, form_id ):
     user = User.objects.get(username=username)
 
     data = db.survey_data.find( {'survey': ObjectId( form_id )} )
-    form = db.survey.find_one({ '_id': ObjectId( form_id ), 'user': user.id })
+    repo = db.survey.find_one({ '_id': ObjectId( form_id ), 'user': user.id })
 
-    if form is None:
+    if repo is None:
         return HttpResponse( status=404 )
 
     # Check to see if the user has access to view this survey
-    if not form.get( 'public', False ):
-        if request.user.id is None or request.user.id != form[ 'user' ]:
+    if not repo.get( 'public', False ):
+        if request.user.id is None or request.user.id != repo[ 'user' ]:
             return HttpResponse( 'Unauthorized', status=401 )
 
     return render_to_response( 'visualize.html',
-                               { 'survey': form,
-                                 'sid': form[ '_id' ],
+                               { 'repo': repo,
+                                 'sid': repo[ '_id' ],
                                  'data': json.dumps( dehydrate_survey(data) ),
                                  'account': user},
                                context_instance=RequestContext(request) )

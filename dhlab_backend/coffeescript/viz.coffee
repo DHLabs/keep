@@ -65,6 +65,11 @@ class DataView extends Backbone.View
         $.post( "/repo/share/#{@form.form_id}/", {}, ( response ) =>
             if response.success
                 $( event.currentTarget ).attr( 'checked', response.public )
+
+                if response.public
+                    $( '#privacy' ).html( '<img src=\'/static/img/public_repo.png\'>&nbsp;PUBLIC' )
+                else
+                    $( '#privacy' ).html( '<img src=\'/static/img/private_repo.png\'>&nbsp;PRIVATE' )
         )
 
         @

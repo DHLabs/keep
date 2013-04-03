@@ -46,11 +46,20 @@
 <div class='container'>
 	<div class='row'>
 		<div class='span12'>
+			<div class='pull-right alert' id='privacy'>
+				{% if repo.public %}
+					<img src='/static/img/public_repo.png'>
+					PUBLIC
+				{% else %}
+					<img src='/static/img/private_repo.png'>
+					PRIVATE
+				{% endif %}
+			</div>
 			<h3>
 				<a href='/{{ account.username }}'>{{ account.username }}</a> /
 				<div class='btn-group'>
 					<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
-						{{ survey.name }}
+						{{ repo.name }}
 						<span class='caret'></span>
 					</a>
 					<ul class='dropdown-menu'>
@@ -67,9 +76,9 @@
 					</ul>
 				</div>
 			</h3>
-			{% if survey.description %}
+			{% if repo.description %}
 			<div class='well well-small'>
-				{{ survey.description }}
+				{{ repo.description }}
 			</div>
 			{% endif %}
 		</div>
@@ -141,7 +150,7 @@
 			</div>
 			<div class='span6'>
 				<label class='checkbox'>
-					<input id='sharing_toggle' type='checkbox' {% if survey.public %}checked='checked'{% endif %}>
+					<input id='sharing_toggle' type='checkbox' {% if repo.public %}checked='checked'{% endif %}>
 					Allow data sharing
 				</label>
 				<span class='help-block'>
