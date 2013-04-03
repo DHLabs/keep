@@ -10,10 +10,6 @@ from registration.models import RegistrationProfile
 from twofactor.models import UserAuthToken
 
 
-class UploadXForm( forms.Form ):
-    file  = forms.FileField(label='XForm File')
-
-
 class ResendActivationForm( forms.Form ):
     email = forms.EmailField(widget=forms.TextInput())
 

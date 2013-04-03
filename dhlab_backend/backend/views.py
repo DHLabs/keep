@@ -2,7 +2,7 @@ from bson import ObjectId
 
 from backend.db import db, encrypt_survey
 
-from backend.forms import RegistrationFormUserProfile, UploadXForm
+from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
 
 from datetime import datetime
@@ -19,8 +19,6 @@ from django.utils import simplejson
 from registration.models import RegistrationProfile
 
 from twofactor.models import UserAPIToken
-
-from pyxform.xls2json import SurveyReader
 
 
 def submission( request, username ):
@@ -111,40 +109,13 @@ def resend_activation( request ):
 
 @login_required
 def user_dashboard( request, username ):
+    '''
+        Dashboard seen when a user signs in or views another user's profile.
 
+        The dashboard contains links to a users the private/public data repos.
+        Private repos are only shown if the user has permission to view them.
+    '''
     user = get_object_or_404( User, username=username )
-
-    # Handle XForm upload
-    if request.method == 'POST':
-
-        form = UploadXForm( request.POST, request.FILES )
-
-        # Check for a valid XForm and parse the file!
-        if form.is_valid():
-
-            # Parse the file and store into our database
-            try:
-                survey = SurveyReader( request.FILES[ 'file' ] )
-
-                if len( survey._warnings ) > 0:
-                    print 'Warnings parsing xls file!'
-
-                data = survey.to_json_dict()
-
-                # Is this form public?
-                data[ 'public' ]    = False
-
-                # Store who uploaded this form
-                data[ 'user' ]      = request.user.id
-                # Store when this form was uploaded
-                data[ 'uploaded' ]  = datetime.now()
-
-                db.survey.insert( data )
-
-            except Exception as e:
-                print e
-    else:
-        form = UploadXForm()
 
     # Grab a list of forms uploaded by the user
     user_forms = db.survey.find( { 'user': user.id } )
@@ -163,8 +134,7 @@ def user_dashboard( request, username ):
                                         .count()
 
     return render_to_response( 'dashboard.html',
-                               { 'form': form,
-                                 'user_forms': user_forms,
+                               { 'user_forms': user_forms,
                                  'account': user },
                                context_instance=RequestContext(request) )
 

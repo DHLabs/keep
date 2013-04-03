@@ -29,20 +29,8 @@
 			<a href='/{{ user.username }}'>{{ account.username }}</a>
 		</h3>
 		<div>
-			<form action='{% url "user_dashboard" user.username %}' method='post' enctype='multipart/form-data'>
-				<h4>XForm Upload</h4>
-				{% csrf_token %}
-				{{ form.file }}
-				<button type='submit' class='btn btn-primary'>Upload!</button>
-			</form>
-		</div>
-		<hr/>
-		<div>
 			<h4>Recent Submissions</h4>
 			<div id='submissions_feed'></div>
-		</div>
-		<div>
-			<h4>
 		</div>
 	</div>
 	<div class='span8'>
@@ -50,7 +38,14 @@
 			<thead>
 				<tr>
 					<td colspan='4' style='background-color:#EEE;'>
-						<h4>Data Repositories</h4>
+						<h4>
+							<div class='pull-right'>
+								<a href='/repo/new' class='btn btn-small'>
+									New Repository
+								</a>
+							</div>
+							Data Repositories
+						</h4>
 					</td>
 				</tr>
 			</thead>

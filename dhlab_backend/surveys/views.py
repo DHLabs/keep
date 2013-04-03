@@ -1,7 +1,10 @@
 import json
+
 from bson import ObjectId
+from datetime import datetime
 
 from django.contrib.auth.models import User
+from django.forms.util import ErrorList
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -9,6 +12,63 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
 from backend.db import db, dehydrate_survey
+
+from pyxform.xls2json import SurveyReader
+
+from .forms import NewRepoForm
+
+
+def new_repo( request ):
+    # Handle XForm upload
+    if request.method == 'POST':
+
+        form = NewRepoForm( request.POST, request.FILES )
+
+        # Check for a valid XForm and parse the file!
+        if form.is_valid():
+
+            # Check that this form name isn't already taken by the user
+            form_exists = db.survey.find( { 'name': form.cleaned_data['name'],
+                                            'user': request.user.id } )
+
+            if form_exists is not None:
+                errors = form._errors.setdefault( 'name', ErrorList() )
+                errors.append( 'Repository already exists with this name' )
+            else:
+                # Parse the file and store into our database
+                survey = SurveyReader( request.FILES[ 'xform_file' ] )
+
+                if len( survey._warnings ) > 0:
+                    print 'Warnings parsing xls file!'
+
+                data = survey.to_json_dict()
+
+                # Basic form name/description
+                data[ 'name' ] = form.cleaned_data[ 'name' ]
+                data[ 'description' ] = form.cleaned_data[ 'desc' ]
+
+                # Needed for xform formatting
+                data[ 'title' ]       = form.cleaned_data[ 'name' ]
+                data[ 'id_string' ]   = form.cleaned_data[ 'name' ]
+
+                # Is this form public?
+                data[ 'public' ] = form.cleaned_data[ 'privacy' ] == 'public'
+
+                # Store who uploaded this form
+                data[ 'user' ]      = request.user.id
+
+                # Store when this form was uploaded
+                data[ 'uploaded' ]  = datetime.now()
+
+                #db.survey.insert( data )
+
+                return HttpResponseRedirect( '/' )
+
+    else:
+        form = NewRepoForm()
+
+    return render_to_response( 'repo/new.html', { 'form': form },
+                               context_instance=RequestContext(request) )
 
 
 def delete_form( request, form_id ):

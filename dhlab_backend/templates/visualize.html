@@ -67,6 +67,11 @@
 					</ul>
 				</div>
 			</h3>
+			{% if survey.description %}
+			<div class='well well-small'>
+				{{ survey.description }}
+			</div>
+			{% endif %}
 		</div>
 	</div>
 </div>

@@ -3,6 +3,9 @@ from django.conf.urls import patterns, url
 ## Webform/Data submission ##
 urlpatterns = patterns( 'surveys.views',
 
+    # Create new data repository
+    url( r'^repo/new/$', 'new_repo', name='repo_new' ),
+
     # Delete form
     url( r'^forms/delete/(?P<form_id>\w+)/$',
          'delete_form',
