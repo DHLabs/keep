@@ -7,7 +7,7 @@
 <script type='text/javascript' src='{% static "/static/js/vendor/underscore-1.4.4.js" %}'></script>
 <script type='text/javascript' src='{% static "/static/js/vendor/moment.min.js" %}'></script>
 <script type='text/javascript' src='{% static "/static/js/dashboard.js" %}'></script>
-<script id='user' type='text/html'>{{ user.username }}</script>
+<script id='user' type='text/html'>{{ account.username }}</script>
 <script id='submission_feed_tmpl' type='text/html'>
 	<div style='border-bottom: 1px solid #EEE;padding-bottom:4px;margin-bottom:4px;'>
 		<div>
@@ -58,7 +58,7 @@
 					</tr>
 				{% endif %}
 				{% for repo in user_forms %}
-					{% if xform.public or user.username == account.username %}
+					{% if repo.public or user.username == account.username %}
 					<tr>
 						<td style='width:32px;text-align:center;'>
 							{% if repo.public %}
