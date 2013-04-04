@@ -113,6 +113,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'backend',
+    'openrosa',
     'repos',
     'twofactor',                # Needed to harden login/database
     'registration',             # Needed for user signup

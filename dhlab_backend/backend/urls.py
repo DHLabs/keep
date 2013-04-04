@@ -3,7 +3,6 @@ from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from backend.api import RepoResource, DataResource
-from backend.xforms.urls import openrosa_urls
 
 # Register resources to make API available
 from tastypie.api import Api
@@ -36,7 +35,7 @@ urlpatterns += patterns( '', url( r'', include( 'repos.urls' ) ) )
 
 
 # Handle the ODKCollect APIs
-urlpatterns += openrosa_urls
+urlpatterns += patterns( '', url( r'', include( 'openrosa.urls' ) ) )
 
 # Handle static files on local dev machine
 if settings.DEBUG:

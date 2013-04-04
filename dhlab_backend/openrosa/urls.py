@@ -1,5 +1,5 @@
 '''
-    backend.xforms.openrosa_urls.py
+    openrosa.urls.py
 
     Contains URL which map from the fantastic and sensible ODKCollect/OpenROSA
     API to our RESTful API. Since redirects only work for GET requests, any
@@ -8,23 +8,21 @@
 
     @author Andrew Huynh
 '''
-from django.conf.urls import url
+from django.conf.urls import patterns, url
 
-openrosa_urls = [
+
+urlpatterns = patterns( 'openrosa.views',
 
     # Return a list of forms uploaded/shared to the specified user
-    url( r'^bs/(?P<username>\w+)/formList$',
-            'backend.xforms.formlist' ),
+    url( r'^bs/(?P<username>\w+)/formList$', 'formlist' ),
 
-    url( r'^bs/(?P<username>\w+)/submission', 'backend.xforms.views.xml_submission'),
+    url( r'^bs/(?P<username>\w+)/submission', 'xml_submission'),
 
     # Returns a list of submissions for a specified form & user
     url( r'^bs/(?P<username>\w+)/forms/(?P<form_id>[^/]+)/submission/(?P<sub_id>[^/]+)$',
-            'backend.xforms.submission_detail' ),
+         'submission_detail' ),
 
-    #Adds the submissions
-    #url( r'^bs/(?P<username>\w+)/submission', 'backend.views.submission'),
-]
+)
 
 # # odk data urls
 # url(r"^submission$", 'odk_logger.views.submission'),
@@ -39,4 +37,3 @@ openrosa_urls = [
 # url(r"^(?P<username>\w+)/forms/(?P<id_string>[^/]+)/form\.json", 'odk_logger.views.download_jsonform', name="download_jsonform"),
 # url(r"^(?P<username>\w+)/delete/(?P<id_string>[^/]+)/$", 'odk_logger.views.delete_xform'),
 # url(r"^(?P<username>\w+)/(?P<id_string>[^/]+)/toggle_downloadable/$", 'odk_logger.views.toggle_downloadable'),
-

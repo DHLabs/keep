@@ -1,15 +1,37 @@
 import json
-
-from backend.db import db, encrypt_survey
-from backend.xforms import validate_and_format
-
+import urllib
 from datetime import datetime
 
+from backend.db import db, encrypt_survey
+
+from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseNotAllowed
+from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from lxml import etree
+from openrosa import validate_and_format
+
+
+def formlist( request, username ):
+    api_url = reverse( 'api_dispatch_list',
+                       kwargs={'resource_name': 'repos',
+                               'api_name': 'v1'} )
+
+    key     = request.GET.get( 'key', None )
+    format  = request.GET.get( 'format', 'xform' )
+
+    api_url = '%s?%s' % ( api_url, urllib.urlencode({
+                         'user': username,
+                         'key': key,
+                         'format': format }) )
+
+    return redirect( api_url )
+
+
+def submission_detail( request ):
+    pass
 
 
 @csrf_exempt

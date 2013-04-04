@@ -2,7 +2,7 @@ import pymongo
 
 from backend.db import db, MongoDBResource, Document, dehydrate_survey
 from backend.serializers import CSVSerializer
-from backend.xforms.serializer import XFormSerializer
+from openrosa.serializer import XFormSerializer
 
 from bson import ObjectId
 
