@@ -71,30 +71,30 @@ def new_repo( request ):
                                context_instance=RequestContext(request) )
 
 
-def delete_form( request, form_id ):
+def delete_repo( request, repo_id ):
 
-    survey = db.survey.find_one( { '_id': ObjectId( form_id ) },
+    survey = db.survey.find_one( { '_id': ObjectId( repo_id ) },
                                  { 'user': True } )
 
     if survey[ 'user' ] != request.user.id:
         return HttpResponse( 'Unauthorized', status=401 )
 
-    db.survey.remove( { '_id': ObjectId( form_id ) } )
-    db.survey_data.remove( { 'survey': ObjectId( form_id ) } )
+    db.survey.remove( { '_id': ObjectId( repo_id ) } )
+    db.survey_data.remove( { 'survey': ObjectId( repo_id ) } )
 
     return HttpResponseRedirect( '/' )
 
 
 @csrf_exempt
 @require_POST
-def toggle_public( request, form_id ):
+def toggle_public( request, repo_id ):
     '''
         Toggle's a data repo's "publicness". Only the person who owns the form
         is allowed to make such changes to the form settings.
     '''
 
     # Find a survey, only looking for the user field
-    survey = db.survey.find_one( { '_id': ObjectId( form_id ) },
+    survey = db.survey.find_one( { '_id': ObjectId( repo_id ) },
                                  { 'user': True, 'public': True } )
 
     # Check if the owner of the survey matches the user who is logged in
@@ -106,7 +106,7 @@ def toggle_public( request, form_id ):
     else:
         survey[ 'public' ] = True
 
-    db.survey.update( { '_id': ObjectId( form_id ) },
+    db.survey.update( { '_id': ObjectId( repo_id ) },
                       { '$set': { 'public': survey[ 'public' ] } } )
 
     return HttpResponse( json.dumps( { 'success': True,
@@ -115,12 +115,12 @@ def toggle_public( request, form_id ):
 
 
 @require_GET
-def webform( request, form_name ):
+def webform( request, repo_name ):
     '''
         Simply grab the survey data and send it on the webform. The webform
         will handle rendering and submission of the final data to the server.
     '''
-    repo = db.survey.find_one( { 'name': form_name } )
+    repo = db.survey.find_one( { 'name': repo_name } )
 
     if repo is None:
         return HttpResponse( status=404 )
@@ -133,11 +133,11 @@ def webform( request, form_name ):
 
 
 @require_GET
-def visualize( request, username, form_name ):
+def repo_viz( request, username, repo_name ):
 
     user = User.objects.get(username=username)
 
-    repo = db.survey.find_one({ 'name': form_name, 'user': user.id })
+    repo = db.survey.find_one({ 'name': repo_name, 'user': user.id })
     data = db.survey_data.find( {'survey': ObjectId( repo[ '_id' ] )} )
 
     if repo is None:

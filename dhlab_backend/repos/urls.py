@@ -8,22 +8,22 @@ urlpatterns = patterns( 'repos.views',
          name='repo_new' ),
 
     # Delete form
-    url( r'^repo/delete/(?P<form_id>\w+)/$', 'delete_form',
-         name='form_delete'),
+    url( r'^repo/delete/(?P<repo_id>\w+)/$', 'delete_repo',
+         name='repo_delete'),
 
     # Toggle form publicness
-    url( r'^repo/share/(?P<form_id>\w+)/$', 'toggle_public',
-         name='form_toggle_public' ),
+    url( r'^repo/share/(?P<repo_id>\w+)/$', 'toggle_public',
+         name='repo_toggle_public' ),
 
     # Web form
-    url( r'^repo/webform/(?P<form_name>\w+)/$', 'webform',
-         name='form_webform' ),
+    url( r'^repo/webform/(?P<repo_name>\w+)/$', 'webform',
+         name='repo_webform' ),
 
     url( r'^repo/viz/map_visualize/$', 'map_visualize',
          name='map_visualize' ),
 
     # View data repository
-    url( r'^(?P<username>\w+)/(?P<form_name>\w+)/$', 'visualize',
-         name='form_visualize' ),
+    url( r'^(?P<username>\w+)/(?P<repo_name>\w+)/$', 'repo_viz',
+         name='repo_visualize' ),
 
 )
