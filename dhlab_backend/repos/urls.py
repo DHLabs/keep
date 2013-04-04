@@ -16,14 +16,14 @@ urlpatterns = patterns( 'repos.views',
          name='form_toggle_public' ),
 
     # Web form
-    url( r'^repo/webform/(?P<form_id>\w+)/$', 'webform',
+    url( r'^repo/webform/(?P<form_name>\w+)/$', 'webform',
          name='form_webform' ),
 
     url( r'^repo/viz/map_visualize/$', 'map_visualize',
          name='map_visualize' ),
 
     # View data repository
-    url( r'^(?P<username>\w+)/(?P<form_id>\w+)/$', 'visualize',
+    url( r'^(?P<username>\w+)/(?P<form_name>\w+)/$', 'visualize',
          name='form_visualize' ),
 
 )

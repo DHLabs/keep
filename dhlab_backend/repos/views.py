@@ -115,26 +115,30 @@ def toggle_public( request, form_id ):
 
 
 @require_GET
-def webform( request, form_id ):
+def webform( request, form_name ):
     '''
         Simply grab the survey data and send it on the webform. The webform
         will handle rendering and submission of the final data to the server.
     '''
-    data = db.survey.find_one( { '_id': ObjectId( form_id ) } )
+    repo = db.survey.find_one( { 'name': form_name } )
+
+    if repo is None:
+        return HttpResponse( status=404 )
+
     return render_to_response( 'get.html',
-                               { 'form': data,
+                               { 'form': repo,
                                  # Convert the form id to a string for easy
                                  # access
-                                 'form_id': str( data[ '_id' ] ) } )
+                                 'form_id': str( repo[ '_id' ] ) } )
 
 
 @require_GET
-def visualize( request, username, form_id ):
+def visualize( request, username, form_name ):
 
     user = User.objects.get(username=username)
 
-    data = db.survey_data.find( {'survey': ObjectId( form_id )} )
-    repo = db.survey.find_one({ '_id': ObjectId( form_id ), 'user': user.id })
+    repo = db.survey.find_one({ 'name': form_name, 'user': user.id })
+    data = db.survey_data.find( {'survey': ObjectId( repo[ '_id' ] )} )
 
     if repo is None:
         return HttpResponse( status=404 )
