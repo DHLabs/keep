@@ -6,7 +6,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.forms.util import ErrorList
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
@@ -135,7 +135,7 @@ def webform( request, repo_name ):
 @require_GET
 def repo_viz( request, username, repo_name ):
 
-    user = User.objects.get(username=username)
+    user = get_object_or_404( User, username=username )
 
     repo = db.survey.find_one({ 'name': repo_name, 'user': user.id })
     data = db.survey_data.find( {'survey': ObjectId( repo[ '_id' ] )} )
