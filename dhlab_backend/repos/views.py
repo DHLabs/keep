@@ -31,7 +31,7 @@ def new_repo( request ):
             form_exists = db.survey.find( { 'name': form.cleaned_data['name'],
                                             'user': request.user.id } )
 
-            if form_exists is not None:
+            if form_exists.count() != 0:
                 errors = form._errors.setdefault( 'name', ErrorList() )
                 errors.append( 'Repository already exists with this name' )
             else:
@@ -60,7 +60,7 @@ def new_repo( request ):
                 # Store when this form was uploaded
                 data[ 'uploaded' ]  = datetime.now()
 
-                #db.survey.insert( data )
+                db.survey.insert( data )
 
                 return HttpResponseRedirect( '/' )
 

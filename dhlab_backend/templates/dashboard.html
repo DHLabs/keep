@@ -57,28 +57,33 @@
 						</td>
 					</tr>
 				{% endif %}
-				{% for xform in user_forms %}
+				{% for repo in user_forms %}
 					{% if xform.public or user.username == account.username %}
 					<tr>
 						<td style='width:32px;text-align:center;'>
-							{% if xform.public %}
+							{% if repo.public %}
 								<img src='/static/img/public_repo.png' alt='Public'>
 							{% else %}
 								<img src='/static/img/private_repo.png' alt='Private'>
 							{% endif %}
 						</td>
 						<td>
-							<a href='/{{ account.username }}/{{ xform.name }}'>
-								{{ xform.name }}
+							<a href='/{{ account.username }}/{{ repo.name }}'>
+								{{ repo.name }}
 							</a>
+							{% if repo.description %}
+							<span class='help-block'>
+								{{ repo.description|slice:":42" }}...
+							</span>
+							{% endif %}
 						</td>
 						<td style='width:102px;text-align:center;'>
-							<a href='/repo/webform/{{ xform.name }}' class='btn btn-small'>
+							<a href='/repo/webform/{{ repo.name }}' class='btn btn-small'>
 								<i class='icon-pencil'></i> Web Form
 							</a>
 						</td>
 						<td style='width:64px;text-align:right;'>
-							{{ xform.submission_count }} <i class='icon-file'></i>
+							{{ repo.submission_count }} <i class='icon-file'></i>
 						</td>
 					</tr>
 					{% endif %}
