@@ -54,6 +54,3 @@ You may now log in to the system using the following credentials along with the
 
 **Password:** test
 
-
-# To access to the map vis_team is working on, use the url /map_visualize
-

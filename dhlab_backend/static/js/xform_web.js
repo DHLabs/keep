@@ -3,12 +3,8 @@ var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 $(function() {
-  var App, item_dict, mobileView, renderedForm, swipeFrame, xFormModel, xFormView, _data, _fieldsets, _schema;
+  var App, mobileView, renderedForm, swipeFrame, xFormModel, xFormView;
   mobileView = false;
-  _fieldsets = [];
-  _schema = {};
-  _data = {};
-  item_dict = {};
   swipeFrame = null;
   renderedForm = null;
   xFormModel = (function(_super) {
@@ -35,13 +31,24 @@ $(function() {
       return xFormView.__super__.constructor.apply(this, arguments);
     }
 
-    xFormView.prototype.el = $('#xform_view');
+    xFormView.prototype.el = $('#webform');
 
     xFormView.prototype.model = new xFormModel();
 
     xFormView.prototype.events = {
-      'click #submit-xform': 'validate'
+      'click #submit-xform': 'validate',
+      'click #form_sidebar > li': 'switch_question',
+      'click #next_btn': 'next_question',
+      'click #prev_btn': 'prev_question'
     };
+
+    xFormView.prototype._fieldsets = [];
+
+    xFormView.prototype._data = [];
+
+    xFormView.prototype._schema = {};
+
+    xFormView.prototype.item_dict = {};
 
     xFormView.prototype.initialize = function() {
       this.form_id = $('#form_id').html();
@@ -266,11 +273,7 @@ $(function() {
     };
 
     xFormView.prototype.render = function() {
-      if (mobileView) {
-        this.loadMobileForm();
-      } else {
-        this.loadForm();
-      }
+      this.loadForm();
       return this;
     };
 
@@ -290,11 +293,9 @@ $(function() {
         _this = this;
       schema_dict = {
         help: child.hint,
-        title: child.label
+        title: child.label,
+        is_field: true
       };
-      if (_fieldsets.length === 0 && mobileView) {
-        schema_dict['template'] = 'firstField';
-      }
       if ((_ref = child.type) === 'string' || _ref === 'text') {
         schema_dict['type'] = 'Text';
       } else if ((_ref1 = child.type) === 'decimal' || _ref1 === 'int' || _ref1 === 'integer') {
@@ -310,12 +311,13 @@ $(function() {
         schema_dict['type'] = 'Checkbox';
       } else if (child.type === 'note') {
         schema_dict['type'] = 'Text';
-        schema_dict['template'] = 'noteField';
+        schema_dict['template'] = _.template('<div id="<%= editorId %>_field" class="control-group"><strong>Note: </strong><%= title %></div>');
+        schema_dict['is_field'] = false;
       } else if (child.type === 'datetime') {
         schema_dict['type'] = 'DateTime';
       } else if (child.type === 'photo') {
         schema_dict['type'] = 'Text';
-        schema_dict['template'] = 'photo';
+        schema_dict['template'] = _.template("<div id='<%= editorId %>_field' class='control-group'><label for='<%= editorId %>'><%= title %></label><input type='file' accept='image/png'></input></div>");
       } else if (child.type === 'select all that apply') {
         schema_dict['type'] = 'Checkboxes';
         schema_dict['options'] = [];
@@ -327,7 +329,6 @@ $(function() {
         });
       } else if (child.type === 'group') {
         schema_dict['type'] = 'Text';
-        schema_dict['template'] = 'groupBegin';
         _.each(child.children, function(_child) {
           return _this.recursiveAdd(_child);
         });
@@ -335,10 +336,11 @@ $(function() {
           type: 'Text',
           help: child.hint,
           title: child.label,
-          template: 'groupEnd'
+          template: 'groupEnd',
+          is_field: false
         };
-        item_dict[child.name + '-end'] = schema_dict;
-        _fieldsets.push(child.name + '-end');
+        this.item_dict[child.name + '-end'] = schema_dict;
+        this._fieldsets.push(child.name + '-end');
         return this;
       } else if (child.type === 'select one') {
         schema_dict['type'] = 'Select';
@@ -351,142 +353,104 @@ $(function() {
         });
       } else {
         schema_dict['type'] = 'Text';
-        schema_dict['template'] = 'unsupportedField';
+        schema_dict['template'] = _.template('<div id="<%= editorId %>_field" class="control-group"><label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label></div>');
       }
-      item_dict[child.name] = schema_dict;
-      _fieldsets.push(child.name);
-      _data[child.name] = child["default"];
-      return this;
-    };
-
-    xFormView.prototype.loadMobileForm = function() {
-      var _this = this;
-      _fieldsets = [];
-      _schema = {};
-      _data = {};
-      item_dict = {};
-      swipeFrame = null;
-      $(document).bind('touchmove', function(e) {
-        return e.preventDefault();
-      });
-      Backbone.Form.setTemplates({
-        fieldset: '<ul>{{fields}}</ul',
-        customForm: '<div id="slider2" class="swipe">{{fieldsets}}</div>',
-        field: '<li style="display:none;"><label for="{{id}}">{{title}}</label><div>{{editor}}</div><div>{{help}}</div></li>',
-        unsupportedField: '<li style="display:none;"><label for="{{id}}">{{title}}</label></li>',
-        firstField: '<li style="display:block;"><label for="{{id}}">{{title}}</label><div>{{editor}}</div><div>{{help}}</div></li>',
-        noteField: '<li style="display:none;"><label class="control-label" for="{{id}}">{{title}}</label></div></li>',
-        groupBegin: '<li style="display:none;"><div class="well"><div><strong>Group: </strong>{{title}}</div></div></li>',
-        groupEnd: '<li style="display:none;"><div><strong>Group End: </strong>{{title}}<hr></div></li>'
-      });
-      _.each(this.model.attributes.children, function(child) {
-        return _this.recursiveAdd(child);
-      });
-      renderedForm = new Backbone.Form({
-        template: 'customForm',
-        schema: item_dict,
-        data: _data,
-        fields: _fieldsets
-      }).render();
-      $('#formDiv').html('');
-      $('#formDiv').html(renderedForm.el);
-      swipeFrame = new Swipe(document.getElementById('slider2'));
+      this.item_dict[child.name] = schema_dict;
+      this._fieldsets.push(child.name);
+      this._data[child.name] = child["default"];
       return this;
     };
 
     xFormView.prototype.loadForm = function() {
-      var answers, child, relevance,
-        _this = this;
-      _fieldsets = [];
-      _schema = {};
-      _data = {};
-      item_dict = {};
-      swipeFrame = null;
-      Backbone.Form.setTemplates({
-        unsupportedField: '<div class="control-group"><label for="{{id}}"><strong>Unsupported:</strong> {{title}}</label></div>',
-        noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>',
-        groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>',
-        groupEnd: '<div><hr></div>',
-        photo: '<div class="control-group"><label for="{{id}}">{{title}}</label><input type="file" accept="image/*"></input></div></div>'
-      });
+      var _this = this;
       _.each(this.model.attributes.children, function(child) {
         return _this.recursiveAdd(child);
       });
       renderedForm = new Backbone.Form({
-        schema: item_dict,
-        data: _data,
-        fields: _fieldsets
+        schema: this.item_dict,
+        data: this._data,
+        fields: this._fieldsets
       }).render();
-      answers = renderedForm.getValue();
-      relevance = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.model.attributes.children;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          child = _ref[_i];
-          _results.push(child.name + ":" + this.isRelevant(child, answers));
-        }
-        return _results;
-      }).call(this);
-      $('#xform_debug').html(JSON.stringify(relevance));
-      $('#formDiv').html('');
       $('#formDiv').html(renderedForm.el);
+      $('#form_sidebar').html('');
+      _.each(this.item_dict, function(child, key) {
+        var element;
+        if (!child.is_field) {
+          return;
+        }
+        element = "<li id='" + key + "_tab' data-key='" + key + "'>";
+        if ($('#form_sidebar > li').length === 0) {
+          element = "<li id='" + key + "_tab' data-key='" + key + "' class='active'>";
+        }
+        element += "<a href='#'>" + child.title + "</a></li>";
+        return $('#form_sidebar').append(element);
+      });
+      $('.control-group').first().show();
+      return this;
+    };
+
+    xFormView.prototype.switch_question = function(element) {
+      var current_question, question, switch_question;
+      question = $(element.currentTarget).data('key');
+      current_question = $('#' + $('.active').data('key') + '_field');
+      switch_question = $("#" + question + "_field");
+      $('.active').removeClass('active');
+      $("#" + question + "_tab").addClass('active');
+      current_question.fadeOut('fast', function() {
+        return switch_question.fadeIn('fast');
+      });
+      return this;
+    };
+
+    xFormView.prototype.next_question = function() {
+      var form_info, question, question_index;
+      question = $('.active').data('key');
+      question_index = -1;
+      form_info = _.find(this.model.attributes.children, function(child) {
+        question_index += 1;
+        return child.name === question;
+      });
+      if (form_info.bind && form_info.bind.required === "yes") {
+        if (renderedForm.getValue()[question].length === 0) {
+          alert("Answer is required");
+          return this;
+        }
+      }
+      if (!this.passesConstraint(form_info, renderedForm.getValue())) {
+        alert("Answer doesn't pass constraint:" + form_info.bind.constraint);
+        return this;
+      }
+      if (question_index < this._fieldsets.length) {
+        question_index += 1;
+      }
+      if (question_index === 0) {
+        $('#prev_btn').hide();
+      } else {
+        $('#prev_btn').show();
+      }
+      $('#form_sidebar > li').eq(question_index).trigger('click');
+      return this;
+    };
+
+    xFormView.prototype.prev_question = function() {
+      var form_info, question, question_index;
+      question = $('.active').data('key');
+      question_index = -1;
+      form_info = _.find(this.model.attributes.children, function(child) {
+        question_index += 1;
+        return child.name === question;
+      });
+      if (question_index <= 0) {
+        return this;
+      }
+      question_index -= 1;
+      $('#next_btn').show();
+      $('#form_sidebar > li').eq(question_index).trigger('click');
       return this;
     };
 
     return xFormView;
 
   })(Backbone.View);
-  App = new xFormView();
-  return $(document).ready(function() {
-    var i, size;
-    i = -1;
-    size = 0;
-    $("#next").click(function() {
-      var child;
-      $("#submit-xform").hide();
-      size = $(".control-group").length;
-      $(".control-group").hide();
-      if (i === -1) {
-        i = i + 1;
-      } else if (App.passesConstraint(App.model.attributes.children[i], renderedForm.getValue())) {
-        child = App.model.attributes.children[i];
-        if (child.bind && child.bind.required && (renderedForm.getValue()[child.name] === "")) {
-          alert("Answer is required");
-        } else {
-          i = i + 1;
-          while (!App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())) {
-            i = i + 1;
-          }
-        }
-      } else {
-        alert("Answer doesn't pass constraint:" + App.model.attributes.children[i].bind.constraint);
-      }
-      $(".control-group").eq(i).show();
-      $("#prev").show();
-      if (i === size - 1) {
-        $("#next").hide();
-        return $("#submit-xform").show();
-      } else {
-        return $("#next").show();
-      }
-    });
-    $("#prev").click(function() {
-      $("#next").show();
-      $("#submit-xform").hide();
-      $(".control-group").hide();
-      i = i - 1;
-      while (!App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())) {
-        i = i - 1;
-      }
-      $(".control-group").eq(i).show();
-      if (i === 0) {
-        return $("#prev").hide();
-      }
-    });
-    return $("#submit-xform").click(function() {
-      alert("Thank you for your time!");
-      return window.location.replace("/");
-    });
-  });
+  return App = new xFormView();
 });

@@ -20,6 +20,11 @@ def restore_db():
     local( 'mongorestore --drop _data/dhlab-backup' )
 
 
+def clean():
+    '''Clean up project directory.'''
+    local( "find . -name '*.pyc' -delete" )
+
+
 def deploy():
     '''Deploy the backend to the server'''
     print green( 'Deploy to EC2 instance...' )

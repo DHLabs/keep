@@ -125,11 +125,13 @@ def webform( request, repo_name ):
     if repo is None:
         return HttpResponse( status=404 )
 
-    return render_to_response( 'get.html',
-                               { 'form': repo,
-                                 # Convert the form id to a string for easy
-                                 # access
-                                 'form_id': str( repo[ '_id' ] ) } )
+    repo_user = get_object_or_404( User, id=repo[ 'user' ] )
+
+    return render_to_response(  'get.html',
+                                { 'repo': repo,
+                                  'repo_user': repo_user,
+                                  'repo_id': str( repo[ '_id' ] ) },
+                                context_instance=RequestContext( request ) )
 
 
 @require_GET

@@ -1,54 +1,58 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block title %}
-Doknosis - {{ form.name }}
+{{ repo.name }} Web Entry
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static '/static/css/webform.css' %}">
 {% endblock %}
 
 {% block js %}
-<!--<div id='xform_debug' style='margin-top:16px;'></div>-->
-<script src="/static/js/vendor/json2.js"></script>
-<script src="/static/js/vendor/underscore.js"></script>
-<script src="/static/js/backbone-min.js"></script>
-<script src="/static/js/bootstrap.2.3.1.min.js"></script>
+<script id='form_id' type='text/html'>{{ repo_id }}</script>
+<script src="{% static '/static/js/vendor/json2.js' %}"></script>
+<script src="{% static '/static/js/vendor/underscore.js' %}"></script>
+<script src="{% static '/static/js/vendor/backbone-min.js' %}"></script>
+<script src="{% static '/static/js/vendor/bootstrap.2.3.1.min.js' %}"></script>
 
-<script src="/static/js/distribution/backbone-forms.min.js"></script>
-<script src="/static/js/distribution/editors/list.min.js"></script>
-<script src="/static/js/backbone-localstorage.js"></script>
-<script src='/static/js/swipe.min.js'></script>
+<script src="{% static '/static/js/vendor/forms/backbone-forms.min.js' %}"></script>
+<script src="{% static '/static/js/vendor/forms/editors/list.min.js' %}"></script>
+<script src="{% static '/static/js/vendor/forms/templates/bootstrap.js' %}"></script>
 
-<script src="/static/js/xform_web.js"></script>
+<script src="{% static '/static/js/vendor/backbone-localstorage.js' %}"></script>
+<script src="{% static '/static/js/vendor/swipe.min.js' %}"></script>
+
+<script src="{% static '/static/js/xform_web.js' %}"></script>
 {% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class="span3 sidebar">
-    <h1>Hey!</h1>
-    <p>stuff is over here!</p>
-  </div>
-  <div id="xform_view" class="span9">
-    <h1>Form: {{ form.name }}</h1>
-    <div id="formcontent" class="formbox">
-      <div class="row">
-	<div class="span10">
-	  <div id="formDiv"></div>
+<div class='container' id='webform'>
+	<div class='row'>
+		<div class='span12'>
+			<h2>
+				<a href='/{{ repo_user.username }}'>{{ repo_user.username }}</a>
+				/
+				{{ repo.name }}
+			</h2>
+		</div>
 	</div>
-      </div>
-      <div class='row'>
-	<div class='span8'>
-	  <a href="#" class='btn prevButton' id="prev">Previous</a>
-	  <a href="#" class='btn btn-primary pull-right nextButton' id="submit-xform">Submit Form</a>
-	  <a href="#" class='btn pull-right nextButton' id="next">Next</a>
-	  <!--<a href="#" class='btn btn-primary' id="getsize">Get Size</a>-->
+	<div class="row">
+		<div class='span3'>
+			<ul class='nav nav-pills nav-stacked' id='form_sidebar'></ul>
+		</div>
+	  	<div id="xform_view" class="span9">
+	    	<div id="form_fields" class="formbox">
+		  		<div id="formDiv"></div>
+	    	</div>
+	    	<div id='form_actions'>
+	    		<div class='pull-right'>
+	    			<a href="#" class='btn' id="next_btn">Next</a>
+	    			<a href='#' class='btn btn-success' style='display:none;'' id='submit_btn'>Submit</a>
+	    		</div>
+				<a href="#" class='btn' style='display:none;' id="prev_btn">Previous</a>
+			</div>
+	  	</div>
 	</div>
-	<!--<div class='span2 offset8 row'>
-	  <a href="#" class='btn btn-primary' id="next">Next</a>
-	  <a href="#" class='btn btn-primary' id="submit-xform">
-	    Submit Form
-	  </a>
-	</div>-->
-      </div>
-    </div>
-  </div>
 </div>
-<div id='form_id' style='display:none;'>{{ form_id }}</div>
 {% endblock %}

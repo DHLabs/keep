@@ -1,14 +1,17 @@
+# TODO
+#   - Handle xform bindings
+#       - Required
+#       - Constraints
+#       - etc
+#
+#
+
 $ ->
     mobileView = false
-    _fieldsets = []
-    _schema = {}
-    _data = {}
-    item_dict = {}
     swipeFrame = null
 
     # Rendered form values will be handled with this variable
     renderedForm = null
-
 
     class xFormModel extends Backbone.Model
 
@@ -20,13 +23,21 @@ $ ->
     class xFormView extends Backbone.View
 
         # The HTML element where the form will be rendered
-        el: $( '#xform_view' )
+        el: $( '#webform' )
 
         # Current form this view is representing
         model: new xFormModel()
 
         events:
-            'click #submit-xform': 'validate'
+            'click #submit-xform':      'validate'
+            'click #form_sidebar > li': 'switch_question'
+            'click #next_btn':          'next_question'
+            'click #prev_btn':          'prev_question'
+
+        _fieldsets: []
+        _data: []
+        _schema: {}
+        item_dict: {}
 
         initialize: ->
             # Grab the form_id from the page
@@ -265,13 +276,7 @@ $ ->
                         return false
 
         render: ->
-
-            #$( '#xform_debug' ).html( JSON.stringify( @model.attributes ) )
-
-            if mobileView
-                @loadMobileForm()
-            else
-                @loadForm()
+            @loadForm()
 
             @
 
@@ -292,10 +297,7 @@ $ ->
             schema_dict =
                 help: child.hint
                 title: child.label
-
-
-            if _fieldsets.length is 0 and mobileView
-                schema_dict['template'] = 'firstField'
+                is_field: true
 
 
             if child.type in [ 'string', 'text' ]
@@ -326,7 +328,8 @@ $ ->
             else if child.type is 'note'
 
                 schema_dict['type'] = 'Text'
-                schema_dict['template'] = 'noteField'
+                schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" class="control-group"><strong>Note: </strong><%= title %></div>' )
+                schema_dict['is_field'] = false
 
             else if child.type is 'datetime'
 
@@ -335,7 +338,7 @@ $ ->
             else if child.type is 'photo'
 
                 schema_dict['type'] = 'Text'
-                schema_dict['template'] = 'photo'
+                schema_dict['template'] = _.template( "<div id='<%= editorId %>_field' class='control-group'><label for='<%= editorId %>'><%= title %></label><input type='file' accept='image/png'></input></div>" )
 
             else if child.type is 'select all that apply'
 
@@ -352,7 +355,7 @@ $ ->
             else if child.type is 'group'
                 # this is a hack
                 schema_dict['type'] = 'Text'
-                schema_dict['template'] = 'groupBegin'
+                # schema_dict['template'] = 'groupBegin'
 
                 _.each( child.children, ( _child ) =>
                     @recursiveAdd( _child )
@@ -363,9 +366,10 @@ $ ->
                     help:       child.hint
                     title:      child.label
                     template:   'groupEnd'
+                    is_field:   false
 
-                item_dict[child.name + '-end'] = schema_dict
-                _fieldsets.push(child.name + '-end')
+                @item_dict[child.name + '-end'] = schema_dict
+                @_fieldsets.push(child.name + '-end')
 
                 return @
 
@@ -383,131 +387,117 @@ $ ->
 
             else
                 schema_dict['type']     = 'Text'
-                schema_dict['template'] = 'unsupportedField'
+                schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" class="control-group"><label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label></div>' )
 
-            item_dict[child.name] = schema_dict
-            _fieldsets.push( child.name )
-            _data[child.name] = child.default
-
-            @
-
-        loadMobileForm: () ->
-            _fieldsets = []
-            _schema = {}
-            _data = {}
-            item_dict = {}
-            swipeFrame = null
-
-            $( document ).bind( 'touchmove', ( e ) ->
-                e.preventDefault()
-            )
-
-            Backbone.Form.setTemplates(
-                fieldset: '<ul>{{fields}}</ul'
-                customForm: '<div id="slider2" class="swipe">{{fieldsets}}</div>'
-                field: '<li style="display:none;"><label for="{{id}}">{{title}}</label><div>{{editor}}</div><div>{{help}}</div></li>'
-                unsupportedField: '<li style="display:none;"><label for="{{id}}">{{title}}</label></li>'
-                firstField: '<li style="display:block;"><label for="{{id}}">{{title}}</label><div>{{editor}}</div><div>{{help}}</div></li>'
-                noteField: '<li style="display:none;"><label class="control-label" for="{{id}}">{{title}}</label></div></li>'
-                groupBegin: '<li style="display:none;"><div class="well"><div><strong>Group: </strong>{{title}}</div></div></li>'
-                groupEnd: '<li style="display:none;"><div><strong>Group End: </strong>{{title}}<hr></div></li>'
-            )
-
-            _.each( @model.attributes.children, ( child ) =>
-                @recursiveAdd( child )
-            )
-
-            renderedForm = new Backbone.Form(
-                template: 'customForm'
-                schema: item_dict
-                data: _data
-                fields: _fieldsets
-            ).render()
-
-            $('#formDiv').html( '' )
-            $('#formDiv').html( renderedForm.el )
-
-            swipeFrame = new Swipe( document.getElementById('slider2') )
+            @item_dict[child.name] = schema_dict
+            @_fieldsets.push( child.name )
+            @_data[child.name] = child.default
 
             @
+
 
         loadForm: () ->
-            _fieldsets = []
-            _schema = {}
-            _data = {}
-            item_dict = {}
-            swipeFrame = null
-
-            Backbone.Form.setTemplates(
-                unsupportedField: '<div class="control-group"><label for="{{id}}"><strong>Unsupported:</strong> {{title}}</label></div>'
-                noteField: '<div class="control-group"><strong>Note: </strong>{{title}}</div>'
-                groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
-                groupEnd: '<div><hr></div>'
-                photo: '<div class="control-group"><label for="{{id}}">{{title}}</label><input type="file" accept="image/*"></input></div></div>'
-            )
+            #     groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
+            #     groupEnd: '<div><hr></div>'
 
             _.each( @model.attributes.children, ( child ) =>
                 @recursiveAdd( child )
             )
 
             renderedForm = new Backbone.Form(
-                schema: item_dict
-                data:   _data
-                fields: _fieldsets
+                schema: @item_dict
+                data:   @_data
+                fields: @_fieldsets
             ).render()
 
-        #debugger
-            answers = renderedForm.getValue()
+            $('#formDiv').html( renderedForm.el )
 
-            # check and display relevance as debug output
-            relevance = ( for child in @model.attributes.children
-                child.name + ":" + @isRelevant( child, answers )
+            # Create sidebar
+            $( '#form_sidebar' ).html( '' )
+            _.each( @item_dict, ( child, key ) ->
+
+                if not child.is_field
+                    return
+
+                element = "<li id='#{key}_tab' data-key='#{key}'>"
+                if $( '#form_sidebar > li' ).length == 0
+                    element = "<li id='#{key}_tab' data-key='#{key}' class='active'>"
+                element += "<a href='#'>#{child.title}</a></li>"
+
+                $( '#form_sidebar' ).append( element )
             )
 
-            $( '#xform_debug' ).html( JSON.stringify( relevance ) )
-
-            $('#formDiv').html( '' )
-            $('#formDiv').html( renderedForm.el )
+            $( '.control-group' ).first().show()
 
             @
 
+        switch_question: ( element ) ->
+
+            question = $( element.currentTarget ).data( 'key' )
+
+            # Find the next question to switch from and to.
+            current_question = $('#' + $( '.active' ).data( 'key' ) + '_field')
+            switch_question  = $( "##{question}_field" )
+
+            # Switch the highlighted tab on the left sidebar
+            $( '.active' ).removeClass( 'active' )
+            $( "##{question}_tab" ).addClass( 'active' )
+
+            # Animate the switching
+            current_question.fadeOut( 'fast', () ->
+                switch_question.fadeIn( 'fast' )
+            )
+            @
+
+        next_question: () ->
+
+            question = $( '.active' ).data( 'key' )
+
+            # Check constraints of this question before continuing
+            question_index = -1
+            form_info = _.find( @model.attributes.children, ( child ) ->
+                question_index += 1
+                return child.name == question
+            )
+
+            # Pass required?
+            if form_info.bind and form_info.bind.required is "yes"
+                if renderedForm.getValue()[ question ].length == 0
+                    alert "Answer is required"
+                    return @
+
+            # Pass contraints?
+            if not @passesConstraint( form_info, renderedForm.getValue() )
+                alert "Answer doesn't pass constraint:" + form_info.bind.constraint
+                return @
+
+            # Pass all constraint! Switch to next question
+            if question_index < @_fieldsets.length
+                question_index += 1
+
+            if question_index == 0
+                $( '#prev_btn' ).hide()
+            else
+                $( '#prev_btn' ).show()
+
+            $( '#form_sidebar > li' ).eq( question_index ).trigger( 'click' )
+            @
+
+        prev_question: () ->
+            question = $( '.active' ).data( 'key' )
+
+            question_index = -1
+            form_info = _.find( @model.attributes.children, ( child ) ->
+                question_index += 1
+                return child.name == question
+            )
+
+            if question_index <= 0
+                return @
+
+            question_index -= 1
+            $( '#next_btn' ).show()
+            $( '#form_sidebar > li' ).eq( question_index ).trigger( 'click' )
+            @
 
     App = new xFormView()
-    $(document).ready ->
-      i = -1
-      size = 0
-      $("#next").click ->
-        $("#submit-xform").hide()
-        size = $(".control-group").length
-        $(".control-group").hide()
-        if i is -1
-          i = i + 1
-        else if App.passesConstraint(App.model.attributes.children[i], renderedForm.getValue())
-          child = App.model.attributes.children[i]
-          if child.bind and child.bind.required and (renderedForm.getValue()[child.name] is "")
-            alert "Answer is required"
-          else
-            i = i + 1
-            i = i + 1  until App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())
-        else
-          alert "Answer doesn't pass constraint:" + App.model.attributes.children[i].bind.constraint
-        $(".control-group").eq(i).show()
-        $("#prev").show()
-        if i is size - 1
-          $("#next").hide()
-          $("#submit-xform").show()
-        else
-          $("#next").show()
-
-      $("#prev").click ->
-        $("#next").show()
-        $("#submit-xform").hide()
-        $(".control-group").hide()
-        i = i - 1
-        i = i - 1  until App.isRelevant(App.model.attributes.children[i], renderedForm.getValue())
-        $(".control-group").eq(i).show()
-        $("#prev").hide()  if i is 0
-
-      $("#submit-xform").click ->
-        alert "Thank you for your time!"
-        window.location.replace "/"
