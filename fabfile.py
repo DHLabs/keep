@@ -7,12 +7,15 @@ env.use_ssh_config = True
 env.user = 'ubuntu'
 env.hosts = [ 'dhlab-backend' ]
 
-PRODUCTION_DIR = 'dhlab-backend'
+PRODUCTION_DIR  = 'backend'
+SUPERVISOR_NAME = 'dhlab_backend'
+
+MONGODB_NAME    = 'dhlab'
 
 
 def backup_db():
     '''Backup local MongoDB database'''
-    local( 'mongodump -d dhlab -o _data/dhlab-backup' )
+    local( 'mongodump -d %s -o _data/dhlab-backup' % ( MONGODB_NAME ) )
 
 
 def restore_db():
@@ -30,10 +33,18 @@ def deploy():
     print green( 'Deploy to EC2 instance...' )
     with cd( PRODUCTION_DIR ):
         # Stop all running processes
-        run( 'supervisorctl stop all' )
+        run( 'supervisorctl stop %s' % ( SUPERVISOR_NAME ) )
 
         # Pull latest code from git
         run( 'git pull origin master' )
 
         # Start up all processes again
         run( 'supervisorctl start all' )
+
+
+def test():
+    print green( 'Running tests...' )
+    local( 'coverage run manage.py test --settings=settings.test' )
+
+    print green( 'Generating coverage report...' )
+    local( 'coverage html --omit="*.pyenvs*"' )
