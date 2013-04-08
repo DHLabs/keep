@@ -115,26 +115,36 @@ def user_dashboard( request, username ):
         The dashboard contains links to a users the private/public data repos.
         Private repos are only shown if the user has permission to view them.
     '''
+    # Are we looking at our own profile or someone elses?
+    is_other_user = request.user.username != username
+
     user = get_object_or_404( User, username=username )
 
     # Grab a list of forms uploaded by the user
-    user_forms = db.survey.find( { 'user': user.id } )
+    query = { 'user': user.id }
+
+    if is_other_user:
+        query[ 'public' ] = True
+
+    user_repos = db.survey.find( query )
 
     # TODO: Find better way of converting _id to mongo_id
-    user_forms = [ xform for xform in user_forms ]
-    for xform in user_forms:
+    user_repos = [ repo for repo in user_repos ]
+    for repo in user_repos:
         # Replace _id with mongo_id since the templates don't place nicely with
         # variables that have an underscore in front.
-        xform[ 'mongo_id' ] = xform[ '_id' ]
-        del xform[ '_id' ]
+        repo[ 'mongo_id' ] = repo[ '_id' ]
+        del repo[ '_id' ]
 
-        xform[ 'submission_count' ] = db.survey_data\
-                                        .find( {'survey':
-                                               ObjectId(xform[ 'mongo_id' ])})\
-                                        .count()
+        # Count the number of submissions for this repo
+        repo[ 'submission_count' ] = db.survey_data\
+                                       .find( {'survey':
+                                              ObjectId(repo[ 'mongo_id' ])})\
+                                       .count()
 
     return render_to_response( 'dashboard.html',
-                               { 'user_forms': user_forms,
+                               { 'user_forms': user_repos,
+                                 'is_other_user': is_other_user,
                                  'account': user },
                                context_instance=RequestContext(request) )
 

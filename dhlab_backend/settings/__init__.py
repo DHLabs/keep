@@ -66,6 +66,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
+    os.path.join( PROJECT_ROOT, 'static' )
 )
 
 # List of finder classes that know how to find static files in
@@ -73,7 +74,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -83,7 +83,6 @@ SECRET_KEY = 'rt26r6ti28t)=%3q*sqbvr2a^lv+kcx&amp;h&amp;k#uocrh*p_v)+h9f'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -117,7 +116,6 @@ INSTALLED_APPS = (
     'repos',
     'twofactor',                # Needed to harden login/database
     'registration',             # Needed for user signup
-    'django.contrib.admin',     # Needed for Django Admin stuff
     'tastypie',                 # Needed for our RESTful API
 )
 

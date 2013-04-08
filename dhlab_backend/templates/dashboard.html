@@ -39,7 +39,7 @@
 				<tr>
 					<td colspan='4' style='background-color:#EEE;'>
 						<h4>
-							{% if user.username == account.username %}
+							{% if not is_other_user %}
 							<div class='pull-right'>
 								<a href='/repo/new' class='btn btn-small'>
 									New Repository
@@ -60,7 +60,6 @@
 					</tr>
 				{% endif %}
 				{% for repo in user_forms %}
-					{% if repo.public or user.username == account.username %}
 					<tr>
 						<td style='width:32px;text-align:center;'>
 							{% if repo.public %}
@@ -88,7 +87,6 @@
 							{{ repo.submission_count }} <i class='icon-file'></i>
 						</td>
 					</tr>
-					{% endif %}
 				{% endfor %}
 			</tbody>
 		</table>

@@ -277,7 +277,18 @@ DataView = (function(_super) {
   };
 
   DataView.prototype.renderMap = function() {
-    var center, datum, geopoint, html, key, marker, myIcon, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    var center, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    this.heatmap = L.TileLayer.heatMap({
+      radius: 20,
+      opacity: 0.8,
+      gradient: {
+        0.45: "rgb(0,0,255)",
+        0.55: "rgb(0,255,255)",
+        0.65: "rgb(0,255,0)",
+        0.95: "yellow",
+        1.0: "rgb(255,0,0)"
+      }
+    });
     center = [0, 0];
     _ref = this.data.models;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -303,13 +314,15 @@ DataView = (function(_super) {
       shadowSize: [41, 41],
       shadowAnchor: [15, 41]
     });
+    heatmapData = [];
+    this.markers = [];
     _ref1 = this.data.models;
     for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
       datum = _ref1[_j];
       geopoint = datum.get('data')[this.map_headers].split(' ');
       marker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
-      }).addTo(this.map);
+      });
       html = '';
       _ref2 = datum.get('data');
       for (key in _ref2) {
@@ -317,8 +330,25 @@ DataView = (function(_super) {
         html += "<div><strong>" + key + ":</strong> " + value + "</div>";
       }
       marker.bindPopup(html);
+      this.markers.push(marker);
+      heatmapData.push({
+        lat: geopoint[0],
+        lon: geopoint[1],
+        value: 1
+      });
     }
-    return this;
+    this.marker_layer = L.layerGroup(this.markers);
+    this.heatmap.addData(heatmapData);
+    this.map.addLayer(this.heatmap);
+    this.map.addLayer(this.marker_layer);
+    layers = {
+      'Markers': this.marker_layer,
+      'Heatmap': this.heatmap
+    };
+    controls = L.control.layers(null, layers, {
+      collapsed: false
+    });
+    return controls.addTo(this.map);
   };
 
   return DataView;

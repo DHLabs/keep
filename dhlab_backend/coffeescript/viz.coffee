@@ -275,6 +275,16 @@ class DataView extends Backbone.View
         @
 
     renderMap: ->
+        @heatmap = L.TileLayer.heatMap(
+                radius: 20
+                opacity: 0.8
+                gradient:
+                    0.45: "rgb(0,0,255)",
+                    0.55: "rgb(0,255,255)",
+                    0.65: "rgb(0,255,0)",
+                    0.95: "yellow",
+                    1.0: "rgb(255,0,0)" )
+
         # Calculate the center of the data
         center = [ 0, 0 ]
         for datum in @data.models
@@ -286,11 +296,11 @@ class DataView extends Backbone.View
         center[0] = center[0] / @data.models.length
         center[1] = center[1] / @data.models.length
 
-        @map = L.map('map').setView( center, 13)
+        @map = L.map('map').setView( center, 13 )
 
         L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-                     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-                     maxZoom: 18 }).addTo( @map )
+                        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                        maxZoom: 18 }).addTo( @map )
 
         myIcon = L.icon(
                     iconUrl: '/static/img/leaflet/marker-icon.png'
@@ -302,14 +312,34 @@ class DataView extends Backbone.View
                     shadowSize: [41, 41]
                     shadowAnchor: [15, 41] )
 
+        heatmapData = []
+        @markers = []
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
 
-            marker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon}).addTo( @map )
+            marker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
 
             html = ''
             for key, value of datum.get( 'data' )
                 html += "<div><strong>#{key}:</strong> #{value}</div>"
             marker.bindPopup( html )
 
-        @
+            @markers.push( marker )
+
+            heatmapData.push(
+                lat: geopoint[0]
+                lon: geopoint[1]
+                value: 1 )
+
+        @marker_layer = L.layerGroup( @markers )
+        @heatmap.addData( heatmapData )
+
+        @map.addLayer( @heatmap )
+        @map.addLayer( @marker_layer )
+
+        layers =
+            'Markers': @marker_layer
+            'Heatmap': @heatmap
+
+        controls = L.control.layers( null, layers, { collapsed: false } )
+        controls.addTo( @map )
