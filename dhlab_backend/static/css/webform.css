@@ -3,7 +3,6 @@
 #xform_view > #form_fields {
   background-color: #fafafa;
   padding: 16px;
-  min-height: 200px;
-  min-width: 600px; }
+  min-height: 256px; }
 #xform_view .control-group {
   display: none; }

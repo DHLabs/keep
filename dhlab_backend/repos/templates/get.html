@@ -16,6 +16,7 @@
 <script src="{% static '/static/js/vendor/backbone-min.js' %}"></script>
 <script src="{% static '/static/js/vendor/bootstrap.2.3.1.min.js' %}"></script>
 
+<!-- Backbone Forms JS files -->
 <script src="{% static '/static/js/vendor/forms/backbone-forms.min.js' %}"></script>
 <script src="{% static '/static/js/vendor/forms/editors/list.min.js' %}"></script>
 <script src="{% static '/static/js/vendor/forms/templates/bootstrap.js' %}"></script>
@@ -32,8 +33,7 @@
 		<div class='span12'>
 			<h2>
 				<a href='/{{ repo_user.username }}'>{{ repo_user.username }}</a>
-				/
-				{{ repo.name }}
+				/&nbsp;{{ repo.name }}
 			</h2>
 		</div>
 	</div>
@@ -45,10 +45,10 @@
 	    	<div id="form_fields" class="formbox">
 		  		<div id="formDiv"></div>
 	    	</div>
-	    	<div id='form_actions'>
+	    	<div id='form_actions' style='overflow:auto;'>
 	    		<div class='pull-right'>
 	    			<a href="#" class='btn' id="next_btn">Next</a>
-	    			<a href='#' class='btn btn-success' style='display:none;'' id='submit_btn'>Submit</a>
+	    			<a href='#' class='btn btn-success' style='display:none;' id='submit_btn'>Submit</a>
 	    		</div>
 				<a href="#" class='btn' style='display:none;' id="prev_btn">Previous</a>
 			</div>

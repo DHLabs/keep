@@ -372,6 +372,7 @@ $(function() {
         fields: this._fieldsets
       }).render();
       $('#formDiv').html(renderedForm.el);
+      this.input_fields = [];
       $('#form_sidebar').html('');
       _.each(this.item_dict, function(child, key) {
         var element;
@@ -383,15 +384,39 @@ $(function() {
           element = "<li id='" + key + "_tab' data-key='" + key + "' class='active'>";
         }
         element += "<a href='#'>" + child.title + "</a></li>";
+        child.name = key;
+        _this.input_fields.push(child);
         return $('#form_sidebar').append(element);
       });
       $('.control-group').first().show();
       return this;
     };
 
+    xFormView.prototype._display_form_buttons = function(question_index) {
+      if (question_index === 0) {
+        $('#prev_btn').hide();
+        $('#submit_btn').hide();
+        $('#next_btn').show();
+      } else if (question_index === this.input_fields.length - 1) {
+        $('#prev_btn').show();
+        $('#submit_btn').show();
+        $('#next_btn').hide();
+      } else {
+        $('#prev_btn').show();
+        $('#next_btn').show();
+        $('#submit_btn').hide();
+      }
+      return this;
+    };
+
     xFormView.prototype.switch_question = function(element) {
-      var current_question, question, switch_question;
+      var current_question, form_info, question, question_index, switch_question;
       question = $(element.currentTarget).data('key');
+      question_index = -1;
+      form_info = _.find(this.input_fields, function(child) {
+        question_index += 1;
+        return child.name === question;
+      });
       current_question = $('#' + $('.active').data('key') + '_field');
       switch_question = $("#" + question + "_field");
       $('.active').removeClass('active');
@@ -399,6 +424,7 @@ $(function() {
       current_question.fadeOut('fast', function() {
         return switch_question.fadeIn('fast');
       });
+      this._display_form_buttons(question_index);
       return this;
     };
 
@@ -406,7 +432,7 @@ $(function() {
       var form_info, question, question_index;
       question = $('.active').data('key');
       question_index = -1;
-      form_info = _.find(this.model.attributes.children, function(child) {
+      form_info = _.find(this.input_fields, function(child) {
         question_index += 1;
         return child.name === question;
       });
@@ -420,15 +446,11 @@ $(function() {
         alert("Answer doesn't pass constraint:" + form_info.bind.constraint);
         return this;
       }
-      if (question_index < this._fieldsets.length) {
+      if (question_index < this.input_fields.length) {
         question_index += 1;
       }
-      if (question_index === 0) {
-        $('#prev_btn').hide();
-      } else {
-        $('#prev_btn').show();
-      }
       $('#form_sidebar > li').eq(question_index).trigger('click');
+      this._display_form_buttons(question_index);
       return this;
     };
 
@@ -436,7 +458,7 @@ $(function() {
       var form_info, question, question_index;
       question = $('.active').data('key');
       question_index = -1;
-      form_info = _.find(this.model.attributes.children, function(child) {
+      form_info = _.find(this.input_fields, function(child) {
         question_index += 1;
         return child.name === question;
       });
@@ -444,8 +466,8 @@ $(function() {
         return this;
       }
       question_index -= 1;
-      $('#next_btn').show();
       $('#form_sidebar > li').eq(question_index).trigger('click');
+      this._display_form_buttons(question_index);
       return this;
     };
 

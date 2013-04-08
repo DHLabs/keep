@@ -35,9 +35,9 @@ $ ->
             'click #prev_btn':          'prev_question'
 
         _fieldsets: []
-        _data: []
-        _schema: {}
-        item_dict: {}
+        _data:      []
+        _schema:    {}
+        item_dict:  {}
 
         initialize: ->
             # Grab the form_id from the page
@@ -395,7 +395,6 @@ $ ->
 
             @
 
-
         loadForm: () ->
             #     groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
             #     groupEnd: '<div><hr></div>'
@@ -413,8 +412,9 @@ $ ->
             $('#formDiv').html( renderedForm.el )
 
             # Create sidebar
+            @input_fields = []
             $( '#form_sidebar' ).html( '' )
-            _.each( @item_dict, ( child, key ) ->
+            _.each( @item_dict, ( child, key ) =>
 
                 if not child.is_field
                     return
@@ -424,6 +424,9 @@ $ ->
                     element = "<li id='#{key}_tab' data-key='#{key}' class='active'>"
                 element += "<a href='#'>#{child.title}</a></li>"
 
+                child.name = key
+                @input_fields.push( child )
+
                 $( '#form_sidebar' ).append( element )
             )
 
@@ -431,9 +434,36 @@ $ ->
 
             @
 
+        _display_form_buttons: ( question_index ) ->
+
+            if question_index == 0
+                $( '#prev_btn' ).hide()
+                $( '#submit_btn' ).hide()
+
+                $( '#next_btn' ).show()
+            else if question_index == @input_fields.length - 1
+                $( '#prev_btn' ).show()
+                $( '#submit_btn' ).show()
+
+                $( '#next_btn' ).hide()
+            else
+                $( '#prev_btn' ).show()
+                $( '#next_btn' ).show()
+
+                $( '#submit_btn' ).hide()
+
+            @
+
         switch_question: ( element ) ->
 
+            # Determine the question
             question = $( element.currentTarget ).data( 'key' )
+
+            question_index = -1
+            form_info = _.find( @input_fields, ( child ) ->
+                question_index += 1
+                return child.name == question
+            )
 
             # Find the next question to switch from and to.
             current_question = $('#' + $( '.active' ).data( 'key' ) + '_field')
@@ -447,6 +477,9 @@ $ ->
             current_question.fadeOut( 'fast', () ->
                 switch_question.fadeIn( 'fast' )
             )
+
+            @_display_form_buttons( question_index )
+
             @
 
         next_question: () ->
@@ -455,7 +488,7 @@ $ ->
 
             # Check constraints of this question before continuing
             question_index = -1
-            form_info = _.find( @model.attributes.children, ( child ) ->
+            form_info = _.find( @input_fields, ( child ) ->
                 question_index += 1
                 return child.name == question
             )
@@ -472,22 +505,20 @@ $ ->
                 return @
 
             # Pass all constraint! Switch to next question
-            if question_index < @_fieldsets.length
+            if question_index < @input_fields.length
                 question_index += 1
 
-            if question_index == 0
-                $( '#prev_btn' ).hide()
-            else
-                $( '#prev_btn' ).show()
-
             $( '#form_sidebar > li' ).eq( question_index ).trigger( 'click' )
+
+            @_display_form_buttons( question_index )
+
             @
 
         prev_question: () ->
             question = $( '.active' ).data( 'key' )
 
             question_index = -1
-            form_info = _.find( @model.attributes.children, ( child ) ->
+            form_info = _.find( @input_fields, ( child ) ->
                 question_index += 1
                 return child.name == question
             )
@@ -496,8 +527,11 @@ $ ->
                 return @
 
             question_index -= 1
-            $( '#next_btn' ).show()
+
             $( '#form_sidebar > li' ).eq( question_index ).trigger( 'click' )
+
+            @_display_form_buttons( question_index )
+
             @
 
     App = new xFormView()
