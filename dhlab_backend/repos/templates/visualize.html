@@ -31,7 +31,7 @@
 
 <!-- Chart viz -->
 <script src='{% static "/static/js/vendor/d3.v3.min.js" %}'></script>
-<script src='{% static "/static/js/viz.js" %}'></script>
+<script src='{% static "/static/js/viz/viz.js" %}'></script>
 <script type='text/javascript'>
 	$( function() {
 		// Initialize data
@@ -50,13 +50,13 @@
 		<div class='span12'>
 			<div class='pull-right alert' id='privacy'>
 				{% if repo.public %}
-					<img src='/static/img/public_repo.png'> PUBLIC
+					<img src='{% static "/static/img/public_repo.png" %}'> PUBLIC
 				{% else %}
-					<img src='/static/img/private_repo.png'> PRIVATE
+					<img src='{% static "/static/img/private_repo.png" %}'> PRIVATE
 				{% endif %}
 			</div>
 			<h3>
-				<a href='/{{ account.username }}'>{{ account.username }}</a> /
+				<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
 				<div class='btn-group'>
 					<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
 						{{ repo.name }}
@@ -133,7 +133,7 @@
 				</span>
 			</div>
 			<div class='span8' style='text-align:right;padding-top:16px;'>
-				<a href='/repo/delete/{{ sid }}' class='btn btn-danger'>
+				<a href='{% url "repo_delete" repo_id=sid %}' class='btn btn-danger'>
 					<i class='icon-trash'></i> Delete Repository
 				</a>
 			</div>

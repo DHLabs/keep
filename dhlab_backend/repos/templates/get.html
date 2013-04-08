@@ -32,7 +32,7 @@
 	<div class='row'>
 		<div class='span12'>
 			<h2>
-				<a href='/{{ repo_user.username }}'>{{ repo_user.username }}</a>
+				<a href='{% url "user_dashboard" username=repo_user.username %}'>{{ repo_user.username }}</a>
 				/&nbsp;{{ repo.name }}
 			</h2>
 		</div>

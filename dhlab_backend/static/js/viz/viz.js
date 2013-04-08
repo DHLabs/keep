@@ -299,7 +299,7 @@ DataView = (function(_super) {
     }
     center[0] = center[0] / this.data.models.length;
     center[1] = center[1] / this.data.models.length;
-    this.map = L.map('map').setView(center, 13);
+    this.map = L.map('map').setView(center, 10);
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 18
