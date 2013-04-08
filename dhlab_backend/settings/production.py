@@ -1,7 +1,7 @@
 from settings import *
 
-ALLOWED_HOSTS = [ '.distributedhealth.org' ]
+ALLOWED_HOSTS = [ '*' ]
 
 DEBUG = False
 
-STATIC_ROOT = '/home/ubuntu/dhlab-backend/static'
+STATIC_ROOT = '/home/ubuntu/backend/static_files'
