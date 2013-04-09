@@ -1,4 +1,5 @@
 import json
+import math
 
 from bson import ObjectId
 from datetime import datetime
@@ -195,8 +196,11 @@ def repo_viz( request, username, repo_name ):
                 fuzzed_data.append( point )
 
             # Split the xbounds in a linear
-            xbounds = linspace( xbounds[0], xbounds[1], num=20 )
-            ybounds = linspace( ybounds[0], ybounds[1], num=20 )
+            num_x_samples = int(math.ceil( ( xbounds[1] - xbounds[0] ) / .2 ))
+            num_y_samples = int(math.ceil( ( ybounds[1] - ybounds[0] ) / .2 ))
+
+            xbounds = linspace( xbounds[0], xbounds[1], num=num_x_samples )
+            ybounds = linspace( ybounds[0], ybounds[1], num=num_y_samples )
 
             fuzzed_data = privatize( points=fuzzed_data,
                                      xbounds=xbounds,
