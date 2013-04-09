@@ -18,6 +18,22 @@
 #map {
   height: 512px;
   border: 4px solid #aaaaaa; }
+  #map .leaflet-control {
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+    opacity: 0.90; }
+    #map .leaflet-control input {
+      margin: 0 8px 0 0; }
+    #map .leaflet-control label {
+      font-weight: bold;
+      padding: 4px 8px;
+      border-bottom: 1px solid #eeeeee;
+      font-size: 16px; }
+    #map .leaflet-control label:last-child {
+      padding-bottom: 0;
+      border: 0; }
+  #map .leaflet-control-layers-list {
+    margin: 0; }
 
 table.table thead .sorting,
 table.table thead .sorting_asc,

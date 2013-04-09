@@ -13,7 +13,7 @@
 						<li> <a href='{% url "settings" %}'><i class='icon-cog'></i>&nbsp;Settings </a> </li>
 						<li> <a href='{% url "auth_logout" %}'> Log Out </a> </li>
 						{% else %}
-						<li> <a href='{% url "auth_register" %}'> Sign Up </a> </li>
+						<li> <a href='{% url "registration_register" %}'> Sign Up </a> </li>
 						<li> <a href='{% url "auth_login" %}'> Log In </a> </li>
 						{% endif %}
 					</ul>

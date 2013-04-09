@@ -97,7 +97,7 @@
 					<a href='#' id='raw_btn' data-type='raw' class='btn active'><i class='icon-list'></i> Raw</a>
 					<a href='#' id='map_btn' data-type='map' class='btn disabled'><i class='icon-map-marker'></i> Map</a>
 					<a href='#' id='line_btn' data-type='line' class='btn'><i class='icon-signal'></i> Line</a>
-					{% if not user.is_anonymous and user.id == account.id %}
+					{% if not is_other_user %}
 					<a data-type='settings' class='btn'>
 						<i class='icon-cog'></i>
 						Settings
@@ -122,7 +122,7 @@
 		</div>
 		<div class='span10' id='line'></div>
 	</div>
-	{% if not user.is_anonymous %}
+	{% if not is_other_user %}
 	<div class='row viz' id='settings_viz'>
 		<div class='span12'>
 			<div class='span3'>
