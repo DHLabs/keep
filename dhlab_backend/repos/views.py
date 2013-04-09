@@ -2,6 +2,7 @@ import json
 
 from bson import ObjectId
 from datetime import datetime
+from numpy import linspace
 
 from django.contrib.auth.models import User
 from django.forms.util import ErrorList
@@ -12,6 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
 from backend.db import db, dehydrate_survey
+from privacy.map import privatize
 
 from pyxform.xls2json import SurveyReader
 
@@ -139,21 +141,77 @@ def repo_viz( request, username, repo_name ):
 
     user = get_object_or_404( User, username=username )
 
+    # Looking our own viz or someone's public repo?
+    is_other_user = request.user.username != username
+
     repo = db.survey.find_one({ 'name': repo_name, 'user': user.id })
-    data = db.survey_data.find( {'survey': ObjectId( repo[ '_id' ] )} )
 
     if repo is None:
         return HttpResponse( status=404 )
 
     # Check to see if the user has access to view this survey
-    if not repo.get( 'public', False ):
-        if request.user.id is None or request.user.id != repo[ 'user' ]:
-            return HttpResponse( 'Unauthorized', status=401 )
+    if not repo.get( 'public', False ) and is_other_user:
+        return HttpResponse( 'Unauthorized', status=401 )
+
+    # Grab the data for this repository
+    data = db.survey_data.find( {'survey': ObjectId( repo[ '_id' ] )} )
+    data = dehydrate_survey( data )
+
+    # Is some unknown user looking at this data?
+    if is_other_user:
+        # Does this data have any geo data?
+        has_geo = False
+        geo_index = None
+        for field in repo[ 'children' ]:
+            if field[ 'type' ] == 'geopoint':
+                has_geo = True
+                geo_index = field[ 'name' ]
+                break
+
+        # Great! We have geopoints, let's privatize this data
+        if has_geo:
+
+            xbounds     = [ None, None ]
+            ybounds     = [ None, None ]
+            fuzzed_data = []
+
+            for datum in data:
+
+                geopoint = datum[ 'data' ][ geo_index ].split( ' ' )
+                point = ( float( geopoint[0] ), float( geopoint[1] ) )
+
+                if xbounds[0] is None or point[0] < xbounds[0]:
+                    xbounds[0] = point[0]
+
+                if xbounds[1] is None or point[0] > xbounds[1]:
+                    xbounds[1] = point[0]
+
+                if ybounds[0] is None or point[1] < ybounds[0]:
+                    ybounds[0] = point[1]
+
+                if ybounds[1] is None or point[1] > ybounds[1]:
+                    ybounds[1] = point[1]
+
+                fuzzed_data.append( point )
+
+            # Split the xbounds in a linear
+            xbounds = linspace( xbounds[0], xbounds[1], num=20 )
+            ybounds = linspace( ybounds[0], ybounds[1], num=20 )
+
+            fuzzed_data = privatize( points=fuzzed_data,
+                                     xbounds=xbounds,
+                                     ybounds=ybounds )
+            data = []
+            for datum in fuzzed_data:
+                data.append( {
+                    'data':
+                    {geo_index: ' '.join( [ str( x ) for x in datum ] )}})
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
                                  'sid': repo[ '_id' ],
-                                 'data': json.dumps( dehydrate_survey(data) ),
+                                 'data': json.dumps( data ),
+                                 'is_other_user': is_other_user,
                                  'account': user},
                                context_instance=RequestContext(request) )
 

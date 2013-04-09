@@ -129,7 +129,7 @@ def m2p(h, xbounds, ybounds):
     return points
 
 
-def privatize(points, xbounds, ybounds, epsilon=1.0, tau=0.5):
+def privatize(points, xbounds, ybounds, epsilon=1.0, tau=1.0):
     '''create differentially private version of list of points using a grid
 
        the grid is defined by axis points in xbounds and ybounds.

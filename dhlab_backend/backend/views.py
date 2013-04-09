@@ -48,6 +48,7 @@ def home( request ):
         return HttpResponseRedirect( '/%s' % ( request.user.username ) )
     else:
         return HttpResponseRedirect( '/accounts/login' )
+        #return render_to_response( 'index.html' )
 
 
 def register( request ):
