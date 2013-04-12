@@ -32,12 +32,12 @@ Ensure that virtualenvwrapper is correctly setup. You should be able to run mkvi
 
 ## Setting up the Databases
 
-    python manage.py syncdb
+    python dhlab_backend/manage.py syncdb
     fab restore_db
 
 ## Running the Django server
 
-    python manage.py runserver
+    python dhlab_backend/manage.py runserver
 
 # Setting up Two Factor Authentication
 
