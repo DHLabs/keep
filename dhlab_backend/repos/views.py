@@ -5,6 +5,7 @@ from bson import ObjectId
 from datetime import datetime
 from numpy import linspace
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.forms.util import ErrorList
 from django.http import HttpResponseRedirect, HttpResponse
@@ -21,7 +22,11 @@ from pyxform.xls2json import SurveyReader
 from .forms import NewRepoForm
 
 
+@login_required
 def new_repo( request ):
+    '''
+        Creates a new user under the currently logged in user.
+    '''
     # Handle XForm upload
     if request.method == 'POST':
 
@@ -74,7 +79,14 @@ def new_repo( request ):
                                context_instance=RequestContext(request) )
 
 
+@login_required
 def delete_repo( request, repo_id ):
+    '''
+        Delete a data repository.
+
+        Checks if the user is the original owner of the repository and removes
+        the repository and the accompaning repo data.
+    '''
 
     survey = db.survey.find_one( { '_id': ObjectId( repo_id ) },
                                  { 'user': True } )
@@ -90,6 +102,7 @@ def delete_repo( request, repo_id ):
 
 @csrf_exempt
 @require_POST
+@login_required
 def toggle_public( request, repo_id ):
     '''
         Toggle's a data repo's "publicness". Only the person who owns the form
@@ -139,6 +152,12 @@ def webform( request, repo_name ):
 
 @require_GET
 def repo_viz( request, username, repo_name ):
+    '''
+        View repo <repo_name> under user <username>.
+
+        Does the checks necessary to determine whether the current user has the
+        authority to view the current repository.
+    '''
 
     user = get_object_or_404( User, username=username )
 
