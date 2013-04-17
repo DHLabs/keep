@@ -3,10 +3,6 @@ from __future__ import with_statement
 from fabric.api import local, cd, env, run
 from fabric.colors import green
 
-env.use_ssh_config = True
-env.user = 'ubuntu'
-env.hosts = [ 'dhlab-backend' ]
-
 PRODUCTION_DIR  = 'backend'
 SUPERVISOR_NAME = 'dhlab_backend'
 
@@ -29,6 +25,10 @@ def clean():
 
 
 def deploy():
+    env.use_ssh_config = True
+    env.user = 'ubuntu'
+    env.hosts = [ 'dhlab-backend' ]
+
     '''Deploy the backend to the server'''
     print green( 'Deploy to EC2 instance...' )
     with cd( PRODUCTION_DIR ):
