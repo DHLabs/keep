@@ -276,7 +276,7 @@ class DataView extends Backbone.View
 
     renderMap: ->
         @heatmap = L.TileLayer.heatMap(
-                radius: 20
+                radius: 80
                 opacity: 0.8
                 gradient:
                     0.45: "rgb(0,0,255)",
@@ -314,6 +314,7 @@ class DataView extends Backbone.View
 
         heatmapData = []
         @markers = []
+        @constrained_markers = []
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
 
@@ -325,6 +326,8 @@ class DataView extends Backbone.View
             marker.bindPopup( html )
 
             @markers.push( marker )
+            constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
+            @constrained_markers.push( constrainedMarker )
 
             heatmapData.push(
                 lat: geopoint[0]
@@ -332,14 +335,17 @@ class DataView extends Backbone.View
                 value: 1 )
 
         @marker_layer = L.layerGroup( @markers )
+        @constrained_layer = L.layerGroup( @constrained_markers )
         @heatmap.addData( heatmapData )
 
         @map.addLayer( @heatmap )
         @map.addLayer( @marker_layer )
+        @map.addLayer( @constrained_layer )
 
         layers =
             'Markers': @marker_layer
             'Heatmap': @heatmap
+            'Constrained': @constrained_layer
 
         controls = L.control.layers( null, layers, { collapsed: false } )
         controls.addTo( @map )
