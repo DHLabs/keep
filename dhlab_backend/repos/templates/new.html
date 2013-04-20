@@ -24,6 +24,14 @@
 
 				<hr/>
 
+                <p>
+                <div>
+                    <a href='{% url "form_build" %}' class='btn btn-medium'>
+                        Build XForm Manually
+                    </a>
+                </div>
+                </p>
+
 				<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
 					<strong>XForm File</strong>
 				</label>

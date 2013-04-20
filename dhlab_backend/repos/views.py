@@ -19,7 +19,7 @@ from privacy.map import privatize
 
 from pyxform.xls2json import SurveyReader
 
-from .forms import NewRepoForm
+from .forms import NewRepoForm, BuildRepoForm
 
 
 @login_required
@@ -78,6 +78,62 @@ def new_repo( request ):
     return render_to_response( 'new.html', { 'form': form },
                                context_instance=RequestContext(request) )
 
+@login_required
+def build_form( request ):
+    '''
+        Builds form.
+        '''
+    # Handle XForm upload
+    if request.method == 'POST':
+
+        form = BuildRepoForm( request.POST )
+
+        # Check for a valid XForm and parse the file!
+        if form.is_valid():
+
+            # Check that this form name isn't already taken by the user
+            form_exists = db.survey.find( { 'name': form.cleaned_data['name'],
+                                         'user': request.user.id } )
+
+            if form_exists.count() != 0:
+                errors = form._errors.setdefault( 'name', ErrorList() )
+                errors.append( 'Repository already exists with this name' )
+            else:
+
+                data = json.loads(request.POST['surveyjson'])
+
+                # Basic form name/description
+                data[ 'name' ] = form.cleaned_data[ 'name' ]
+                data[ 'description' ] = form.cleaned_data[ 'desc' ]
+
+                # Needed for xform formatting
+                data[ 'title' ]       = form.cleaned_data[ 'name' ]
+                data[ 'id_string' ]   = form.cleaned_data[ 'name' ]
+
+                # Is this form public?
+                data[ 'public' ] = form.cleaned_data[ 'privacy' ] == 'public'
+
+                # Store who uploaded this form
+                data[ 'user' ]      = request.user.id
+
+                data[ 'type' ]      = 'survey'
+
+                # Store when this form was uploaded
+                data[ 'uploaded' ]  = datetime.now()
+
+                print data
+
+                db.survey.insert( data )
+
+                return HttpResponseRedirect( '/' )
+        else:
+            print "form is not valid"
+    
+    else:
+        form = BuildRepoForm()
+    
+    return render_to_response( 'build_form.html', { 'form': form },
+                              context_instance=RequestContext(request) )
 
 @login_required
 def delete_repo( request, repo_id ):

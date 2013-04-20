@@ -7,6 +7,10 @@ urlpatterns = patterns( 'repos.views',
     url( r'^repo/new/$', 'new_repo',
          name='repo_new' ),
 
+    # Create new data repository
+    url( r'^repo/build/$', 'build_form',
+         name='form_build' ),
+
     # Delete form
     url( r'^repo/delete/(?P<repo_id>\w+)/$', 'delete_repo',
          name='repo_delete'),
