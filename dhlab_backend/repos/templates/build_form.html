@@ -33,7 +33,8 @@
                         <td colspan='3' style='background-color:#EEE;'>
                             <h4>
                                 <div class='pull-right'>
-                                    <a data-toggle="modal" id='addquestion' href="#questionEditWindow" class="btn btn btn-medium">Add Question</a>
+                                    <!--a data-toggle="modal" id='addquestion' href="#questionEditWindow" class="btn btn btn-medium">Add Question</a-->
+                                    <button type='button' id='addquestion' onclick='editQuestion(-1)' class="btn btn btn-medium">Add Question</button>
                                 </div>
                                 Survey Questions
                             </h4>
@@ -55,13 +56,24 @@
                     <div class="modal-body">
                         
                         <div>
-                        Name:
-                        <input id="questionName" name="questionName" type="text" />
+                            Name:
+                            <input id="questionName" name="questionName" type="text" />
                         </div>
 
                         <div>
                             Label:
                             <input id="questionLabel" name="label" type="text" />
+                        </div>
+
+                        <div>
+                            <input id='questionRequired' type="checkbox">
+                            <label for='questionRequired'>Required Question</label>
+                        </div>
+                            <input id='questionHintUse' type="checkbox" onclick='toggleHint()'>
+                            <label for='questionHintUse'>Use Question Hint</label>
+                            <div id='questionHintDiv'></div>
+                        <div>
+                            
                         </div>
 
                         <div>
@@ -86,6 +98,14 @@
 
                         <div id="choices">
                             
+                        </div>
+
+                        <div id="constraints">
+
+                        </div>
+
+                        <div id="relevances">
+
                         </div>
                         
 					</div>
