@@ -2,8 +2,8 @@
 {% load staticfiles %}
 
 {% block css %}
-<link rel="stylesheet" type="text/css" href='{% static "/static/css/viz.css" %}'>
-<link rel="stylesheet" type="text/css" href='{% static "/static/css/leaflet.css" %}'>
+<link rel="stylesheet" type="text/css" href='{% static "css/viz.css" %}'>
+<link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
 {% endblock %}
 
 {% block js %}
@@ -50,9 +50,9 @@
 		<div class='span12'>
 			<div class='pull-right alert' id='privacy'>
 				{% if repo.public %}
-					<img src='{% static "/static/img/public_repo.png" %}'> PUBLIC
+					<img src='{% static "img/public_repo.png" %}'> PUBLIC
 				{% else %}
-					<img src='{% static "/static/img/private_repo.png" %}'> PRIVATE
+					<img src='{% static "img/private_repo.png" %}'> PRIVATE
 				{% endif %}
 			</div>
 			<h3>

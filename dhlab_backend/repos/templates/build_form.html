@@ -42,10 +42,10 @@
                     </tr>
                 </thead>
                 <tbody id='questionList'>
-					
+
                 </tbody>
                 </table>
-                
+
                 <!-- Modal View For Editing Question-->
                 <div id='questionEditWindow' class='modal hide fade'>
 
@@ -54,7 +54,7 @@
                         <h3>New Question</h3>
 					</div>
                     <div class="modal-body">
-                        
+
                         <div>
                             Name:
                             <input id="questionName" name="questionName" type="text" />
@@ -73,7 +73,7 @@
                             <label for='questionHintUse'>Use Question Hint</label>
                             <div id='questionHintDiv'></div>
                         <div>
-                            
+
                         </div>
 
                         <div>
@@ -97,7 +97,7 @@
                         </div>
 
                         <div id="choices">
-                            
+
                         </div>
 
                         <div id="constraints">
@@ -107,7 +107,7 @@
                         <div id="relevances">
 
                         </div>
-                        
+
 					</div>
                     <div class="modal-footer">
                         <!--a href="#" data-toggle="modal" class="btn" onclick="closeDialog();">Cancel</a-->
@@ -115,7 +115,7 @@
                         <!--a href="#" class="btn btn-primary" onclick="okClicked();">OK</a-->
                         <input type='button' value='OK' class="btn btn-primary" onclick="okClicked();">
 					</div>
-                </div>                
+                </div>
 
                 <input type='hidden' id='surveyjson' name='surveyjson' value=''>
 
@@ -124,7 +124,7 @@
 			    <label class='radio'>
 			    	<input type='radio' name='privacy' value='public' style='margin-top:16px;'>
 			    	<div class='pull-left' style='width:32px;text-align:center;padding-top:8px;'>
-			    		<img src='{% static "/static/img/public_repo.png" %}'>
+			    		<img src='{% static "img/public_repo.png" %}'>
 			    	</div>
 			    	<div class='pull-left'>
 			    		<strong>Public</strong>
@@ -137,7 +137,7 @@
 			    <label class='radio' style='clear:both;'>
 			    	<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
 			    	<div class='pull-left' style='width:32px;text-align:center;padding-top:8px;'>
-			    		<img src='{% static "/static/img/private_repo.png" %}'>
+			    		<img src='{% static "img/private_repo.png" %}'>
 			    	</div>
 			    	<div class='pull-left'>
 			    		<strong>Private</strong>
