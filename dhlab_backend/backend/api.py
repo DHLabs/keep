@@ -1,10 +1,16 @@
+import json
 import pymongo
 
-from backend.db import db, MongoDBResource, Document, dehydrate_survey
+from backend.db import db, MongoDBResource, Document
+from backend.db import dehydrate_survey, encrypt_survey
 from backend.serializers import CSVSerializer
+
+from openrosa import validate_and_format
 from openrosa.serializer import XFormSerializer
 
 from bson import ObjectId
+
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -68,6 +74,9 @@ class RepoAuthorization( Authorization ):
         if object_detail[ 'user' ] != user.id:
             raise ValueError
 
+        return object_detail
+
+    def update_detail( self, object_detail, bundle ):
         return object_detail
 
 
@@ -135,7 +144,7 @@ class RepoResource( MongoDBResource ):
         object_class = Document
 
         list_allowed_methods = [ 'get' ]
-        detail_allowed_methods = [ 'get' ]
+        detail_allowed_methods = [ 'get', 'post' ]
 
         # Only return JSON & XForm xml
         serializer = XFormSerializer()
@@ -150,6 +159,36 @@ class RepoResource( MongoDBResource ):
 
         # Don't include resource uri
         include_resource_uri = False
+
+    def post_detail( self, request, **kwargs ):
+
+        # The find the suervey object associated with this form name & user
+        repo = db.survey.find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
+        repo_user = repo[ 'user' ]
+
+        # Do basic validation of the data
+        valid_data = validate_and_format( repo, request.POST )
+
+        # Include some metadata with the survey data
+        survey_data = {
+            'user':         repo_user,
+            # Survey/form ID associated with this data
+            'survey':       repo[ '_id' ],
+
+            # Survey name (used for feed purposes)
+            'survey_label': repo[ 'name' ],
+
+            # Timestamp of when this submission was received
+            'timestamp':    datetime.utcnow(),
+            # The validated & formatted survey data.
+            'data':         encrypt_survey( valid_data )
+        }
+
+        # Insert into the database
+        db.survey_data.insert( survey_data )
+
+        data = json.dumps( { 'success': True } )
+        return data
 
     def dehydrate_owner(self, bundle):
         '''

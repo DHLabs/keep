@@ -128,12 +128,13 @@ def build_form( request ):
                 return HttpResponseRedirect( '/' )
         else:
             print "form is not valid"
-    
+
     else:
         form = BuildRepoForm()
-    
+
     return render_to_response( 'build_form.html', { 'form': form },
                               context_instance=RequestContext(request) )
+
 
 @login_required
 def delete_repo( request, repo_id ):
@@ -199,11 +200,11 @@ def webform( request, repo_name ):
 
     repo_user = get_object_or_404( User, id=repo[ 'user' ] )
 
-    return render_to_response(  'get.html',
-                                { 'repo': repo,
-                                  'repo_user': repo_user,
-                                  'repo_id': str( repo[ '_id' ] ) },
-                                context_instance=RequestContext( request ) )
+    return render_to_response( 'get.html',
+                               { 'repo': repo,
+                                 'repo_user': repo_user,
+                                 'repo_id': str( repo[ '_id' ] ) },
+                               context_instance=RequestContext( request ))
 
 
 @require_GET
