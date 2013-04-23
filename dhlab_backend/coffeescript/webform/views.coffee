@@ -37,11 +37,12 @@ define( [ 'jquery',
 
         initialize: ->
             # Grab the form_id from the page
-            @form_id = $( '#form_id' ).html()
+            @form_id  = $( '#form_id' ).html()
+            @user     = $( '#user' ).html()
 
             # Begin render when the model is finished fetching from the server
             @listenTo( @model, 'change', @render )
-            @model.fetch( { url: "/api/v1/repos/#{@form_id}/?user=admin&format=json" } )
+            @model.fetch( { url: "/api/v1/repos/#{@form_id}/?user=#{@user}&format=json" } )
 
             @
 

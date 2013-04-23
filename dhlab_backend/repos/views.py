@@ -78,6 +78,7 @@ def new_repo( request ):
     return render_to_response( 'new.html', { 'form': form },
                                context_instance=RequestContext(request) )
 
+
 @login_required
 def build_form( request ):
     '''

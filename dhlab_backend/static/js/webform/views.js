@@ -37,9 +37,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
     xFormView.prototype.initialize = function() {
       this.form_id = $('#form_id').html();
+      this.user = $('#user').html();
       this.listenTo(this.model, 'change', this.render);
       this.model.fetch({
-        url: "/api/v1/repos/" + this.form_id + "/?user=admin&format=json"
+        url: "/api/v1/repos/" + this.form_id + "/?user=" + this.user + "&format=json"
       });
       return this;
     };

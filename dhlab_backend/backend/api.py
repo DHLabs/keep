@@ -5,7 +5,7 @@ from backend.db import db, MongoDBResource, Document
 from backend.db import dehydrate_survey, encrypt_survey
 from backend.serializers import CSVSerializer
 
-from openrosa import validate_and_format
+from repos import validate_and_format
 from openrosa.serializer import XFormSerializer
 
 from bson import ObjectId
