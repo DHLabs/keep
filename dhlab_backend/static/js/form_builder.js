@@ -1,15 +1,8 @@
 var questionList = new Array();
 var currentQuestion;
 
-$(document).ready(function(){
-
-  $("#addquestion").click(function() {
-  	                                              
-  });
-
-  $("#questionType").click(function() {
-
-  	var questionType = $("#questionType").val();
+function questionTypeChanged() {
+	var questionType = $("#questionType").val();
 
   	removeChoices();
   	removeConstraint();
@@ -35,10 +28,7 @@ $(document).ready(function(){
   	} else if( questionType == "time" ) {
 
   	}
-
-  });
-
-});
+}
 
 function closeDialog() {
 	$('#questionEditWindow').modal('hide'); 
