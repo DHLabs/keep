@@ -4,4 +4,5 @@ ALLOWED_HOSTS = [ '*' ]
 
 DEBUG = False
 
-STATIC_ROOT = '/home/ubuntu/backend/static_files'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+STATIC_ROOT = '/usr/share/nginx/www/keep_static'

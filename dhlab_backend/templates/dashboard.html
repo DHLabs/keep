@@ -4,9 +4,9 @@
 {% block title %}{{ user.username }}{% endblock %}
 
 {% block js %}
-<script type='text/javascript' src='{% static "/static/js/vendor/underscore-1.4.4.js" %}'></script>
-<script type='text/javascript' src='{% static "/static/js/vendor/moment.min.js" %}'></script>
-<script type='text/javascript' src='{% static "/static/js/dashboard.js" %}'></script>
+<script type='text/javascript' src='{% static "js/vendor/underscore-1.4.4.js" %}'></script>
+<script type='text/javascript' src='{% static "js/vendor/moment.min.js" %}'></script>
+<script type='text/javascript' src='{% static "js/dashboard.js" %}'></script>
 <script id='user' type='text/html'>{{ account.username }}</script>
 <script id='submission_feed_tmpl' type='text/html'>
 	<div style='border-bottom: 1px solid #EEE;padding-bottom:4px;margin-bottom:4px;'>
@@ -63,9 +63,9 @@
 					<tr>
 						<td style='width:32px;text-align:center;'>
 							{% if repo.public %}
-								<img src='{% static "/static/img/public_repo.png" %}' alt='Public'>
+								<img src='{% static "img/public_repo.png" %}' alt='Public'>
 							{% else %}
-								<img src='{% static "/static/img/private_repo.png" %}' alt='Private'>
+								<img src='{% static "img/private_repo.png" %}' alt='Private'>
 							{% endif %}
 						</td>
 						<td>

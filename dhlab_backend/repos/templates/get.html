@@ -6,25 +6,30 @@
 {% endblock %}
 
 {% block css %}
-<link rel="stylesheet" type="text/css" href="{% static '/static/css/webform.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/webform.css' %}">
 {% endblock %}
 
 {% block js %}
 <script id='form_id' type='text/html'>{{ repo_id }}</script>
-<script src="{% static '/static/js/vendor/json2.js' %}"></script>
-<script src="{% static '/static/js/vendor/underscore.js' %}"></script>
-<script src="{% static '/static/js/vendor/backbone-min.js' %}"></script>
-<script src="{% static '/static/js/vendor/bootstrap.2.3.1.min.js' %}"></script>
+<script id='user' type='text/html'>{{ user.username }}</script>
+
+<script data-main='/static/js/webform/main' src='{% static 'js/vendor/require-jquery.js' %}'></script>
+
+<!--
+<script src="{% static 'js/vendor/json2.js' %}"></script>
+<script src="{% static 'js/vendor/underscore.js' %}"></script>
+<script src="{% static 'js/vendor/backbone-min.js' %}"></script>
+-->
+<script src="{% static 'js/vendor/bootstrap.2.3.1.min.js' %}"></script>
 
 <!-- Backbone Forms JS files -->
-<script src="{% static '/static/js/vendor/forms/backbone-forms.min.js' %}"></script>
-<script src="{% static '/static/js/vendor/forms/editors/list.min.js' %}"></script>
-<script src="{% static '/static/js/vendor/forms/templates/bootstrap.js' %}"></script>
+<!--
+<script src="{% static 'js/vendor/forms/backbone-forms.min.js' %}"></script>
+<script src="{% static 'js/vendor/forms/editors/list.min.js' %}"></script>
+<script src="{% static 'js/vendor/forms/templates/bootstrap.js' %}"></script>
+<script src="{% static 'js/vendor/backbone-localstorage.js' %}"></script>
+-->
 
-<script src="{% static '/static/js/vendor/backbone-localstorage.js' %}"></script>
-<script src="{% static '/static/js/vendor/swipe.min.js' %}"></script>
-
-<script src="{% static '/static/js/xform_web.js' %}"></script>
 {% endblock %}
 
 {% block content %}

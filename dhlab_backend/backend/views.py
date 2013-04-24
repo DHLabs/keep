@@ -1,46 +1,19 @@
 from bson import ObjectId
 
-from backend.db import db, encrypt_survey
-
+from backend.db import db
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
-
-from datetime import datetime
 
 from django.contrib.sites.models import RequestSite
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.utils import simplejson
 
 from registration.models import RegistrationProfile
 
 from twofactor.models import UserAPIToken
-
-
-def submission( request, username ):
-
-    if request.method == 'POST':
-        user = User.objects.get(username=username)
-        survey_data = {
-            # User ID of the person who uploaded the form (not the data)
-            'user':         user.id,
-            # Survey/form ID associated with this data
-            'survey':       survey[ '_id' ],
-            # Timestamp of when this submission was received
-            'timestamp':    datetime.utcnow(),
-            # The validated & formatted survey data.
-            'data':         encrypt_survey( valid_data )
-        }
-        db.survey_data.insert(survey_data)
-
-        data = simplejson.dumps( { 'success': True } )
-        return HttpResponse( data, mimetype='application/json' )
-
-    return HttpResponseNotAllowed( ['POST'] )
 
 
 def home( request ):

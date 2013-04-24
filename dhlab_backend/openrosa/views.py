@@ -11,7 +11,7 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from lxml import etree
-from openrosa import validate_and_format
+from repos import validate_and_format
 
 
 def formlist( request, username ):
