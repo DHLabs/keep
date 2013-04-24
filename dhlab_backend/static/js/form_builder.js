@@ -124,6 +124,7 @@ function populateQuestion( questionNum ) {
 	$("#questionLabel").val( "" );
 	$("#questionRequired").checked = false;
 	$("#questionHintUse").checked = false;
+	$("#questionType").val('note');
 	toggleHint();
 
 
@@ -132,7 +133,7 @@ function populateQuestion( questionNum ) {
 		$("#questionName").val( question.name );
 		$("#questionLabel").val( question.label );
 		$("#questionType").val(question.type);
-		var choices = question.children;
+		var choices = question.choices;
 		if( choices ) {
 			showChoices();
 			for( var choice in choices ) {
@@ -297,7 +298,7 @@ function okClicked() {
 				option.label = rows[1].value;
 				options.push(option);
 			}
-			question.children = options;
+			question.choices = options;
 		}
 
 		//alert( JSON.stringify(question) );
