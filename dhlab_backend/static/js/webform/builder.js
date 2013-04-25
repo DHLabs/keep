@@ -43,19 +43,9 @@ define(['vendor/underscore'], function(_) {
         });
       });
     } else if (child.type === 'group') {
-      schema_dict['type'] = 'Text';
       _.each(child.children, function(_child) {
         return _this.recursiveAdd(_child);
       });
-      schema_dict = {
-        type: 'Text',
-        help: child.hint,
-        title: child.label,
-        template: 'groupEnd',
-        is_field: false
-      };
-      this.item_dict[child.name + '-end'] = schema_dict;
-      this._fieldsets.push(child.name + '-end');
       return this;
     } else if (child.type === 'select one') {
       schema_dict['type'] = 'Select';

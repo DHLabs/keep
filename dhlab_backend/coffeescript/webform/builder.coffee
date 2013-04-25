@@ -60,23 +60,10 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             )
 
         else if child.type is 'group'
-            # this is a hack
-            schema_dict['type'] = 'Text'
-            # schema_dict['template'] = 'groupBegin'
 
             _.each( child.children, ( _child ) =>
                 @recursiveAdd( _child )
             )
-
-            schema_dict =
-                type:       'Text'
-                help:       child.hint
-                title:      child.label
-                template:   'groupEnd'
-                is_field:   false
-
-            @item_dict[child.name + '-end'] = schema_dict
-            @_fieldsets.push(child.name + '-end')
 
             return @
 
