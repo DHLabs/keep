@@ -189,12 +189,14 @@ def toggle_public( request, repo_id ):
 
 
 @require_GET
-def webform( request, repo_name ):
+def webform( request, username, repo_name ):
     '''
         Simply grab the survey data and send it on the webform. The webform
         will handle rendering and submission of the final data to the server.
     '''
-    repo = db.survey.find_one( { 'name': repo_name } )
+    user = get_object_or_404( User, username=username )
+
+    repo = db.survey.find_one( { 'name': repo_name, 'user': user.id } )
 
     if repo is None:
         return HttpResponse( status=404 )

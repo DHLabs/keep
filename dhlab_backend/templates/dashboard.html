@@ -79,7 +79,7 @@
 							{% endif %}
 						</td>
 						<td style='width:102px;text-align:center;'>
-							<a href='{% url "repo_webform" repo_name=repo.name %}' class='btn btn-small'>
+							<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
 								<i class='icon-pencil'></i> Web Form
 							</a>
 						</td>
