@@ -1,5 +1,4 @@
 # Installing Dependencies
-test
 
 Make sure the following dependencies are installed:
 
@@ -30,6 +29,12 @@ Ensure that virtualenvwrapper is correctly setup. You should be able to run mkvi
     git submodule init
     git submodule update
 
+## Startup MongoDB
+
+Run mongod to ensure MongoDB is running
+
+    mongod
+
 ## Setting up the Databases
 
     python dhlab_backend/manage.py syncdb
@@ -39,16 +44,9 @@ Ensure that virtualenvwrapper is correctly setup. You should be able to run mkvi
 
     python dhlab_backend/manage.py runserver
 
-# Setting up Two Factor Authentication
+## Logging In
 
-Download the Google Authenticator app on your smartphone.
-
-Scan the following barcode:
-
-![2FA Token](https://chart.googleapis.com/chart?chl=otpauth%3A%2F%2Ftotp%2Fadmin%40DHLab%3Fsecret%3DNTSRUTMVFKM44XTW&chs=200x200&cht=qr&chld=M%7C0)
-
-You may now log in to the system using the following credentials along with the
-6 digit authentication token provided by the Google Authenticator application.
+You may now log in to the system using the following credentials.
 
 **Username:** admin
 
