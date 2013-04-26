@@ -160,6 +160,21 @@ class RepoResource( MongoDBResource ):
         # Don't include resource uri
         include_resource_uri = False
 
+    def create_response( self, request, data, response_class=HttpResponse, **response_kwargs):
+        """
+        Extracts the common "which-format/serialize/return-response" cycle.
+
+        Mostly a useful shortcut/hook.
+        """
+        desired_format = self.determine_format(request)
+
+        serialized = self.serialize(request, data, desired_format)
+        response = response_class( content=serialized,
+                            content_type=build_content_type(desired_format),
+                               **response_kwargs )
+        response[ 'X-OpenRosa-Version'] = '1.0'
+        return response
+
     def post_detail( self, request, **kwargs ):
 
         # The find the suervey object associated with this form name & user
