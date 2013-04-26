@@ -14,9 +14,11 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 
 from tastypie import fields
 from tastypie.authorization import Authorization
+from tastypie.utils.mime import build_content_type
 
 # from twofactor.api_auth import ApiTokenAuthentication
 

@@ -61,9 +61,6 @@ class XFormSerializer( Serializer ):
 
                 element.append( downloadUrl )
 
-                xformHash = etree.Element( 'hash' )
-                xformHash.text = 'md5:bac9bf046779e2bc874adbd478e0092c'
-                element.append( xformHash )
                 element.append( etree.Element( 'descriptionText' ) )
                 element.append( etree.Element( 'manifestUrl' ) )
 
