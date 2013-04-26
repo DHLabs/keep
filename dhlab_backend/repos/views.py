@@ -258,7 +258,11 @@ def repo_viz( request, username, repo_name ):
             for datum in data:
 
                 geopoint = datum[ 'data' ][ geo_index ].split( ' ' )
-                point = ( float( geopoint[0] ), float( geopoint[1] ) )
+
+                try:
+                    point = ( float( geopoint[0] ), float( geopoint[1] ) )
+                except ValueError:
+                    continue
 
                 if xbounds[0] is None or point[0] < xbounds[0]:
                     xbounds[0] = point[0]
