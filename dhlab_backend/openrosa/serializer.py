@@ -61,6 +61,7 @@ class XFormSerializer( Serializer ):
 
                 element.append( downloadUrl )
 
+                element.append( etree.Element( 'hash' ) )
                 element.append( etree.Element( 'descriptionText' ) )
                 element.append( etree.Element( 'manifestUrl' ) )
 
