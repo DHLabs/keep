@@ -25,7 +25,7 @@ class XFormSerializer( Serializer ):
     formats = [ 'xform', 'json' ]
     content_types = {
         'json': 'application/json',
-        'xform': 'application/xml',
+        'xform': 'text/xml',
     }
 
     def to_xform( self, data, options=None ):
