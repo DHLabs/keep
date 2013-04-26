@@ -72,7 +72,8 @@ DataView = (function(_super) {
   DataView.prototype.events = {
     "click #yaxis_options input": "change_y_axis",
     "click #chart_options a.btn": "switch_viz",
-    "change #sharing_toggle": "toggle_public"
+    "change #sharing_toggle": "toggle_public",
+    "click #step": "map_step"
   };
 
   DataView.prototype.data = new DataCollection();
@@ -90,6 +91,10 @@ DataView = (function(_super) {
   DataView.prototype.yaxis = null;
 
   DataView.prototype.chart_fields = [];
+
+  DataView.prototype.stepFlag = false;
+
+  DataView.prototype.stepCount = 0;
 
   DataView.prototype.width = 750;
 
@@ -136,6 +141,12 @@ DataView = (function(_super) {
         }
       }).addClass('viz-active');
     });
+  };
+
+  DataView.prototype.map_step = function(event) {
+    this.stepFlag = true;
+    this.stepCount = this.stepCount + 1;
+    return this.renderMap();
   };
 
   DataView.prototype.change_y_axis = function(event) {
@@ -276,7 +287,7 @@ DataView = (function(_super) {
   };
 
   DataView.prototype.renderMap = function() {
-    var center, constrainedMarker, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    var center, constrainedMarker, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, stepLoop, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
     this.heatmap = L.TileLayer.heatMap({
       radius: 80,
       opacity: 0.8,
@@ -298,7 +309,9 @@ DataView = (function(_super) {
     }
     center[0] = center[0] / this.data.models.length;
     center[1] = center[1] / this.data.models.length;
-    this.map = L.map('map').setView(center, 10);
+    if (!this.stepFlag) {
+      this.map = L.map('map').setView(center, 10);
+    }
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 18
@@ -316,9 +329,11 @@ DataView = (function(_super) {
     heatmapData = [];
     this.markers = [];
     this.constrained_markers = [];
+    stepLoop = this.stepCount;
     _ref1 = this.data.models;
     for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
       datum = _ref1[_j];
+      alert("entered loop!");
       geopoint = datum.get('data')[this.map_headers].split(' ');
       marker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
@@ -334,7 +349,10 @@ DataView = (function(_super) {
       constrainedMarker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
       });
-      this.constrained_markers.push(constrainedMarker);
+      if (stepLoop > 0) {
+        this.constrained_markers.push(constrainedMarker);
+        stepLoop = stepLoop - 1;
+      }
       heatmapData.push({
         lat: geopoint[0],
         lon: geopoint[1],
@@ -344,9 +362,11 @@ DataView = (function(_super) {
     this.marker_layer = L.layerGroup(this.markers);
     this.constrained_layer = L.layerGroup(this.constrained_markers);
     this.heatmap.addData(heatmapData);
-    this.map.addLayer(this.heatmap);
-    this.map.addLayer(this.marker_layer);
-    this.map.addLayer(this.constrained_layer);
+    if (!this.stepFlag) {
+      this.map.addLayer(this.heatmap);
+      this.map.addLayer(this.marker_layer);
+      this.map.addLayer(this.constrained_layer);
+    }
     layers = {
       'Markers': this.marker_layer,
       'Heatmap': this.heatmap,
