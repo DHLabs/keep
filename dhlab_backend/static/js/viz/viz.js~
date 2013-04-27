@@ -73,7 +73,7 @@ DataView = (function(_super) {
     "click #yaxis_options input": "change_y_axis",
     "click #chart_options a.btn": "switch_viz",
     "change #sharing_toggle": "toggle_public",
-    "click #step": "map_step"
+    "click #time_step a.btn": "time_step"
   };
 
   DataView.prototype.data = new DataCollection();
@@ -88,13 +88,15 @@ DataView = (function(_super) {
 
   DataView.prototype.map = null;
 
+  DataView.prototype.step_clicked = false;
+
+  DataView.prototype.step_current = 0;
+
+  DataView.prototype.previous_control = null;
+
   DataView.prototype.yaxis = null;
 
   DataView.prototype.chart_fields = [];
-
-  DataView.prototype.stepFlag = false;
-
-  DataView.prototype.stepCount = 0;
 
   DataView.prototype.width = 750;
 
@@ -143,9 +145,11 @@ DataView = (function(_super) {
     });
   };
 
-  DataView.prototype.map_step = function(event) {
-    this.stepFlag = true;
-    this.stepCount = this.stepCount + 1;
+  DataView.prototype.time_step = function(event) {
+    if (this.step_clicked === false) {
+      this.step_clicked = true;
+    }
+    this.step_current += 1;
     return this.renderMap();
   };
 
@@ -287,7 +291,7 @@ DataView = (function(_super) {
   };
 
   DataView.prototype.renderMap = function() {
-    var center, constrainedMarker, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, stepLoop, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    var center, constrainedMarker, controls, datum, geopoint, heatmapData, html, index, key, layers, marker, myIcon, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
     this.heatmap = L.TileLayer.heatMap({
       radius: 80,
       opacity: 0.8,
@@ -309,7 +313,7 @@ DataView = (function(_super) {
     }
     center[0] = center[0] / this.data.models.length;
     center[1] = center[1] / this.data.models.length;
-    if (!this.stepFlag) {
+    if (this.step_clicked === false) {
       this.map = L.map('map').setView(center, 10);
     }
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -329,11 +333,10 @@ DataView = (function(_super) {
     heatmapData = [];
     this.markers = [];
     this.constrained_markers = [];
-    stepLoop = this.stepCount;
+    index = this.step_current;
     _ref1 = this.data.models;
     for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
       datum = _ref1[_j];
-      alert("entered loop!");
       geopoint = datum.get('data')[this.map_headers].split(' ');
       marker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
@@ -349,9 +352,9 @@ DataView = (function(_super) {
       constrainedMarker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
       });
-      if (stepLoop > 0) {
+      if (index > 0) {
         this.constrained_markers.push(constrainedMarker);
-        stepLoop = stepLoop - 1;
+        index -= 1;
       }
       heatmapData.push({
         lat: geopoint[0],
@@ -362,11 +365,9 @@ DataView = (function(_super) {
     this.marker_layer = L.layerGroup(this.markers);
     this.constrained_layer = L.layerGroup(this.constrained_markers);
     this.heatmap.addData(heatmapData);
-    if (!this.stepFlag) {
-      this.map.addLayer(this.heatmap);
-      this.map.addLayer(this.marker_layer);
-      this.map.addLayer(this.constrained_layer);
-    }
+    this.map.addLayer(this.heatmap);
+    this.map.addLayer(this.marker_layer);
+    this.map.addLayer(this.constrained_layer);
     layers = {
       'Markers': this.marker_layer,
       'Heatmap': this.heatmap,
@@ -375,6 +376,11 @@ DataView = (function(_super) {
     controls = L.control.layers(null, layers, {
       collapsed: false
     });
+    alert(step_clicked);
+    if (this.step_clicked) {
+      this.previous_control.removeFrom(this.map);
+    }
+    this.previous_control = controls;
     return controls.addTo(this.map);
   };
 

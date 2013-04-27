@@ -343,7 +343,7 @@ class DataView extends Backbone.View
 
             if index > 0
                 @constrained_markers.push( constrainedMarker )
-            index -= 1
+                index -= 1
 
             heatmapData.push(
                 lat: geopoint[0]
@@ -354,6 +354,7 @@ class DataView extends Backbone.View
         @constrained_layer = L.layerGroup( @constrained_markers )
         @heatmap.addData( heatmapData )
 
+        
         @map.addLayer( @heatmap )
         @map.addLayer( @marker_layer )
         @map.addLayer( @constrained_layer )
@@ -363,5 +364,12 @@ class DataView extends Backbone.View
             'Heatmap': @heatmap
             'Constrained': @constrained_layer
 
+        
+        
         controls = L.control.layers( null, layers, { collapsed: false } )
+        alert @step_clicked
+        if (@step_clicked)
+          @previous_control.removeFrom( @map )
+        
+        @previous_control = controls
         controls.addTo( @map )
