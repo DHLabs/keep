@@ -29,6 +29,7 @@ class DataView extends Backbone.View
         "click #yaxis_options input":   "change_y_axis"
         "click #chart_options a.btn":   "switch_viz"
         "change #sharing_toggle":       "toggle_public"
+        "click #time_step a.btn":        "time_step" 
 
     # Current list of survey data
     data: new DataCollection()
@@ -43,6 +44,11 @@ class DataView extends Backbone.View
     map_headers: null       # Map related headers (geopoint datatype)
     map_enabled: false      # Did we detect any geopoints in the data?
     map: null               # Map object
+
+    # Time step variables
+    step_clicked:  false
+    step_current: 0
+    previous_control: null
 
     # Yaxis chosen by the user
     yaxis: null
@@ -97,6 +103,11 @@ class DataView extends Backbone.View
             ).addClass( 'viz-active' )
         )
 
+    time_step: (event) ->
+        if @step_clicked == false
+            @step_clicked = true 
+        @step_current += 1
+        @renderMap()
 
     change_y_axis: (event) ->
         # Ensure everything else is unchecked
@@ -296,7 +307,8 @@ class DataView extends Backbone.View
         center[0] = center[0] / @data.models.length
         center[1] = center[1] / @data.models.length
 
-        @map = L.map('map').setView( center, 10 )
+        if @step_clicked == false
+            @map = L.map('map').setView( center, 10 )
 
         L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -315,6 +327,7 @@ class DataView extends Backbone.View
         heatmapData = []
         @markers = []
         @constrained_markers = []
+        index = @step_current
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
 
@@ -327,7 +340,10 @@ class DataView extends Backbone.View
 
             @markers.push( marker )
             constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
-            @constrained_markers.push( constrainedMarker )
+
+            if index > 0
+                @constrained_markers.push( constrainedMarker )
+            index -= 1
 
             heatmapData.push(
                 lat: geopoint[0]
