@@ -107,7 +107,8 @@ class DataView extends Backbone.View
         if @step_clicked == false
             @step_clicked = true 
         @step_current += 1
-        @renderMap()
+        if (@step_current <= @data.models.length)
+            @renderMap()
 
     change_y_axis: (event) ->
         # Ensure everything else is unchecked
@@ -355,8 +356,9 @@ class DataView extends Backbone.View
         @heatmap.addData( heatmapData )
 
         
-        @map.addLayer( @heatmap )
-        @map.addLayer( @marker_layer )
+        if (!@step_clicked)
+            @map.addLayer( @heatmap )
+            @map.addLayer( @marker_layer )
         @map.addLayer( @constrained_layer )
 
         layers =
@@ -367,9 +369,5 @@ class DataView extends Backbone.View
         
         
         controls = L.control.layers( null, layers, { collapsed: false } )
-        alert @step_clicked
-        if (@step_clicked)
-          @previous_control.removeFrom( @map )
-        
-        @previous_control = controls
-        controls.addTo( @map )
+        if (!@step_clicked)
+            controls.addTo( @map )
