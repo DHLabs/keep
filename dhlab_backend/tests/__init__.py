@@ -27,11 +27,12 @@ class ApiTestCase( LiveServerTestCase ):
 
     def open( self, url, params, method='GET' ):
         final_url = '%s%s' % ( self.live_server_url, '/api/v1' )
+        final_url += url
 
         encoded_params = urllib.urlencode( params, True )
 
         if method == 'GET':
-            final_url += url + '?' + encoded_params
+            final_url += '?' + encoded_params
             return json.load( urllib2.urlopen( final_url ) )
 
         return json.load( urllib2.urlopen( final_url, encoded_params ) )
