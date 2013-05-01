@@ -1,4 +1,7 @@
 import json
+import os
+import shlex
+import subprocess
 import urllib
 import urllib2
 
@@ -12,6 +15,13 @@ class HttpTestCase( LiveServerTestCase ):
     @classmethod
     def setUpClass( cls ):
         cls.selenium = WebDriver()
+
+        with open( os.devnull, 'w' ) as devnull:
+            testdb = 'mongorestore -d test --drop ../_data/dhlab-backup/dhlab'
+            subprocess.call( shlex.split( testdb ),
+                             stdout=devnull,
+                             stderr=devnull )
+
         super( HttpTestCase, cls ).setUpClass()
 
     @classmethod
@@ -24,6 +34,16 @@ class HttpTestCase( LiveServerTestCase ):
 
 
 class ApiTestCase( LiveServerTestCase ):
+
+    @classmethod
+    def setUpClass( cls ):
+        with open( os.devnull, 'w' ) as devnull:
+            testdb = 'mongorestore -d test --drop ../_data/dhlab-backup/dhlab'
+            subprocess.call( shlex.split( testdb ),
+                             stdout=devnull,
+                             stderr=devnull )
+
+        super( ApiTestCase, cls ).setUpClass()
 
     def open( self, url, params, method='GET' ):
         final_url = '%s%s' % ( self.live_server_url, '/api/v1' )
