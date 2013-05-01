@@ -74,7 +74,6 @@ class MongoDBResource(Resource):
         """
         Returns mongodb document from provided id.
         """
-
         obj = self.get_collection()\
                   .find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
 

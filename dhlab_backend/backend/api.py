@@ -18,6 +18,7 @@ from django.http import HttpResponse
 
 from tastypie import fields
 from tastypie.authorization import Authorization
+from tastypie.http import HttpUnauthorized
 from tastypie.utils.mime import build_content_type
 
 # from twofactor.api_auth import ApiTokenAuthentication
@@ -31,9 +32,12 @@ class DataAuthorization( Authorization ):
         try:
             user = User.objects.get( username=user )
         except ObjectDoesNotExist:
-            return ValueError
+            raise ValueError
 
-        return object_list.find({ 'user': user.id } )
+        return object_list.find( { 'user': user.id },
+                                 { 'data': False, 'user': False } )\
+                          .limit( 5 )\
+                          .sort( 'timestamp', pymongo.DESCENDING )
 
     def read_detail( self, object_detail, bundle ):
         user = bundle.request.GET.get( 'user', None )
@@ -41,12 +45,12 @@ class DataAuthorization( Authorization ):
         try:
             user = User.objects.get( username=user )
         except ObjectDoesNotExist:
-            raise ValueError
+            return False
 
         if object_detail[ 'user' ] != user.id:
-            raise ValueError
+            return False
 
-        return object_detail
+        return True
 
 
 class RepoAuthorization( Authorization ):
@@ -71,22 +75,22 @@ class RepoAuthorization( Authorization ):
         try:
             user = User.objects.get( username=user )
         except ObjectDoesNotExist:
-            raise ValueError
+            return False
 
         if object_detail[ 'user' ] != user.id:
-            raise ValueError
+            return False
 
         return True
 
-    def update_detail( self, object_detail, bundle ):
-        return object_detail
+    def create_detail( self, object_detail, bundle ):
+        return True
 
 
 class DataResource( MongoDBResource ):
     id          = fields.CharField( attribute='_id' )
     repo_id     = fields.CharField( attribute='repo' )
     timestamp   = fields.DateTimeField( attribute='timestamp' )
-    data        = fields.DictField( attribute='data' )
+    data        = fields.DictField( attribute='data', null=True )
 
     class Meta:
         collection = 'data'
@@ -100,33 +104,25 @@ class DataResource( MongoDBResource ):
         authorization = DataAuthorization()
 
     def get_detail( self, request, **kwargs ):
+
         # Grab the survey that we're querying survey data for
         repo_id = kwargs[ 'pk' ]
 
-        # Query the database for the data
-        cursor = db.data.find( { 'repo': ObjectId( repo_id ) })
+        try:
+            basic_bundle = self.build_bundle( request=request )
+            repo = db.survey.find_one( { '_id': ObjectId( repo_id ) } )
 
-        data = dehydrate_survey( cursor )
+            if not self.authorized_read_detail( repo, basic_bundle ):
+                return HttpUnauthorized()
 
-        return self.create_response( request, data )
+            # Query the database for the data
+            cursor = db.data.find( { 'repo': ObjectId( repo_id ) } )
 
-    def get_list( self, request, **kwargs ):
-        user = request.GET.get( 'user', None )
-        user = User.objects.get( username=user )
+            data = dehydrate_survey( cursor )
 
-        # Don't show encrypted data information and user id.
-        # Limit to the last 5 submissions
-        # Sort by latest submission first
-        cursor = db.data.find( { 'user': user.id },
-                                      { 'data': False, 'user': False } )\
-                               .limit( 5 )\
-                               .sort( 'timestamp', pymongo.DESCENDING )
-
-        # Format timestamp correctly such that Javascript can correctly parse
-        # the information
-        data = dehydrate_survey( cursor )
-
-        return self.create_response( request, data )
+            return self.create_response( request, data )
+        except ValueError:
+            return HttpUnauthorized()
 
 
 class RepoResource( MongoDBResource ):
@@ -185,9 +181,15 @@ class RepoResource( MongoDBResource ):
 
     def post_detail( self, request, **kwargs ):
 
+        basic_bundle = self.build_bundle( request=request )
+
         # The find the suervey object associated with this form name & user
         repo = db.survey.find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
         repo_user = repo[ 'user' ]
+
+        # Are we authorized to post data here?
+        if not self.authorized_create_detail( repo, basic_bundle ):
+            return HttpUnauthorized()
 
         # Do basic validation of the data
         valid_data = validate_and_format( repo, request.POST )
@@ -207,7 +209,6 @@ class RepoResource( MongoDBResource ):
             'data':         valid_data
         }
 
-        # Insert into the database
         new_id = db.data.insert( repo_data )
         response_data = { 'success': True, 'id': str( new_id ) }
         return self.create_response( request, response_data )
