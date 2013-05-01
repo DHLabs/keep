@@ -16,9 +16,38 @@ class DataApiV1Tests( ApiTestCase ):
         response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
         repo = response[ 'objects' ][0][ 'id' ]
 
-        # Grab the repo details
+        # Grab the list of datapoints for this repo.
         response = self.open( '/data/%s' % ( repo ),
                               {'format': 'json', 'user': 'admin'} )
 
         assert response is not None
         assert len( response ) > 0
+
+    def test_data_post( self ):
+        '''
+            Test if we can successfully post data to the API for a repo.
+        '''
+        # Get the list of repos for the test user
+        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
+        repo = response[ 'objects' ][0][ 'id' ]
+
+        # Grab the list of datapoints for this repo
+        response = self.open( '/data/%s' % ( repo ),
+                              {'format': 'json', 'user': 'admin'} )
+
+        assert response is not None
+        assert len( response ) > 0
+
+        beforeLength = len( response )
+        data = { 'format': 'json', 'user': 'admin' }
+
+        # Attempt to post data to the repo.
+        response = self.open( '/repos/%s' % ( repo ), data, method='POST' )
+        print response
+
+        assert response[ 'success' ]
+
+        # Assert that the number of datapoints increased by one.
+        response = self.open( '/data/%s' % ( repo ),
+                              {'format': 'json', 'user': 'admin'} )
+        assert len( response ) == beforeLength + 1
