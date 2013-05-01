@@ -1,4 +1,11 @@
-from backend.db import db, decrypt_survey
+from backend.db import db
+from twofactor.util import decrypt_value
+
+
+def decrypt_survey( data ):
+    for key in data:
+        data[ key ] = decrypt_value( data[ key ] )
+    return data
 
 
 def main():
