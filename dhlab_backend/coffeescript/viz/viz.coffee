@@ -287,16 +287,22 @@ class DataView extends Backbone.View
 
         # Calculate the center of the data
         center = [ 0, 0 ]
+        valid_count = 0
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
 
+            if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
+                continue
+
             center[0] += parseFloat( geopoint[0] )
             center[1] += parseFloat( geopoint[1] )
+            valid_count += 1
 
-        center[0] = center[0] / @data.models.length
-        center[1] = center[1] / @data.models.length
+        center[0] = center[0] / valid_count
+        center[1] = center[1] / valid_count
 
         @map = L.map('map').setView( center, 10 )
+        @test_map = L.map( 'hidden_map' ).setView( center, 10 );
 
         L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -314,9 +320,11 @@ class DataView extends Backbone.View
 
         heatmapData = []
         @markers = []
-        @constrained_markers = []
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
+
+            if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
+                continue
 
             marker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
 
@@ -326,26 +334,27 @@ class DataView extends Backbone.View
             marker.bindPopup( html )
 
             @markers.push( marker )
-            constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
-            @constrained_markers.push( constrainedMarker )
 
             heatmapData.push(
                 lat: geopoint[0]
                 lon: geopoint[1]
                 value: 1 )
 
-        @marker_layer = L.layerGroup( @markers )
-        @constrained_layer = L.layerGroup( @constrained_markers )
-        @heatmap.addData( heatmapData )
+        # polylines = [
+        #     new L.LatLng( 32.818862, -117.088589 ),
+        #     new L.LatLng( 37.785834, -122.406417 ) ]
+        # @test_map.addLayer( L.polyline( polylines, {color:'red'} ) )
+        # @map.addLayer( L.polyline( polylines, {color:'red'} ) )
 
+        @marker_layer = L.layerGroup( @markers )
+        @heatmap.addData( heatmapData )
         @map.addLayer( @heatmap )
         @map.addLayer( @marker_layer )
-        @map.addLayer( @constrained_layer )
 
         layers =
             'Markers': @marker_layer
             'Heatmap': @heatmap
-            'Constrained': @constrained_layer
 
         controls = L.control.layers( null, layers, { collapsed: false } )
         controls.addTo( @map )
+        @

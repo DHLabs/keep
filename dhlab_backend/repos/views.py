@@ -153,7 +153,7 @@ def delete_repo( request, repo_id ):
         return HttpResponse( 'Unauthorized', status=401 )
 
     db.survey.remove( { '_id': ObjectId( repo_id ) } )
-    db.survey_data.remove( { 'survey': ObjectId( repo_id ) } )
+    db.data.remove( { 'repo': ObjectId( repo_id ) } )
 
     return HttpResponseRedirect( '/' )
 
@@ -234,7 +234,7 @@ def repo_viz( request, username, repo_name ):
         return HttpResponse( 'Unauthorized', status=401 )
 
     # Grab the data for this repository
-    data = db.survey_data.find( {'survey': ObjectId( repo[ '_id' ] )} )
+    data = db.data.find( {'repo': ObjectId( repo[ '_id' ] )} )
     data = dehydrate_survey( data )
 
     # Is some unknown user looking at this data?
@@ -250,7 +250,6 @@ def repo_viz( request, username, repo_name ):
 
         # Great! We have geopoints, let's privatize this data
         if has_geo:
-
             xbounds     = [ None, None ]
             ybounds     = [ None, None ]
             fuzzed_data = []

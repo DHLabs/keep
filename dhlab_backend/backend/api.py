@@ -2,7 +2,7 @@ import json
 import pymongo
 
 from backend.db import db, MongoDBResource, Document
-from backend.db import dehydrate_survey, encrypt_survey
+from backend.db import dehydrate_survey
 from backend.serializers import CSVSerializer
 
 from repos import validate_and_format
@@ -64,7 +64,7 @@ class RepoAuthorization( Authorization ):
     def read_detail( self, object_detail, bundle ):
 
         if object_detail.get( 'public', False ):
-            return object_detail
+            return True
 
         user = bundle.request.GET.get( 'user', None )
 
@@ -84,12 +84,12 @@ class RepoAuthorization( Authorization ):
 
 class DataResource( MongoDBResource ):
     id          = fields.CharField( attribute='_id' )
-    survey_id   = fields.CharField( attribute='survey' )
+    repo_id     = fields.CharField( attribute='repo' )
     timestamp   = fields.DateTimeField( attribute='timestamp' )
     data        = fields.DictField( attribute='data' )
 
     class Meta:
-        collection = 'survey_data'
+        collection = 'data'
         resource_name = 'data'
         object_class = Document
         serializer = CSVSerializer()
@@ -101,10 +101,10 @@ class DataResource( MongoDBResource ):
 
     def get_detail( self, request, **kwargs ):
         # Grab the survey that we're querying survey data for
-        survey_id = kwargs[ 'pk' ]
+        repo_id = kwargs[ 'pk' ]
 
         # Query the database for the data
-        cursor = db.survey_data.find( { 'survey': ObjectId( survey_id ) })
+        cursor = db.data.find( { 'repo': ObjectId( repo_id ) })
 
         data = dehydrate_survey( cursor )
 
@@ -117,7 +117,7 @@ class DataResource( MongoDBResource ):
         # Don't show encrypted data information and user id.
         # Limit to the last 5 submissions
         # Sort by latest submission first
-        cursor = db.survey_data.find( { 'user': user.id },
+        cursor = db.data.find( { 'user': user.id },
                                       { 'data': False, 'user': False } )\
                                .limit( 5 )\
                                .sort( 'timestamp', pymongo.DESCENDING )
@@ -139,6 +139,7 @@ class RepoResource( MongoDBResource ):
     type        = fields.CharField( attribute='type', null=True )
     children    = fields.ListField( attribute='children', null=True )
     owner       = fields.IntegerField( attribute='user', null=True )
+    public      = fields.BooleanField( attribute='public', default=False )
 
     class Meta:
         collection = 'survey'
@@ -162,7 +163,8 @@ class RepoResource( MongoDBResource ):
         # Don't include resource uri
         include_resource_uri = False
 
-    def create_response( self, request, data, response_class=HttpResponse, **response_kwargs):
+    def create_response( self, request, data, response_class=HttpResponse,
+                         **response_kwargs):
         """
         Extracts the common "which-format/serialize/return-response" cycle.
 
@@ -172,9 +174,13 @@ class RepoResource( MongoDBResource ):
 
         serialized = self.serialize(request, data, desired_format)
         response = response_class( content=serialized,
-                            content_type=build_content_type(desired_format),
-                               **response_kwargs )
-        response[ 'X-OpenRosa-Version'] = '1.0'
+                                   content_type=build_content_type(desired_format),
+                                   **response_kwargs )
+
+        # FOR ODKCollect
+        # If the device requests an xform add an OpenRosa header
+        if desired_format == 'text/xml':
+            response[ 'X-OpenRosa-Version'] = '1.0'
         return response
 
     def post_detail( self, request, **kwargs ):
@@ -187,10 +193,10 @@ class RepoResource( MongoDBResource ):
         valid_data = validate_and_format( repo, request.POST )
 
         # Include some metadata with the survey data
-        survey_data = {
+        repo_data = {
             'user':         repo_user,
             # Survey/form ID associated with this data
-            'survey':       repo[ '_id' ],
+            'repo':         repo[ '_id' ],
 
             # Survey name (used for feed purposes)
             'survey_label': repo[ 'name' ],
@@ -198,14 +204,13 @@ class RepoResource( MongoDBResource ):
             # Timestamp of when this submission was received
             'timestamp':    datetime.utcnow(),
             # The validated & formatted survey data.
-            'data':         encrypt_survey( valid_data )
+            'data':         valid_data
         }
 
         # Insert into the database
-        db.survey_data.insert( survey_data )
-
-        data = json.dumps( { 'success': True } )
-        return data
+        new_id = db.data.insert( repo_data )
+        response_data = { 'success': True, 'id': str( new_id ) }
+        return self.create_response( request, response_data )
 
     def dehydrate_owner(self, bundle):
         '''

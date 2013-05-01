@@ -59,6 +59,4 @@ class RegistrationFormUserProfile( RegistrationFormUniqueEmail ):
         auth_token = UserAuthToken(user=new_user)
         auth_token.save()
 
-        print 'Password: ', new_user.password
-
         return ( new_user, auth_token )

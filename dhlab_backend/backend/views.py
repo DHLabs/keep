@@ -108,13 +108,14 @@ def user_dashboard( request, username ):
         # Replace _id with mongo_id since the templates don't place nicely with
         # variables that have an underscore in front.
         repo[ 'mongo_id' ] = repo[ '_id' ]
-        del repo[ '_id' ]
 
         # Count the number of submissions for this repo
-        repo[ 'submission_count' ] = db.survey_data\
-                                       .find( {'survey':
-                                              ObjectId(repo[ 'mongo_id' ])})\
+        repo[ 'submission_count' ] = db.data\
+                                       .find( {'repo':
+                                              ObjectId(repo[ '_id' ])})\
                                        .count()
+
+        del repo[ '_id' ]
 
     return render_to_response( 'dashboard.html',
                                { 'user_forms': user_repos,

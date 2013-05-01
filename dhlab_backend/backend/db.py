@@ -1,5 +1,6 @@
 from bson import ObjectId
 
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 
@@ -10,10 +11,8 @@ from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpUnauthorized
 from tastypie.resources import Resource
 
-from twofactor.util import encrypt_value, decrypt_value
-
-connection = MongoClient()
-db = connection[ 'dhlab' ]
+connection = MongoClient( settings.MONGODB_HOST, settings.MONGODB_PORT )
+db = connection[ settings.MONGODB_DBNAME ]
 
 
 def dehydrate( survey ):
@@ -21,13 +20,10 @@ def dehydrate( survey ):
         if isinstance( survey[ key ], ObjectId ):
             survey[ key ] = str( survey[ key ] )
 
-    # Decrypt survey values
-    if 'data' in survey:
-        survey[ 'data' ] = decrypt_survey( survey[ 'data' ] )
-
     # Reformat python DateTime into JS DateTime
     if 'timestamp' in survey:
         survey[ 'timestamp' ] = survey[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
+
     return survey
 
 
@@ -40,18 +36,6 @@ def dehydrate_survey( cursor ):
         return dehydrate( cursor )
 
     return [ dehydrate( row ) for row in cursor ]
-
-
-def encrypt_survey( data ):
-    for key in data:
-        data[ key ] = encrypt_value( data[ key ] )
-    return data
-
-
-def decrypt_survey( data ):
-    for key in data:
-        data[ key ] = decrypt_value( data[ key ] )
-    return data
 
 
 class Document( dict ):
