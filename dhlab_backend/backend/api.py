@@ -89,6 +89,7 @@ class RepoAuthorization( Authorization ):
 class DataResource( MongoDBResource ):
     id          = fields.CharField( attribute='_id' )
     repo_id     = fields.CharField( attribute='repo' )
+    survey_label = fields.CharField( attribute='survey_label', null=True )
     timestamp   = fields.DateTimeField( attribute='timestamp' )
     data        = fields.DictField( attribute='data', null=True )
 

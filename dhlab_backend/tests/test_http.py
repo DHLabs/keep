@@ -64,7 +64,7 @@ class HttpTests( HttpTestCase ):
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( 'test_repo' )
 
-        xform = os.path.abspath( '_data/test_docs/tutorial2.xls' )
+        xform = os.path.abspath( '_data/test_docs/tutorial.xls' )
         self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
 
         submit = '/html/body/div[2]/div/div/div/form/div[2]/button'
@@ -88,7 +88,7 @@ class HttpTests( HttpTestCase ):
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( 'tutorial' )
 
-        xform = os.path.abspath( '_data/test_docs/tutorial2.xls' )
+        xform = os.path.abspath( '_data/test_docs/tutorial.xls' )
         self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
 
         submit = '/html/body/div[2]/div/div/div/form/div[2]/button'
