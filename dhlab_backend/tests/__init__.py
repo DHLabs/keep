@@ -17,7 +17,7 @@ class HttpTestCase( LiveServerTestCase ):
         cls.selenium = WebDriver()
 
         with open( os.devnull, 'w' ) as devnull:
-            testdb = 'mongorestore -d test --drop ../_data/dhlab-backup/dhlab'
+            testdb = 'mongorestore -d test --drop _data/dhlab-backup/dhlab'
             subprocess.call( shlex.split( testdb ),
                              stdout=devnull,
                              stderr=devnull )
@@ -38,7 +38,7 @@ class ApiTestCase( LiveServerTestCase ):
     @classmethod
     def setUpClass( cls ):
         with open( os.devnull, 'w' ) as devnull:
-            testdb = 'mongorestore -d test --drop ../_data/dhlab-backup/dhlab'
+            testdb = 'mongorestore -d test --drop _data/dhlab-backup/dhlab'
             subprocess.call( shlex.split( testdb ),
                              stdout=devnull,
                              stderr=devnull )
