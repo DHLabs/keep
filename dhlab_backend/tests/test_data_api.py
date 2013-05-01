@@ -39,11 +39,12 @@ class DataApiV1Tests( ApiTestCase ):
         assert len( response ) > 0
 
         beforeLength = len( response )
-        data = { 'format': 'json', 'user': 'admin' }
+        data = { 'name': 'Bob Dole', 'age': 20, 'gender': 'male' }
 
         # Attempt to post data to the repo.
-        response = self.open( '/repos/%s' % ( repo ), data, method='POST' )
-        print response
+        response = self.open( '/repos/%s/?user=admin&format=json' % ( repo ),
+                              data,
+                              method='POST' )
 
         assert response[ 'success' ]
 
