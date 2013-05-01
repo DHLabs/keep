@@ -31,7 +31,7 @@ class DataAuthorization( Authorization ):
         try:
             user = User.objects.get( username=user )
         except ObjectDoesNotExist:
-            return []
+            return ValueError
 
         return object_list.find({ 'user': user.id } )
 
@@ -57,7 +57,7 @@ class RepoAuthorization( Authorization ):
         try:
             user = User.objects.get( username=user )
         except ObjectDoesNotExist:
-            return []
+            raise ValueError
 
         return object_list.find({ 'user': user.id } )
 
@@ -76,7 +76,7 @@ class RepoAuthorization( Authorization ):
         if object_detail[ 'user' ] != user.id:
             raise ValueError
 
-        return object_detail
+        return True
 
     def update_detail( self, object_detail, bundle ):
         return object_detail

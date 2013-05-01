@@ -77,9 +77,13 @@ class MongoDBResource(Resource):
         Maps mongodb documents to Document class.
         """
 
-        objects = map( Document,
-                       self.authorized_read_list( self.get_collection(),
-                                                  bundle ) )
+        try:
+            objects = map( Document,
+                           self.authorized_read_list( self.get_collection(),
+                                                      bundle ) )
+        except ValueError:
+            raise ImmediateHttpResponse( HttpUnauthorized() )
+
         return objects
 
     def obj_get(self, bundle, **kwargs):
@@ -91,7 +95,8 @@ class MongoDBResource(Resource):
                   .find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
 
         try:
-            return Document( self.authorized_read_detail( obj, bundle ) )
+            if self.authorized_read_detail( obj, bundle ):
+                return Document( obj )
         except ValueError:
             raise ImmediateHttpResponse( HttpUnauthorized() )
 

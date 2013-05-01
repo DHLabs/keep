@@ -3,7 +3,7 @@ Fabric==1.6.0
 coverage==3.6
 django-discover-runner==0.3
 django-registration==0.8
-django-tastypie==0.9.12
+django-tastypie==0.9.14
 gunicorn==0.17.2
 lxml==3.1beta1
 mimeparse==0.1.3
