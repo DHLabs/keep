@@ -62,8 +62,6 @@ class RepoApiV1Tests( ApiTestCase ):
             if 'public' in repo and repo[ 'public' ]:
                 break
 
-        print repo
-
         # Grab the repo details under a different user
         data = {'format': 'json', 'user': 'test_user'}
         response = self.open( '/repos/%s' % ( repo[ 'id' ] ), data )
