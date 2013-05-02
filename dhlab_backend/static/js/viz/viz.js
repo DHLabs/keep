@@ -343,6 +343,7 @@ DataView = (function(_super) {
     heatmapData = [];
     this.markers = [];
     this.constrained_markers = [];
+	var polyLines = [];
     index = this.step_current;
     _ref5 = this.data.models;
     for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
@@ -371,26 +372,35 @@ DataView = (function(_super) {
         lon: geopoint[1],
         value: 1
       });
+	  polyLines.push ( [parseFloat(geopoint[0]),parseFloat(geopoint[1])] );
     }
     this.marker_layer = L.layerGroup(this.markers);
     this.constrained_layer = L.layerGroup(this.constrained_markers);
+    var polyLineStyle = { color: 'blue', weight: 3, opacity: 0.5, smoothFactor: 1 };
+	this.polyLine_layer = L.polyline(polyLines, polyLineStyle);
+	
+	this.map.addLayer(this.polyLine_layer);
+
+	
     this.heatmap.addData(heatmapData);
     if (!this.step_clicked) {
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
+	  this.map.addLayer(this.polyLine_layer);
     }
     this.map.addLayer(this.constrained_layer);
     layers = {
       'Markers': this.marker_layer,
       'Heatmap': this.heatmap,
-      'Constrained': this.constrained_layer
+      'Constrained': this.constrained_layer,
+	  'polyLine': this.polyLine_layer
     };
-    controls = L.control.layers(null, layers, {
-      collapsed: false
-    });
-    if (!this.step_clicked) {
-      return controls.addTo(this.map);
-    }
+     controls = L.control.layers(null, layers, {
+       collapsed: false
+     });
+      if (!this.step_clicked) {
+       return controls.addTo(this.map);
+      }
   };
 
   return DataView;
