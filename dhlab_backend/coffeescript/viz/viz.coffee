@@ -29,7 +29,8 @@ class DataView extends Backbone.View
         "click #yaxis_options input":   "change_y_axis"
         "click #chart_options a.btn":   "switch_viz"
         "change #sharing_toggle":       "toggle_public"
-        "click #time_step a.btn":        "time_step" 
+        "click #time_step a.btn":       "time_step"
+        "click #autostep a.btn":        "auto_step"
 
     # Current list of survey data
     data: new DataCollection()
@@ -102,6 +103,9 @@ class DataView extends Backbone.View
                     document.vizApp.map.invalidateSize( false )
             ).addClass( 'viz-active' )
         )
+
+    auto_step: (event) ->
+        
 
     time_step: (event) ->
         if @step_clicked == false
