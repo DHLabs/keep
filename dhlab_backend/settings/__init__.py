@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     'twofactor',                # Needed to harden login/database
     'registration',             # Needed for user signup
     'tastypie',                 # Needed for our RESTful API
+    'storages',                 # Needed for S3 file storage
 )
 
 # Set up 2Factor authentication settings
