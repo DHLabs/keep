@@ -123,6 +123,9 @@ class XFormReader():
                         del binding['jr:constraintMsg']['tid']
 
     def apply_translations( self, translations ):
+        '''
+            Apply translations to any labels/constraintMsgs we can find.
+        '''
         for lang, trans in translations.items():
             for itext in trans:
 
@@ -137,9 +140,16 @@ class XFormReader():
                 self._apply_itext( self.xform_dict[ 'children' ],
                                    tid, lang, value )
 
+        # Apply itext adds metadata so we can easily find translations. Remove
+        # this metadata from the final dictionary.
         self._clean_itext( self.xform_dict[ 'children' ] )
 
     def parse_body( self, root ):
+        '''
+            Parse the XForm body. The XForm body provides additional data-type
+            information if not present in the bindings and labels for the
+            fields in the form.
+        '''
         for el in root:
             name       = el.get( 'ref' )
             field_type = el.xpath( 'local-name()' )
