@@ -61,7 +61,7 @@ def xml_submission( request, username ):
             # User ID of the person who uploaded the form (not the data)
             'user':         user.id,
             # Survey/form ID associated with this data
-            'survey':       survey[ '_id' ],
+            'repo':       survey[ '_id' ],
 
             # Survey name (used for feed purposes)
             'survey_label': survey[ 'name' ],
