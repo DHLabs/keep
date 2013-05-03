@@ -45,14 +45,25 @@ class ApiTestCase( LiveServerTestCase ):
 
         super( ApiTestCase, cls ).setUpClass()
 
-    def open( self, url, params, method='GET' ):
+    def openRaw( self, url, params ):
+        final_url = '%s%s' % ( self.live_server_url, url )
+        return urllib2.urlopen( final_url, params ).read()
+
+    def open( self, url, params, method='GET', format='JSON' ):
         final_url = '%s%s' % ( self.live_server_url, '/api/v1' )
         final_url += url
 
-        encoded_params = urllib.urlencode( params, True )
+        encoded_params = ''
+        if params is not None:
+            encoded_params = urllib.urlencode( params, True )
 
         if method == 'GET':
             final_url += '?' + encoded_params
-            return json.load( urllib2.urlopen( final_url ) )
+            response = urllib2.urlopen( final_url )
+        else:
+            response = urllib2.urlopen( final_url, encoded_params )
 
-        return json.load( urllib2.urlopen( final_url, encoded_params ) )
+        if format == 'JSON':
+            return json.load( response )
+        else:
+            return response.read()

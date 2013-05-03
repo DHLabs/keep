@@ -51,18 +51,20 @@ class HttpTests( HttpTestCase ):
         assert 'Registration Complete' in self.selenium.title
         assert len( mail.outbox ) == 1
 
-    def test_create_repo( self ):
+    def test_create_repo_xls_form( self ):
         '''
             Tests the creation of a new repo
         '''
         self.test_login()
+
+        repo_name = 'xls_repo'
 
         # Click on new repo button
         new_repo = '/html/body/div[2]/div/div[2]/table/thead/tr/td/h4/div/a'
         self.selenium.find_element_by_xpath( new_repo ).click()
 
         # Fill out form
-        self.selenium.find_element_by_id( 'id_name' ).send_keys( 'test_repo' )
+        self.selenium.find_element_by_id( 'id_name' ).send_keys( repo_name )
 
         xform = os.path.abspath( '_data/test_docs/tutorial.xls' )
         self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
@@ -73,7 +75,59 @@ class HttpTests( HttpTestCase ):
         # Check that the new repo was created
         repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
         repos = self.selenium.find_elements_by_xpath( repo_table )
-        assert any( [ x.text == 'test_repo' for x in repos ] )
+        assert any( [ x.text == repo_name for x in repos ] )
+
+    def test_create_repo_xml_form( self ):
+        '''
+            Tests the creation of a new repo
+        '''
+        self.test_login()
+
+        repo_name = 'xml_repo'
+
+        # Click on new repo button
+        new_repo = '/html/body/div[2]/div/div[2]/table/thead/tr/td/h4/div/a'
+        self.selenium.find_element_by_xpath( new_repo ).click()
+
+        # Fill out form
+        self.selenium.find_element_by_id( 'id_name' ).send_keys( repo_name )
+
+        xform = os.path.abspath( '_data/test_docs/tutorial.xml' )
+        self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
+
+        submit = '/html/body/div[2]/div/div/div/form/div[2]/button'
+        self.selenium.find_element_by_xpath( submit ).click()
+
+        # Check that the new repo was created
+        repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
+        repos = self.selenium.find_elements_by_xpath( repo_table )
+        assert any( [ x.text == repo_name for x in repos ] )
+
+    def test_create_repo_xml_form_itext( self ):
+        '''
+            Tests the creation of a new repo
+        '''
+        self.test_login()
+
+        repo_name = 'xml_repo_itext'
+
+        # Click on new repo button
+        new_repo = '/html/body/div[2]/div/div[2]/table/thead/tr/td/h4/div/a'
+        self.selenium.find_element_by_xpath( new_repo ).click()
+
+        # Fill out form
+        self.selenium.find_element_by_id( 'id_name' ).send_keys( repo_name )
+
+        xform = os.path.abspath( '_data/test_docs/zambia/Delivery.xml' )
+        self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
+
+        submit = '/html/body/div[2]/div/div/div/form/div[2]/button'
+        self.selenium.find_element_by_xpath( submit ).click()
+
+        # Check that the new repo was created
+        repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
+        repos = self.selenium.find_elements_by_xpath( repo_table )
+        assert any( [ x.text == repo_name for x in repos ] )
 
     def test_create_repo_existing( self ):
         '''

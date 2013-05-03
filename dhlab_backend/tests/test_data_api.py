@@ -49,6 +49,14 @@ class DataApiV1Tests( ApiTestCase ):
         assert response is not None
         assert len( response ) > 0
 
+        # Grab the list of datapoints for this repo.
+        response = self.open( '/data/%s/' % ( repo ),
+                              {'format': 'csv', 'user': 'admin'},
+                              format='csv' )
+
+        assert response is not None
+        assert len( response ) > 0
+
     def test_data_detail_different_user( self ):
         '''
             Test failure state when querying for repo data under a
