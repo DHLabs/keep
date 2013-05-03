@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+
 {% block js %}
-<script src="/static/js/form_builder.js"></script>
+<script src="{% static 'js/form_builder.js' %}"></script>
 {% endblock %}
+
 {% block title %}Create new data repository{% endblock %}
 
 {% block content %}
