@@ -278,11 +278,6 @@ class XFormReader():
                         field[ 'type' ] = value
                         continue
 
-                    # Set readonly fields to act as "notes"
-                    if key == 'readonly' and value == 'true()':
-                        field[ 'type' ] = 'note'
-                        continue
-
                     # Clean up the key and assign the value to our field
                     # bindings
                     key = self._clean_key( key, binding.nsmap )
@@ -327,7 +322,7 @@ class XFormReader():
 
             if field[ 'id' ] == name:
 
-                if 'type' not in field:
+                if 'select' in field_type and 'select' not in field['type']:
                     field[ 'type' ] = self.parse_type( field_type )
 
                 for element in root:
