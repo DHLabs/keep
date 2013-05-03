@@ -309,12 +309,12 @@ class DataView extends Backbone.View
                         maxZoom: 18 }).addTo( @map )
 
         myIcon = L.icon(
-                    iconUrl: '/static/img/leaflet/marker-icon.png'
-                    iconRetinaUrl: '/static/img/leaflet/marker-icon@2x.png'
+                    iconUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon.png'
+                    iconRetinaUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon@2x.png'
                     iconSize: [25, 41]
                     iconAnchor: [12, 41]
                     popupAnchor: [1, -34]
-                    shadowUrl: '/static/img/leaflet/marker-shadow.png'
+                    shadowUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-shadow.png'
                     shadowSize: [41, 41]
                     shadowAnchor: [15, 41] )
 
