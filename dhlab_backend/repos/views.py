@@ -1,5 +1,6 @@
 import json
 import math
+import os
 
 from bson import ObjectId
 from datetime import datetime
@@ -18,6 +19,7 @@ from backend.db import db, dehydrate_survey
 from privacy.map import privatize
 
 from pyxform.xls2json import SurveyReader
+from openrosa.xform_reader import XFormReader
 
 from .forms import NewRepoForm, BuildRepoForm
 
@@ -35,6 +37,9 @@ def new_repo( request ):
         # Check for a valid XForm and parse the file!
         if form.is_valid():
 
+            # Additional errors we may encounter
+            has_errors = False
+
             # Check that this form name isn't already taken by the user
             form_exists = db.survey.find( { 'name': form.cleaned_data['name'],
                                             'user': request.user.id } )
@@ -42,13 +47,27 @@ def new_repo( request ):
             if form_exists.count() != 0:
                 errors = form._errors.setdefault( 'name', ErrorList() )
                 errors.append( 'Repository already exists with this name' )
-            else:
-                # Parse the file and store into our database
-                survey = SurveyReader( request.FILES[ 'xform_file' ] )
+                has_errors = True
 
-                if len( survey._warnings ) > 0:
-                    print 'Warnings parsing xls file!'
+            # Parse form file
+            survey = None
+            if not has_errors:
+                # Detect whether this is an XLS or XML file.
+                xform_file = request.FILES['xform_file']
+                name, file_ext = os.path.splitext( xform_file.name)
 
+                # Parse file depending on file type
+                if file_ext == '.xls':
+                    survey = SurveyReader( xform_file )
+                elif file_ext == '.xml':
+                    survey = XFormReader( xform_file )
+                else:
+                    errors = form._errors.setdefault('xform_file', ErrorList())
+                    errors.append( 'Unable to load XForm' )
+                    has_errors = True
+
+            # Create repo!
+            if survey and not has_errors:
                 data = survey.to_json_dict()
 
                 # Basic form name/description
@@ -94,7 +113,7 @@ def build_form( request ):
 
             # Check that this form name isn't already taken by the user
             form_exists = db.survey.find( { 'name': form.cleaned_data['name'],
-                                         'user': request.user.id } )
+                                            'user': request.user.id } )
 
             if form_exists.count() != 0:
                 errors = form._errors.setdefault( 'name', ErrorList() )
@@ -134,7 +153,7 @@ def build_form( request ):
         form = BuildRepoForm()
 
     return render_to_response( 'build_form.html', { 'form': form },
-                              context_instance=RequestContext(request) )
+                               context_instance=RequestContext(request) )
 
 
 @login_required

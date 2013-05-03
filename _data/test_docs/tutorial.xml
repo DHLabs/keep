@@ -3,7 +3,7 @@
     <h:title>tutorial</h:title>
     <model>
       <instance>
-        <tutorial id="tutorial"><formhub><uuid/></formhub>
+        <tutorial id="tutorial">
           <name/>
           <age/>
           <gender/>
@@ -17,7 +17,6 @@
           <thanks/>
         </tutorial>
       </instance>
-      <bind nodeset="/tutorial/formhub/uuid" type="string" calculate="'58111b3c777841d489f6ec60ea09d084'" />
       <bind nodeset="/tutorial/name" required="true()" type="string"/>
       <bind constraint=". &gt; 0 and . &lt; 120" jr:constraintMsg="That's not a valid age!" nodeset="/tutorial/age" required="true()" type="int"/>
       <bind nodeset="/tutorial/gender" type="select1"/>
@@ -113,7 +112,7 @@
       </item>
     </select>
     <input ref="/tutorial/thanks">
-      <label>Thanks for your time <output value="/tutorial/name"/>!</label>
+      <label>Thanks for your time <output value="/tutorial/name"/>! <output value="/tutorial/name"/></label>
     </input>
   </h:body>
 </h:html>

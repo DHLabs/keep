@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>Delivery</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" uiVersion="1" version="1" name="Delivery">
+					<mother_label />
+					<mother_alive />
+					<experience_miscarriage />
+					<fill_out_dereg_form_label />
+					<delivered />
+					<register_children>
+						<delivery_date />
+						<number_of_children_born_dead />
+						<number_of_children />
+						<child_1>
+							<name_child_1 />
+							<other_name_child_1 />
+							<gender_child_1 />
+						</child_1>
+						<child_2>
+							<name_child_2 />
+							<other_name_child_2 />
+							<gender_child_2 />
+						</child_2>
+						<child_1-2>
+							<name_child_3 />
+							<other_name_child_3 />
+							<gender_child_3 />
+						</child_1-2>
+						<child_4>
+							<name_child_4 />
+							<other_name_child_4 />
+							<gender_child_4 />
+						</child_4>
+						<mother_removed />
+						<next_visit_label_child_1 />
+						<next_visit_label_child_2 />
+						<next_visit_label_child_3 />
+						<next_visit_label_child_1-3 />
+					</register_children>
+					<form_complete />
+					<debug_group>
+						<debug-1 />
+						<debug-2 />
+						<debug-3 />
+						<debug-4 />
+					</debug_group>
+					<case_name />
+					<case_next_visit />
+					<case_mother_state />
+					<next_visit />
+					<visit_success />
+					<mother_state />
+					<close_case />
+					<active_child_1 />
+					<next_visit_child_1 />
+					<num_childcare_visits_child_1 />
+					<case_hh_num />
+					<num_referrals />
+					<active_child_2 />
+					<active_child_3 />
+					<active_child_4 />
+					<num_childcare_visits_child_2 />
+					<num_childcare_visits_child_3 />
+					<num_childcare_visits_child_4 />
+					<next_visit_child_2 />
+					<next_visit_child_3 />
+					<next_visit_child_4 />
+					<last_visit />
+					<case_last_visit />
+					<case_village />
+					<case_parish />
+					<case_subcounty />
+				</data>
+			</instance>
+			<bind nodeset="/data/mother_label" />
+			<bind nodeset="/data/mother_alive" required="true()" />
+			<bind nodeset="/data/experience_miscarriage" relevant="/data/mother_alive != 'no'" required="true()" />
+			<bind nodeset="/data/fill_out_dereg_form_label" relevant="/data/mother_alive = 'no' or /data/experience_miscarriage = 'yes'" />
+			<bind nodeset="/data/delivered" relevant="/data/mother_alive = 'yes' and /data/experience_miscarriage = 'no'" required="true()" />
+			<bind nodeset="/data/register_children" relevant="/data/delivered = 'yes'" />
+			<bind nodeset="/data/register_children/delivery_date" type="xsd:date" constraint=". &lt;= today()" jr:constraintMsg="jr:itext('delivery_date-constraintMsg')" required="true()" />
+			<bind nodeset="/data/register_children/number_of_children_born_dead" type="xsd:int" constraint=". &gt;= 0" jr:constraintMsg="jr:itext('number_of_children_born_dead-constraintMsg')" />
+			<bind nodeset="/data/register_children/number_of_children" type="xsd:int" constraint=". &gt;= 1 and . &lt;= 4" jr:constraintMsg="jr:itext('number_of_children-constraintMsg')" />
+			<bind nodeset="/data/register_children/child_1" relevant="/data/register_children/number_of_children &gt;= 1" />
+			<bind nodeset="/data/register_children/child_1/name_child_1" type="xsd:string" required="true()" />
+			<bind nodeset="/data/register_children/child_1/other_name_child_1" type="xsd:string" />
+			<bind nodeset="/data/register_children/child_1/gender_child_1" />
+			<bind nodeset="/data/register_children/child_2" relevant="/data/register_children/number_of_children &gt;= 2" />
+			<bind nodeset="/data/register_children/child_2/name_child_2" type="xsd:string" required="true()" />
+			<bind nodeset="/data/register_children/child_2/other_name_child_2" type="xsd:string" />
+			<bind nodeset="/data/register_children/child_2/gender_child_2" />
+			<bind nodeset="/data/register_children/child_1-2" relevant="/data/register_children/number_of_children &gt;= 3" />
+			<bind nodeset="/data/register_children/child_1-2/name_child_3" type="xsd:string" required="true()" />
+			<bind nodeset="/data/register_children/child_1-2/other_name_child_3" type="xsd:string" />
+			<bind nodeset="/data/register_children/child_1-2/gender_child_3" />
+			<bind nodeset="/data/register_children/child_4" relevant="/data/register_children/number_of_children &gt;= 4" />
+			<bind nodeset="/data/register_children/child_4/name_child_4" type="xsd:string" />
+			<bind nodeset="/data/register_children/child_4/other_name_child_4" type="xsd:string" />
+			<bind nodeset="/data/register_children/child_4/gender_child_4" />
+			<bind nodeset="/data/register_children/mother_removed" relevant="/data/next_visit = &quot;&quot;" />
+			<bind nodeset="/data/register_children/next_visit_label_child_1" relevant="/data/active_child_1 = 'yes'" />
+			<bind nodeset="/data/register_children/next_visit_label_child_2" relevant="/data/active_child_2 = 'yes'" />
+			<bind nodeset="/data/register_children/next_visit_label_child_3" relevant="/data/active_child_3 = 'yes'" />
+			<bind nodeset="/data/register_children/next_visit_label_child_1-3" relevant="/data/active_child_4 = 'yes'" />
+			<bind nodeset="/data/form_complete" />
+			<bind nodeset="/data/debug_group" relevant="1=2" />
+			<bind nodeset="/data/debug_group/debug-1" />
+			<bind nodeset="/data/debug_group/debug-2" />
+			<bind nodeset="/data/debug_group/debug-3" />
+			<bind nodeset="/data/debug_group/debug-4" />
+			<bind nodeset="/data/case_name" />
+			<bind nodeset="/data/case_next_visit" />
+			<bind nodeset="/data/case_mother_state" />
+			<bind nodeset="/data/next_visit" calculate="if(/data/visit_success = &quot;yes&quot;, &quot;&quot;, /data/case_next_visit)" />
+			<bind nodeset="/data/visit_success" calculate="if(/data/mother_alive = &quot;no&quot; or /data/experience_miscarriage = &quot;yes&quot; or /data/delivered = &quot;no&quot;, &quot;no&quot;, &quot;yes&quot;)" />
+			<bind nodeset="/data/mother_state" calculate="if(/data/delivered = &quot;yes&quot;, &quot;childcare&quot;, /data/case_mother_state)" />
+			<bind nodeset="/data/close_case" calculate="if(/data/next_visit = &quot;&quot;, &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/active_child_1" calculate="if(/data/register_children/number_of_children &gt;= 1, &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/next_visit_child_1" calculate="if(today() &lt;= date(/data/register_children/delivery_date + 42), today(), date(today() + 7))" />
+			<bind nodeset="/data/num_childcare_visits_child_1" calculate="0" />
+			<bind nodeset="/data/case_hh_num" />
+			<bind nodeset="/data/num_referrals" calculate="0" />
+			<bind nodeset="/data/active_child_2" calculate="if(/data/register_children/number_of_children &gt;= 2, &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/active_child_3" calculate="if(/data/register_children/number_of_children &gt;= 3, &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/active_child_4" calculate="if(/data/register_children/number_of_children &gt;= 4, &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/num_childcare_visits_child_2" calculate="0" />
+			<bind nodeset="/data/num_childcare_visits_child_3" calculate="0" />
+			<bind nodeset="/data/num_childcare_visits_child_4" calculate="0" />
+			<bind nodeset="/data/next_visit_child_2" calculate="if(today() &lt;= date(/data/register_children/delivery_date + 42), today(), date(today() + 7))" />
+			<bind nodeset="/data/next_visit_child_3" calculate="if(today() &lt;= date(/data/register_children/delivery_date + 42), today(), date(today() + 7))" />
+			<bind nodeset="/data/next_visit_child_4" calculate="if(today() &lt;= date(/data/register_children/delivery_date + 42), today(), date(today() + 7))" />
+			<bind nodeset="/data/last_visit" calculate="if(/data/visit_success = &quot;yes&quot;, today(), date(/data/case_last_visit))" />
+			<bind nodeset="/data/case_last_visit" />
+			<bind nodeset="/data/case_village" />
+			<bind nodeset="/data/case_parish" />
+			<bind nodeset="/data/case_subcounty" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="mother_label-label2">
+						<value>Mother: <output value="/data/case_name"/></value>
+					</text>
+					<text id="mother_alive-label">
+						<value>Is the mother alive?</value>
+					</text>
+					<text id="mother_alive-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="mother_alive-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="experience_miscarriage-label">
+						<value>Did the mother experience miscarriage ?</value>
+					</text>
+					<text id="mother_alive-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="mother_alive-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="fill_out_dereg_form_label-label">
+						<value>Please fill out the de-register Mother Form.</value>
+					</text>
+					<text id="delivered-label">
+						<value>Has the mother delivered?</value>
+					</text>
+					<text id="experience_miscarriage-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="experience_miscarriage-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="register_children-label">
+						<value>Birth Registration</value>
+					</text>
+					<text id="delivery_date-label">
+						<value>Date of delivery</value>
+						<value form="image">jr://file/commcare/image/data/dob.png</value>
+					</text>
+					<text id="delivery_date-constraintMsg">
+						<value>Date of delivery must be in the past.</value>
+					</text>
+					<text id="number_of_children_born_dead-label">
+						<value>Number of children born dead</value>
+					</text>
+					<text id="number_of_children_born_dead-constraintMsg">
+						<value>Must be zero or greater.</value>
+					</text>
+					<text id="number_of_young_children-label">
+						<value>Number of children born alive</value>
+						<value form="image">jr://file/commcare/image/data/number_born_live.png</value>
+					</text>
+					<text id="number_of_children-constraintMsg">
+						<value>Maximum of 4 children. </value>
+					</text>
+					<text id="child_1-label">
+						<value>Newborn 1</value>
+					</text>
+					<text id="name_child_1-label">
+						<value>Baby1 Name</value>
+						<value form="image">jr://file/commcare/image/data/child_name.png</value>
+					</text>
+					<text id="other_name_child_1-label">
+						<value>Other Name (also known by)</value>
+					</text>
+					<text id="gender_child_1-label">
+						<value>Gender</value>
+						<value form="image">jr://file/commcare/image/data/gender.png</value>
+					</text>
+					<text id="gender_child-male-label">
+						<value>1. Male</value>
+					</text>
+					<text id="gender_child-female-label">
+						<value>2. Female</value>
+					</text>
+					<text id="child_2-label">
+						<value>Newborn 2</value>
+					</text>
+					<text id="name_child_2-label">
+						<value>Baby 2 Name</value>
+						<value form="image">jr://file/commcare/image/data/child_name.png</value>
+					</text>
+					<text id="other_name_child_2-label">
+						<value>Other Name (also known by)</value>
+					</text>
+					<text id="gender_child_2-label">
+						<value>Gender</value>
+						<value form="image">jr://file/commcare/image/data/gender.png</value>
+					</text>
+					<text id="gender_child_1-1-male-label">
+						<value>1. Male</value>
+					</text>
+					<text id="gender_child_1-1-female-label">
+						<value>2. Female</value>
+					</text>
+					<text id="child_1-2-label">
+						<value>Newborn 3</value>
+					</text>
+					<text id="name_child_3-label">
+						<value>Baby 3 Name</value>
+						<value form="image">jr://file/commcare/image/data/child_name.png</value>
+					</text>
+					<text id="other_name_child_3-label">
+						<value>Other Name (also known by)</value>
+					</text>
+					<text id="gender_child_3-label">
+						<value>Gender</value>
+						<value form="image">jr://file/commcare/image/data/gender.png</value>
+					</text>
+					<text id="gender_child_1-2-male-label">
+						<value>1. Male</value>
+					</text>
+					<text id="gender_child_1-2-female-label">
+						<value>2. Female</value>
+					</text>
+					<text id="child_4-label">
+						<value>Newborn 4</value>
+					</text>
+					<text id="name_child_4-label">
+						<value>Baby 4 Name</value>
+						<value form="image">jr://file/commcare/image/data/child_name.png</value>
+					</text>
+					<text id="other_name_child_4-label">
+						<value>Other Name (also known by)</value>
+					</text>
+					<text id="gender_child_4-label">
+						<value>Gender</value>
+						<value form="image">jr://file/commcare/image/data/gender.png</value>
+					</text>
+					<text id="gender_child_1-3-male-label">
+						<value>1. Male</value>
+					</text>
+					<text id="gender_child_1-3-female-label">
+						<value>2. Female</value>
+					</text>
+					<text id="mother_removed-label">
+						<value>All visits complete. This mother will be de-registered</value>
+					</text>
+					<text id="next_visit_label_child_1-label">
+						<value>Please Fill out a Children Form for Baby 1 (<output value="/data/register_children/child_1/name_child_1"/>) immediately.</value>
+					</text>
+					<text id="next_visit_label_child_2-label">
+						<value>Please Fill out a Children Form for Baby 2 (<output value="/data/register_children/child_2/name_child_2"/>) immediately.</value>
+					</text>
+					<text id="next_visit_label_child_3-label">
+						<value>Please Fill out a Children Form for Baby 3 (<output value="/data/register_children/child_3/name_child_3"/>) immediately.</value>
+					</text>
+					<text id="next_visit_label_child_1-3-label">
+						<value>Please Fill out a Children Form for Baby 4 (<output value="/data/register_children/child_4/name_child_4"/>) immediately.</value>
+					</text>
+					<text id="form_complete-label">
+						<value>Form complete</value>
+						<value form="image">jr://file/commcare/image/data/form_complete.png</value>
+					</text>
+					<text id="debug_group-label">
+						<value>Debug</value>
+					</text>
+					<text id="debug-1-label">
+						<value>Next Visit: <output value="/data/next_visit"/></value>
+					</text>
+					<text id="debug-2-label">
+						<value>Case Next Visit: <output value="/data/case_next_visit"/></value>
+					</text>
+					<text id="debug-3-label">
+						<value>Case Mother State:: <output value="/data/case_mother_state"/></value>
+					</text>
+					<text id="debug-4-label">
+						<value>Child 1 Next Visit: <output value="/data/next_visit_child_1"/></value>
+					</text>
+				</translation>
+				<translation lang="tog">
+					<text id="mother_label-label2">
+						<value>Bamama: <output value="/data/case_name"/></value>
+					</text>
+					<text id="mother_alive-label">
+						<value>Sena banyina bacipona?</value>
+					</text>
+					<text id="mother_alive-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="mother_alive-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="experience_miscarriage-label">
+						<value>Sena banyina bakasowa?</value>
+					</text>
+					<text id="mother_alive-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="mother_alive-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="fill_out_dereg_form_label-label">
+						<value>Ikaka amuchilembe chipepa chakugwisya</value>
+					</text>
+					<text id="delivered-label">
+						<value>Sena banyina bakatumbuka?</value>
+					</text>
+					<text id="experience_miscarriage-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="experience_miscarriage-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="register_children-label">
+						<value>Cizubuluzyo cakuzyalwa</value>
+					</text>
+					<text id="delivery_date-label">
+						<value>Buzuba bwakuzyala</value>
+						<value form="image">jr://file/commcare/image/data/dob.png</value>
+					</text>
+					<text id="delivery_date-constraintMsg">
+						<value>Buzuba bwakuzyala bweelede kuba musule</value>
+					</text>
+					<text id="number_of_children_born_dead-label">
+						<value>Mweelwe wabana bakazyalwa kabafwide</value>
+					</text>
+					<text id="number_of_children_born_dead-constraintMsg">
+						<value>Taakwe na mbanji</value>
+					</text>
+					<text id="number_of_young_children-label">
+						<value>Mweelwe wabana bakazyalwa kabalibaumi</value>
+						<value form="image">jr://file/commcare/image/data/number_born_live.png</value>
+					</text>
+					<text id="number_of_children-constraintMsg">
+						<value>Kutaiindilila ali bone bana</value>
+					</text>
+					<text id="child_1-label">
+						<value>Mwana Mutaanzi</value>
+					</text>
+					<text id="name_child_1-label">
+						<value>Zyina lya mwana munataanzi</value>
+						<value form="image">jr://file/commcare/image/data/child_name.png</value>
+					</text>
+					<text id="other_name_child_1-label">
+						<value>Izyina limbi (alyalo lizizilwe)</value>
+					</text>
+					<text id="gender_child_1-label">
+						<value>Bube</value>
+						<value form="image">jr://file/commcare/image/data/gender.png</value>
+					</text>
+					<text id="gender_child-male-label">
+						<value>1. Mwaalumi</value>
+					</text>
+					<text id="gender_child-female-label">
+						<value>2. Mwanakazi</value>
+					</text>
+					<text id="child_2-label">
+						<value>Mwana wabili</value>
+					</text>
+					<text id="name_child_2-label">
+						<value>Zyina lya mwana wabili</value>
+						<value form="image">jr://file/commcare/image/data/child_name.png</value>
+					</text>
+					<text id="other_name_child_2-label">
+						<value>Izyina limbi (alyalo lizizilwe)</value>
+					</text>
+					<text id="gender_child_2-label">
+						<value>Bube</value>
+						<value form="image">jr://file/commcare/image/data/gender.png</value>
+					</text>
+					<text id="gender_child_1-1-male-label">
+						<value>1. Mwaalumi</value>
+					</text>
+					<text id="gender_child_1-1-female-label">
+						<value>2. Mwanakazi</value>
+					</text>
+					<text id="child_1-2-label">
+						<value>Mwana watatu</value>
+					</text>
+					<text id="name_child_3-label">
+						<value>Zyina lya mwana watatu</value>
+						<value form="image">jr://file/commcare/image/data/child_name.png</value>
+					</text>
+					<text id="other_name_child_3-label">
+						<value>Izyina limbi (alyalo lizizilwe)</value>
+					</text>
+					<text id="gender_child_3-label">
+						<value>Bube</value>
+						<value form="image">jr://file/commcare/image/data/gender.png</value>
+					</text>
+					<text id="gender_child_1-2-male-label">
+						<value>1. Mwaalumi</value>
+					</text>
+					<text id="gender_child_1-2-female-label">
+						<value>2. Mwanakazi</value>
+					</text>
+					<text id="child_4-label">
+						<value>Mwana wane</value>
+					</text>
+					<text id="name_child_4-label">
+						<value>Zyina lya mwana wane</value>
+						<value form="image">jr://file/commcare/image/data/child_name.png</value>
+					</text>
+					<text id="other_name_child_4-label">
+						<value>Izyina limbi (alyalo lizizilwe)</value>
+					</text>
+					<text id="gender_child_4-label">
+						<value>Bube</value>
+						<value form="image">jr://file/commcare/image/data/gender.png</value>
+					</text>
+					<text id="gender_child_1-3-male-label">
+						<value>1. Mwaalumi</value>
+					</text>
+					<text id="gender_child_1-3-female-label">
+						<value>2. Mwanakazi</value>
+					</text>
+					<text id="mother_removed-label">
+						<value>Kuswaya koonse kwamana. Bamama aba balagwisigwa mu regista</value>
+					</text>
+					<text id="next_visit_label_child_1-label">
+						<value>Ikaka amulembe cipepa cha mwana mutaanzi ino mpoya awa  (<output value="/data/register_children/child_1/name_child_1"/>)</value>
+					</text>
+					<text id="next_visit_label_child_2-label">
+						<value>Ikaka amulembe cipepa cha mwana wabili ino mpoya awa (<output value="/data/register_children/child_2/name_child_2"/>)</value>
+					</text>
+					<text id="next_visit_label_child_3-label">
+						<value>Ikaka amulembe cipepa cha mwana watatu ino mpoya awa (<output value="/data/register_children/child_3/name_child_3"/>)</value>
+					</text>
+					<text id="next_visit_label_child_1-3-label">
+						<value>Ikaka amulembe cipepa cha mwana wane ino mpoya awa (<output value="/data/register_children/child_4/name_child_4"/>)</value>
+					</text>
+					<text id="form_complete-label">
+						<value>Bulembo bwamana</value>
+						<value form="image">jr://file/commcare/image/data/form_complete.png</value>
+					</text>
+					<text id="debug_group-label">
+						<value>Debug</value>
+					</text>
+					<text id="debug-1-label">
+						<value>Next Visit: <output value="/data/next_visit"/></value>
+					</text>
+					<text id="debug-2-label">
+						<value>Case Next Visit: <output value="/data/case_next_visit"/></value>
+					</text>
+					<text id="debug-3-label">
+						<value>Case Mother State:: <output value="/data/case_mother_state"/></value>
+					</text>
+					<text id="debug-4-label">
+						<value>Child 1 Next Visit: <output value="/data/next_visit_child_1"/></value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<trigger ref="/data/mother_label">
+			<label ref="jr:itext('mother_label-label2')" />
+		</trigger>
+		<select1 ref="/data/mother_alive">
+			<label ref="jr:itext('mother_alive-label')" />
+			<item>
+				<label ref="jr:itext('mother_alive-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('mother_alive-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<select1 ref="/data/experience_miscarriage">
+			<label ref="jr:itext('experience_miscarriage-label')" />
+			<item>
+				<label ref="jr:itext('mother_alive-1-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('mother_alive-1-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<trigger ref="/data/fill_out_dereg_form_label">
+			<label ref="jr:itext('fill_out_dereg_form_label-label')" />
+		</trigger>
+		<select1 ref="/data/delivered">
+			<label ref="jr:itext('delivered-label')" />
+			<item>
+				<label ref="jr:itext('experience_miscarriage-1-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('experience_miscarriage-1-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<group ref="/data/register_children">
+			<label ref="jr:itext('register_children-label')" />
+			<input ref="/data/register_children/delivery_date">
+				<label ref="jr:itext('delivery_date-label')" />
+			</input>
+			<input ref="/data/register_children/number_of_children_born_dead">
+				<label ref="jr:itext('number_of_children_born_dead-label')" />
+			</input>
+			<input ref="/data/register_children/number_of_children">
+				<label ref="jr:itext('number_of_young_children-label')" />
+			</input>
+			<group ref="/data/register_children/child_1">
+				<label ref="jr:itext('child_1-label')" />
+				<input ref="/data/register_children/child_1/name_child_1">
+					<label ref="jr:itext('name_child_1-label')" />
+				</input>
+				<input ref="/data/register_children/child_1/other_name_child_1">
+					<label ref="jr:itext('other_name_child_1-label')" />
+				</input>
+				<select1 ref="/data/register_children/child_1/gender_child_1">
+					<label ref="jr:itext('gender_child_1-label')" />
+					<item>
+						<label ref="jr:itext('gender_child-male-label')" />
+						<value>male</value>
+					</item>
+					<item>
+						<label ref="jr:itext('gender_child-female-label')" />
+						<value>female</value>
+					</item>
+				</select1>
+			</group>
+			<group ref="/data/register_children/child_2">
+				<label ref="jr:itext('child_2-label')" />
+				<input ref="/data/register_children/child_2/name_child_2">
+					<label ref="jr:itext('name_child_2-label')" />
+				</input>
+				<input ref="/data/register_children/child_2/other_name_child_2">
+					<label ref="jr:itext('other_name_child_2-label')" />
+				</input>
+				<select1 ref="/data/register_children/child_2/gender_child_2">
+					<label ref="jr:itext('gender_child_2-label')" />
+					<item>
+						<label ref="jr:itext('gender_child_1-1-male-label')" />
+						<value>male</value>
+					</item>
+					<item>
+						<label ref="jr:itext('gender_child_1-1-female-label')" />
+						<value>female</value>
+					</item>
+				</select1>
+			</group>
+			<group ref="/data/register_children/child_1-2">
+				<label ref="jr:itext('child_1-2-label')" />
+				<input ref="/data/register_children/child_1-2/name_child_3">
+					<label ref="jr:itext('name_child_3-label')" />
+				</input>
+				<input ref="/data/register_children/child_1-2/other_name_child_3">
+					<label ref="jr:itext('other_name_child_3-label')" />
+				</input>
+				<select1 ref="/data/register_children/child_1-2/gender_child_3">
+					<label ref="jr:itext('gender_child_3-label')" />
+					<item>
+						<label ref="jr:itext('gender_child_1-2-male-label')" />
+						<value>male</value>
+					</item>
+					<item>
+						<label ref="jr:itext('gender_child_1-2-female-label')" />
+						<value>female</value>
+					</item>
+				</select1>
+			</group>
+			<group ref="/data/register_children/child_4">
+				<label ref="jr:itext('child_4-label')" />
+				<input ref="/data/register_children/child_4/name_child_4">
+					<label ref="jr:itext('name_child_4-label')" />
+				</input>
+				<input ref="/data/register_children/child_4/other_name_child_4">
+					<label ref="jr:itext('other_name_child_4-label')" />
+				</input>
+				<select1 ref="/data/register_children/child_4/gender_child_4">
+					<label ref="jr:itext('gender_child_4-label')" />
+					<item>
+						<label ref="jr:itext('gender_child_1-3-male-label')" />
+						<value>male</value>
+					</item>
+					<item>
+						<label ref="jr:itext('gender_child_1-3-female-label')" />
+						<value>female</value>
+					</item>
+				</select1>
+			</group>
+			<trigger ref="/data/register_children/mother_removed">
+				<label ref="jr:itext('mother_removed-label')" />
+			</trigger>
+			<trigger ref="/data/register_children/next_visit_label_child_1">
+				<label ref="jr:itext('next_visit_label_child_1-label')" />
+			</trigger>
+			<trigger ref="/data/register_children/next_visit_label_child_2">
+				<label ref="jr:itext('next_visit_label_child_2-label')" />
+			</trigger>
+			<trigger ref="/data/register_children/next_visit_label_child_3">
+				<label ref="jr:itext('next_visit_label_child_3-label')" />
+			</trigger>
+			<trigger ref="/data/register_children/next_visit_label_child_1-3">
+				<label ref="jr:itext('next_visit_label_child_1-3-label')" />
+			</trigger>
+		</group>
+		<trigger ref="/data/form_complete">
+			<label ref="jr:itext('form_complete-label')" />
+		</trigger>
+		<group ref="/data/debug_group">
+			<label ref="jr:itext('debug_group-label')" />
+			<trigger ref="/data/debug_group/debug-1">
+				<label ref="jr:itext('debug-1-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug-2">
+				<label ref="jr:itext('debug-2-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug-3">
+				<label ref="jr:itext('debug-3-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug-4">
+				<label ref="jr:itext('debug-4-label')" />
+			</trigger>
+		</group>
+	</h:body>
+</h:html>
