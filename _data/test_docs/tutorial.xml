@@ -112,7 +112,7 @@
       </item>
     </select>
     <input ref="/tutorial/thanks">
-      <label>Thanks for your time <output value="/tutorial/name"/>! <output value="/tutorial/name"/></label>
+      <label>Thanks for your time <output value="/tutorial/name"/>!</label>
     </input>
   </h:body>
 </h:html>
