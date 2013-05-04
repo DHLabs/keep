@@ -24,7 +24,7 @@
 
 
   Form.Field.template = _.template('\
-    <div id="<%= editorId %>_field" class="control-group field-<%= key %>">\
+    <div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group field-<%= key %>">\
       <label class="control-label" for="<%= editorId %>"><%= title %></label>\
       <div class="controls">\
         <span data-editor></span>\

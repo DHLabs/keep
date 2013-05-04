@@ -14,21 +14,7 @@
 <script id='user' type='text/html'>{{ user.username }}</script>
 
 <script data-main='/static/js/webform/main' src='{% static 'js/vendor/require-jquery.js' %}'></script>
-
-<!--
-<script src="{% static 'js/vendor/json2.js' %}"></script>
-<script src="{% static 'js/vendor/underscore.js' %}"></script>
-<script src="{% static 'js/vendor/backbone-min.js' %}"></script>
--->
 <script src="{% static 'js/vendor/bootstrap.2.3.1.min.js' %}"></script>
-
-<!-- Backbone Forms JS files -->
-<!--
-<script src="{% static 'js/vendor/forms/backbone-forms.min.js' %}"></script>
-<script src="{% static 'js/vendor/forms/editors/list.min.js' %}"></script>
-<script src="{% static 'js/vendor/forms/templates/bootstrap.js' %}"></script>
-<script src="{% static 'js/vendor/backbone-localstorage.js' %}"></script>
--->
 
 {% endblock %}
 
@@ -43,10 +29,7 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class='span3'>
-			<ul class='nav nav-pills nav-stacked' id='form_sidebar'></ul>
-		</div>
-	  	<div id="xform_view" class="span9">
+	  	<div id="xform_view" class="span12">
 	    	<div id="form_fields" class="formbox">
 		  		<div id="formDiv"></div>
 	    	</div>

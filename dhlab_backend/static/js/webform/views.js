@@ -35,6 +35,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
     xFormView.prototype.renderedForm = null;
 
+    xFormView.prototype.languages = [];
+
     xFormView.prototype.initialize = function() {
       this.form_id = $('#form_id').html();
       this.user = $('#user').html();
@@ -64,49 +66,20 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     xFormView.prototype.render = function() {
       var _this = this;
       _.each(this.model.attributes.children, function(child) {
-        return _this.recursiveAdd(child);
+        return _this.recursiveAdd(child, _this.model.attributes.default_language);
       });
+      console.log(this.languages);
       this.renderedForm = new Backbone.Form({
         schema: this.item_dict,
         data: this._data,
         fields: this._fieldsets
       }).render();
+      _.each(this.item_dict, function(child, key) {
+        child.name = key;
+        return _this.input_fields.push(child);
+      });
       $('#formDiv').html(this.renderedForm.el);
-      this._create_sidebar();
-      $('.control-group').first().show();
-      return this;
-    };
-
-    xFormView.prototype._create_sidebar = function() {
-      var _this = this;
-      if (this.input_fields.length === 0) {
-        $('#form_sidebar').html('');
-        _.each(this.item_dict, function(child, key) {
-          var element;
-          element = "<li id='" + key + "_tab' data-key='" + key + "'";
-          if ($('#form_sidebar > li').length === 0) {
-            element += " class='active'";
-          }
-          if (!XFormConstraintChecker.isRelevant(child, _this.renderedForm.getValue())) {
-            element += " class='disabled'";
-          }
-          element += '>';
-          element += "<a href='#'>" + child.title + "</a></li>";
-          child.name = key;
-          _this.input_fields.push(child);
-          return $('#form_sidebar').append(element);
-        });
-      } else {
-        _.each(this.item_dict, function(child, key) {
-          var sidebar_element;
-          sidebar_element = $("#" + key + "_tab");
-          if (!XFormConstraintChecker.isRelevant(child, _this.renderedForm.getValue())) {
-            return sidebar_element.addClass('disabled');
-          } else {
-            return sidebar_element.removeClass('disabled');
-          }
-        });
-      }
+      $('.control-group').first().show().addClass('active');
       return this;
     };
 
@@ -158,34 +131,38 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       return true;
     };
 
-    xFormView.prototype.switch_question = function(element) {
+    xFormView.prototype.switch_question = function(element, forward) {
       var current_question, form_info, question_index, switch_question, switch_question_key;
       if (!this.passes_question_constraints()) {
         return this;
       }
       current_question = this._active_question();
-      switch_question_key = $(element.currentTarget).data('key');
+      switch_question_key = $(element).data('key');
       question_index = -1;
       form_info = _.find(this.input_fields, function(child) {
         question_index += 1;
         return child.name === switch_question_key;
       });
       if (!XFormConstraintChecker.isRelevant(form_info, this.renderedForm.getValue())) {
-        if (question_index < this.input_fields.length) {
-          question_index += 1;
+        if (forward) {
+          if (question_index < this.input_fields.length) {
+            question_index += 1;
+          }
+        } else {
+          if (question_index > 0) {
+            question_index -= 1;
+          }
         }
-        $('#form_sidebar > li').eq(question_index).trigger('click');
+        this.switch_question($('.control-group').eq(question_index), forward);
         return;
       }
       current_question = $("#" + current_question.key + "_field");
       switch_question = $("#" + switch_question_key + "_field");
       $('.active').removeClass('active');
-      $("#" + switch_question_key + "_tab").addClass('active');
       current_question.fadeOut('fast', function() {
-        return switch_question.fadeIn('fast');
+        return switch_question.fadeIn('fast').addClass('active');
       });
       this._display_form_buttons(question_index);
-      this._create_sidebar();
       return this;
     };
 
@@ -196,7 +173,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       if (question_index < this.input_fields.length) {
         question_index += 1;
       }
-      $('#form_sidebar > li').eq(question_index).trigger('click');
+      this.switch_question($('.control-group').eq(question_index)[0], true);
       return this;
     };
 
@@ -208,7 +185,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         return this;
       }
       question_index -= 1;
-      $('#form_sidebar > li').eq(question_index).trigger('click');
+      this.switch_question($('.control-group').eq(question_index)[0], false);
       return this;
     };
 

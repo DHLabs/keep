@@ -1,9 +1,21 @@
 define( [ 'vendor/underscore' ], ( _ ) ->
 
-    build_form = ( child ) ->
+    build_form = ( child, lang ) ->
+
+        label = ''
+        if typeof child.label == 'object'
+            label = child.label[ lang ]
+
+            if @languages.length == 0
+                _.each( child.label, ( child, key ) =>
+                    @languages.push( key )
+                )
+        else
+            label = child.label
+
         schema_dict =
             help: child.hint
-            title: child.label
+            title: label
             is_field: true
             bind: child.bind
 
@@ -53,9 +65,14 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             schema_dict['options'] = []
 
             _.each( child.choices, ( option ) ->
+
+                choice_label = option.label
+                if typeof option.label == 'object'
+                    choice_label = option.label[ lang ]
+
                 schema_dict['options'].push(
                     val:    option.name
-                    label:  option.label
+                    label:  choice_label
                 )
             )
 
@@ -73,15 +90,20 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             schema_dict['options'] = []
 
             _.each( child.choices, ( option ) ->
+
+                choice_label = option.label
+                if typeof option.label == 'object'
+                    choice_label = option.label[ lang ]
+
                 schema_dict['options'].push(
                     val:    option.name
-                    label:  option.label
+                    label:  choice_label
                 )
             )
 
         else
             schema_dict['type']     = 'Text'
-            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" class="control-group"><label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label></div>' )
+            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label></div>' )
 
         @item_dict[child.name] = schema_dict
         @_fieldsets.push( child.name )

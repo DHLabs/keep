@@ -34,6 +34,7 @@ define( [ 'jquery',
         item_dict:  {}
         input_fields: []
         renderedForm: null
+        languages:  []
 
         initialize: ->
             # Grab the form_id from the page
@@ -66,8 +67,10 @@ define( [ 'jquery',
 
             # Create the form to render
             _.each( @model.attributes.children, ( child ) =>
-                @recursiveAdd( child )
+                @recursiveAdd( child, @model.attributes.default_language )
             )
+
+            console.log( @languages )
 
             # Create the Form object with the schema we want
             @renderedForm = new Backbone.Form(
@@ -76,52 +79,15 @@ define( [ 'jquery',
                 fields: @_fieldsets
             ).render()
 
+            _.each( @item_dict, ( child, key ) =>
+                child.name = key
+                @input_fields.push( child )
+            )
+
             # Render it on the page!
             $('#formDiv').html( @renderedForm.el )
 
-            # Create & render the html for the questions sidebar
-            @_create_sidebar()
-
-            $( '.control-group' ).first().show()
-
-            @
-
-        _create_sidebar: ->
-            # Create sidebar
-            if @input_fields.length == 0
-                $( '#form_sidebar' ).html( '' )
-                _.each( @item_dict, ( child, key ) =>
-
-                    #if not child.is_field
-                    #    return
-
-                    element = "<li id='#{key}_tab' data-key='#{key}'"
-                    if $( '#form_sidebar > li' ).length == 0
-                        element += " class='active'"
-
-                    if not XFormConstraintChecker.isRelevant( child, @renderedForm.getValue() )
-                        element += " class='disabled'"
-                    element += '>'
-
-                    element += "<a href='#'>#{child.title}</a></li>"
-
-                    child.name = key
-                    @input_fields.push( child )
-
-                    $( '#form_sidebar' ).append( element )
-                )
-            else
-                _.each( @item_dict, ( child, key ) =>
-
-                    #if not child.is_field
-                    #    return
-
-                    sidebar_element = $( "##{key}_tab" )
-                    if not XFormConstraintChecker.isRelevant( child, @renderedForm.getValue() )
-                        sidebar_element.addClass( 'disabled' )
-                    else
-                        sidebar_element.removeClass( 'disabled' )
-                )
+            $( '.control-group' ).first().show().addClass( 'active' )
 
             @
 
@@ -175,7 +141,7 @@ define( [ 'jquery',
 
             return true
 
-        switch_question: ( element ) ->
+        switch_question: ( element, forward ) ->
 
             # Does the current active question pass our constraints?
             if not @passes_question_constraints()
@@ -185,7 +151,7 @@ define( [ 'jquery',
             current_question = @_active_question()
 
             # Question to switch to
-            switch_question_key = $( element.currentTarget ).data( 'key' )
+            switch_question_key = $( element ).data( 'key' )
 
             # Check constraints of this question before continuing
             question_index = -1
@@ -198,10 +164,14 @@ define( [ 'jquery',
             if not XFormConstraintChecker.isRelevant( form_info, @renderedForm.getValue() )
 
                 # Switch to the next question!
-                if question_index < @input_fields.length
-                    question_index += 1
+                if forward
+                    if question_index < @input_fields.length
+                        question_index += 1
+                else
+                    if question_index > 0
+                        question_index -= 1
 
-                $( '#form_sidebar > li' ).eq( question_index ).trigger( 'click' )
+                @switch_question( $( '.control-group' ).eq( question_index ), forward )
                 return
 
             # Find the next question to switch from and to.
@@ -210,15 +180,13 @@ define( [ 'jquery',
 
             # Switch the highlighted tab on the left sidebar
             $( '.active' ).removeClass( 'active' )
-            $( "##{switch_question_key}_tab" ).addClass( 'active' )
 
             # Animate the switching
             current_question.fadeOut( 'fast', () ->
-                switch_question.fadeIn( 'fast' )
+                switch_question.fadeIn( 'fast' ).addClass( 'active' )
             )
 
             @_display_form_buttons( question_index )
-            @_create_sidebar()
 
             @
 
@@ -231,7 +199,8 @@ define( [ 'jquery',
             if question_index < @input_fields.length
                 question_index += 1
 
-            $( '#form_sidebar > li' ).eq( question_index ).trigger( 'click' )
+            @switch_question( $( '.control-group' ).eq( question_index )[0], true )
+
             @
 
         prev_question: () ->
@@ -243,8 +212,7 @@ define( [ 'jquery',
                 return @
 
             question_index -= 1
-
-            $( '#form_sidebar > li' ).eq( question_index ).trigger( 'click' )
+            @switch_question( $( '.control-group' ).eq( question_index )[0], false )
 
             @
 

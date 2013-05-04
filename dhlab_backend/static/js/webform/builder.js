@@ -2,12 +2,23 @@
 
 define(['vendor/underscore'], function(_) {
   var build_form;
-  build_form = function(child) {
-    var schema_dict, _ref, _ref1,
+  build_form = function(child, lang) {
+    var label, schema_dict, _ref, _ref1,
       _this = this;
+    label = '';
+    if (typeof child.label === 'object') {
+      label = child.label[lang];
+      if (this.languages.length === 0) {
+        _.each(child.label, function(child, key) {
+          return _this.languages.push(key);
+        });
+      }
+    } else {
+      label = child.label;
+    }
     schema_dict = {
       help: child.hint,
-      title: child.label,
+      title: label,
       is_field: true,
       bind: child.bind
     };
@@ -37,9 +48,14 @@ define(['vendor/underscore'], function(_) {
       schema_dict['type'] = 'Checkboxes';
       schema_dict['options'] = [];
       _.each(child.choices, function(option) {
+        var choice_label;
+        choice_label = option.label;
+        if (typeof option.label === 'object') {
+          choice_label = option.label[lang];
+        }
         return schema_dict['options'].push({
           val: option.name,
-          label: option.label
+          label: choice_label
         });
       });
     } else if (child.type === 'group') {
@@ -51,14 +67,19 @@ define(['vendor/underscore'], function(_) {
       schema_dict['type'] = 'Select';
       schema_dict['options'] = [];
       _.each(child.choices, function(option) {
+        var choice_label;
+        choice_label = option.label;
+        if (typeof option.label === 'object') {
+          choice_label = option.label[lang];
+        }
         return schema_dict['options'].push({
           val: option.name,
-          label: option.label
+          label: choice_label
         });
       });
     } else {
       schema_dict['type'] = 'Text';
-      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" class="control-group"><label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label></div>');
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label></div>');
     }
     this.item_dict[child.name] = schema_dict;
     this._fieldsets.push(child.name);
