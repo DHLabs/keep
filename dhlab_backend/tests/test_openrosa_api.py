@@ -7,7 +7,7 @@ class OpenRosaAPITests( ApiTestCase ):
         '''
         '''
         response = self.openRaw( '/bs/admin/formList', None )
-        print response
+        assert response is not None
 
     def test_repo_xform_xml( self ):
         '''
