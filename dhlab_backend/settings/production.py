@@ -1,5 +1,5 @@
 from settings import *
-from credentials import AWS
+from credentials import AWS, MAILGUN
 
 ALLOWED_HOSTS = [ '*' ]
 
@@ -13,3 +13,9 @@ AWS_SECRET_ACCESS_KEY   = AWS[ 'SECRET_KEY' ]
 AWS_STORAGE_BUCKET_NAME = 'keep-static'
 
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+
+# Setup Mailgun as our email backend
+# http://mailgun.net
+EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+MAILGUN_ACCESS_KEY      = MAILGUN[ 'ACCESS_KEY' ]
+MAILGUN_SERVER_NAME     = MAILGUN[ 'SERVER_NAME' ]
