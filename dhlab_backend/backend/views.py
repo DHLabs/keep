@@ -35,7 +35,8 @@ def register( request ):
                 profile.send_activation_email( RequestSite( request ) )
 
             return render_to_response('registration/reg_complete.html',
-                                      {'user_token': user_token.google_url()})
+                                      {'user_token': user_token.google_url(),
+                                       'email': new_user.email } )
     else:
         form = RegistrationFormUserProfile()
 

@@ -4,27 +4,50 @@
 {% block title %}Registration Complete{% endblock %}
 
 {% block content %}
-<section id="registration-email-sent">
-  <div class="page-header">
-    <h1>{% trans "Registration Email Sent" %}</h1>
-  </div>
-  <p>
-      {% blocktrans %}A user account has been created for you and an email message has
-    been sent to the email address you provided.{% endblocktrans %}
-  </p>
-  <p>
-      {% blocktrans %}To activate your account and complete the registration process,
-    you must click the activation link provided in the email.{% endblocktrans %}
-  </p>
-  <p>
-    <span style='font-weight:bold;'>
-      Additionally</span>, to correctly setup 2-factor authentication, scan the following
-      barcode with your favorite 2-factor authentication application to begin generating
-      authentication codes.
-    </span>
-  </p>
-  <div>
-    <img src='{{ user_token }}'>
-  </div>
-</section>
+<div class='row'>
+    <div class='span12'>
+        <h3>Registration Email Sent</h3>
+        <h4 style='color:#AAA;font-weight:normal;'>
+            Activating your account and getting started
+        </h4>
+    </div>
+</div>
+<div class='row'>
+    <div class='span4'>
+        <h4>1. Activate Your Account</h4>
+        <div>
+            <p>
+                Click on the link sent to <span>{{ email }}</span> to activate your account and
+                validate your email.
+            </p>
+        </div>
+    </div>
+    <div class='span4'>
+        <h4>2. Setting Up Two-Factor</h4>
+        <div>
+            <p>
+                To correctly setup 2-factor authentication, following these steps to
+                begin generating authentication codes:
+            </p>
+            <ul>
+                <li>
+                    Install <a target='_blank' href='http://support.google.com/accounts/bin/answer.py?hl=en&answer=1066447'>Google Authenticator</a>
+                </li>
+                <li>
+                    Scan the following image using Google Authenticator
+                </li>
+            </ul>
+            <div style='text-align:center;'>
+                <img width='150' src='{{ user_token }}'>
+            </div>
+        </div>
+    </div>
+    <div class='span4'>
+        <h4>3. Login and Collect!</h4>
+        <div>
+            <a href='{% url "auth_login" %}'> Log In </a> to your account to
+            begin creating data repositories and collecting data!
+        </div>
+    </div>
+</div>
 {% endblock %}
