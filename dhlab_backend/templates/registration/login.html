@@ -26,7 +26,7 @@
 				{% url "resend_activation" as resend_activation_url %}
 				Missed your activation email? <a id='resend_activation' href='{{ resend_activation_url }}'>Re-send activation email.</a>
 			</p>
-			<p>
+			<p style='display:none;'>
 				{% url "auth_password_reset" as reset_url %}
 				{% blocktrans %}
 				Can't access your account? <a id='reset_password' href="{{ reset_url }}">Reset your password.</a>
