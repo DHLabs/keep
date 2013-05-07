@@ -1,0 +1,58 @@
+[
+  {
+    "pk": 1,
+    "model": "auth.user",
+    "fields": {
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "last_login": "2011-09-26 18:42:34",
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$10000$YdIxE7Mmclfb$pDAS0cwaRfGnOAYZB7vxlvq0CoChhkzTcm6URsWNVzs=",
+      "email": "info@distributedhealth.org",
+      "date_joined": "2011-09-26 18:42:34"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "twofactor.userauthtoken",
+    "fields": {
+      "created_datetime": "2012-01-30 03:04:54.015",
+      "encrypted_seed": "0E7InBuUfUUmiScZ$f26843e37555961309583993222af9da",
+      "user": 1,
+      "updated_datetime": "2012-01-30 03:04:54.016"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "auth.user",
+    "fields": {
+      "username": "test_user",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": "2011-09-26 18:42:34",
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$10000$YdIxE7Mmclfb$pDAS0cwaRfGnOAYZB7vxlvq0CoChhkzTcm6URsWNVzs=",
+      "email": "info@distributedhealth.org",
+      "date_joined": "2011-09-26 18:42:34"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "twofactor.userauthtoken",
+    "fields": {
+      "created_datetime": "2012-01-30 03:04:54.015",
+      "encrypted_seed": "0E7InBuUfUUmiScZ$f26843e37555961309583993222af9da",
+      "user": 3,
+      "updated_datetime": "2012-01-30 03:04:54.016"
+    }
+  }
+]
