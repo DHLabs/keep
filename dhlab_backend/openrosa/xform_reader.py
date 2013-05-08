@@ -1,3 +1,4 @@
+import os
 from lxml import etree
 import sys
 
@@ -57,6 +58,9 @@ class XFormReader():
         # Apply translations we have found
         self.apply_translations( translations )
 
+        # Check that every field has a type
+        self._validate( self.xform_dict[ 'children' ] )
+
     def _apply_itext( self, model, tid, lang, value ):
         '''
             Loop through all the fields in the model and apply translations
@@ -72,7 +76,10 @@ class XFormReader():
                 # Check if we have a translation for this item
                 label = field[ 'label' ]
                 if label[ 'tid' ] == tid:
-                    label[ lang ] = value
+                    label[ lang ] = value[ 'label' ]
+
+                    if 'media' in value:
+                        field[ 'media' ] = value[ 'media' ]
 
             # Apply translations to choices for selections
             if 'choices' in field:
@@ -87,10 +94,10 @@ class XFormReader():
 
                         label = binding['jr:constraintMsg']
                         if label['tid'] == tid:
-                            label[ lang ] = value
+                            label[ lang ] = value[ 'label' ]
 
                     elif tid == binding['jr:constraintMsg']:
-                        label = {'tid': tid, lang: value }
+                        label = {'tid': tid, lang: value[ 'label' ] }
                         binding['jr:constraintMsg'] = label
 
     def _clean_itext( self, model ):
@@ -134,8 +141,17 @@ class XFormReader():
 
                 tid = "jr:itext('%s')" % ( itext.get( 'id' ) )
 
-                value_element = itext.xpath( '*[local-name() = "value"]' )[0]
-                value = self.parse_label( value_element )
+                # May possibly have media elements here...
+                value_elements = itext.xpath( '*[local-name() = "value"]' )
+
+                value = { 'label': None }
+                for element in value_elements:
+                    if element.get( 'form', None ):
+                        media_type = element.get( 'form' )
+                        ( head, tail ) = os.path.split( element.text )
+                        value[ 'media' ] = { media_type: tail }
+                    else:
+                        value[ 'label' ] = self.parse_label( element )
 
                 self._apply_itext( self.xform_dict[ 'children' ],
                                    tid, lang, value )
@@ -211,8 +227,7 @@ class XFormReader():
             self.reference_ids.append( ref_id )
 
             # Set up defaults for the field
-            field = { 'type': 'text',
-                      'label': local_name,
+            field = { 'label': local_name,
                       'id': ref_id,
                       'name': local_name }
 
@@ -284,6 +299,10 @@ class XFormReader():
                     value = self._clean_value( value )
                     field[ 'bind' ][ key ] = value
 
+                    # Calculate bindings means a type of "calculate"
+                    if key == 'calculate':
+                        field[ 'type' ] = 'calculate'
+
                 # Clean up empty bind fields
                 if len( field[ 'bind' ].keys() ) == 0:
                     del field[ 'bind' ]
@@ -322,8 +341,14 @@ class XFormReader():
 
             if field[ 'id' ] == name:
 
-                if 'select' in field_type and 'select' not in field['type']:
+                if 'type' not in field:
                     field[ 'type' ] = self.parse_type( field_type )
+
+                # if 'select' in field_type and 'select' not in field['type']:
+                #     field[ 'type' ] = self.parse_type( field_type )
+
+                # if 'trigger' in field_type:
+                #     field[ 'type' ] = self.parse_type( field_type )
 
                 for element in root:
                     if 'hint' in element.tag:
@@ -365,6 +390,25 @@ class XFormReader():
             attr = attr.replace( 'false()', 'no' )
 
         return attr
+
+    def _validate( self, root ):
+        '''
+            Validate an XForm schema to make sure each field is a valid field.
+
+            At the moment, invalid fields are simply made valid by putting an
+            empty 'calculate' field.
+        '''
+        for field in root:
+
+            if 'children' in field:
+                self._validate( field[ 'children' ] )
+                continue
+
+            if 'type' not in field:
+                field[ 'type' ] = 'calculate'
+                if 'bind' not in field:
+                    field[ 'bind' ] = {}
+                field[ 'bind' ][ 'calculate' ] = ''
 
     def to_json_dict( self ):
         return self.xform_dict
