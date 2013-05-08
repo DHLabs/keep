@@ -43,7 +43,7 @@ class XFormSerializer( Serializer ):
                 fileName.text = media
 
                 downloadUrl = etree.Element( 'downloadUrl' )
-                downloadUrl.text = 'http://keep-media.s3-website-us-east-1.amazonaws.com/%s/%s' % ( data[ 'repo' ], media )
+                downloadUrl.text = 'http://s3.amazonaws.com/keep-media/%s/%s' % ( data[ 'repo' ], media )
 
                 mediaFile.append( fileName )
                 mediaFile.append( downloadUrl )
