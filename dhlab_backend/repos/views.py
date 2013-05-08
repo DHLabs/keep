@@ -179,6 +179,8 @@ def webform( request, username, repo_name ):
                              data=valid_data,
                              account=account )
 
+        # Return to organization/user dashboard based on where the "New Repo"
+        # button was clicked.
         if isinstance( account, User ):
             return HttpResponseRedirect(
                         reverse( 'user_dashboard',

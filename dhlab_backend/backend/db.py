@@ -124,6 +124,58 @@ class Repository( object ):
 
         return Repository.objects.find_one( query )
 
+    @staticmethod
+    def list_repos( account, **kwargs ):
+        '''
+            Return a list of repositories for a specific <account>
+        '''
+        query = { 'user': account.id }
+
+        for key in kwargs:
+            query[ key ] = kwargs.get( key )
+
+        cursor = db.survey.find( query )
+
+        repos = []
+        for repo in cursor:
+            repo[ 'mongo_id' ] = repo[ '_id' ]
+
+            query = { 'repo': ObjectId( repo[ '_id' ] ) }
+            repo[ 'submission_count' ] = db.data.find( query ).count()
+
+            del repo[ '_id' ]
+            repos.append( repo )
+
+        return repos
+
+    @staticmethod
+    def shared_repos( account, **kwargs ):
+        '''
+            Return a list of shared repositories for a specifc <account>
+        '''
+        orgs = OrganizationUser.objects.filter( user=account )
+
+        # Map org id to org name
+        org_map = {}
+        for org in orgs:
+            org_map[ org.id ] = org.organization.name
+
+        query = { 'org': { '$in': [ org.id for org in orgs ] } }
+        cursor = db.survey.find( query )
+
+        repos = []
+        for repo in cursor:
+            repo[ 'mongo_id' ] = repo[ '_id' ]
+            repo[ 'org' ] = org_map[ repo[ 'org' ] ]
+
+            query = { 'repo': ObjectId( repo[ '_id' ] ) }
+            repo[ 'submission_count' ] = db.data.find( query ).count()
+
+            del repo[ '_id' ]
+            repos.append( repo )
+
+        return repos
+
 
 class Document( dict ):
     # Dictionary-like object for MongoDB documents
