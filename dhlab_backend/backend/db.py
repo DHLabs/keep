@@ -1,6 +1,8 @@
 from bson import ObjectId
+from datetime import datetime
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 
@@ -10,6 +12,8 @@ from tastypie.bundle import Bundle
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpUnauthorized
 from tastypie.resources import Resource
+
+from organizations.models import Organization, OrganizationUser
 
 connection = MongoClient( settings.MONGODB_HOST, settings.MONGODB_PORT )
 db = connection[ settings.MONGODB_DBNAME ]
@@ -36,6 +40,89 @@ def dehydrate_survey( cursor ):
         return dehydrate( cursor )
 
     return [ dehydrate( row ) for row in cursor ]
+
+
+def user_or_organization( name ):
+    results = User.objects.filter( username=name )
+
+    if len( results ) > 0:
+        return results[0]
+
+    results = Organization.objects.filter( name=name )
+
+    if len( results ) > 0:
+        return results[0]
+
+    return None
+
+
+class Repository( object ):
+    objects = db.survey
+
+    @staticmethod
+    def add_data( repo, data, account ):
+        # The validated & formatted survey data.
+        repo_data = { 'data': data }
+
+        if isinstance( account, User ):
+            repo_data[ 'user' ] = account.id
+        elif isinstance( account, Organization ):
+            repo_data[ 'org' ] = account.id
+
+        # Survey/form ID associated with this data
+        repo_data[ 'repo' ] = repo[ '_id' ]
+
+        # Survey name (used for feed purposes)
+        repo_data[ 'survey_label' ] = repo[ 'name' ]
+
+        # Timestamp of when this submission was received
+        repo_data[ 'timestamp' ] = datetime.utcnow()
+
+        return db.data.insert( repo_data )
+
+    @staticmethod
+    def permissions( repo, account, current_user ):
+        '''
+            Determine whether this <account> has permission to view the <repo>.
+        '''
+        permissions = set([])
+
+        # Is this repo public?
+        if repo.get( 'public', False ):
+            permissions.add( 'view' )
+
+        if isinstance( account, User ):
+
+            # Is this user the owner of the repo?
+            if repo[ 'user' ] == account.id:
+                permissions.add( 'view' )
+                permissions.add( 'view_raw' )
+
+        elif isinstance( account, Organization ):
+
+            # Is the current user a member of this organization?
+            user = OrganizationUser.objects.filter( user=current_user,
+                                                    organization=account )
+            if len( user ) > 0:
+                permissions.add( 'view' )
+                permissions.add( 'view_raw' )
+
+        return permissions
+
+    @staticmethod
+    def get_repo( name, account ):
+        '''
+            Find a repository based on the repository name and a <User> or
+            <Organization> account.
+        '''
+        query = { 'name': name }
+
+        if isinstance( account, Organization ):
+            query[ 'org' ] = account.id
+        else:
+            query[ 'user' ] = account.id
+
+        return Repository.objects.find_one( query )
 
 
 class Document( dict ):

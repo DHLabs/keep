@@ -1,26 +1,25 @@
 import json
-import math
-import os
 
 from bson import ObjectId
 from datetime import datetime
-from numpy import linspace
 
+from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.forms.util import ErrorList
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
-from backend.db import db, dehydrate_survey
-from privacy.map import privatize
+from backend.db import db, dehydrate_survey, user_or_organization
+from backend.db import Repository
 
-from pyxform.xls2json import SurveyReader
-from openrosa.xform_reader import XFormReader
+from organizations.models import Organization
+from privacy import privatize_geo
 
+from . import validate_and_format
 from .forms import NewRepoForm, BuildRepoForm
 
 
@@ -32,65 +31,15 @@ def new_repo( request ):
     # Handle XForm upload
     if request.method == 'POST':
 
-        form = NewRepoForm( request.POST, request.FILES )
+        form = NewRepoForm( request.POST, request.FILES, user=request.user )
 
         # Check for a valid XForm and parse the file!
         if form.is_valid():
 
-            # Additional errors we may encounter
-            has_errors = False
+            repo = form.save()
+            db.survey.insert( repo )
 
-            # Check that this form name isn't already taken by the user
-            form_exists = db.survey.find( { 'name': form.cleaned_data['name'],
-                                            'user': request.user.id } )
-
-            if form_exists.count() != 0:
-                errors = form._errors.setdefault( 'name', ErrorList() )
-                errors.append( 'Repository already exists with this name' )
-                has_errors = True
-
-            # Parse form file
-            survey = None
-            if not has_errors:
-                # Detect whether this is an XLS or XML file.
-                xform_file = request.FILES['xform_file']
-                name, file_ext = os.path.splitext( xform_file.name)
-
-                # Parse file depending on file type
-                if file_ext == '.xls':
-                    survey = SurveyReader( xform_file )
-                elif file_ext == '.xml':
-                    survey = XFormReader( xform_file )
-                else:
-                    errors = form._errors.setdefault('xform_file', ErrorList())
-                    errors.append( 'Unable to load XForm' )
-                    has_errors = True
-
-            # Create repo!
-            if survey and not has_errors:
-                data = survey.to_json_dict()
-
-                # Basic form name/description
-                data[ 'name' ] = form.cleaned_data[ 'name' ]
-                data[ 'description' ] = form.cleaned_data[ 'desc' ]
-
-                # Needed for xform formatting
-                data[ 'title' ]       = form.cleaned_data[ 'name' ]
-                data[ 'id_string' ]   = form.cleaned_data[ 'name' ]
-
-                # Is this form public?
-                data[ 'public' ] = form.cleaned_data[ 'privacy' ] == 'public'
-
-                # Store who uploaded this form
-                data[ 'user' ]      = request.user.id
-
-                # Store when this form was uploaded
-                data[ 'uploaded' ]  = datetime.now()
-
-                db.survey.insert( data )
-
-                return HttpResponseRedirect( '/' )
-
+            return HttpResponseRedirect( '/' )
     else:
         form = NewRepoForm()
 
@@ -207,25 +156,42 @@ def toggle_public( request, repo_id ):
                          mimetype='application/json' )
 
 
-@require_GET
+@csrf_exempt
 def webform( request, username, repo_name ):
     '''
         Simply grab the survey data and send it on the webform. The webform
         will handle rendering and submission of the final data to the server.
     '''
-    user = get_object_or_404( User, username=username )
 
-    repo = db.survey.find_one( { 'name': repo_name, 'user': user.id } )
+    account = user_or_organization( username )
+    if account is None:
+        return HttpResponse( status=404 )
 
+    repo = Repository.get_repo( name=repo_name, account=account )
     if repo is None:
         return HttpResponse( status=404 )
 
-    repo_user = get_object_or_404( User, id=repo[ 'user' ] )
+    if request.method == 'POST':
+
+        # Do basic validation of the data
+        valid_data = validate_and_format( repo, request.POST )
+        Repository.add_data( repo=repo,
+                             data=valid_data,
+                             account=account )
+
+        if isinstance( account, User ):
+            return HttpResponseRedirect(
+                        reverse( 'user_dashboard',
+                                 kwargs={ 'username': account.username } ) )
+        else:
+            return HttpResponseRedirect(
+                        reverse( 'organization_dashboard',
+                                 kwargs={ 'org': account.name } ) )
 
     return render_to_response( 'get.html',
                                { 'repo': repo,
-                                 'repo_user': repo_user,
-                                 'repo_id': str( repo[ '_id' ] ) },
+                                 'repo_id': str( repo[ '_id' ] ),
+                                 'account': account },
                                context_instance=RequestContext( request ))
 
 
@@ -238,18 +204,23 @@ def repo_viz( request, username, repo_name ):
         authority to view the current repository.
     '''
 
-    user = get_object_or_404( User, username=username )
+    # Grab the user/organization based on the username
+    account = user_or_organization( username )
+    if account is None:
+        return HttpResponse( status=404 )
 
-    # Looking our own viz or someone's public repo?
-    is_other_user = request.user.username != username
-
-    repo = db.survey.find_one({ 'name': repo_name, 'user': user.id })
-
+    # Grab the repository
+    repo = Repository.get_repo( repo_name, account )
     if repo is None:
         return HttpResponse( status=404 )
 
+    # Grab the user's permissions for this repository
+    permissions = Repository.permissions( repo=repo,
+                                          account=account,
+                                          current_user=request.user )
+
     # Check to see if the user has access to view this survey
-    if not repo.get( 'public', False ) and is_other_user:
+    if 'view' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
     # Grab the data for this repository
@@ -257,67 +228,21 @@ def repo_viz( request, username, repo_name ):
     data = dehydrate_survey( data )
 
     # Is some unknown user looking at this data?
-    if is_other_user:
-        # Does this data have any geo data?
-        has_geo = False
-        geo_index = None
-        for field in repo[ 'children' ]:
-            if field[ 'type' ] == 'geopoint':
-                has_geo = True
-                geo_index = field[ 'name' ]
-                break
+    if 'view_raw' not in permissions:
+        data = privatize_geo( repo, data )
 
-        # Great! We have geopoints, let's privatize this data
-        if has_geo:
-            xbounds     = [ None, None ]
-            ybounds     = [ None, None ]
-            fuzzed_data = []
-
-            for datum in data:
-
-                geopoint = datum[ 'data' ][ geo_index ].split( ' ' )
-
-                try:
-                    point = ( float( geopoint[0] ), float( geopoint[1] ) )
-                except ValueError:
-                    continue
-
-                if xbounds[0] is None or point[0] < xbounds[0]:
-                    xbounds[0] = point[0]
-
-                if xbounds[1] is None or point[0] > xbounds[1]:
-                    xbounds[1] = point[0]
-
-                if ybounds[0] is None or point[1] < ybounds[0]:
-                    ybounds[0] = point[1]
-
-                if ybounds[1] is None or point[1] > ybounds[1]:
-                    ybounds[1] = point[1]
-
-                fuzzed_data.append( point )
-
-            # Split the xbounds in a linear
-            num_x_samples = int(math.ceil( ( xbounds[1] - xbounds[0] ) / .2 ))
-            num_y_samples = int(math.ceil( ( ybounds[1] - ybounds[0] ) / .2 ))
-
-            xbounds = linspace( xbounds[0], xbounds[1], num=num_x_samples )
-            ybounds = linspace( ybounds[0], ybounds[1], num=num_y_samples )
-
-            fuzzed_data = privatize( points=fuzzed_data,
-                                     xbounds=xbounds,
-                                     ybounds=ybounds )
-            data = []
-            for datum in fuzzed_data:
-                data.append( {
-                    'data':
-                    {geo_index: ' '.join( [ str( x ) for x in datum ] )}})
+    if isinstance( account, User ):
+        account_name = account.username
+    else:
+        account_name = account.name
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
                                  'sid': repo[ '_id' ],
                                  'data': json.dumps( data ),
-                                 'is_other_user': is_other_user,
-                                 'account': user},
+                                 'permissions': permissions,
+                                 'account': account,
+                                 'account_name': account_name },
                                context_instance=RequestContext(request) )
 
 

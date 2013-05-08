@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     'backend',
     'openrosa',
     'repos',
+    'organizations',
     'twofactor',                # Needed to harden login/database
     'registration',             # Needed for user signup
     'tastypie',                 # Needed for our RESTful API

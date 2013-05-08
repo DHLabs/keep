@@ -11,8 +11,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
-
 from twofactor.models import UserAPIToken
 
 
@@ -118,10 +118,14 @@ def user_dashboard( request, username ):
 
         del repo[ '_id' ]
 
+    # Find all the organization this user belongs to
+    organizations = OrganizationUser.objects.filter( user=user )
+
     return render_to_response( 'dashboard.html',
                                { 'user_forms': user_repos,
                                  'is_other_user': is_other_user,
-                                 'account': user },
+                                 'account': user,
+                                 'organizations': organizations },
                                context_instance=RequestContext(request) )
 
 

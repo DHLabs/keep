@@ -23,7 +23,11 @@
 	<div class='row'>
 		<div class='span12'>
 			<h2>
-				<a href='{% url "user_dashboard" username=repo_user.username %}'>{{ repo_user.username }}</a>
+				{% if account.username %}
+					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>
+				{% else %}
+					<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>
+				{% endif %}
 				/&nbsp;{{ repo.name }}
 			</h2>
 		</div>

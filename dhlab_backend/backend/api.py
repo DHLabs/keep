@@ -1,4 +1,3 @@
-import json
 import pymongo
 
 from backend.db import db, MongoDBResource, Document
@@ -10,16 +9,18 @@ from openrosa.serializer import XFormSerializer
 
 from bson import ObjectId
 
-from datetime import datetime
-
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 
 from tastypie import fields
 from tastypie.authorization import Authorization
+from tastypie.exceptions import BadRequest
 from tastypie.http import HttpUnauthorized
+from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
+
+from backend.db import user_or_organization, Repository
+from organizations.models import Organization
 
 # from twofactor.api_auth import ApiTokenAuthentication
 
@@ -27,30 +28,46 @@ from tastypie.utils.mime import build_content_type
 class DataAuthorization( Authorization ):
 
     def read_list( self, object_list, bundle ):
+
         user = bundle.request.GET.get( 'user', None )
 
-        try:
-            user = User.objects.get( username=user )
-        except ObjectDoesNotExist:
+        account = user_or_organization( user )
+        if account is None:
             raise ValueError
 
-        return object_list.find( { 'user': user.id },
-                                 { 'data': False, 'user': False } )\
+        query = {}
+        if isinstance( account, User ):
+            query[ 'user' ] = account.id
+        else:
+            query[ 'org' ] = account.d
+
+        return object_list.find( query,
+                                 {'data': False, 'user': False, 'org': False})\
                           .limit( 5 )\
                           .sort( 'timestamp', pymongo.DESCENDING )
 
     def read_detail( self, object_detail, bundle ):
         user = bundle.request.GET.get( 'user', None )
 
-        try:
-            user = User.objects.get( username=user )
-        except ObjectDoesNotExist:
-            return False
+        account = user_or_organization( user )
 
-        if object_detail[ 'user' ] != user.id:
-            return False
+        if 'user' in object_detail:
 
-        return True
+            if isinstance( account, User ):
+                if object_detail[ 'user' ] == account.id:
+                    return True
+
+        elif 'org' in object_detail:
+
+            if isinstance( account, User ):
+                if Organization.has_user( object_detail['org'], account ):
+                    return True
+
+            elif isinstance( account, Organization ):
+                if object_detail[ 'org' ] == account.id:
+                    return True
+
+        return False
 
 
 class RepoAuthorization( Authorization ):
@@ -58,27 +75,31 @@ class RepoAuthorization( Authorization ):
     def read_list( self, object_list, bundle ):
         user = bundle.request.GET.get( 'user', None )
 
-        try:
-            user = User.objects.get( username=user )
-        except ObjectDoesNotExist:
+        account = user_or_organization( user )
+        if account is None:
             raise ValueError
 
-        return object_list.find({ 'user': user.id } )
+        if isinstance( account, User ):
+            return object_list.find({ 'user': account.id } )
+        else:
+            return object_list.find({ 'org': account.id } )
 
     def read_detail( self, object_detail, bundle ):
 
         if object_detail.get( 'public', False ):
             return True
 
-        user = bundle.request.GET.get( 'user', None )
-
-        try:
-            user = User.objects.get( username=user )
-        except ObjectDoesNotExist:
+        account = bundle.request.GET.get( 'user', None )
+        account = user_or_organization( account )
+        if account is None:
             return False
 
-        if object_detail[ 'user' ] != user.id:
-            return False
+        # If this repo is owned by an individual user, check if this is
+        # the repo's owner.
+        if 'user' in object_detail:
+            if isinstance( account, User ):
+                if object_detail[ 'user' ] != account.id:
+                    return False
 
         return True
 
@@ -135,7 +156,8 @@ class RepoResource( MongoDBResource ):
     id_string   = fields.CharField( attribute='id_string', null=True )
     type        = fields.CharField( attribute='type', null=True )
     children    = fields.ListField( attribute='children', null=True )
-    owner       = fields.IntegerField( attribute='user', null=True )
+    user        = fields.IntegerField( attribute='user', null=True )
+    org         = fields.IntegerField( attribute='org', null=True )
     public      = fields.BooleanField( attribute='public', default=False )
 
     class Meta:
@@ -186,7 +208,14 @@ class RepoResource( MongoDBResource ):
 
         # The find the suervey object associated with this form name & user
         repo = db.survey.find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
-        repo_user = repo[ 'user' ]
+
+        account = None
+        if 'user' in repo:
+            account = repo[ 'user' ]
+        elif 'org' in repo:
+            account = repo[ 'org' ]
+
+        account = user_or_organization( account )
 
         # Are we authorized to post data here?
         if not self.authorized_create_detail( repo, basic_bundle ):
@@ -195,29 +224,71 @@ class RepoResource( MongoDBResource ):
         # Do basic validation of the data
         valid_data = validate_and_format( repo, request.POST )
 
-        # Include some metadata with the survey data
-        repo_data = {
-            'user':         repo_user,
-            # Survey/form ID associated with this data
-            'repo':         repo[ '_id' ],
+        new_id = Repository.add_data( repo=repo,
+                                      data=valid_data,
+                                      account=account )
 
-            # Survey name (used for feed purposes)
-            'survey_label': repo[ 'name' ],
-
-            # Timestamp of when this submission was received
-            'timestamp':    datetime.utcnow(),
-            # The validated & formatted survey data.
-            'data':         valid_data
-        }
-
-        new_id = db.data.insert( repo_data )
         response_data = { 'success': True, 'id': str( new_id ) }
         return self.create_response( request, response_data )
 
-    def dehydrate_owner(self, bundle):
+    def dehydrate( self, bundle ):
         '''
-        Convert user ids into a more informative username when displaying
-        results
+            Remove user/org key is it doesn't existself.
         '''
-        user = User.objects.get( id=bundle.data['owner'] )
-        return user.username
+        if bundle.data.get( 'user', None ) is None:
+            del bundle.data[ 'user' ]
+
+        if bundle.data.get( 'org', None ) is None:
+            del bundle.data[ 'org' ]
+
+        return bundle
+
+    def dehydrate_user( self, bundle ):
+        '''
+            Convert user ids into a more informative username when displaying
+            results
+        '''
+        if bundle.data[ 'user' ]:
+            return User.objects.get( id=bundle.data['user'] ).username
+        return None
+
+    def dehydrate_org( self, bundle ):
+        '''
+            Convert organization ids into the more informative org name.
+        '''
+        if bundle.data[ 'org' ]:
+            return Organization.objects.get( id=bundle.data['org'] ).name
+
+        return None
+
+
+class UserResource( ModelResource ):
+    class Meta:
+        queryset = User.objects.all()
+        resource_name = 'user'
+
+        list_allowed_methods = [ 'get' ]
+        detail_allowed_methods = []
+
+        excludes = [ 'email',
+                     'password',
+                     'is_superuser',
+                     'is_staff',
+                     'is_active',
+                     'date_joined',
+                     'first_name',
+                     'last_name',
+                     'last_login' ]
+
+        filtering = {
+            'username': ( 'icontains', )
+        }
+
+    def build_filters( self, filters=None ):
+        '''
+            Since we're only using this API to search for users, require that
+            a filter be in the API call.
+        '''
+        if 'username__icontains' not in filters:
+            raise BadRequest
+        return super( UserResource, self ).build_filters( filters )

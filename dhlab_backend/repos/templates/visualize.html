@@ -57,7 +57,11 @@
 				{% endif %}
 			</div>
 			<h3>
-				<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
+				{% if account.username %}
+					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
+				{% else %}
+					<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a> /
+				{% endif %}
 				<div class='btn-group'>
 					<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
 						{{ repo.name }}
@@ -65,12 +69,12 @@
 					</a>
 					<ul class='dropdown-menu'>
 						<li>
-							<a href='/api/v1/repos/{{ sid }}?format=json&amp;user={{ account.username }}'>
+							<a href='/api/v1/repos/{{ sid }}?format=json&amp;user={{ account }}'>
 								Download as JSON
 							</a>
 						</li>
 						<li>
-							<a href='/api/v1/repos/{{ sid }}?format=xform&amp;user={{ account.username }}'>
+							<a href='/api/v1/repos/{{ sid }}?format=xform&amp;user={{ account }}'>
 								Download as XForm
 							</a>
 						</li>
