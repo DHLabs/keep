@@ -61,7 +61,8 @@ class DataAuthorization( Authorization ):
         elif 'org' in object_detail:
 
             if isinstance( account, User ):
-                if Organization.has_user( object_detail['org'], account ):
+                org = Organization.objects.get( id=object_detail['org'] )
+                if org.has_user( account ):
                     return True
 
             elif isinstance( account, Organization ):

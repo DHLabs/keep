@@ -52,8 +52,12 @@
 				{% endif %}
 				<div id='member_list'>
 				{% for member in members %}
-					{% if member.user != user %}
 					<div>
+						{% if member.is_admin %}
+						<div class='pull-right'>
+							<span class='label label-inverse'>administrator</span>
+						</div>
+						{% endif %}
 						{% if member.pending %}
 						<div class='pull-right'>
 							<span class='label label-info'>Pending</span>
@@ -63,7 +67,6 @@
 							{{ member.user.username }}
 						</a>
 					</div>
-					{% endif %}
 				{% endfor %}
 				</div>
 			</div>

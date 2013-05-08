@@ -48,15 +48,9 @@ class Organization( models.Model ):
         pending_user.save()
         return pending_user
 
-    @staticmethod
-    def has_user( org, user ):
-        if isinstance( org, Organization ):
-            org_user = OrganizationUser.objects.filter( user=user,
-                                                        organization=org )
-        else:
-            organization = Organization.objects.get( organization=org )
-            org_user = OrganizationUser.objects.filter( user=user,
-                                                        organization=organization )
+    def has_user( self, user ):
+        org_user = OrganizationUser.objects.filter( user=user,
+                                                    organization=self )
         return len( org_user ) > 0
 
 
@@ -82,4 +76,4 @@ class OrganizationUser( models.Model ):
         verbose_name_plural = 'organization users'
 
     def __unicode__( self ):
-        return '%s ( %s )' % ( self.user.email, self.organization.name )
+        return '%s ( %s )' % ( self.user.username, self.organization.name )

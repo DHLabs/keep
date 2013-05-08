@@ -153,14 +153,15 @@ class Repository( object ):
         '''
             Return a list of shared repositories for a specifc <account>
         '''
-        orgs = OrganizationUser.objects.filter( user=account )
+        orgs = OrganizationUser.objects.filter( user=account,
+                                                pending=False )
 
         # Map org id to org name
         org_map = {}
         for org in orgs:
-            org_map[ org.id ] = org.organization.name
+            org_map[ org.organization.id ] = org.organization.name
 
-        query = { 'org': { '$in': [ org.id for org in orgs ] } }
+        query = { 'org': { '$in': [ org.organization.id for org in orgs ] } }
         cursor = db.survey.find( query )
 
         repos = []

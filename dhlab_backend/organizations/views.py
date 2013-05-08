@@ -52,7 +52,7 @@ def organization_delete( request, org ):
     user = request.user
     org  = get_object_or_404( Organization, name=org )
 
-    if Organization.has_user( org, user ):
+    if org.has_user( user ):
 
         # Delete any repos associated with this organization
         repos = db.survey.find( { 'org': org.id } )
@@ -79,6 +79,7 @@ def organization_dashboard( request, org ):
 
     account = get_object_or_404( Organization, name=org )
     is_owner = request.user == account.owner
+    is_member = account.has_user( request.user )
 
     repos = db.survey.find( { 'org': account.id } )
     repos = [ repo for repo in repos ]
@@ -100,6 +101,7 @@ def organization_dashboard( request, org ):
                                { 'account': account,
                                  'members': members,
                                  'is_owner': is_owner,
+                                 'is_member': is_member,
                                  'repos': repos },
                                context_instance=RequestContext(request) )
 

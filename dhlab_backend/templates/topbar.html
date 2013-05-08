@@ -10,7 +10,7 @@
 				<div class='span3'>
 					<ul class='nav'>
 						{% if user.is_authenticated %}
-						<li> <a href='{% url "settings" %}'><i class='icon-cog'></i>&nbsp;Settings </a> </li>
+						<li style='display:none;'> <a href='{% url "settings" %}'><i class='icon-cog'></i>&nbsp;Settings </a> </li>
 						<li> <a href='{% url "auth_logout" %}'> Log Out </a> </li>
 						{% else %}
 						<li> <a href='{% url "registration_register" %}'> Sign Up </a> </li>
