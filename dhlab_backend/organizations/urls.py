@@ -7,6 +7,10 @@ urlpatterns = patterns( 'organizations.views',
          view='organization_new',
          name='organization_new' ),
 
+    url( regex=r'^organizations/(?P<org>\w+)/delete/$',
+         view='organization_delete',
+         name='organization_delete' ),
+
     url( regex=r'^organizations/(?P<org>\w+)/$',
          view='organization_dashboard',
          name='organization_dashboard' ),
@@ -14,5 +18,4 @@ urlpatterns = patterns( 'organizations.views',
     url( regex=r'^organizations/(?P<org>\w+)/repo/new/$',
          view='organization_repo_new',
          name='organization_repo_new' ),
-
 )

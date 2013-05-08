@@ -42,6 +42,34 @@ def organization_new( request ):
 
 
 @login_required
+def organization_delete( request, org ):
+
+    user = request.user
+    org  = get_object_or_404( Organization, name=org )
+
+    if Organization.has_user( org, user ):
+
+        # Delete any repos associated with this organization
+        repos = db.survey.find( { 'org': org.id } )
+        repos = [ repo[ '_id' ] for repo in repos ]
+
+        db.survey.remove( { '_id': { '$in': repos } } )
+        db.data.remove( { 'repo': { '$in': repos } } )
+
+        # Delete all the org user objects under this org
+        org_users = OrganizationUser.objects.filter( organization=org )
+        for org_user in org_users:
+            org_user.delete()
+
+        # Delete the main org object
+        org.delete()
+
+    return HttpResponseRedirect(
+                reverse( 'user_dashboard',
+                         kwargs={ 'username': user.username } ) )
+
+
+@login_required
 def organization_dashboard( request, org ):
 
     account = get_object_or_404( Organization, name=org )
