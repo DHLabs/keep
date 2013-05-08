@@ -48,16 +48,7 @@ define( [ 'jquery',
             @
 
         submit: ->
-            posted_data = @renderedForm.getValue()
-            console.log( posted_data )
-
-            $.ajax(
-                url: "/api/v1/repos/#{@form_id}/"
-                data: posted_data
-                type: "POST"
-                success: () ->
-                    window.location = '/'
-            )
+            $( @renderedForm.el ).submit()
 
         recursiveAdd: build_form
 
@@ -88,6 +79,7 @@ define( [ 'jquery',
             $('#formDiv').html( @renderedForm.el )
 
             $( '.control-group' ).first().show().addClass( 'active' )
+            $( '.active input' ).focus()
 
             @
 
@@ -184,6 +176,7 @@ define( [ 'jquery',
             # Animate the switching
             current_question.fadeOut( 'fast', () ->
                 switch_question.fadeIn( 'fast' ).addClass( 'active' )
+                $( '.active input' ).focus()
             )
 
             @_display_form_buttons( question_index )

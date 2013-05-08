@@ -37,13 +37,15 @@ define(['vendor/underscore'], function(_) {
       schema_dict['type'] = 'Checkbox';
     } else if (child.type === 'note') {
       schema_dict['type'] = 'Text';
-      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" class="control-group"><strong>Note: </strong><%= title %></div>');
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
+                                                        <strong>Note: </strong><%= title %>\
+                                                   </div>');
       schema_dict['is_field'] = false;
     } else if (child.type === 'datetime') {
       schema_dict['type'] = 'DateTime';
     } else if (child.type === 'photo') {
       schema_dict['type'] = 'Text';
-      schema_dict['template'] = _.template("<div id='<%= editorId %>_field' class='control-group'><label for='<%= editorId %>'><%= title %></label><input type='file' accept='image/png'></input></div>");
+      schema_dict['template'] = _.template("<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>                                                        <label for='<%= editorId %>'><%= title %></label>                                                        <input type='file' accept='image/png'></input>                                                   </div>");
     } else if (child.type === 'select all that apply') {
       schema_dict['type'] = 'Checkboxes';
       schema_dict['options'] = [];
@@ -79,7 +81,9 @@ define(['vendor/underscore'], function(_) {
       });
     } else {
       schema_dict['type'] = 'Text';
-      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label></div>');
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
+                                                        <label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label>\
+                                                   </div>');
     }
     this.item_dict[child.name] = schema_dict;
     this._fieldsets.push(child.name);

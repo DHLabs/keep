@@ -12,7 +12,6 @@ define( [], ->
             return passesConstraint
 
         @isRelevant: (question, answers) ->
-
             containsRelevant = question.bind and question.bind.relevant
 
             if containsRelevant

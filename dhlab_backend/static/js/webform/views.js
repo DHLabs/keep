@@ -48,17 +48,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     };
 
     xFormView.prototype.submit = function() {
-      var posted_data;
-      posted_data = this.renderedForm.getValue();
-      console.log(posted_data);
-      return $.ajax({
-        url: "/api/v1/repos/" + this.form_id + "/",
-        data: posted_data,
-        type: "POST",
-        success: function() {
-          return window.location = '/';
-        }
-      });
+      return $(this.renderedForm.el).submit();
     };
 
     xFormView.prototype.recursiveAdd = build_form;
@@ -80,6 +70,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       });
       $('#formDiv').html(this.renderedForm.el);
       $('.control-group').first().show().addClass('active');
+      $('.active input').focus();
       return this;
     };
 
@@ -160,7 +151,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       switch_question = $("#" + switch_question_key + "_field");
       $('.active').removeClass('active');
       current_question.fadeOut('fast', function() {
-        return switch_question.fadeIn('fast').addClass('active');
+        switch_question.fadeIn('fast').addClass('active');
+        return $('.active input').focus();
       });
       this._display_form_buttons(question_index);
       return this;
