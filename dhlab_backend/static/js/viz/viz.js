@@ -109,9 +109,9 @@ DataView = (function(_super) {
       if (response.success) {
         $(event.currentTarget).attr('checked', response["public"]);
         if (response["public"]) {
-          return $('#privacy').html('<img src=\'/static/img/public_repo.png\'>&nbsp;PUBLIC');
+          return $('#privacy').html('<i class=\'icon-unlock\'></i>&nbsp;PUBLIC');
         } else {
-          return $('#privacy').html('<img src=\'/static/img/private_repo.png\'>&nbsp;PRIVATE');
+          return $('#privacy').html('<i class=\'icon-lock\'></i>&nbsp;PRIVATE');
         }
       }
     });

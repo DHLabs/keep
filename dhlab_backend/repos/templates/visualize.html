@@ -51,9 +51,9 @@
 		<div class='span12'>
 			<div class='pull-right alert' id='privacy'>
 				{% if repo.public %}
-					<img src='{% static "img/public_repo.png" %}'> PUBLIC
+					<i class='icon-unlock'></i>
 				{% else %}
-					<img src='{% static "img/private_repo.png" %}'> PRIVATE
+					<i class='icon-lock'></i>
 				{% endif %}
 			</div>
 			<h3>

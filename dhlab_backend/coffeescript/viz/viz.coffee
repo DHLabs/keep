@@ -67,9 +67,9 @@ class DataView extends Backbone.View
                 $( event.currentTarget ).attr( 'checked', response.public )
 
                 if response.public
-                    $( '#privacy' ).html( '<img src=\'/static/img/public_repo.png\'>&nbsp;PUBLIC' )
+                    $( '#privacy' ).html( '<i class=\'icon-unlock\'></i>&nbsp;PUBLIC' )
                 else
-                    $( '#privacy' ).html( '<img src=\'/static/img/private_repo.png\'>&nbsp;PRIVATE' )
+                    $( '#privacy' ).html( '<i class=\'icon-lock\'></i>&nbsp;PRIVATE' )
         )
 
         @
