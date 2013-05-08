@@ -1,10 +1,14 @@
+import json
+
 from bson import ObjectId
 
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.views.decorators.http import require_POST, require_GET
 
 from backend.db import db
 from repos.forms import NewRepoForm
@@ -29,6 +33,7 @@ def organization_new( request ):
 
             new_org_user = OrganizationUser( user=user,
                                              organization=new_org )
+            new_org_user.is_admin = True
             new_org_user.save()
 
             return HttpResponseRedirect(
@@ -125,3 +130,81 @@ def organization_repo_new( request, org ):
 
     return render_to_response( 'new.html', { 'form': form },
                                context_instance=RequestContext(request) )
+
+
+@login_required
+@require_POST
+def organization_member_add( request, org, user ):
+    '''
+        Request a user become a member of an organization.
+    '''
+
+    org  = get_object_or_404( Organization, name=org )
+    user = get_object_or_404( User, username=user )
+
+    org_user = get_object_or_404( OrganizationUser,
+                                  user=request.user,
+                                  organization=org )
+
+    # Check that the current user is the owner of the org or is an admin
+    response = { 'success': False }
+
+    # Don't add users who are already members
+    res = OrganizationUser.objects.filter( organization=org,
+                                           user=user )
+    if len( res ) == 0:
+        if org.owner == user or org_user.is_admin:
+            org.add_user( user )
+            response[ 'success' ] = True
+
+    return HttpResponse( json.dumps( response ),
+                         content_type='application/json' )
+
+
+@login_required
+@require_GET
+def organization_member_accept( request, org, user ):
+    '''
+        Request a user become a member of an organization.
+    '''
+    org  = get_object_or_404( Organization, name=org )
+    user = get_object_or_404( User, username=user )
+
+    # Is the user this acceptance is for the current user?
+    if request.user != user:
+        return HttpResponse( status=404 )
+
+    # Great grab this user and toggle the pending variable
+    org_user = get_object_or_404( OrganizationUser,
+                                  user=user,
+                                  organization=org )
+    org_user.pending = False
+    org_user.save()
+
+    return HttpResponseRedirect(
+            reverse( 'user_dashboard',
+                     kwargs={ 'username': user.username } ) )
+
+
+@login_required
+@require_GET
+def organization_member_ignore( request, org, user ):
+    '''
+        Request a user become a member of an organization.
+    '''
+    org  = get_object_or_404( Organization, name=org )
+    user = get_object_or_404( User, username=user )
+
+    # Is the user this acceptance is for the current user?
+    if request.user != user:
+        return HttpResponse( status=404 )
+
+    # Great grab this user and toggle the pending variable
+    org_user = get_object_or_404( OrganizationUser,
+                                  user=user,
+                                  organization=org )
+    org_user.delete()
+
+    return HttpResponseRedirect(
+            reverse( 'user_dashboard',
+                     kwargs={ 'username': user.username } ) )

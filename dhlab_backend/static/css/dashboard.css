@@ -8,3 +8,23 @@ img.account-icon {
 img.account-icon-large {
   border: 1px solid #cccccc;
   border-radius: 8px; }
+
+#member_list > div {
+  margin-top: 8px; }
+
+.ui-helper-hidden-accessible {
+  display: none; }
+
+#user_search_list {
+  position: absolute; }
+  #user_search_list .ui-autocomplete {
+    border-bottom: 1px solid #eeeeee;
+    border-right: 1px solid #eeeeee;
+    border-left: 1px solid #eeeeee;
+    list-style-type: none;
+    background-color: white; }
+  #user_search_list .ui-autocomplete > .ui-menu-item {
+    padding: 4px 8px;
+    cursor: pointer; }
+  #user_search_list .ui-autocomplete > .selected {
+    background-color: #EEE; }
