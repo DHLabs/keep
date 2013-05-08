@@ -41,10 +41,26 @@
 				</div>
 				<div id="user_search_list">
 				</div>
+				{% endif %}
+				{% if is_member %}
 				<div>
+					{% if is_owner %}
 					<div class='pull-right'>
 						<span class='label label-inverse'>administrator</span>
 					</div>
+					{% endif %}
+					{% if is_member.pending %}
+					<div class='pull-right'>
+						<a href='{% url "organization_member_accept" org=account.name user=user.username %}'
+						   class='btn btn-small btn-success'>
+							Join
+						</a>
+						<a href='{% url "organization_member_ignore" org=account.name user=user.username %}'
+						   class='btn btn-small'>
+						   Ignore
+						</a>
+					</div>
+					{% endif %}
 					<a href='{% url "user_dashboard" username=user.username %}'>
 						{{ user.username }}
 					</a>
@@ -52,6 +68,7 @@
 				{% endif %}
 				<div id='member_list'>
 				{% for member in members %}
+					{% if member.user != user %}
 					<div>
 						{% if member.is_admin %}
 						<div class='pull-right'>
@@ -67,6 +84,7 @@
 							{{ member.user.username }}
 						</a>
 					</div>
+					{% endif %}
 				{% endfor %}
 				</div>
 			</div>

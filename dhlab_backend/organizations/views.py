@@ -5,6 +5,7 @@ from bson import ObjectId
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -34,6 +35,7 @@ def organization_new( request ):
             new_org_user = OrganizationUser( user=user,
                                              organization=new_org )
             new_org_user.is_admin = True
+            new_org_user.pending = False
             new_org_user.save()
 
             return HttpResponseRedirect(
@@ -79,7 +81,12 @@ def organization_dashboard( request, org ):
 
     account = get_object_or_404( Organization, name=org )
     is_owner = request.user == account.owner
-    is_member = account.has_user( request.user )
+
+    try:
+        is_member = OrganizationUser.objects.get( organization=account,
+                                                  user=request.user )
+    except ObjectDoesNotExist:
+        is_member = None
 
     repos = db.survey.find( { 'org': account.id } )
     repos = [ repo for repo in repos ]
