@@ -37,13 +37,24 @@ class Organization( models.Model ):
         m.update( self.gravatar.strip().lower() )
         return '//gravatar.com/avatar/%s' % ( m.hexdigest() )
 
+    def add_user( self, user ):
+        '''
+            Add a ( pending ) user to this organization.
+        '''
+        pending_user = OrganizationUser( user=user,
+                                         organization=self,
+                                         pending=True,
+                                         is_admin=False )
+        pending_user.save()
+        return pending_user
+
     @staticmethod
     def has_user( org, user ):
         if isinstance( org, Organization ):
             org_user = OrganizationUser.objects.filter( user=user,
                                                         organization=org )
         else:
-            organization = Organization.objects.get( id=org )
+            organization = Organization.objects.get( organization=org )
             org_user = OrganizationUser.objects.filter( user=user,
                                                         organization=organization )
         return len( org_user ) > 0
@@ -61,6 +72,7 @@ class OrganizationUser( models.Model ):
                               related_name='organization_user' )
     organization = models.ForeignKey( Organization,
                                       related_name='organization_user' )
+    pending  = models.BooleanField( default=True )
     is_admin = models.BooleanField( default=False )
 
     class Meta:

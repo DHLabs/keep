@@ -41,7 +41,9 @@
     "model": "organizations.organizationuser",
     "fields": {
       "user": 1,
-      "organization": 1
+      "organization": 1,
+      "pending": false,
+      "is_admin": true
     }
   },
   {
