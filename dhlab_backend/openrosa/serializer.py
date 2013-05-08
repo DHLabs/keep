@@ -49,6 +49,8 @@ class XFormSerializer( Serializer ):
                 name.text = xform[ 'name' ]
                 element.append( name )
 
+                owner = xform['user'] if 'user' in xform else xform[ 'org' ]
+
                 downloadUrl = etree.Element( 'downloadUrl' )
 
                 if settings.DEBUG:
@@ -57,7 +59,7 @@ class XFormSerializer( Serializer ):
                     base_url = 'keep.distributedhealth.org'
 
                 downloadUrl.text = 'http://%s/api/v1/repos/%s/?format=xform&user=%s' %\
-                                   ( base_url, xform[ 'id' ], xform[ 'owner'] )
+                                   ( base_url, xform[ 'id' ], owner )
 
                 element.append( downloadUrl )
 
