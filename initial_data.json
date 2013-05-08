@@ -28,6 +28,23 @@
     }
   },
   {
+    "pk": 1,
+    "model": "organizations.organization",
+    "fields": {
+      "name": "DHLab",
+      "gravatar": "webmaster@distributedhealth.org",
+      "owner": 1
+    }
+  },
+  {
+    "pk": 1,
+    "model": "organizations.organizationuser",
+    "fields": {
+      "user": 1,
+      "organization": 1
+    }
+  },
+  {
     "pk": 3,
     "model": "auth.user",
     "fields": {

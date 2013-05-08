@@ -131,3 +131,37 @@ class OrganizationHttpTests( HttpTestCase ):
         error = '/html/body/div[2]/div/div/div/form/ul/li'
         elem = self.selenium.find_element_by_xpath( error )
         assert elem.text == 'Organization already exists with this name!'
+
+    def test_organization_dashboard( self ):
+        self.test_login()
+
+        # Find the list of orgs on the page
+        org = '/html/body/div[2]/div/div[1]/div[1]/div/div/a'
+        elems = self.selenium.find_elements_by_xpath( org )
+
+        assert len( elems ) > 0
+        # Click on the first one
+        first_org = elems[0]
+        first_org_name = first_org.text
+        first_org.click()
+
+        assert self.selenium.title == first_org_name
+
+    def test_org_repo_new( self ):
+        self.test_organization_dashboard()
+        self.selenium.find_element_by_id( 'new_repo_btn' ).click()
+
+        repo_name = 'xls_repo'
+
+        # Fill out form
+        self.selenium.find_element_by_id( 'id_name' ).send_keys( repo_name )
+
+        xform = os.path.abspath( '_data/test_docs/tutorial.xls' )
+        self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
+
+        self.selenium.find_element_by_xpath( 'submit_btn' ).click()
+
+        # Check that the new repo was created
+        repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
+        repos = self.selenium.find_elements_by_xpath( repo_table )
+        assert any( [ x.text == repo_name for x in repos ] )

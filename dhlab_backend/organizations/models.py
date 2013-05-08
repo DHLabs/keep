@@ -16,7 +16,7 @@ class Organization( models.Model ):
                              help_text='The name of the organization' )
 
     gravatar = models.EmailField( blank=True )
-    owner = models.OneToOneField( USER_MODEL )
+    owner = models.ForeignKey( USER_MODEL )
     users = models.ManyToManyField( USER_MODEL,
                                     through='OrganizationUser',
                                     related_name='organization_users' )

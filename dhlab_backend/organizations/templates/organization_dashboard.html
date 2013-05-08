@@ -53,7 +53,7 @@
 						<h4>
 							{% if is_owner %}
 							<div class='pull-right'>
-								<a href='{% url "organization_repo_new" org=account.name %}' class='btn btn-small'>
+								<a id='new_repo_btn' href='{% url "organization_repo_new" org=account.name %}' class='btn btn-small'>
 									New Repository
 								</a>
 							</div>
