@@ -9,6 +9,7 @@ from openrosa.serializer import XFormSerializer
 
 from bson import ObjectId
 
+from django.conf.urls import url
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 
@@ -182,6 +183,14 @@ class RepoResource( MongoDBResource ):
         # Don't include resource uri
         include_resource_uri = False
 
+    def prepend_urls(self):
+        return [
+            url( r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/manifest/$" %
+                 ( self._meta.resource_name ),
+                 self.wrap_view('get_manifest'),
+                 name="api_get_resource"),
+        ]
+
     def create_response( self, request, data, response_class=HttpResponse,
                          **response_kwargs):
         """
@@ -201,6 +210,33 @@ class RepoResource( MongoDBResource ):
         if desired_format == 'text/xml':
             response[ 'X-OpenRosa-Version'] = '1.0'
         return response
+
+    def _grab_media( self, root ):
+
+        media = []
+        for field in root:
+            if 'children' in field:
+                media.extend( self._grab_media( field[ 'children' ] ) )
+                continue
+
+            if 'choices' in field:
+                for choice in field[ 'choices' ]:
+                    if 'media' in choice:
+                        media.extend( choice[ 'media' ].values() )
+
+            if 'media' in field:
+                media.extend( field[ 'media' ].values() )
+
+        return media
+
+    def get_manifest( self, request, **kwargs ):
+        bundle = self.build_bundle( request=request )
+        obj = self.obj_get( bundle, **self.remove_api_resource_names(kwargs) )
+
+        media = list( set( self._grab_media( obj[ 'children' ] ) ) )
+
+        response = { 'repo': obj[ '_id' ], 'manifest': media }
+        return self.create_response( request, response )
 
     def post_detail( self, request, **kwargs ):
 
