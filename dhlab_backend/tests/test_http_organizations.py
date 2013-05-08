@@ -159,7 +159,7 @@ class OrganizationHttpTests( HttpTestCase ):
         xform = os.path.abspath( '_data/test_docs/tutorial.xls' )
         self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
 
-        self.selenium.find_element_by_xpath( 'submit_btn' ).click()
+        self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that the new repo was created
         repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
