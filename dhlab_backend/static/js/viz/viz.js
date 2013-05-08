@@ -146,14 +146,14 @@ DataView = (function(_super) {
     return this.renderCharts();
   };
 
-  DataView.prototype.render = function() {
-    var field, _i, _len, _ref, _ref1, _ref2, _ref3;
-    if (!this.form.attributes.children || !this.data) {
-      return;
-    }
-    _ref = this.form.attributes.children;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      field = _ref[_i];
+  DataView.prototype._detect_types = function(root) {
+    var field, _i, _len, _ref, _ref1, _ref2, _ref3, _results;
+    _results = [];
+    for (_i = 0, _len = root.length; _i < _len; _i++) {
+      field = root[_i];
+      if ((_ref = field.type) === 'group') {
+        this._detect_types(field.children);
+      }
       if ((_ref1 = field.type) !== 'note') {
         this.raw_headers.push(field.name);
       }
@@ -166,9 +166,19 @@ DataView = (function(_super) {
       if ((_ref3 = field.type) === 'geopoint') {
         $('#map_btn').removeClass('disabled');
         this.map_enabled = true;
-        this.map_headers = field.name;
+        _results.push(this.map_headers = field.name);
+      } else {
+        _results.push(void 0);
       }
     }
+    return _results;
+  };
+
+  DataView.prototype.render = function() {
+    if (!this.form.attributes.children || !this.data) {
+      return;
+    }
+    this._detect_types(this.form.attributes.children);
     this.renderRaw();
     if (this.data.models.length > 0) {
       if (this.map_enabled) {
@@ -294,13 +304,23 @@ DataView = (function(_super) {
     _ref = this.data.models;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       datum = _ref[_i];
-      geopoint = datum.get('data')[this.map_headers].split(' ');
+      geopoint = datum.get('data')[this.map_headers];
+      if (geopoint == null) {
+        continue;
+      }
+      geopoint = geopoint.split(' ');
       if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
         continue;
       }
       center[0] += parseFloat(geopoint[0]);
       center[1] += parseFloat(geopoint[1]);
       valid_count += 1;
+    }
+    if (valid_count === 0) {
+      this.map_enabled = false;
+      $('#map_btn').addClass('disabled');
+      $('#map').hide();
+      return this;
     }
     center[0] = center[0] / valid_count;
     center[1] = center[1] / valid_count;

@@ -109,15 +109,10 @@ class DataView extends Backbone.View
         # Re-render chart
         @renderCharts()
 
-
-    render: ->
-        # Don't render until we get both the form & survey data
-        if( !@form.attributes.children || !@data )
-            return
-
-        # Loop through the form fields and check to see what type of visualizations
-        # we can do.
-        for field in @form.attributes.children
+    _detect_types: ( root ) ->
+        for field in root
+            if field.type in [ 'group' ]
+                @_detect_types( field.children )
 
             # Don't show notes in the raw data table
             if field.type not in [ 'note' ]
@@ -139,6 +134,15 @@ class DataView extends Backbone.View
 
                 @map_enabled = true
                 @map_headers = field.name
+
+    render: ->
+        # Don't render until we get both the form & survey data
+        if( !@form.attributes.children || !@data )
+            return
+
+        # Loop through the form fields and check to see what type of visualizations
+        # we can do.
+        @_detect_types( @form.attributes.children )
 
         @renderRaw()
 
@@ -176,7 +180,6 @@ class DataView extends Backbone.View
         # Render the actual data
         html += '<tbody>'
         for datum in @data.models
-
             html += '<tr>'
             for key in @raw_headers
 
@@ -289,14 +292,24 @@ class DataView extends Backbone.View
         center = [ 0, 0 ]
         valid_count = 0
         for datum in @data.models
-            geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
 
+            geopoint = datum.get( 'data' )[ @map_headers ]
+            if not geopoint?
+                continue
+
+            geopoint = geopoint.split( ' ' )
             if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
                 continue
 
             center[0] += parseFloat( geopoint[0] )
             center[1] += parseFloat( geopoint[1] )
             valid_count += 1
+
+        if valid_count == 0
+            @map_enabled = false
+            $( '#map_btn' ).addClass( 'disabled' )
+            $( '#map' ).hide()
+            return @
 
         center[0] = center[0] / valid_count
         center[1] = center[1] / valid_count
