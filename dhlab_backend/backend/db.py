@@ -119,7 +119,7 @@ class Repository( object ):
                 permissions.add( 'sharing' )
                 permissions.add( 'delete' )
             # Is this user a member of this organization
-            elif Organization.has_user( user ):
+            elif org.has_user( user ):
                 permissions.add( 'view' )
                 permissions.add( 'view_raw' )
 
