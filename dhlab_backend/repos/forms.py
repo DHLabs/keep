@@ -115,8 +115,6 @@ class NewRepoForm( forms.Form ):
         else:
             repo = self.cleaned_data[ 'survey_json' ]
 
-        print repo
-
         # Basic form name/description
         repo[ 'name' ] = self.cleaned_data[ 'name' ]
         repo[ 'description' ] = self.cleaned_data[ 'desc' ]

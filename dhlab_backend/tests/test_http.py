@@ -69,8 +69,7 @@ class HttpTests( HttpTestCase ):
         xform = os.path.abspath( '_data/test_docs/tutorial.xls' )
         self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
 
-        submit = '/html/body/div[2]/div/div/div/form/div[2]/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that the new repo was created
         repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
@@ -95,8 +94,7 @@ class HttpTests( HttpTestCase ):
         xform = os.path.abspath( '_data/test_docs/tutorial.xml' )
         self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
 
-        submit = '/html/body/div[2]/div/div/div/form/div[2]/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that the new repo was created
         repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
@@ -121,8 +119,7 @@ class HttpTests( HttpTestCase ):
         xform = os.path.abspath( '_data/test_docs/zambia/Delivery.xml' )
         self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
 
-        submit = '/html/body/div[2]/div/div/div/form/div[2]/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that the new repo was created
         repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
@@ -145,8 +142,7 @@ class HttpTests( HttpTestCase ):
         xform = os.path.abspath( '_data/test_docs/tutorial.xls' )
         self.selenium.find_element_by_id( 'id_xform_file' ).send_keys( xform )
 
-        submit = '/html/body/div[2]/div/div/div/form/div[2]/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that we correctly report an error
         error = '/html/body/div[2]/div/div/div/form/ul/li'
