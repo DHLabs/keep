@@ -33,6 +33,14 @@ def submission_detail( request ):
     pass
 
 
+def _parse_xml_submission( xml_data, root ):
+    for element in root:
+        xml_data[ element.tag ] = element.text
+
+        if element.getchildren() > 0:
+            _parse_xml_submission( xml_data, element )
+
+
 @csrf_exempt
 @require_POST
 def xml_submission( request, username ):
@@ -49,8 +57,7 @@ def xml_submission( request, username ):
 
     # Parse the xml data
     xml_data = {}
-    for element in root:
-        xml_data[ element.tag ] = element.text
+    _parse_xml_submission( xml_data, root )
 
     # Do basic validation of the data
     valid_data = validate_and_format( repo, xml_data )
