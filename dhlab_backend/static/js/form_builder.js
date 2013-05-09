@@ -4,34 +4,34 @@ var currentQuestion;
 function questionTypeChanged() {
 	var questionType = $("#questionType").val();
 
-  	removeChoices();
-  	removeConstraint();
+	removeChoices();
+	removeConstraint();
 
-  	removeRelevance();//switch to showRelevance when relevances is ready
+	removeRelevance();//switch to showRelevance when relevances is ready
 
-  	if( questionType == "select one" || questionType == "select all that apply" ) {
-  		showChoices();
-  	} else if( questionType == "audio" ||questionType == "photo" || questionType == "video" || questionType == "barcode" ) {
+	if( questionType == "select one" || questionType == "select all that apply" ) {
+		showChoices();
+	} else if( questionType == "audio" ||questionType == "photo" || questionType == "video" || questionType == "barcode" ) {
 
-  	} else if( questionType == "geopoint" ) {
+	} else if( questionType == "geopoint" ) {
 
-  	} else if( questionType == "decimal" || questionType == "integer" ) {
-  		showConstraint();
-  	} else if( questionType == "text" ) {
+	} else if( questionType == "decimal" || questionType == "integer" ) {
+		showConstraint();
+	} else if( questionType == "text" ) {
 
-  	} else if( questionType == "note" ) {
+	} else if( questionType == "note" ) {
 
-  	} else if( questionType == "date" ) {
+	} else if( questionType == "date" ) {
 
-  	} else if( questionType == "dateTime" ) {
+	} else if( questionType == "dateTime" ) {
 
-  	} else if( questionType == "time" ) {
+	} else if( questionType == "time" ) {
 
-  	}
+	}
 }
 
 function closeDialog() {
-	$('#questionEditWindow').modal('hide'); 
+	$('#questionEditWindow').modal('hide');
 }
 
 function showRelevance() {
@@ -67,13 +67,13 @@ function addConstraint(constraintType, constraintValue) {
 	   "<option value='&gt;='>Greater than or equal to</option>" +
 	   "<option value='&lt;='>Less than or equal to</option>" +
 	   "</select>\n</td>\n";
-	html += "<td><input id='constraintValue" + constraintNum 
+	html += "<td><input id='constraintValue" + constraintNum
 	   +"' placeholder='Constraint Value' value='" + constraintValue + "' type='number' step='any'></td>\n";
 	html += "<td style='width:40px;text-align:center;'>"+
-        "<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'" 
-        + " class='btn btn-danger'>" +
-        "   <i class='icon-trash'></i>"+
-        "</button>"+
+		"<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'"
+		+ " class='btn btn-danger'>" +
+		"   <i class='icon-trash'></i>"+
+		"</button>"+
 		"</td>\n</tr>\n";
 
 	$("#constraintList").append( html );
@@ -159,7 +159,7 @@ function populateQuestion( questionNum ) {
 			var constraintStr = bind.constraint;
 			if( constraintStr ) {
 				showConstraint();
-				
+
 				var theConstraints;
 				if( constraintStr.indexOf( "AND" ) != -1 ) {
 					$("#constraintType").val("AND");
@@ -213,10 +213,10 @@ function addChoice(name, label) {
 	html += "<td><input id='name' placeholder='Name' value='" + name +"' type='text'></td>";
 	html += "<td><input id='label' placeholder='Label' value='"+label+"' type='text'></td>";
 	html += "<td style='width:40px;text-align:center;'>"+
-                            "<button type='button' onclick='deleteChoice(\"choice" + choiceNum + "\")'" 
-                            	+" class='btn btn-danger'>"+
-                             "   <i class='icon-trash'></i>"+
-                            "</button>"+
+							"<button type='button' onclick='deleteChoice(\"choice" + choiceNum + "\")'"
+								+" class='btn btn-danger'>"+
+							 "   <i class='icon-trash'></i>"+
+							"</button>"+
 						"</td>";
 	html += '</tr>';
 
@@ -251,12 +251,12 @@ function okClicked() {
 		question.name = $("#questionName").val();
 		question.label = $("#questionLabel").val();
 		question.type = $("#questionType").val();
-		
+
 		if( $("#questionHintUse").checked ) {
 			question.hint = $("#questionHint").val();
 		}
 
-		//TODO: bind(relevant), 
+		//TODO: bind(relevant),
 
 		var useBind = false;
 		var bind = new Object();
@@ -318,7 +318,8 @@ function buildSurvey() {
 	var survey = new Object();
 	survey.children = questionList;
 	var value = JSON.stringify(survey);
-	$("#surveyjson").val(value);
+	console.log( value );
+	$("#id_survey_json").val(value);
 }
 
 function validateQuestion() {
@@ -335,11 +336,11 @@ function deleteQuestion(questionNum) {
 function editQuestion(questionNum) {
 	populateQuestion(questionNum);
 	currentQuestion = questionNum;
-	$('#questionEditWindow').modal('show'); 
+	$('#questionEditWindow').modal('show');
 }
 
 function getHTMLForQuestion(questionNum) {
-	
+
 	var question = questionList[questionNum];
 	var html = "<tr id='question" + questionNum + "'>";
 	html += '<td>Name:&nbsp;' + question.name +
@@ -352,13 +353,13 @@ function getHTMLForQuestion(questionNum) {
 							"</button>"+
 						"</td>"+
 						"<td style='width:90px;text-align:center;'>"+
-                            "<button onclick='deleteQuestion(" + questionNum 
-                            	+")' class='btn btn-danger'>"+
-                             "   <i class='icon-trash'></i> Delete"+
-                            "</button>"+
+							"<button onclick='deleteQuestion(" + questionNum
+								+")' class='btn btn-danger'>"+
+							 "   <i class='icon-trash'></i> Delete"+
+							"</button>"+
 						"</td>";
 	html += '</tr>';
-	return html; 
+	return html;
 }
 
 function reloadQuestionListHTML() {

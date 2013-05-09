@@ -1,10 +1,10 @@
+import json
 import os
 import re
 
 from datetime import datetime
 
 from django import forms
-from django.forms.util import ErrorList
 
 from pyxform.xls2json import SurveyReader
 from openrosa.xform_reader import XFormReader
@@ -22,7 +22,9 @@ class NewRepoForm( forms.Form ):
                                            ('private', 'Private') ],
                                  widget=forms.RadioSelect )
 
-    xform_file      = forms.FileField()
+    survey_json     = forms.CharField( required=False,
+                                       widget=forms.HiddenInput )
+    xform_file      = forms.FileField( required=False )
 
     def __init__( self, *args, **kwargs ):
 
@@ -35,6 +37,17 @@ class NewRepoForm( forms.Form ):
             self._org = kwargs.pop( 'org' )
 
         super( NewRepoForm, self ).__init__( *args, **kwargs )
+
+    def clean( self ):
+        '''
+            Run final checks on whether we have valid form schema to create the
+            repository.
+        '''
+        if self.cleaned_data[ 'survey_json' ] is None and\
+                self.cleaned_data[ 'xform_file' ] is None:
+            raise forms.ValidationError('''Please create or upload an XForm''')
+
+        return self.cleaned_data
 
     def clean_name( self ):
 
@@ -62,9 +75,26 @@ class NewRepoForm( forms.Form ):
 
         return data
 
+    def clean_survey_json( self ):
+        data = self.cleaned_data[ 'survey_json' ].strip()
+
+        if len( data ) == 0:
+            return None
+
+        # Attempt to load the into a dict
+        try:
+            data = json.loads( data )
+        except Exception:
+            return None
+
+        return data
+
     def clean_xform_file( self ):
 
         data = self.cleaned_data[ 'xform_file' ]
+
+        if data is None:
+            return None
 
         name, file_ext = os.path.splitext( data.name )
 
@@ -80,7 +110,12 @@ class NewRepoForm( forms.Form ):
 
     def save( self ):
 
-        repo = self.cleaned_data[ 'xform_file' ]
+        if self.cleaned_data[ 'xform_file' ]:
+            repo = self.cleaned_data[ 'xform_file' ]
+        else:
+            repo = self.cleaned_data[ 'survey_json' ]
+
+        print repo
 
         # Basic form name/description
         repo[ 'name' ] = self.cleaned_data[ 'name' ]
@@ -104,27 +139,3 @@ class NewRepoForm( forms.Form ):
         repo[ 'uploaded' ]  = datetime.now()
 
         return repo
-
-
-class BuildRepoForm( forms.Form ):
-
-    name    = forms.CharField()
-
-    desc    = forms.CharField( widget=forms.Textarea, required=False )
-
-    privacy = forms.ChoiceField( choices=[ ('public', 'Public'),
-                                           ('private', 'Private') ],
-                                 widget=forms.RadioSelect )
-
-    def clean( self ):
-        if any( self.errors ):
-            return
-
-        # Ensure form name is a valid form
-        if re.search( '\W+', self.cleaned_data[ 'name' ] ) is not None:
-
-            errors = self._errors.setdefault( "name", ErrorList() )
-            errors.append( '''Repository name can not have
-                spaces or special characters''' )
-
-        return self.cleaned_data
