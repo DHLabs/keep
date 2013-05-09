@@ -53,15 +53,20 @@ def delete_repo( request, repo_id ):
         the repository and the accompaning repo data.
     '''
 
-    survey = db.survey.find_one( { '_id': ObjectId( repo_id ) },
-                                 { 'user': True } )
+    repo = db.survey.find_one( { '_id': ObjectId( repo_id ) },
+                               { 'user': True, 'org': True } )
 
-    if survey[ 'user' ] != request.user.id:
+    if repo is None:
+        return HttpResponse( status=404 )
+
+    permissions = Repository.permissions( repo=repo,
+                                          account=request.user,
+                                          current_user=request.user )
+
+    if 'delete' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
-    db.survey.remove( { '_id': ObjectId( repo_id ) } )
-    db.data.remove( { 'repo': ObjectId( repo_id ) } )
-
+    Repository.delete( repo )
     return HttpResponseRedirect( '/' )
 
 

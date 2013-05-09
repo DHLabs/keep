@@ -60,6 +60,16 @@ class Repository( object ):
     objects = db.survey
 
     @staticmethod
+    def delete( repo ):
+        '''
+            Deletes a repository and all the data associated with it.
+
+            Assumes the correct permission checks have already been done.
+        '''
+        db.survey.remove( { '_id': repo[ '_id' ] } )
+        db.data.remove( { 'repo': repo[ '_id' ] } )
+
+    @staticmethod
     def add_data( repo, data, account ):
         # The validated & formatted survey data.
         repo_data = { 'data': data }
@@ -94,9 +104,22 @@ class Repository( object ):
         if isinstance( account, User ):
 
             # Is this user the owner of the repo?
-            if repo[ 'user' ] == account.id:
-                permissions.add( 'view' )
-                permissions.add( 'view_raw' )
+            if 'user' in repo:
+                if repo[ 'user' ] == account.id:
+                    permissions.add( 'view' )
+                    permissions.add( 'view_raw' )
+                    permissions.add( 'delete' )
+            elif 'org' in repo:
+                org = Organization.objects.get( id=repo[ 'org' ] )
+
+                # Is this user the owner of this org?
+                if org.owner == current_user:
+                    permissions.add( 'view' )
+                    permissions.add( 'view_raw' )
+                    permissions.add( 'delete' )
+                elif Organization.has_user( current_user ):
+                    permissions.add( 'view' )
+                    permissions.add( 'view_raw' )
 
         elif isinstance( account, Organization ):
 
@@ -106,6 +129,7 @@ class Repository( object ):
             if len( user ) > 0:
                 permissions.add( 'view' )
                 permissions.add( 'view_raw' )
+                permissions.add( 'delete' )
 
         return permissions
 
