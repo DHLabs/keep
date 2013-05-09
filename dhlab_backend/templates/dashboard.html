@@ -35,7 +35,7 @@
 		<h3>
 			<a href='{% url "user_dashboard" username=user.username %}'>{{ account.username }}</a>
 		</h3>
-		<div style='border-bottom:1px solid #EEE;padding-bottom:8px;margin-bottom:8px;'>
+		<div style='padding-bottom:8px;margin-bottom:8px;'>
 			{% if not is_other_user %}
 			<div class='pull-right' style='margin-top:-2px;'>
 				<a href='{% url "organization_new" %}' style='font-size:12px;'>
