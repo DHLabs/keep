@@ -106,6 +106,7 @@ class Repository( object ):
             if repo[ 'user' ] == user.id:
                 permissions.add( 'view' )
                 permissions.add( 'view_raw' )
+                permissions.add( 'sharing' )
                 permissions.add( 'delete' )
 
         elif 'org' in repo:
@@ -115,6 +116,7 @@ class Repository( object ):
             if org.owner == user:
                 permissions.add( 'view' )
                 permissions.add( 'view_raw' )
+                permissions.add( 'sharing' )
                 permissions.add( 'delete' )
             # Is this user a member of this organization
             elif Organization.has_user( user ):

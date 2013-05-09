@@ -5,6 +5,8 @@
 import googauth
 import os
 
+import selenium.webdriver.support.ui as ui
+
 from base64 import b32encode
 
 from django.contrib.auth.models import User
@@ -148,3 +150,42 @@ class HttpTests( HttpTestCase ):
         error = '/html/body/div[2]/div/div/div/form/ul/li'
         elem = self.selenium.find_element_by_xpath( error )
         assert elem.text == 'Repository already exists with this name'
+
+    def test_repo_detail( self ):
+        '''
+            Test access to a repo detail page.
+        '''
+        self.test_login()
+
+        # Find the first data repo
+        repo = '/html/body/div[2]/div/div[2]/table[1]/tbody/tr[1]/td[2]/a'
+        repo = self.selenium.find_element_by_xpath( repo )
+
+        repo_name = repo.text
+        repo.click()
+
+        assert self.selenium.title == repo_name
+
+    def test_repo_share( self ):
+        '''
+            Test toggling repo sharing
+        '''
+        self.test_repo_detail()
+
+        share = '//*[@id="chart_options"]/a[5]'
+        share = self.selenium.find_element_by_xpath( share )
+        share.click()
+
+        wait = ui.WebDriverWait( self.selenium, 10 )
+        wait.until( lambda driver: driver.find_element_by_id( 'sharing_toggle' ).is_displayed() )
+
+        privacy = self.selenium.find_element_by_id( 'privacy' )
+        previous_privacy = privacy.text.strip()
+
+        share = self.selenium.find_element_by_id( 'sharing_toggle' )
+        share.click()
+
+        if previous_privacy == 'PUBLIC':
+            assert 'PRIVATE' in privacy.text
+        else:
+            assert 'PUBLIC' in privacy.text

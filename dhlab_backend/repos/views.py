@@ -79,23 +79,28 @@ def toggle_public( request, repo_id ):
     '''
 
     # Find a survey, only looking for the user field
-    survey = db.survey.find_one( { '_id': ObjectId( repo_id ) },
-                                 { 'user': True, 'public': True } )
+    repo = db.survey.find_one( { '_id': ObjectId( repo_id ) },
+                               { 'user': True, 'org': True, 'public': True } )
 
-    # Check if the owner of the survey matches the user who is logged in
-    if survey[ 'user' ] != request.user.id:
+    if repo is None:
+        return HttpResponse( status=404 )
+
+    permissions = Repository.permissions( repo=repo,
+                                          user=request.user )
+
+    if 'sharing' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
-    if 'public' in survey:
-        survey[ 'public' ] = not survey[ 'public' ]
+    if 'public' in repo:
+        repo[ 'public' ] = not repo[ 'public' ]
     else:
-        survey[ 'public' ] = True
+        repo[ 'public' ] = True
 
     db.survey.update( { '_id': ObjectId( repo_id ) },
-                      { '$set': { 'public': survey[ 'public' ] } } )
+                      { '$set': { 'public': repo[ 'public' ] } } )
 
     return HttpResponse( json.dumps( { 'success': True,
-                                       'public': survey[ 'public' ] } ),
+                                       'public': repo[ 'public' ] } ),
                          mimetype='application/json' )
 
 

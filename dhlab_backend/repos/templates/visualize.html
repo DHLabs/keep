@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
+{% block title %}{{ repo.name }}{% endblock %}
+
 {% block css %}
 <link rel="stylesheet" type="text/css" href='{% static "css/viz.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
