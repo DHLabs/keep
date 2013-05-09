@@ -4,7 +4,7 @@ import urllib
 from backend.db import Repository, user_or_organization
 
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseNotAllowed
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
