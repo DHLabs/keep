@@ -1,11 +1,10 @@
 .jumbotron {
   position: relative;
-  margin-top: -24px;
-  padding-top: 16px;
+  padding-top: 24px;
   background: url(../img/masthead/worldmap.png) no-repeat;
   background-position: 0 32px;
   background-size: 1440px 707px;
-  border-bottom: 1px solid #eeeeee; }
+  border-bottom: 1px solid #dddddd; }
   .jumbotron h1 {
     text-align: center;
     font-weight: normal;
@@ -17,10 +16,10 @@
     line-height: 200%; }
 
 .collab {
-  display: none;
   background: #FAFAFA;
-  border-bottom: 1px solid #eeeeee;
-  padding: 16px; }
+  border-bottom: 1px solid #dddddd;
+  padding: 16px;
+  text-align: center; }
   .collab h4 {
     font-weight: normal; }
 
