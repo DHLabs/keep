@@ -95,7 +95,6 @@ class XFormSerializer( Serializer ):
 
             return etree.tostring( root )
         elif 'id' not in data:
-            print data
             return self.to_xml( data )
 
         # Grab the form & convert into the xform format!
