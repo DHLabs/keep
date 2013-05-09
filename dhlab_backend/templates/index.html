@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/landing.css' %}">
+{% endblock %}
+
+{% block outerspace %}
+<div class='jumbotron'>
+	<div class='container'>
+		<h1>A powerful, secure data repository.</h1>
+		<div style='text-align:center;padding:32px;'>
+			<img src='{% static "img/masthead/dataflow.png" %}' width='640'>
+		</div>
+	</div>
+</div>
+<div class='collab'>
+	<div class='container'>
+		<h4>Used by:</h4>
+	</div>
+</div>
+<div class='container' style='margin-top:16px;'>
+	<div class='row'>
+		<div class='span4'>
+			<h4>Secure Data Storage</h4>
+			<div class='securedata-banner'></div>
+			<div style='margin-top:16px;'>
+				Two-factor authentication and 1024-bit SSL encryption used
+				throughout the data collection process allows your data to be
+				safely transmitted and stored.
+			</div>
+		</div>
+		<div class='span4'>
+			<h4>Powerful Analytics</h4>
+			<div class='analytics-banner'></div>
+			<div style='margin-top:16px;'>
+				Based on your data, we determine the best visualizations and
+				analytics to apply allowing you to view your data in new and
+				powerful ways.
+			</div>
+		</div>
+		<div class='span4'>
+			<h4>Differential Privacy</h4>
+			<div class='privacy-banner'></div>
+			<div style='margin-top:16px;'>
+				Differential privacy allows you to share potentially confidential
+				information by fuzzing the data with enough randomness to mask
+				it but still provide statistically useful analytics.
+			</div>
+		</div>
+</div>
+{% endblock %}

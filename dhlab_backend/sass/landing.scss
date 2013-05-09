@@ -1,0 +1,48 @@
+.jumbotron {
+	position:relative;
+	margin-top:-24px;
+	padding-top:16px;
+
+	background: url(/static/img/masthead/worldmap.png) no-repeat;
+	background-position: 0 32px;
+	background-size: 1440px 707px;
+
+	border-bottom: 1px solid #EEE;
+
+	h1 {
+		font-weight: normal;
+		text-shadow: rgba(128,128,128,0.6) 0 1px 0;
+	}
+}
+
+.collab {
+	display:none;
+	background: #FAFAFA;
+	border-bottom: 1px solid #EEE;
+	padding:16px;
+
+	h4 {
+		font-weight: normal;
+	}
+}
+
+.analytics-banner {
+	background: url(/static/img/masthead/analytics.png) no-repeat;
+	background-size: 300px 128px;
+	height:128px;
+	border-radius:8px;
+}
+
+.privacy-banner {
+	background: url(/static/img/masthead/privacy.png) no-repeat;
+	background-size: 300px 128px;
+	height:128px;
+	border-radius:8px;
+}
+
+.securedata-banner {
+	background: url(/static/img/masthead/securedata.jpg) no-repeat;
+	background-size: 300px 128px;
+	height:128px;
+	border-radius:8px;
+}
