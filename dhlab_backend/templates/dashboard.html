@@ -52,22 +52,24 @@
 				{% else %}
 					{% for org in organizations %}
 					<div>
-						{% if org.pending %}
-						<div class='pull-right'>
-							<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
-							   class='btn btn-small btn-success'>
-								Join
+						{% if not org.pending or not is_other_user %}
+							{% if org.pending %}
+							<div class='pull-right'>
+								<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
+								   class='btn btn-small btn-success'>
+									Join
+								</a>
+								<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
+								   class='btn btn-small'>
+								   Ignore
+								</a>
+							</div>
+							{% endif %}
+							<a href='{% url "organization_dashboard" org=org.organization.name %}'>
+								<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
+								{{ org.organization.name }}
 							</a>
-							<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
-							   class='btn btn-small'>
-							   Ignore
-							</a>
-						</div>
 						{% endif %}
-						<a href='{% url "organization_dashboard" org=org.organization.name %}'>
-							<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
-							{{ org.organization.name }}
-						</a>
 					</div>
 					{% endfor %}
 				{% endif %}
