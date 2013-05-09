@@ -60,8 +60,7 @@ def delete_repo( request, repo_id ):
         return HttpResponse( status=404 )
 
     permissions = Repository.permissions( repo=repo,
-                                          account=request.user,
-                                          current_user=request.user )
+                                          user=request.user )
 
     if 'delete' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
@@ -162,8 +161,7 @@ def repo_viz( request, username, repo_name ):
 
     # Grab the user's permissions for this repository
     permissions = Repository.permissions( repo=repo,
-                                          account=account,
-                                          current_user=request.user )
+                                          user=request.user )
 
     # Check to see if the user has access to view this survey
     if 'view' not in permissions:

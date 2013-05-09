@@ -91,7 +91,7 @@ class Repository( object ):
         return db.data.insert( repo_data )
 
     @staticmethod
-    def permissions( repo, account, current_user ):
+    def permissions( repo, user ):
         '''
             Determine whether this <account> has permission to view the <repo>.
         '''
@@ -101,35 +101,25 @@ class Repository( object ):
         if repo.get( 'public', False ):
             permissions.add( 'view' )
 
-        if isinstance( account, User ):
-
+        if 'user' in repo:
             # Is this user the owner of the repo?
-            if 'user' in repo:
-                if repo[ 'user' ] == account.id:
-                    permissions.add( 'view' )
-                    permissions.add( 'view_raw' )
-                    permissions.add( 'delete' )
-            elif 'org' in repo:
-                org = Organization.objects.get( id=repo[ 'org' ] )
-
-                # Is this user the owner of this org?
-                if org.owner == current_user:
-                    permissions.add( 'view' )
-                    permissions.add( 'view_raw' )
-                    permissions.add( 'delete' )
-                elif Organization.has_user( current_user ):
-                    permissions.add( 'view' )
-                    permissions.add( 'view_raw' )
-
-        elif isinstance( account, Organization ):
-
-            # Is the current user a member of this organization?
-            user = OrganizationUser.objects.filter( user=current_user,
-                                                    organization=account )
-            if len( user ) > 0:
+            if repo[ 'user' ] == user.id:
                 permissions.add( 'view' )
                 permissions.add( 'view_raw' )
                 permissions.add( 'delete' )
+
+        elif 'org' in repo:
+            org = Organization.objects.get( id=repo[ 'org' ] )
+
+            # Is this user the owner of this org?
+            if org.owner == user:
+                permissions.add( 'view' )
+                permissions.add( 'view_raw' )
+                permissions.add( 'delete' )
+            # Is this user a member of this organization
+            elif Organization.has_user( user ):
+                permissions.add( 'view' )
+                permissions.add( 'view_raw' )
 
         return permissions
 
