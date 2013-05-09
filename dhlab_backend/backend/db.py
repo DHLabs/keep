@@ -101,6 +101,9 @@ class Repository( object ):
         if repo.get( 'public', False ):
             permissions.add( 'view' )
 
+        if user.is_anonymous():
+            return permissions
+
         if 'user' in repo:
             # Is this user the owner of the repo?
             if repo[ 'user' ] == user.id:
