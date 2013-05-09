@@ -45,10 +45,6 @@ def deploy():
         # Pull latest code from git
         run( 'git pull origin master' )
 
-        # Ensure we have the latest dependencies
-        run( 'workon dhlab_backend' )
-        run( 'pip install -r deps.txt' )
-
         # Start up all processes again
         run( 'supervisorctl start all' )
 
