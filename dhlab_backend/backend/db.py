@@ -70,7 +70,7 @@ class Repository( object ):
         db.data.remove( { 'repo': repo[ '_id' ] } )
 
     @staticmethod
-    def add_data( repo, data, account ):
+    def add_data( repo, data, account, **kwargs ):
         # The validated & formatted survey data.
         repo_data = { 'data': data }
 
@@ -87,6 +87,9 @@ class Repository( object ):
 
         # Timestamp of when this submission was received
         repo_data[ 'timestamp' ] = datetime.utcnow()
+
+        for key in kwargs:
+            repo_data[ key ] = kwargs.get( key )
 
         return db.data.insert( repo_data )
 

@@ -7,7 +7,6 @@ URLConf to include this URLConf for any URL beginning with
 
 """
 
-
 from django.conf.urls import patterns, url
 from django.shortcuts import render
 from django.contrib.auth import views as auth_views
@@ -48,7 +47,7 @@ urlpatterns += patterns('',
 
     url(r'^logout/$',
         auth_views.logout,
-        {'template_name': 'registration/logout.html'},
+        kwargs={ 'next_page': '/' },
         name='auth_logout'),
 
     url(r'^password/change/$',

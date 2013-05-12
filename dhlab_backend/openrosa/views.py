@@ -1,14 +1,13 @@
 import json
 import urllib
-from datetime import datetime
 
-from backend.db import db
+from backend.db import Repository, user_or_organization
 
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseNotAllowed
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from lxml import etree
 from repos import validate_and_format
@@ -34,52 +33,39 @@ def submission_detail( request ):
     pass
 
 
+def _parse_xml_submission( xml_data, root ):
+    for element in root:
+        xml_data[ element.tag ] = element.text
+
+        if element.getchildren() > 0:
+            _parse_xml_submission( xml_data, element )
+
+
 @csrf_exempt
+@require_POST
 def xml_submission( request, username ):
-    if request.method == 'POST':
-        iphone_id = request.GET.get( 'iphone_id', None )
+    iphone_id = request.POST.get( 'iphone_id', None )
 
-        root = etree.fromstring(request.FILES[ 'xml_submission_file' ].read())
+    root = etree.fromstring(request.FILES[ 'xml_submission_file' ].read())
 
-        # Find the user object associated with this username
-        user = User.objects.get(username=username)
+    # Find the user object associated with this username
+    account = user_or_organization( username )
 
-        # The find the suervey object associated with this form name & user
-        survey_name = root.tag
-        survey = db.survey.find_one( { 'name': survey_name, 'user': user.id } )
+    # The find the suervey object associated with this form name & user
+    repo_name = root.tag
+    repo = Repository.get_repo( repo_name, account )
 
-        # Parse the xml data
-        xml_data = {}
-        for element in root:
-            xml_data[ element.tag ] = element.text
+    # Parse the xml data
+    xml_data = {}
+    _parse_xml_submission( xml_data, root )
 
-        # Do basic validation of the data
-        valid_data = validate_and_format( survey, xml_data )
+    # Do basic validation of the data
+    valid_data = validate_and_format( repo, xml_data )
 
-        # Include some metadata with the survey data
-        repo_data = {
-            # User ID of the person who uploaded the form (not the data)
-            'user':         user.id,
-            # Survey/form ID associated with this data
-            'repo':       survey[ '_id' ],
+    if iphone_id:
+        Repository.add_data( repo, valid_data, account, uuid=iphone_id )
+    else:
+        Repository.add_data( repo, valid_data, account, uuid=iphone_id )
 
-            # Survey name (used for feed purposes)
-            'survey_label': survey[ 'name' ],
-
-            # Timestamp of when this submission was received
-            'timestamp':    datetime.utcnow(),
-            # The validated & formatted survey data.
-            'data':         valid_data
-        }
-
-        # Save the iphone_id ( if passed in by the submitter )
-        if iphone_id:
-            repo_data[ 'uuid' ] = iphone_id
-
-        # Insert into the database
-        db.data.insert( repo_data )
-
-        data = json.dumps( { 'success': True } )
-        return HttpResponse( data, mimetype='application/json' )
-
-    return HttpResponseNotAllowed( ['POST'] )
+    data = json.dumps( { 'success': True } )
+    return HttpResponse( data, mimetype='application/json' )

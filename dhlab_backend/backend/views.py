@@ -1,9 +1,8 @@
-from bson import ObjectId
-
-from backend.db import db, Repository
+from backend.db import Repository
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
 
+from django.core.urlresolvers import reverse
 from django.contrib.sites.models import RequestSite
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -17,11 +16,12 @@ from twofactor.models import UserAPIToken
 
 
 def home( request ):
-    if request.user.username:
-        return HttpResponseRedirect( '/%s' % ( request.user.username ) )
-    else:
-        return HttpResponseRedirect( '/accounts/login' )
-        #return render_to_response( 'index.html' )
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(
+                    reverse( 'user_dashboard',
+                             kwargs={ 'username': request.user.username } ) )
+
+    return render_to_response( 'index.html' )
 
 
 def register( request ):

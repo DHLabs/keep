@@ -40,10 +40,10 @@ class XFormSerializer( Serializer ):
                 mediaFile = etree.Element( 'mediaFile' )
 
                 fileName = etree.Element( 'filename' )
-                fileName.text = media
+                fileName.text = media[0]
 
                 downloadUrl = etree.Element( 'downloadUrl' )
-                downloadUrl.text = 'http://s3.amazonaws.com/keep-media/%s/%s' % ( data[ 'repo' ], media )
+                downloadUrl.text = media[1]
 
                 mediaFile.append( fileName )
                 mediaFile.append( downloadUrl )
@@ -95,7 +95,6 @@ class XFormSerializer( Serializer ):
 
             return etree.tostring( root )
         elif 'id' not in data:
-            print data
             return self.to_xml( data )
 
         # Grab the form & convert into the xform format!

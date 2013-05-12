@@ -231,10 +231,13 @@ class RepoResource( MongoDBResource ):
         return media
 
     def get_manifest( self, request, **kwargs ):
+        base = 'http://s3.amazonaws.com/keep-media/%s/%s'
+
         bundle = self.build_bundle( request=request )
         obj = self.obj_get( bundle, **self.remove_api_resource_names(kwargs) )
 
         media = list( set( self._grab_media( obj[ 'children' ] ) ) )
+        media = [ ( med, base % ( obj['_id'], med ) ) for med in media ]
 
         response = { 'repo': obj[ '_id' ], 'manifest': media }
         return self.create_response( request, response )

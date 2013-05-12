@@ -16,7 +16,6 @@
     <link href='{% static "css/font-awesome-ie7.min.css" %}' rel='stylesheet'>
     <![endif]-->
     <style type='text/css'>
-        body { margin-top:64px; }
         span.help-block { font-size: 13px; color: #AAA; }
     </style>
     {% block css %}{% endblock %}
@@ -26,15 +25,27 @@
 </head>
 <body>
     {% include "topbar.html" %}
-    <div class="container">
+    {% block outerspace %}
+    <div class="container" style='padding-top:16px;'>
         {% block content %}
         {% if template %}{% include template %}{% endif %}
         {{ content|safe }}
         {% endblock %}
     </div>
+    {% endblock %}
+
     {% include "footer.html" %}
 
-    <!-- JAVASCRIPT! -->
+    <!-- EVIL TRACKER -->
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-40791426-1', 'distributedhealth.org');
+        ga('send', 'pageview');
+    </script>
     <script src='{% static "js/vendor/jquery-1.9.1.min.js" %}'></script>
     <script src='{% static "js/vendor/bootstrap.2.3.1.min.js" %}'></script>
     {% block js %}{% endblock %}

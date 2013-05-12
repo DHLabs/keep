@@ -262,6 +262,9 @@ class XFormReader():
         if type_str in [ 'string', 'xsd:string' ]:
             return 'text'
 
+        if type_str in [ 'xsd:decimal', 'xsd:double' ]:
+            return 'decimal'
+
         return type_str
 
     def set_binding( self, model, name, binding ):
