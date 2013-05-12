@@ -12,7 +12,6 @@ define( [], ->
             return passesConstraint
 
         @isRelevant: (question, answers) ->
-
             containsRelevant = question.bind and question.bind.relevant
 
             if containsRelevant
@@ -223,7 +222,11 @@ define( [], ->
                     # string comparisons are only equal or not equal
 
                     # remove surrounding quotes
-                    rightAnswer = ((rightAnswer.split "'")[1]).replace /\s+/g, ""
+                    if "'" in rightAnswer
+                        rightAnswer = ((rightAnswer.split "'")[1]).replace /\s+/g, ""
+
+                    if "\"" in rightAnswer
+                        rightAnswer = ((rightAnswer.split "\"")[1]).replace /\s+/g, ""
 
                     if compareString is "="
                         return leftAnswer is rightAnswer

@@ -109,9 +109,9 @@ DataView = (function(_super) {
       if (response.success) {
         $(event.currentTarget).attr('checked', response["public"]);
         if (response["public"]) {
-          return $('#privacy').html('<img src=\'/static/img/public_repo.png\'>&nbsp;PUBLIC');
+          return $('#privacy').html('<i class=\'icon-unlock\'></i>&nbsp;PUBLIC');
         } else {
-          return $('#privacy').html('<img src=\'/static/img/private_repo.png\'>&nbsp;PRIVATE');
+          return $('#privacy').html('<i class=\'icon-lock\'></i>&nbsp;PRIVATE');
         }
       }
     });
@@ -146,14 +146,14 @@ DataView = (function(_super) {
     return this.renderCharts();
   };
 
-  DataView.prototype.render = function() {
-    var field, _i, _len, _ref, _ref1, _ref2, _ref3;
-    if (!this.form.attributes.children || !this.data) {
-      return;
-    }
-    _ref = this.form.attributes.children;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      field = _ref[_i];
+  DataView.prototype._detect_types = function(root) {
+    var field, _i, _len, _ref, _ref1, _ref2, _ref3, _results;
+    _results = [];
+    for (_i = 0, _len = root.length; _i < _len; _i++) {
+      field = root[_i];
+      if ((_ref = field.type) === 'group') {
+        this._detect_types(field.children);
+      }
       if ((_ref1 = field.type) !== 'note') {
         this.raw_headers.push(field.name);
       }
@@ -166,9 +166,19 @@ DataView = (function(_super) {
       if ((_ref3 = field.type) === 'geopoint') {
         $('#map_btn').removeClass('disabled');
         this.map_enabled = true;
-        this.map_headers = field.name;
+        _results.push(this.map_headers = field.name);
+      } else {
+        _results.push(void 0);
       }
     }
+    return _results;
+  };
+
+  DataView.prototype.render = function() {
+    if (!this.form.attributes.children || !this.data) {
+      return;
+    }
+    this._detect_types(this.form.attributes.children);
     this.renderRaw();
     if (this.data.models.length > 0) {
       if (this.map_enabled) {
@@ -277,7 +287,7 @@ DataView = (function(_super) {
   };
 
   DataView.prototype.renderMap = function() {
-    var center, constrainedMarker, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    var center, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
     this.heatmap = L.TileLayer.heatMap({
       radius: 80,
       opacity: 0.8,
@@ -290,37 +300,55 @@ DataView = (function(_super) {
       }
     });
     center = [0, 0];
+    valid_count = 0;
     _ref = this.data.models;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       datum = _ref[_i];
-      geopoint = datum.get('data')[this.map_headers].split(' ');
+      geopoint = datum.get('data')[this.map_headers];
+      if (geopoint == null) {
+        continue;
+      }
+      geopoint = geopoint.split(' ');
+      if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
+        continue;
+      }
       center[0] += parseFloat(geopoint[0]);
       center[1] += parseFloat(geopoint[1]);
+      valid_count += 1;
     }
-    center[0] = center[0] / this.data.models.length;
-    center[1] = center[1] / this.data.models.length;
+    if (valid_count === 0) {
+      this.map_enabled = false;
+      $('#map_btn').addClass('disabled');
+      $('#map').hide();
+      return this;
+    }
+    center[0] = center[0] / valid_count;
+    center[1] = center[1] / valid_count;
     this.map = L.map('map').setView(center, 10);
+    this.test_map = L.map('hidden_map').setView(center, 10);
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 18
     }).addTo(this.map);
     myIcon = L.icon({
-      iconUrl: '/static/img/leaflet/marker-icon.png',
-      iconRetinaUrl: '/static/img/leaflet/marker-icon@2x.png',
+      iconUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon.png',
+      iconRetinaUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon@2x.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
-      shadowUrl: '/static/img/leaflet/marker-shadow.png',
+      shadowUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-shadow.png',
       shadowSize: [41, 41],
       shadowAnchor: [15, 41]
     });
     heatmapData = [];
     this.markers = [];
-    this.constrained_markers = [];
     _ref1 = this.data.models;
     for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
       datum = _ref1[_j];
       geopoint = datum.get('data')[this.map_headers].split(' ');
+      if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
+        continue;
+      }
       marker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
       });
@@ -332,10 +360,6 @@ DataView = (function(_super) {
       }
       marker.bindPopup(html);
       this.markers.push(marker);
-      constrainedMarker = L.marker([geopoint[0], geopoint[1]], {
-        icon: myIcon
-      });
-      this.constrained_markers.push(constrainedMarker);
       heatmapData.push({
         lat: geopoint[0],
         lon: geopoint[1],
@@ -343,20 +367,18 @@ DataView = (function(_super) {
       });
     }
     this.marker_layer = L.layerGroup(this.markers);
-    this.constrained_layer = L.layerGroup(this.constrained_markers);
     this.heatmap.addData(heatmapData);
     this.map.addLayer(this.heatmap);
     this.map.addLayer(this.marker_layer);
-    this.map.addLayer(this.constrained_layer);
     layers = {
       'Markers': this.marker_layer,
-      'Heatmap': this.heatmap,
-      'Constrained': this.constrained_layer
+      'Heatmap': this.heatmap
     };
     controls = L.control.layers(null, layers, {
       collapsed: false
     });
-    return controls.addTo(this.map);
+    controls.addTo(this.map);
+    return this;
   };
 
   return DataView;

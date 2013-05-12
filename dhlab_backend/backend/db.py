@@ -1,5 +1,8 @@
 from bson import ObjectId
+from datetime import datetime
 
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 
@@ -10,10 +13,10 @@ from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpUnauthorized
 from tastypie.resources import Resource
 
-from twofactor.util import encrypt_value, decrypt_value
+from organizations.models import Organization, OrganizationUser
 
-connection = MongoClient()
-db = connection[ 'dhlab' ]
+connection = MongoClient( settings.MONGODB_HOST, settings.MONGODB_PORT )
+db = connection[ settings.MONGODB_DBNAME ]
 
 
 def dehydrate( survey ):
@@ -21,13 +24,10 @@ def dehydrate( survey ):
         if isinstance( survey[ key ], ObjectId ):
             survey[ key ] = str( survey[ key ] )
 
-    # Decrypt survey values
-    if 'data' in survey:
-        survey[ 'data' ] = decrypt_survey( survey[ 'data' ] )
-
     # Reformat python DateTime into JS DateTime
     if 'timestamp' in survey:
         survey[ 'timestamp' ] = survey[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
+
     return survey
 
 
@@ -42,16 +42,159 @@ def dehydrate_survey( cursor ):
     return [ dehydrate( row ) for row in cursor ]
 
 
-def encrypt_survey( data ):
-    for key in data:
-        data[ key ] = encrypt_value( data[ key ] )
-    return data
+def user_or_organization( name ):
+    results = User.objects.filter( username=name )
+
+    if len( results ) > 0:
+        return results[0]
+
+    results = Organization.objects.filter( name=name )
+
+    if len( results ) > 0:
+        return results[0]
+
+    return None
 
 
-def decrypt_survey( data ):
-    for key in data:
-        data[ key ] = decrypt_value( data[ key ] )
-    return data
+class Repository( object ):
+    objects = db.survey
+
+    @staticmethod
+    def delete( repo ):
+        '''
+            Deletes a repository and all the data associated with it.
+
+            Assumes the correct permission checks have already been done.
+        '''
+        db.survey.remove( { '_id': repo[ '_id' ] } )
+        db.data.remove( { 'repo': repo[ '_id' ] } )
+
+    @staticmethod
+    def add_data( repo, data, account ):
+        # The validated & formatted survey data.
+        repo_data = { 'data': data }
+
+        if isinstance( account, User ):
+            repo_data[ 'user' ] = account.id
+        elif isinstance( account, Organization ):
+            repo_data[ 'org' ] = account.id
+
+        # Survey/form ID associated with this data
+        repo_data[ 'repo' ] = repo[ '_id' ]
+
+        # Survey name (used for feed purposes)
+        repo_data[ 'survey_label' ] = repo[ 'name' ]
+
+        # Timestamp of when this submission was received
+        repo_data[ 'timestamp' ] = datetime.utcnow()
+
+        return db.data.insert( repo_data )
+
+    @staticmethod
+    def permissions( repo, user ):
+        '''
+            Determine whether this <account> has permission to view the <repo>.
+        '''
+        permissions = set([])
+
+        # Is this repo public?
+        if repo.get( 'public', False ):
+            permissions.add( 'view' )
+
+        if user.is_anonymous():
+            return permissions
+
+        if 'user' in repo:
+            # Is this user the owner of the repo?
+            if repo[ 'user' ] == user.id:
+                permissions.add( 'view' )
+                permissions.add( 'view_raw' )
+                permissions.add( 'sharing' )
+                permissions.add( 'delete' )
+
+        elif 'org' in repo:
+            org = Organization.objects.get( id=repo[ 'org' ] )
+
+            # Is this user the owner of this org?
+            if org.owner == user:
+                permissions.add( 'view' )
+                permissions.add( 'view_raw' )
+                permissions.add( 'sharing' )
+                permissions.add( 'delete' )
+            # Is this user a member of this organization
+            elif org.has_user( user ):
+                permissions.add( 'view' )
+                permissions.add( 'view_raw' )
+
+        return permissions
+
+    @staticmethod
+    def get_repo( name, account ):
+        '''
+            Find a repository based on the repository name and a <User> or
+            <Organization> account.
+        '''
+        query = { 'name': name }
+
+        if isinstance( account, Organization ):
+            query[ 'org' ] = account.id
+        else:
+            query[ 'user' ] = account.id
+
+        return Repository.objects.find_one( query )
+
+    @staticmethod
+    def list_repos( account, **kwargs ):
+        '''
+            Return a list of repositories for a specific <account>
+        '''
+        query = { 'user': account.id }
+
+        for key in kwargs:
+            query[ key ] = kwargs.get( key )
+
+        cursor = db.survey.find( query )
+
+        repos = []
+        for repo in cursor:
+            repo[ 'mongo_id' ] = repo[ '_id' ]
+
+            query = { 'repo': ObjectId( repo[ '_id' ] ) }
+            repo[ 'submission_count' ] = db.data.find( query ).count()
+
+            del repo[ '_id' ]
+            repos.append( repo )
+
+        return repos
+
+    @staticmethod
+    def shared_repos( account, **kwargs ):
+        '''
+            Return a list of shared repositories for a specifc <account>
+        '''
+        orgs = OrganizationUser.objects.filter( user=account,
+                                                pending=False )
+
+        # Map org id to org name
+        org_map = {}
+        for org in orgs:
+            org_map[ org.organization.id ] = org.organization.name
+
+        query = { 'org': { '$in': [ org.organization.id for org in orgs ] } }
+        cursor = db.survey.find( query )
+
+        repos = []
+        for repo in cursor:
+            repo[ 'mongo_id' ] = repo[ '_id' ]
+            repo[ 'org' ] = org_map[ repo[ 'org' ] ]
+
+            query = { 'repo': ObjectId( repo[ '_id' ] ) }
+            repo[ 'submission_count' ] = db.data.find( query ).count()
+
+            del repo[ '_id' ]
+            repos.append( repo )
+
+        return repos
 
 
 class Document( dict ):
@@ -77,21 +220,25 @@ class MongoDBResource(Resource):
         Maps mongodb documents to Document class.
         """
 
-        objects = map( Document,
-                       self.authorized_read_list( self.get_collection(),
-                                                  bundle ) )
+        try:
+            objects = map( Document,
+                           self.authorized_read_list( self.get_collection(),
+                                                      bundle ) )
+        except ValueError:
+            raise ImmediateHttpResponse( HttpUnauthorized() )
+
         return objects
 
     def obj_get(self, bundle, **kwargs):
         """
         Returns mongodb document from provided id.
         """
-
         obj = self.get_collection()\
                   .find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
 
         try:
-            return Document( self.authorized_read_detail( obj, bundle ) )
+            if self.authorized_read_detail( obj, bundle ):
+                return Document( obj )
         except ValueError:
             raise ImmediateHttpResponse( HttpUnauthorized() )
 

@@ -1,3 +1,5 @@
 *sublime*
 *.db
 *.db.bak
+htmlcov
+*.coverage

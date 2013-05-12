@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>De-register Child</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/ba5feb9f7529d5081234abb981effd89a7291053" uiVersion="1" version="1" name="De-register Child">
+					<reason_for_closure />
+					<date_of_death />
+					<place_of_death />
+					<type_of_death />
+					<time_of_death_child />
+					<cause_of_death_child />
+					<are_you_sure />
+					<done />
+				</data>
+			</instance>
+			<bind nodeset="/data/reason_for_closure" />
+			<bind nodeset="/data/date_of_death" type="xsd:date" relevant="/data/reason_for_closure = 'death'" />
+			<bind nodeset="/data/place_of_death" relevant="/data/reason_for_closure = 'death'" />
+			<bind nodeset="/data/type_of_death" relevant="/data/reason_for_closure = 'death'" />
+			<bind nodeset="/data/time_of_death_child" relevant="/data/type_of_death = 'newborn'" />
+			<bind nodeset="/data/cause_of_death_child" relevant="/data/type_of_death = 'newborn' or /data/type_of_death = 'infant' or /data/type_of_death = 'child'" />
+			<bind nodeset="/data/are_you_sure" required="true()" />
+			<bind nodeset="/data/done" relevant="/data/are_you_sure = 'yes'" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="reason_for_closure-label">
+						<value>Reason for closure</value>
+					</text>
+					<text id="closure_reason-death-label">
+						<value>1. Death</value>
+					</text>
+					<text id="reason_for_closure-change_of_location-label">
+						<value>2. Migration</value>
+					</text>
+					<text id="reason_for_closure-end_of_care-label">
+						<value>3. End of Care</value>
+					</text>
+					<text id="date_of_death-label">
+						<value>Date of death</value>
+					</text>
+					<text id="place_of_death-label">
+						<value>Place of death</value>
+					</text>
+					<text id="place_of_death-home-label">
+						<value>1. Home</value>
+					</text>
+					<text id="place_of_death-health_centre-label">
+						<value>2. Health centre</value>
+					</text>
+					<text id="place_of_death-hospital-label">
+						<value>3. Hospital</value>
+					</text>
+					<text id="place_of_death-other-label">
+						<value>4. Other</value>
+					</text>
+					<text id="type_of_death-label">
+						<value>Type of death</value>
+					</text>
+					<text id="type_of_death-newborn_death-label">
+						<value>1. Newborn death (0 - 28d)</value>
+					</text>
+					<text id="type_of_death-infant-label">
+						<value>2. Infant death (29d - 12m)</value>
+					</text>
+					<text id="type_of_death-child-label">
+						<value>3. Child death (12 - 24m)</value>
+					</text>
+					<text id="time_of_death_child-label">
+						<value>Time of death</value>
+					</text>
+					<text id="time_of_death-still_birth-label">
+						<value>1. Still birth</value>
+					</text>
+					<text id="time_of_death-early_neonatal-label">
+						<value>2. Early neonatal (0 - 7d)</value>
+					</text>
+					<text id="time_of_death-late_neonatal-label">
+						<value>3. Late neonatal (8 - 28d)</value>
+					</text>
+					<text id="cause_of_death_child-label">
+						<value>Cause of death</value>
+					</text>
+					<text id="cause_of_death_child-ari-label">
+						<value>1. ARI</value>
+					</text>
+					<text id="cause_of_death_child-fever-label">
+						<value>2. Fever</value>
+					</text>
+					<text id="cause_of_death_child-dysentery-label">
+						<value>3. Dysentery or diarrhea</value>
+					</text>
+					<text id="cause_of_death_child-injury-label">
+						<value>4. Injury or accident</value>
+					</text>
+					<text id="cause_of_death_child-malnutrition-label">
+						<value>5. Malnutrition</value>
+					</text>
+					<text id="cause_of_death_child-cholera-label">
+						<value>6. Cholera</value>
+					</text>
+					<text id="cause_of_death_child-measles-label">
+						<value>7. Measles</value>
+					</text>
+					<text id="cause_of_death_child-meningitis-label">
+						<value>8. Meningitis</value>
+					</text>
+					<text id="cause_of_death_child-meningitis-1-label">
+						<value>9. Other</value>
+					</text>
+					<text id="are_you_sure-label">
+						<value>Are you sure you wish to deregister this child?</value>
+					</text>
+					<text id="are_you_sure-yes-label">
+						<value>1. Yes</value>
+						<value form="image">jr://file/commcare/image/data/yes.png</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="are_you_sure-no-label">
+						<value>2. No</value>
+						<value form="image">jr://file/commcare/image/data/no.png</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="done-label">
+						<value>This child will now be de-registered.</value>
+					</text>
+				</translation>
+				<translation lang="tog">
+					<text id="reason_for_closure-label">
+						<value>Kaambo ka kujala</value>
+					</text>
+					<text id="closure_reason-death-label">
+						<value>1. Lufu</value>
+					</text>
+					<text id="reason_for_closure-change_of_location-label">
+						<value>2. Kulonga</value>
+					</text>
+					<text id="reason_for_closure-end_of_care-label">
+						<value>3. Mamanino aku bambwa</value>
+					</text>
+					<text id="date_of_death-label">
+						<value>Buzuba bwa kufwa</value>
+					</text>
+					<text id="place_of_death-label">
+						<value>Busena mbwakafwida</value>
+					</text>
+					<text id="place_of_death-home-label">
+						<value>1. Kung'anda</value>
+					</text>
+					<text id="place_of_death-health_centre-label">
+						<value>2. Kabbadela Kashonto</value>
+					</text>
+					<text id="place_of_death-hospital-label">
+						<value>3. Cibaddela cipati</value>
+					</text>
+					<text id="place_of_death-other-label">
+						<value>4. Busena bumbi</value>
+					</text>
+					<text id="type_of_death-label">
+						<value>Mushobo walufu</value>
+					</text>
+					<text id="type_of_death-newborn_death-label">
+						<value>1. Lufu lwa mwana mutete kuzwa kuzyaligwa kusikila mazuba makumi obile amusanu aatatu.</value>
+					</text>
+					<text id="type_of_death-infant-label">
+						<value>2. Lufu lwa mwana mutete kuzwa mazuba makumi obile amusanu aone kusikila myeezi kumi a yobile.</value>
+					</text>
+					<text id="type_of_death-child-label">
+						<value>3. Lufu lwa mwana mutete kuzwa myeezi kumi  ayobile kusikila kumyeezi makumi obile a one.</value>
+					</text>
+					<text id="time_of_death_child-label">
+						<value>Ciindi ca kufwa</value>
+					</text>
+					<text id="time_of_death-still_birth-label">
+						<value>1. Kuzyala mwana wataputa</value>
+					</text>
+					<text id="time_of_death-early_neonatal-label">
+						<value>2. Mwana ufwa kuzwa muzyaligwa kusikila kumazuba musanu abili</value>
+					</text>
+					<text id="time_of_death-late_neonatal-label">
+						<value>3. Mwana ufwa kuzwa kumazuba musanu aotatwe kusikila kumazuba makumi obile amusanu aatatu</value>
+					</text>
+					<text id="cause_of_death_child-label">
+						<value>Ceeta Lufu</value>
+					</text>
+					<text id="cause_of_death_child-ari-label">
+						<value>1. Tumanu</value>
+					</text>
+					<text id="cause_of_death_child-fever-label">
+						<value>2. Kupya mubili</value>
+					</text>
+					<text id="cause_of_death_child-dysentery-label">
+						<value>3. Kunya bulowa na kusoomona</value>
+					</text>
+					<text id="cause_of_death_child-injury-label">
+						<value>4. Kulicisa na ntenda</value>
+					</text>
+					<text id="cause_of_death_child-malnutrition-label">
+						<value>5. Bulwazi bwa nzala</value>
+					</text>
+					<text id="cause_of_death_child-cholera-label">
+						<value>6. Bulwazi bwa kusoomona akuluka</value>
+					</text>
+					<text id="cause_of_death_child-measles-label">
+						<value>7. Cifumu</value>
+					</text>
+					<text id="cause_of_death_child-meningitis-label">
+						<value>8. Bulwazi bukwela nsingo</value>
+					</text>
+					<text id="cause_of_death_child-meningitis-1-label">
+						<value>9. Malwazi ambi</value>
+					</text>
+					<text id="are_you_sure-label">
+						<value>Muli masimpe muyanda kumugwisya uyu mwana mu regista</value>
+					</text>
+					<text id="are_you_sure-yes-label">
+						<value>1. Iiyi</value>
+						<value form="image">jr://file/commcare/image/data/yes.png</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="are_you_sure-no-label">
+						<value>2. Peepe</value>
+						<value form="image">jr://file/commcare/image/data/no.png</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="done-label">
+						<value>Oyu mwana ino ulagwisigwa mu regista</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/reason_for_closure">
+			<label ref="jr:itext('reason_for_closure-label')" />
+			<item>
+				<label ref="jr:itext('closure_reason-death-label')" />
+				<value>death</value>
+			</item>
+			<item>
+				<label ref="jr:itext('reason_for_closure-change_of_location-label')" />
+				<value>change_of_location</value>
+			</item>
+			<item>
+				<label ref="jr:itext('reason_for_closure-end_of_care-label')" />
+				<value>end_of_care</value>
+			</item>
+		</select1>
+		<input ref="/data/date_of_death">
+			<label ref="jr:itext('date_of_death-label')" />
+		</input>
+		<select1 ref="/data/place_of_death">
+			<label ref="jr:itext('place_of_death-label')" />
+			<item>
+				<label ref="jr:itext('place_of_death-home-label')" />
+				<value>home</value>
+			</item>
+			<item>
+				<label ref="jr:itext('place_of_death-health_centre-label')" />
+				<value>health_centre</value>
+			</item>
+			<item>
+				<label ref="jr:itext('place_of_death-hospital-label')" />
+				<value>hospital</value>
+			</item>
+			<item>
+				<label ref="jr:itext('place_of_death-other-label')" />
+				<value>other</value>
+			</item>
+		</select1>
+		<select1 ref="/data/type_of_death">
+			<label ref="jr:itext('type_of_death-label')" />
+			<item>
+				<label ref="jr:itext('type_of_death-newborn_death-label')" />
+				<value>newborn_death</value>
+			</item>
+			<item>
+				<label ref="jr:itext('type_of_death-infant-label')" />
+				<value>infant</value>
+			</item>
+			<item>
+				<label ref="jr:itext('type_of_death-child-label')" />
+				<value>child</value>
+			</item>
+		</select1>
+		<select1 ref="/data/time_of_death_child">
+			<label ref="jr:itext('time_of_death_child-label')" />
+			<item>
+				<label ref="jr:itext('time_of_death-still_birth-label')" />
+				<value>still_birth</value>
+			</item>
+			<item>
+				<label ref="jr:itext('time_of_death-early_neonatal-label')" />
+				<value>early_neonatal</value>
+			</item>
+			<item>
+				<label ref="jr:itext('time_of_death-late_neonatal-label')" />
+				<value>late_neonatal</value>
+			</item>
+		</select1>
+		<select1 ref="/data/cause_of_death_child">
+			<label ref="jr:itext('cause_of_death_child-label')" />
+			<item>
+				<label ref="jr:itext('cause_of_death_child-ari-label')" />
+				<value>ari</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_child-fever-label')" />
+				<value>fever</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_child-dysentery-label')" />
+				<value>dysentery</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_child-injury-label')" />
+				<value>injury</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_child-malnutrition-label')" />
+				<value>malnutrition</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_child-cholera-label')" />
+				<value>cholera</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_child-measles-label')" />
+				<value>measles</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_child-meningitis-label')" />
+				<value>meningitis</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_child-meningitis-1-label')" />
+				<value>meningitis-1</value>
+			</item>
+		</select1>
+		<select1 ref="/data/are_you_sure">
+			<label ref="jr:itext('are_you_sure-label')" />
+			<item>
+				<label ref="jr:itext('are_you_sure-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('are_you_sure-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<trigger ref="/data/done">
+			<label ref="jr:itext('done-label')" />
+		</trigger>
+	</h:body>
+</h:html>

@@ -14,7 +14,6 @@ from lxml import etree
 from tastypie.serializers import Serializer
 
 from pyxform.builder import create_survey_element_from_dict
-from pyxform.xls2json import SurveyReader
 
 
 class XFormSerializer( Serializer ):
@@ -25,12 +24,33 @@ class XFormSerializer( Serializer ):
     formats = [ 'xform', 'json' ]
     content_types = {
         'json': 'application/json',
-        'xform': 'application/xml',
+        'xform': 'text/xml',
     }
 
     def to_xform( self, data, options=None ):
         options = options or {}
         data    = self.to_simple( data, options )
+
+        if 'manifest' in data:
+
+            root = etree.Element( 'manifest' )
+            root.set( 'xmlns', 'http://openrosa.org/xforms/xformsManifest' )
+
+            for media in data[ 'manifest' ]:
+                mediaFile = etree.Element( 'mediaFile' )
+
+                fileName = etree.Element( 'filename' )
+                fileName.text = media
+
+                downloadUrl = etree.Element( 'downloadUrl' )
+                downloadUrl.text = 'http://s3.amazonaws.com/keep-media/%s/%s' % ( data[ 'repo' ], media )
+
+                mediaFile.append( fileName )
+                mediaFile.append( downloadUrl )
+
+                root.append( mediaFile )
+
+            return etree.tostring( root )
 
         # We only want to return the special xform format when there is an
         # survey id present.
@@ -49,25 +69,33 @@ class XFormSerializer( Serializer ):
                 name.text = xform[ 'name' ]
                 element.append( name )
 
+                owner = xform['user'] if 'user' in xform else xform[ 'org' ]
+
                 downloadUrl = etree.Element( 'downloadUrl' )
 
+                base_url = 'http://%s/api/v1/repos/'
                 if settings.DEBUG:
-                    base_url = 'localhost:8000'
+                    base_url = base_url % ( 'localhost:8000' )
                 else:
-                    base_url = 'odk.distributedhealth.org'
+                    base_url = base_url % ( 'keep.distributedhealth.org' )
 
-                downloadUrl.text = 'http://%s/api/v1/repos/%s/?format=xform&user=%s' %\
-                                   ( base_url, xform[ 'id' ], xform[ 'owner'] )
+                downloadUrl.text = '%s%s/?format=xform&user=%s' %\
+                                   ( base_url, xform[ 'id' ], owner )
 
                 element.append( downloadUrl )
 
+                manifestUrl = etree.Element( 'manifestUrl' )
+                manifestUrl.text = '%s%s/manifest/?format=xml&user=%s' %\
+                                   ( base_url, xform[ 'id' ], owner )
+
+                element.append( manifestUrl )
                 element.append( etree.Element( 'descriptionText' ) )
-                element.append( etree.Element( 'manifestUrl' ) )
 
                 root.append( element )
 
             return etree.tostring( root )
         elif 'id' not in data:
+            print data
             return self.to_xml( data )
 
         # Grab the form & convert into the xform format!
@@ -75,9 +103,3 @@ class XFormSerializer( Serializer ):
         survey  = create_survey_element_from_dict( survey_data )
 
         return survey._to_pretty_xml()
-
-    def from_xform( self, content ):
-        raw_data = StringIO.StringIO( content )
-        survey = SurveyReader( raw_data )
-
-        return survey.to_json_dict()

@@ -1,6 +1,6 @@
 from bson import ObjectId
 
-from backend.db import db
+from backend.db import db, Repository
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
 
@@ -11,8 +11,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
-
 from twofactor.models import UserAPIToken
 
 
@@ -35,7 +35,8 @@ def register( request ):
                 profile.send_activation_email( RequestSite( request ) )
 
             return render_to_response('registration/reg_complete.html',
-                                      {'user_token': user_token.google_url()})
+                                      {'user_token': user_token.google_url(),
+                                       'email': new_user.email } )
     else:
         form = RegistrationFormUserProfile()
 
@@ -95,31 +96,22 @@ def user_dashboard( request, username ):
     user = get_object_or_404( User, username=username )
 
     # Grab a list of forms uploaded by the user
-    query = { 'user': user.id }
-
     if is_other_user:
-        query[ 'public' ] = True
+        user_repos = Repository.list_repos( user, public=True )
+        shared_repos = None
+    else:
+        user_repos = Repository.list_repos( user )
+        shared_repos = Repository.shared_repos( user )
 
-    user_repos = db.survey.find( query )
-
-    # TODO: Find better way of converting _id to mongo_id
-    user_repos = [ repo for repo in user_repos ]
-    for repo in user_repos:
-        # Replace _id with mongo_id since the templates don't place nicely with
-        # variables that have an underscore in front.
-        repo[ 'mongo_id' ] = repo[ '_id' ]
-        del repo[ '_id' ]
-
-        # Count the number of submissions for this repo
-        repo[ 'submission_count' ] = db.survey_data\
-                                       .find( {'survey':
-                                              ObjectId(repo[ 'mongo_id' ])})\
-                                       .count()
+    # Find all the organization this user belongs to
+    organizations = OrganizationUser.objects.filter( user=user )
 
     return render_to_response( 'dashboard.html',
-                               { 'user_forms': user_repos,
+                               { 'user_repos': user_repos,
+                                 'shared_repos': shared_repos,
                                  'is_other_user': is_other_user,
-                                 'account': user },
+                                 'account': user,
+                                 'organizations': organizations },
                                context_instance=RequestContext(request) )
 
 

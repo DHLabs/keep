@@ -53,12 +53,7 @@ class RegistrationFormUserProfile( RegistrationFormUniqueEmail ):
             site='http://distributedhealth.org',
             send_email=False)
 
-        new_user.is_active = True
-        #RegistrationProfile.objects.activate_user( new_user.activation_key )
-
         auth_token = UserAuthToken(user=new_user)
         auth_token.save()
-
-        print 'Password: ', new_user.password
 
         return ( new_user, auth_token )

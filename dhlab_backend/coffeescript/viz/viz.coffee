@@ -67,9 +67,9 @@ class DataView extends Backbone.View
                 $( event.currentTarget ).attr( 'checked', response.public )
 
                 if response.public
-                    $( '#privacy' ).html( '<img src=\'/static/img/public_repo.png\'>&nbsp;PUBLIC' )
+                    $( '#privacy' ).html( '<i class=\'icon-unlock\'></i>&nbsp;PUBLIC' )
                 else
-                    $( '#privacy' ).html( '<img src=\'/static/img/private_repo.png\'>&nbsp;PRIVATE' )
+                    $( '#privacy' ).html( '<i class=\'icon-lock\'></i>&nbsp;PRIVATE' )
         )
 
         @
@@ -109,15 +109,10 @@ class DataView extends Backbone.View
         # Re-render chart
         @renderCharts()
 
-
-    render: ->
-        # Don't render until we get both the form & survey data
-        if( !@form.attributes.children || !@data )
-            return
-
-        # Loop through the form fields and check to see what type of visualizations
-        # we can do.
-        for field in @form.attributes.children
+    _detect_types: ( root ) ->
+        for field in root
+            if field.type in [ 'group' ]
+                @_detect_types( field.children )
 
             # Don't show notes in the raw data table
             if field.type not in [ 'note' ]
@@ -139,6 +134,15 @@ class DataView extends Backbone.View
 
                 @map_enabled = true
                 @map_headers = field.name
+
+    render: ->
+        # Don't render until we get both the form & survey data
+        if( !@form.attributes.children || !@data )
+            return
+
+        # Loop through the form fields and check to see what type of visualizations
+        # we can do.
+        @_detect_types( @form.attributes.children )
 
         @renderRaw()
 
@@ -176,7 +180,6 @@ class DataView extends Backbone.View
         # Render the actual data
         html += '<tbody>'
         for datum in @data.models
-
             html += '<tr>'
             for key in @raw_headers
 
@@ -287,36 +290,54 @@ class DataView extends Backbone.View
 
         # Calculate the center of the data
         center = [ 0, 0 ]
+        valid_count = 0
         for datum in @data.models
-            geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
+
+            geopoint = datum.get( 'data' )[ @map_headers ]
+            if not geopoint?
+                continue
+
+            geopoint = geopoint.split( ' ' )
+            if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
+                continue
 
             center[0] += parseFloat( geopoint[0] )
             center[1] += parseFloat( geopoint[1] )
+            valid_count += 1
 
-        center[0] = center[0] / @data.models.length
-        center[1] = center[1] / @data.models.length
+        if valid_count == 0
+            @map_enabled = false
+            $( '#map_btn' ).addClass( 'disabled' )
+            $( '#map' ).hide()
+            return @
+
+        center[0] = center[0] / valid_count
+        center[1] = center[1] / valid_count
 
         @map = L.map('map').setView( center, 10 )
+        @test_map = L.map( 'hidden_map' ).setView( center, 10 );
 
         L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
                         maxZoom: 18 }).addTo( @map )
 
         myIcon = L.icon(
-                    iconUrl: '/static/img/leaflet/marker-icon.png'
-                    iconRetinaUrl: '/static/img/leaflet/marker-icon@2x.png'
+                    iconUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon.png'
+                    iconRetinaUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon@2x.png'
                     iconSize: [25, 41]
                     iconAnchor: [12, 41]
                     popupAnchor: [1, -34]
-                    shadowUrl: '/static/img/leaflet/marker-shadow.png'
+                    shadowUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-shadow.png'
                     shadowSize: [41, 41]
                     shadowAnchor: [15, 41] )
 
         heatmapData = []
         @markers = []
-        @constrained_markers = []
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
+
+            if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
+                continue
 
             marker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
 
@@ -326,26 +347,27 @@ class DataView extends Backbone.View
             marker.bindPopup( html )
 
             @markers.push( marker )
-            constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
-            @constrained_markers.push( constrainedMarker )
 
             heatmapData.push(
                 lat: geopoint[0]
                 lon: geopoint[1]
                 value: 1 )
 
-        @marker_layer = L.layerGroup( @markers )
-        @constrained_layer = L.layerGroup( @constrained_markers )
-        @heatmap.addData( heatmapData )
+        # polylines = [
+        #     new L.LatLng( 32.818862, -117.088589 ),
+        #     new L.LatLng( 37.785834, -122.406417 ) ]
+        # @test_map.addLayer( L.polyline( polylines, {color:'red'} ) )
+        # @map.addLayer( L.polyline( polylines, {color:'red'} ) )
 
+        @marker_layer = L.layerGroup( @markers )
+        @heatmap.addData( heatmapData )
         @map.addLayer( @heatmap )
         @map.addLayer( @marker_layer )
-        @map.addLayer( @constrained_layer )
 
         layers =
             'Markers': @marker_layer
             'Heatmap': @heatmap
-            'Constrained': @constrained_layer
 
         controls = L.control.layers( null, layers, { collapsed: false } )
         controls.addTo( @map )
+        @

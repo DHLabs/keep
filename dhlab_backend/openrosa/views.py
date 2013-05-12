@@ -2,7 +2,7 @@ import json
 import urllib
 from datetime import datetime
 
-from backend.db import db, encrypt_survey
+from backend.db import db
 
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -57,11 +57,11 @@ def xml_submission( request, username ):
         valid_data = validate_and_format( survey, xml_data )
 
         # Include some metadata with the survey data
-        survey_data = {
+        repo_data = {
             # User ID of the person who uploaded the form (not the data)
             'user':         user.id,
             # Survey/form ID associated with this data
-            'survey':       survey[ '_id' ],
+            'repo':       survey[ '_id' ],
 
             # Survey name (used for feed purposes)
             'survey_label': survey[ 'name' ],
@@ -69,15 +69,15 @@ def xml_submission( request, username ):
             # Timestamp of when this submission was received
             'timestamp':    datetime.utcnow(),
             # The validated & formatted survey data.
-            'data':         encrypt_survey( valid_data )
+            'data':         valid_data
         }
 
         # Save the iphone_id ( if passed in by the submitter )
         if iphone_id:
-            survey_data[ 'uuid' ] = iphone_id
+            repo_data[ 'uuid' ] = iphone_id
 
         # Insert into the database
-        db.survey_data.insert( survey_data )
+        db.data.insert( repo_data )
 
         data = json.dumps( { 'success': True } )
         return HttpResponse( data, mimetype='application/json' )

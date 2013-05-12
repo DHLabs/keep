@@ -18,9 +18,6 @@ class CSVSerializer( Serializer ):
         data = self.to_simple(data, options)
         raw_data = StringIO.StringIO()
 
-        if 'error_message' in data:
-            print data
-
         writer = None
         for item in data:
 
@@ -35,11 +32,3 @@ class CSVSerializer( Serializer ):
             writer.writerow( sub_data )
 
         return raw_data.getvalue()
-
-    def from_csv(self, content):
-        raw_data = StringIO.StringIO(content)
-        data = []
-        # Untested, so this might not work exactly right.
-        for item in csv.DictReader(raw_data):
-            data.append(item)
-        return data

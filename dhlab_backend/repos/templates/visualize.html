@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
+{% block title %}{{ repo.name }}{% endblock %}
+
 {% block css %}
 <link rel="stylesheet" type="text/css" href='{% static "css/viz.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
@@ -40,6 +42,7 @@
 
 		// Start up visualization
 		document.vizApp = new DataView();
+
 	});
 </script>
 {% endblock %}
@@ -50,13 +53,17 @@
 		<div class='span12'>
 			<div class='pull-right alert' id='privacy'>
 				{% if repo.public %}
-					<img src='{% static "img/public_repo.png" %}'> PUBLIC
+					<i class='icon-unlock'></i>&nbsp;PUBLIC
 				{% else %}
-					<img src='{% static "img/private_repo.png" %}'> PRIVATE
+					<i class='icon-lock'></i>&nbsp;PRIVATE
 				{% endif %}
 			</div>
 			<h3>
-				<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
+				{% if account.username %}
+					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
+				{% else %}
+					<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a> /
+				{% endif %}
 				<div class='btn-group'>
 					<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
 						{{ repo.name }}
@@ -64,12 +71,12 @@
 					</a>
 					<ul class='dropdown-menu'>
 						<li>
-							<a href='/api/v1/repos/{{ sid }}?format=json&amp;user={{ account.username }}'>
+							<a href='/api/v1/repos/{{ sid }}?format=json&amp;user={{ account }}'>
 								Download as JSON
 							</a>
 						</li>
 						<li>
-							<a href='/api/v1/repos/{{ sid }}?format=xform&amp;user={{ account.username }}'>
+							<a href='/api/v1/repos/{{ sid }}?format=xform&amp;user={{ account }}'>
 								Download as XForm
 							</a>
 						</li>
@@ -88,7 +95,7 @@
 	<div class='row'>
 		<div class='span12'>
 			<div class='pull-right'>
-				<a class='btn' href='/api/v1/data/{{ sid }}?format=csv'>
+				<a class='btn' href='/api/v1/data/{{ sid }}?format=csv&amp;user={{account.username}}'>
 					<i class='icon-download'></i> Download Data
 				</a>
 			</div>
@@ -97,7 +104,7 @@
 					<a href='#' id='raw_btn' data-type='raw' class='btn active'><i class='icon-list'></i> Raw</a>
 					<a href='#' id='map_btn' data-type='map' class='btn disabled'><i class='icon-map-marker'></i> Map</a>
 					<a href='#' id='line_btn' data-type='line' class='btn'><i class='icon-signal'></i> Line</a>
-					{% if not is_other_user %}
+					{% if 'delete' in permissions %}
 					<a data-type='settings' class='btn'>
 						<i class='icon-cog'></i>
 						Settings
@@ -110,9 +117,10 @@
 	</div>
 	<hr/>
 	<div class='row viz viz-active' id='raw_viz'>
-		<div class='span12' id='raw'></div>
+		<div class='span12' id='raw' style='overflow-y:scroll;'></div>
 	</div>
 	<div class='row viz' id='map_viz'>
+		<div id='hidden_map'></div>
 		<div class='span12' id='map'></div>
 	</div>
 	<div class='row viz' id='line_viz'>
@@ -122,7 +130,7 @@
 		</div>
 		<div class='span10' id='line'></div>
 	</div>
-	{% if not is_other_user %}
+	{% if 'delete' in permissions %}
 	<div class='row viz' id='settings_viz'>
 		<div class='span12'>
 			<div class='span3'>

@@ -1,0 +1,46 @@
+#org-list {
+	> div {
+		margin-bottom: 8px;
+	}
+}
+
+img.account-icon {
+	 border:1px solid #CCC;
+	 border-radius:4px;
+}
+
+img.account-icon-large {
+	border:1px solid #CCC;
+	border-radius:8px;
+}
+
+// Organization Dashboard styles
+#member_list > div {
+	margin-top:8px;
+}
+
+.ui-helper-hidden-accessible {
+	display:none;
+}
+
+#user_search_list {
+
+	position:absolute;
+
+	.ui-autocomplete {
+		border-bottom:1px solid #EEE;
+		border-right:1px solid #EEE;
+		border-left:1px solid #EEE;
+		list-style-type: none;
+		background-color: white;
+	}
+
+	.ui-autocomplete > .ui-menu-item {
+		padding: 4px 8px;
+		cursor:pointer;
+	}
+
+	.ui-autocomplete > .selected {
+		background-color: #EEE;
+	}
+}

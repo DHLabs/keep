@@ -20,6 +20,11 @@ DATABASES = {
     }
 }
 
+# MongoDB Settings
+MONGODB_HOST    = 'localhost'
+MONGODB_PORT    = 27017
+MONGODB_DBNAME  = 'dhlab'
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -114,9 +119,12 @@ INSTALLED_APPS = (
     'backend',
     'openrosa',
     'repos',
+    'organizations',
     'twofactor',                # Needed to harden login/database
     'registration',             # Needed for user signup
     'tastypie',                 # Needed for our RESTful API
+    'storages',                 # Needed for S3 file storage
+    'django_mailgun',
 )
 
 # Set up 2Factor authentication settings
@@ -137,15 +145,20 @@ LOGGING = {
         }
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
         }
+        # 'mail_admins': {
+        #     'level': 'ERROR',
+        #     'filters': ['require_debug_false'],
+        #     'class': 'django.utils.log.AdminEmailHandler'
+        # }
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
+            #'handlers': ['mail_admins'],
+            'handlers': [ 'console' ],
             'level': 'ERROR',
             'propagate': True,
         },

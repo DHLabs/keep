@@ -1,9 +1,14 @@
 {% load i18n %}
 {% url "registration_activate" activation_key as register_url %}
-{% blocktrans with site_name=site.name site_domain=site.domain expiration_days=expiration_days expiration_days_p=expiration_days|pluralize %}You have registered on {{ site_name }}. To activate your account
-please click on the link below:
+Welcome to DHLab Keep!
 
-http://{{ site_domain }}{{ register_url }}
+Please visit the following link to activate your account:
+https://{{ site.domain }}{{ register_url }}
 
-The link above is valid for {{ expiration_days }} day{{ expiration_days_p }}.
-{% endblocktrans %}
+Once you activate your account, you can log into DHLab Keep and begin collecting
+and analyzing data!
+
+If you are having any issues with your account, please don't hesitate to contact us: support@distributedhealth.org
+
+Best regards,
+DHLab Keep Team

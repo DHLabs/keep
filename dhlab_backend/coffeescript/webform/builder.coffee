@@ -1,9 +1,21 @@
 define( [ 'vendor/underscore' ], ( _ ) ->
 
-    build_form = ( child ) ->
+    build_form = ( child, lang ) ->
+
+        label = ''
+        if typeof child.label == 'object'
+            label = child.label[ lang ]
+
+            if @languages.length == 0
+                _.each( child.label, ( child, key ) =>
+                    @languages.push( key )
+                )
+        else
+            label = child.label
+
         schema_dict =
             help: child.hint
-            title: child.label
+            title: label
             is_field: true
             bind: child.bind
 
@@ -35,7 +47,9 @@ define( [ 'vendor/underscore' ], ( _ ) ->
         else if child.type is 'note'
 
             schema_dict['type'] = 'Text'
-            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" class="control-group"><strong>Note: </strong><%= title %></div>' )
+            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
+                                                        <strong>Note: </strong><%= title %>
+                                                   </div>' )
             schema_dict['is_field'] = false
 
         else if child.type is 'datetime'
@@ -45,7 +59,10 @@ define( [ 'vendor/underscore' ], ( _ ) ->
         else if child.type is 'photo'
 
             schema_dict['type'] = 'Text'
-            schema_dict['template'] = _.template( "<div id='<%= editorId %>_field' class='control-group'><label for='<%= editorId %>'><%= title %></label><input type='file' accept='image/png'></input></div>" )
+            schema_dict['template'] = _.template( "<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>
+                                                        <label for='<%= editorId %>'><%= title %></label>
+                                                        <input type='file' accept='image/png'></input>
+                                                   </div>" )
 
         else if child.type is 'select all that apply'
 
@@ -53,30 +70,22 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             schema_dict['options'] = []
 
             _.each( child.choices, ( option ) ->
+
+                choice_label = option.label
+                if typeof option.label == 'object'
+                    choice_label = option.label[ lang ]
+
                 schema_dict['options'].push(
                     val:    option.name
-                    label:  option.label
+                    label:  choice_label
                 )
             )
 
         else if child.type is 'group'
-            # this is a hack
-            schema_dict['type'] = 'Text'
-            # schema_dict['template'] = 'groupBegin'
 
             _.each( child.children, ( _child ) =>
                 @recursiveAdd( _child )
             )
-
-            schema_dict =
-                type:       'Text'
-                help:       child.hint
-                title:      child.label
-                template:   'groupEnd'
-                is_field:   false
-
-            @item_dict[child.name + '-end'] = schema_dict
-            @_fieldsets.push(child.name + '-end')
 
             return @
 
@@ -86,15 +95,22 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             schema_dict['options'] = []
 
             _.each( child.choices, ( option ) ->
+
+                choice_label = option.label
+                if typeof option.label == 'object'
+                    choice_label = option.label[ lang ]
+
                 schema_dict['options'].push(
                     val:    option.name
-                    label:  option.label
+                    label:  choice_label
                 )
             )
 
         else
             schema_dict['type']     = 'Text'
-            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" class="control-group"><label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label></div>' )
+            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
+                                                        <label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label>
+                                                   </div>' )
 
         @item_dict[child.name] = schema_dict
         @_fieldsets.push( child.name )

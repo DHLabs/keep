@@ -1,0 +1,1863 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>Pregnancy Visit</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/023E4495-E644-4C16-8812-8BB719325394" uiVersion="1" version="1" name="Pregnancy Visit">
+					<mother_label />
+					<mother_alive />
+					<experience_miscarriage />
+					<fill_out_dereg_form />
+					<delivered />
+					<fill_out_delivery />
+					<visit_questions>
+						<update_edd />
+						<updated_edd />
+						<new_edd_label />
+						<anc_1 />
+						<anc_1_completed_16_weeks />
+						<anc_2 />
+						<anc_3 />
+						<anc_4 />
+						<anc_warning />
+						<tet_1 />
+						<tet_2 />
+						<tet_3 />
+						<tet_warning />
+						<hiv_tested />
+						<danger_signs_group>
+							<check_danger_signs />
+							<vaginal_bleeding />
+							<headache />
+							<high_temp />
+							<vaginal_discharge />
+							<swelling />
+							<abdomen_pain />
+							<baby_not_move />
+							<fainting />
+							<baby_lying />
+							<other_danger_sign />
+						</danger_signs_group>
+						<refer_mother />
+						<ipt_1 />
+						<ipt_2 />
+						<iron_folic />
+						<deworming />
+						<sleeping_under_bednet />
+						<adequate_rest />
+						<eating />
+						<birth_plan />
+						<household_handwashing />
+						<plan_to_deliver_at_health_center />
+						<mama_kit />
+						<male_present />
+						<anc_risk_label />
+						<pregnancy_care />
+						<next_anc_label />
+						<next_visit_immediate_label />
+						<next_visit_days_label />
+						<create_referral />
+						<referral_questions>
+							<danger_signs_label />
+							<symptoms_noticed />
+							<days_since_symptoms />
+							<referral_comment />
+							<next_referral_date />
+							<CHW_name />
+						</referral_questions>
+					</visit_questions>
+					<form_complete />
+					<debug_group>
+						<debug1 />
+						<debug1-1 />
+						<debug1-2 />
+						<debug1-3 />
+						<debug1-4 />
+						<debug1-5 />
+						<debug10 />
+						<debug10-1 />
+						<debug10-2 />
+					</debug_group>
+					<case_edd />
+					<case_name />
+					<case_mother_state />
+					<case_next_visit />
+					<edd />
+					<visit_success />
+					<next_visit_ipt />
+					<next_visit_anc />
+					<next_visit_care />
+					<next_visit_high_risk />
+					<next_visit_normal />
+					<next_visit />
+					<days_to_next_visit />
+					<conception_date />
+					<next_scheduled_anc />
+					<case_anc_1 />
+					<case_anc_2 />
+					<case_anc_3 />
+					<case_anc_4 />
+					<case_tet_1 />
+					<case_tet_2 />
+					<case_tet_3 />
+					<case_ipt_1 />
+					<case_ipt_2 />
+					<case_hiv_tested />
+					<danger_signs />
+					<num_anc_visits />
+					<late_anc_visit />
+					<late_tetanus_shot />
+					<num_tetanus_shots />
+					<danger_signs_text />
+					<referral_date_symptoms />
+					<next_visit_referral />
+					<referral_type />
+					<num_referrals />
+					<case_num_referrals />
+					<num_preg_visits />
+					<case_num_preg_visits />
+					<last_visit />
+					<case_last_visit />
+					<preg_1_done />
+					<preg_2_done />
+					<preg_3_done />
+					<preg_4_done />
+					<case_preg_1_done />
+					<case_preg_2_done />
+					<case_preg_3_done />
+					<case_preg_4_done />
+					<mother_danger_signs />
+					<date_onregis />
+					<cal_edd_from_regis />
+					<new_eddlmp />
+				</data>
+			</instance>
+			<bind nodeset="/data/mother_label" />
+			<bind nodeset="/data/mother_alive" relevant="/data/date_onregis != today()" required="true()" />
+			<bind nodeset="/data/experience_miscarriage" relevant="/data/mother_alive = 'yes' and /data/date_onregis != today()" required="true()" />
+			<bind nodeset="/data/fill_out_dereg_form" relevant="/data/mother_alive = 'no' or /data/experience_miscarriage = 'yes'" />
+			<bind nodeset="/data/delivered" relevant="/data/mother_alive = 'yes' and /data/experience_miscarriage = 'no' and /data/date_onregis != today()" required="true()" />
+			<bind nodeset="/data/fill_out_delivery" relevant="/data/delivered = 'yes'" />
+			<bind nodeset="/data/visit_questions" relevant="/data/visit_success = 'yes'" />
+			<bind nodeset="/data/visit_questions/update_edd" />
+			<bind nodeset="/data/visit_questions/updated_edd" type="xsd:date" constraint="(int(.) - today()) &lt;= 280 and . &gt;= today()" jr:constraintMsg="jr:itext('updated_edd-constraintMsg')" relevant="/data/visit_questions/update_edd = 'yes'" />
+			<bind nodeset="/data/visit_questions/new_edd_label" relevant="/data/visit_questions/update_edd = 'yes'" />
+			<bind nodeset="/data/visit_questions/anc_1" relevant="/data/case_anc_1 != 'yes' and ((today() - /data/conception_date) &gt;= 77)" />
+			<bind nodeset="/data/visit_questions/anc_1_completed_16_weeks" relevant="/data/visit_questions/anc_1 = 'yes'" />
+			<bind nodeset="/data/visit_questions/anc_2" relevant="/data/case_anc_2 != 'yes' and (/data/visit_questions/anc_1 = 'yes' or /data/case_anc_1 = &quot;yes&quot;) and ((today() - /data/conception_date) &gt;= 161)" />
+			<bind nodeset="/data/visit_questions/anc_3" relevant="/data/case_anc_3 != 'yes' and (/data/visit_questions/anc_2 = 'yes' or /data/case_anc_2 = &quot;yes&quot;) and ((today() - /data/conception_date) &gt;= 217)" />
+			<bind nodeset="/data/visit_questions/anc_4" relevant="/data/case_anc_4 != 'yes' and (/data/visit_questions/anc_3 = 'yes' or /data/case_anc_3 = &quot;yes&quot;) and ((today() - /data/conception_date) &gt;= 245)" />
+			<bind nodeset="/data/visit_questions/anc_warning" relevant="/data/late_anc_visit = 'yes'" />
+			<bind nodeset="/data/visit_questions/tet_1" relevant="/data/case_tet_1 != &quot;yes&quot; and ((today() - /data/conception_date) &gt;= 77)" />
+			<bind nodeset="/data/visit_questions/tet_2" relevant="/data/case_tet_2 != 'yes' and (/data/visit_questions/tet_1 = 'yes' or /data/case_tet_1 = &quot;yes&quot;) and ((today() - /data/conception_date) &gt;= 161)" />
+			<bind nodeset="/data/visit_questions/tet_3" relevant="/data/case_tet_3 != 'yes' and (/data/visit_questions/tet_2 = 'yes' or /data/case_tet_2 = &quot;yes&quot;) and ((today() - /data/conception_date) &gt;= 217)" />
+			<bind nodeset="/data/visit_questions/tet_warning" relevant="/data/late_tetanus_shot = &quot;yes&quot;" />
+			<bind nodeset="/data/visit_questions/hiv_tested" relevant="/data/case_hiv_tested != 'yes'" />
+			<bind nodeset="/data/visit_questions/danger_signs_group" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/check_danger_signs" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/vaginal_bleeding" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/headache" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/high_temp" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/vaginal_discharge" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/swelling" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/abdomen_pain" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/baby_not_move" relevant="((today() - /data/conception_date) &gt;= 161)" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/fainting" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/baby_lying" relevant="((today() - /data/conception_date) &gt;= 210)" />
+			<bind nodeset="/data/visit_questions/danger_signs_group/other_danger_sign" />
+			<bind nodeset="/data/visit_questions/refer_mother" relevant="/data/visit_questions/danger_signs_group/baby_not_move = 'no' or /data/visit_questions/danger_signs_group/other_danger_sign = 'yes' or /data/visit_questions/danger_signs_group/fainting = 'yes' or /data/visit_questions/danger_signs_group/headache = 'yes' or /data/visit_questions/danger_signs_group/abdomen_pain = 'yes' or /data/visit_questions/danger_signs_group/swelling = 'yes' or /data/visit_questions/danger_signs_group/vaginal_discharge = 'yes' or /data/visit_questions/danger_signs_group/vaginal_bleeding = 'yes' or /data/visit_questions/danger_signs_group/high_temp = 'yes' or /data/visit_questions/danger_signs_group/baby_lying = 'yes'" />
+			<bind nodeset="/data/visit_questions/ipt_1" relevant="/data/case_ipt_1 != 'yes' and today() - /data/conception_date &gt;= 161" />
+			<bind nodeset="/data/visit_questions/ipt_2" relevant="/data/case_ipt_2 != 'yes' and (/data/visit_questions/ipt_1 = 'yes' or /data/case_ipt_1 = &quot;yes&quot;) and ((today() - /data/conception_date) &gt;= 217)" />
+			<bind nodeset="/data/visit_questions/iron_folic" />
+			<bind nodeset="/data/visit_questions/deworming" relevant="today() - /data/conception_date &gt;= 161" />
+			<bind nodeset="/data/visit_questions/sleeping_under_bednet" relevant="((today() - /data/conception_date) &gt;= 161)" />
+			<bind nodeset="/data/visit_questions/adequate_rest" relevant="((today() - /data/conception_date) &gt;= 252)" />
+			<bind nodeset="/data/visit_questions/eating" />
+			<bind nodeset="/data/visit_questions/birth_plan" relevant="((today() - /data/conception_date) &gt;= 252)" />
+			<bind nodeset="/data/visit_questions/household_handwashing" relevant="((today() - /data/conception_date) &gt;= 252)" />
+			<bind nodeset="/data/visit_questions/plan_to_deliver_at_health_center" relevant="((today() - /data/conception_date) &gt;= 252)" />
+			<bind nodeset="/data/visit_questions/mama_kit" relevant="((today() - /data/conception_date) &gt;= 252)" />
+			<bind nodeset="/data/visit_questions/male_present" />
+			<bind nodeset="/data/visit_questions/anc_risk_label" relevant="/data/next_scheduled_anc &lt;= date(today() + 14)" />
+			<bind nodeset="/data/visit_questions/pregnancy_care" relevant="/data/visit_questions/iron_folic = 'no' or /data/visit_questions/sleeping_under_bednet = 'no' or /data/visit_questions/eating = 'no'" />
+			<bind nodeset="/data/visit_questions/next_anc_label" relevant="/data/next_scheduled_anc &gt; date(today() + 14) and /data/num_anc_visits &lt; 4" />
+			<bind nodeset="/data/visit_questions/next_visit_immediate_label" relevant="/data/days_to_next_visit &lt;= 0" />
+			<bind nodeset="/data/visit_questions/next_visit_days_label" relevant="/data/days_to_next_visit &gt; 0" />
+			<bind nodeset="/data/visit_questions/create_referral" relevant="/data/visit_questions/danger_signs_group/high_temp = 'yes' or /data/visit_questions/danger_signs_group/vaginal_bleeding = 'yes' or /data/visit_questions/danger_signs_group/vaginal_discharge = 'yes' or /data/visit_questions/danger_signs_group/swelling = 'yes' or /data/visit_questions/danger_signs_group/abdomen_pain = 'yes' or /data/visit_questions/danger_signs_group/headache = 'yes' or /data/visit_questions/danger_signs_group/fainting = 'yes' or /data/visit_questions/danger_signs_group/other_danger_sign = 'yes' or /data/visit_questions/danger_signs_group/baby_lying = 'yes'" />
+			<bind nodeset="/data/visit_questions/referral_questions" relevant="/data/visit_questions/create_referral = 'yes'" />
+			<bind nodeset="/data/visit_questions/referral_questions/danger_signs_label" />
+			<bind nodeset="/data/visit_questions/referral_questions/symptoms_noticed" />
+			<bind nodeset="/data/visit_questions/referral_questions/days_since_symptoms" type="xsd:int" constraint=". &gt; 1" relevant="/data/visit_questions/referral_questions/symptoms_noticed = 'more_48_hours'" required="true()" />
+			<bind nodeset="/data/visit_questions/referral_questions/referral_comment" type="xsd:string" />
+			<bind nodeset="/data/visit_questions/referral_questions/next_referral_date" />
+			<bind nodeset="/data/visit_questions/referral_questions/CHW_name" type="xsd:string" relevant="/data/visit_questions/create_referral = 'yes'" />
+			<bind nodeset="/data/form_complete" />
+			<bind nodeset="/data/debug_group" relevant="1=2" />
+			<bind nodeset="/data/debug_group/debug1" />
+			<bind nodeset="/data/debug_group/debug1-1" />
+			<bind nodeset="/data/debug_group/debug1-2" />
+			<bind nodeset="/data/debug_group/debug1-3" />
+			<bind nodeset="/data/debug_group/debug1-4" />
+			<bind nodeset="/data/debug_group/debug1-5" />
+			<bind nodeset="/data/debug_group/debug10" />
+			<bind nodeset="/data/debug_group/debug10-1" />
+			<bind nodeset="/data/debug_group/debug10-2" />
+			<bind nodeset="/data/case_edd" />
+			<bind nodeset="/data/case_name" />
+			<bind nodeset="/data/case_mother_state" />
+			<bind nodeset="/data/case_next_visit" />
+			<bind nodeset="/data/edd" calculate="if(/data/visit_questions/update_edd = 'yes', /data/visit_questions/updated_edd, date(/data/new_eddlmp))" />
+			<bind nodeset="/data/visit_success" calculate="if(/data/mother_alive = &quot;no&quot; or /data/experience_miscarriage = &quot;yes&quot; or /data/delivered = &quot;yes&quot;, &quot;no&quot;, &quot;yes&quot;)" />
+			<bind nodeset="/data/next_visit_ipt" calculate="if((/data/num_anc_visits = 0 and (today() &gt; (/data/conception_date + 77))) or  (/data/num_anc_visits = 1 and (today() &gt; (/data/conception_date + 161))) or  (/data/num_anc_visits = 2 and (today() &gt; (/data/conception_date + 217))) or  (/data/num_anc_visits = 0 and (today() &gt; (/data/conception_date + 245))), date(today() + 14), date(/data/edd))" />
+			<bind nodeset="/data/next_visit_anc" calculate="if(/data/next_scheduled_anc &lt;= date(today() + 14), date(today() + 14), /data/next_scheduled_anc)" />
+			<bind nodeset="/data/next_visit_care" calculate="if(/data/visit_questions/iron_folic = &quot;no&quot; or /data/visit_questions/sleeping_under_bednet = &quot;no&quot; or /data/visit_questions/eating = &quot;no&quot;, date(today() + 30), date(/data/edd))" />
+			<bind nodeset="/data/next_visit_high_risk" calculate="if(/data/mother_danger_signs = 'yes', if(today() &gt; /data/conception_date + 224, date(today() + 7), date(today() + 30)), date(/data/edd))" />
+			<bind nodeset="/data/next_visit_normal" calculate="if((today() - /data/conception_date) &lt; 28, date(/data/conception_date + 112 - 5),if((today() - /data/conception_date) &lt; 126, date(/data/conception_date + 182 - 5),if((today() - /data/conception_date) &lt; 196, date(/data/conception_date + 224 - 5),if((today() - /data/conception_date) &lt; 252, date(/data/conception_date + 266 - 5), date(/data/edd)))))" />
+			<bind nodeset="/data/next_visit" calculate="if(/data/visit_success = 'yes', date(min(int(/data/next_visit_anc), int(/data/next_visit_care), int(/data/next_visit_high_risk), int(/data/next_visit_normal))), date(/data/case_next_visit))" />
+			<bind nodeset="/data/days_to_next_visit" calculate="int(/data/next_visit - today())  " />
+			<bind nodeset="/data/conception_date" calculate="date(/data/edd - 280) " />
+			<bind nodeset="/data/next_scheduled_anc" calculate="if((/data/num_anc_visits = 0), date(/data/conception_date + 84),  if((/data/num_anc_visits = 1), date(/data/conception_date + 168),  if((/data/num_anc_visits = 2), date(/data/conception_date + 224),  if((/data/num_anc_visits = 3), date(/data/conception_date + 245), date(/data/edd)))))" />
+			<bind nodeset="/data/case_anc_1" />
+			<bind nodeset="/data/case_anc_2" />
+			<bind nodeset="/data/case_anc_3" />
+			<bind nodeset="/data/case_anc_4" />
+			<bind nodeset="/data/case_tet_1" />
+			<bind nodeset="/data/case_tet_2" />
+			<bind nodeset="/data/case_tet_3" />
+			<bind nodeset="/data/case_ipt_1" />
+			<bind nodeset="/data/case_ipt_2" />
+			<bind nodeset="/data/case_hiv_tested" />
+			<bind nodeset="/data/danger_signs" calculate="if(/data/visit_questions/danger_signs_group/high_temp = &quot;yes&quot; or /data/visit_questions/danger_signs_group/vaginal_bleeding = &quot;yes&quot; or /data/visit_questions/danger_signs_group/vaginal_discharge = &quot;yes&quot; or /data/visit_questions/danger_signs_group/swelling = &quot;yes&quot; or /data/visit_questions/danger_signs_group/abdomen_pain = &quot;yes&quot; or /data/visit_questions/danger_signs_group/headache = &quot;yes&quot; or /data/visit_questions/danger_signs_group/fainting = &quot;yes&quot; or /data/visit_questions/danger_signs_group/other_danger_sign = &quot;yes&quot;, &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/num_anc_visits" calculate="if(/data/visit_questions/anc_4 = &quot;yes&quot; or /data/case_anc_4 = &quot;yes&quot;, 4, if(/data/visit_questions/anc_3 = &quot;yes&quot; or /data/case_anc_3 = &quot;yes&quot;, 3,if(/data/visit_questions/anc_2 = &quot;yes&quot; or /data/case_anc_2 = &quot;yes&quot;, 2,if(/data/visit_questions/anc_1 = &quot;yes&quot; or /data/case_anc_1 = &quot;yes&quot;, 1, 0))))" />
+			<bind nodeset="/data/late_anc_visit" calculate="if((/data/num_anc_visits = 0 and ((today() - /data/conception_date) &gt; 77)) or (/data/num_anc_visits = 1 and ((today() - /data/conception_date) &gt; 161)) or (/data/num_anc_visits = 2 and ((today() - /data/conception_date) &gt; 217)) or (/data/num_anc_visits = 3 and ((today() - /data/conception_date) &gt; 245)), &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/late_tetanus_shot" calculate="if((/data/num_tetanus_shots = 0 and ((today() - /data/conception_date) &gt; 71)) or (/data/num_tetanus_shots = 1 and ((today() - /data/conception_date) &gt; 161)) or (/data/num_tetanus_shots = 2 and ((today() - /data/conception_date) &gt; 217)), &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/num_tetanus_shots" calculate="if(/data/visit_questions/tet_3= &quot;yes&quot; or /data/case_tet_3 = &quot;yes&quot;, 3, if(/data/visit_questions/tet_2= &quot;yes&quot; or /data/case_tet_2 = &quot;yes&quot;, 2, if(/data/visit_questions/tet_1= &quot;yes&quot; or /data/case_tet_1 = &quot;yes&quot;, 1, 0)))" />
+			<bind nodeset="/data/danger_signs_text" calculate="concat( if(/data/visit_questions/danger_signs_group/high_temp = &quot;yes&quot;, &quot;high temperature, &quot;, &quot;&quot;),  if(/data/visit_questions/danger_signs_group/vaginal_bleeding = &quot;yes&quot;, &quot;vaginal bleeding, &quot;, &quot;&quot;),  if(/data/visit_questions/danger_signs_group/vaginal_discharge = &quot;yes&quot;, &quot;vaginal discharge or irritation, &quot;, &quot;&quot;),  if(/data/visit_questions/danger_signs_group/swelling = &quot;yes&quot;, &quot;swelling, &quot;, &quot;&quot;),  if(/data/visit_questions/danger_signs_group/abdomen_pain = &quot;yes&quot;, &quot;abdominal pain, &quot;, &quot;&quot;),  if(/data/visit_questions/danger_signs_group/headache = &quot;yes&quot;, &quot;severe headache, &quot;, &quot;&quot;),  if(/data/visit_questions/danger_signs_group/fainting = &quot;yes&quot;, &quot;fainting, dizziness or tiredness, &quot;, &quot;&quot;), if(/data/visit_questions/danger_signs_group/other_danger_sign = &quot;yes&quot;, &quot;other&quot;, &quot;&quot;))" />
+			<bind nodeset="/data/referral_date_symptoms" calculate="if(/data/visit_questions/create_referral != &quot;yes&quot;, &quot;&quot;,if(/data/visit_questions/referral_questions/symptoms_noticed = &quot;more_48_hours&quot;, date(today() - /data/visit_questions/referral_questions/days_since_symptoms), if(/data/visit_questions/referral_questions/symptoms_noticed = &quot;less_48_hours&quot;, date(today()-1), today())))" />
+			<bind nodeset="/data/next_visit_referral" calculate="date(today() + 2)" />
+			<bind nodeset="/data/referral_type" calculate="&quot;mother&quot;" />
+			<bind nodeset="/data/num_referrals" calculate="if(/data/visit_questions/create_referral = &quot;yes&quot;, /data/case_num_referrals + 1, /data/case_num_referrals)" />
+			<bind nodeset="/data/case_num_referrals" />
+			<bind nodeset="/data/num_preg_visits" calculate="if(/data/visit_success = &quot;yes&quot;, /data/case_num_preg_visits+1, /data/case_num_preg_visits)" />
+			<bind nodeset="/data/case_num_preg_visits" />
+			<bind nodeset="/data/last_visit" calculate="if(/data/visit_success = &quot;yes&quot;, today(), date(/data/case_last_visit))" />
+			<bind nodeset="/data/case_last_visit" />
+			<bind nodeset="/data/preg_1_done" calculate="if(today() &gt;= date(/data/conception_date + 28) and today() &lt;= date(/data/conception_date + 112), &quot;yes&quot;, /data/case_preg_1_done)" />
+			<bind nodeset="/data/preg_2_done" calculate="if(today() &gt;= date(/data/conception_date + 126) and today() &lt;= date(/data/conception_date + 182), &quot;yes&quot;, /data/case_preg_2_done)" />
+			<bind nodeset="/data/preg_3_done" calculate="if(today() &gt;= date(/data/conception_date + 196) and today() &lt;= date(/data/conception_date + 224), &quot;yes&quot;, /data/case_preg_3_done)" />
+			<bind nodeset="/data/preg_4_done" calculate="if(today() &gt;= date(/data/conception_date + 252) and today() &lt;= date(/data/conception_date + 266), &quot;yes&quot;, /data/case_preg_4_done)" />
+			<bind nodeset="/data/case_preg_1_done" />
+			<bind nodeset="/data/case_preg_2_done" />
+			<bind nodeset="/data/case_preg_3_done" />
+			<bind nodeset="/data/case_preg_4_done" />
+			<bind nodeset="/data/mother_danger_signs" calculate="if(/data/visit_questions/danger_signs_group/fainting = 'yes' or /data/visit_questions/danger_signs_group/headache = 'yes' or /data/visit_questions/danger_signs_group/abdomen_pain = 'yes' or /data/visit_questions/danger_signs_group/swelling = 'yes' or /data/visit_questions/danger_signs_group/vaginal_discharge = 'yes' or /data/visit_questions/danger_signs_group/vaginal_bleeding = 'yes' or /data/visit_questions/danger_signs_group/high_temp = 'yes' or /data/visit_questions/danger_signs_group/other_danger_sign = 'yes', &quot;yes&quot;, &quot;no&quot;)" />
+			<bind nodeset="/data/date_onregis" />
+			<bind nodeset="/data/cal_edd_from_regis" />
+			<bind nodeset="/data/new_eddlmp" calculate="if(/data/case_edd='',/data/cal_edd_from_regis,/data/case_edd)" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="mother_label-label">
+						<value>Mother: <output value="/data/case_name"/></value>
+					</text>
+					<text id="mother_alive-label">
+						<value>Is the mother still alive?</value>
+					</text>
+					<text id="mother_alive-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="mother_alive-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="experience_miscarriage-label">
+						<value>Did the mother experience miscarriage ?</value>
+					</text>
+					<text id="experience_miscarriage-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="experience_miscarriage-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="fill_out_dereg_form-label">
+						<value>Please fill out the de-registration form.</value>
+					</text>
+					<text id="delivered-label">
+						<value>Has the mother delivered?</value>
+					</text>
+					<text id="delivered-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="delivered-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="fill_out_delivery-label">
+						<value>Please fill out the delivery form.</value>
+					</text>
+					<text id="update_edd-label">
+						<value>EDD is <output value="format-date(/data/new_eddlmp, '%e/%n/%y')"/>. Do you want to change it?</value>
+						<value form="image">jr://file/commcare/image/data/edd.png</value>
+					</text>
+					<text id="update_edd-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="update_edd-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="updated_edd-label">
+						<value>New EDD: </value>
+						<value form="image">jr://file/commcare/image/data/edd.png</value>
+					</text>
+					<text id="updated_edd-constraintMsg">
+						<value>Date of delivery must be in the future and less than 9 months away.</value>
+					</text>
+					<text id="new_edd_label-label">
+						<value>New EDD is <output value="format-date(/data/edd, '%e/%n/%y')"/></value>
+						<value form="image">jr://file/commcare/image/data/edd.png</value>
+					</text>
+					<text id="anc_1-label">
+						<value>Have you been to antenatal care (ANC 1)?</value>
+						<value form="image">jr://file/commcare/image/data/anc_1.png</value>
+					</text>
+					<text id="anc_1_complete-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_1_complete-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_1_completed_16_weeks-label">
+						<value>ANC 1 Completed Within 12 Weeks?</value>
+					</text>
+					<text id="anc_1_completed_16_weeks-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_1_completed_16_weeks-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_2-label">
+						<value>ANC 2 Complete?</value>
+						<value form="image">jr://file/commcare/image/data/anc_2.png</value>
+					</text>
+					<text id="anc_1_complete-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_1_complete-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_3-label">
+						<value>ANC 3 Complete?</value>
+						<value form="image">jr://file/commcare/image/data/anc_3.png</value>
+					</text>
+					<text id="anc_2_complete-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_2_complete-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_4-label">
+						<value>ANC 4 Complete?</value>
+						<value form="image">jr://file/commcare/image/data/anc_4.png</value>
+					</text>
+					<text id="anc_3_complete-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_3_complete-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_warning-label">
+						<value>Please advise the Mother to Visit Clinic and get ANC Checkup.</value>
+						<value form="image">jr://file/commcare/image/data/visit_clinic.png</value>
+					</text>
+					<text id="tet_1-label">
+						<value>Tetanus 1 Complete?</value>
+						<value form="image">jr://file/commcare/image/data/tetanus_1.png</value>
+					</text>
+					<text id="anc_4_complete-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_4_complete-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="tet_2-label">
+						<value>Tetanus 2 Complete?</value>
+						<value form="image">jr://file/commcare/image/data/tetanus_2.png</value>
+					</text>
+					<text id="tet_1_complete-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="tet_1_complete-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="tet_3-label">
+						<value>Tetanus 3 Complete?</value>
+						<value form="image">jr://file/commcare/image/data/tetanus_3.png</value>
+					</text>
+					<text id="tet_2-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="tet_2-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="tet_warning-label">
+						<value>Please Advise Mother to Visit Clinic and get Tetanus Vaccination!</value>
+						<value form="image">jr://file/commcare/image/data/visit_clinic.png</value>
+					</text>
+					<text id="hiv_tested-label">
+						<value>HIV tested during pregnancy?</value>
+						<value form="image">jr://file/commcare/image/data/hiv_test.png</value>
+					</text>
+					<text id="ipt_given-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="ipt_given-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="danger_signs_group-label">
+						<value>Danger Signs</value>
+					</text>
+					<text id="check_danger_signs-label">
+						<value>Check mother 9 Danger Signs</value>
+						<value form="image">jr://file/commcare/image/data/danger_sign_mother.png</value>
+					</text>
+					<text id="vaginal_bleeding-label">
+						<value>Vaginal Bleeding?</value>
+						<value form="image">jr://file/commcare/image/data/vaginal_bleeding.png</value>
+					</text>
+					<text id="high_temp-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="high_temp-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="headache-label">
+						<value>Severe headache?</value>
+						<value form="image">jr://file/commcare/image/data/headache.png</value>
+					</text>
+					<text id="abdomen_pain-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="abdomen_pain-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="high_temp-label">
+						<value>Body hotness or feeling cold?</value>
+						<value form="image">jr://file/commcare/image/data/high_temperature.png</value>
+					</text>
+					<text id="danger_signs-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="danger_signs-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="vaginal_discharge-label">
+						<value>Vaginal Discharge or irritation?</value>
+						<value form="image">jr://file/commcare/image/data/vaginal_discharge.png</value>
+					</text>
+					<text id="vaginal_bleeding-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="vaginal_bleeding-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="swelling-label">
+						<value>Swelling of the feet and hands?</value>
+						<value form="image">jr://file/commcare/image/data/swelling.png</value>
+					</text>
+					<text id="vaginal_discharge-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="vaginal_discharge-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="abdomen_pain-label">
+						<value>Abdominal pain or backache?</value>
+						<value form="image">jr://file/commcare/image/data/abdomen_pain.png</value>
+					</text>
+					<text id="swelling-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="swelling-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="baby_not_move-label">
+						<value>Does the baby move normally?</value>
+					</text>
+					<text id="item320-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/baby_not_move-yes.mp3</value>
+					</text>
+					<text id="baby_not_move-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="fainting-label">
+						<value>Very tired, tires easily or is very pale?</value>
+						<value form="image">jr://file/commcare/image/data/fainting.png</value>
+					</text>
+					<text id="headache-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="headache-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="baby_lying-label">
+						<value>Baby lying crossways or head up? (Please Check Mother antenatal card)</value>
+					</text>
+					<text id="2">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/baby_lying-yes.mp3</value>
+					</text>
+					<text id="baby_lying-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="other_danger_sign-label">
+						<value>Any other danger sign?</value>
+					</text>
+					<text id="other_danger_sign-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="other_danger_sign-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="refer_mother-label2">
+						<value>Please Refer mother to the health center IMMEDIATELY</value>
+						<value form="image">jr://file/commcare/image/data/refer_mother.png</value>
+					</text>
+					<text id="ipt_1-label">
+						<value>IPT (Fansidar) Dose 1 received?</value>
+						<value form="image">jr://file/commcare/image/data/ipt_1.png</value>
+					</text>
+					<text id="ipt_1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="ipt_1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="ipt_2-label">
+						<value>IPT (Fansidar) Dose 2 received?</value>
+						<value form="image">jr://file/commcare/image/data/ipt_2.png</value>
+					</text>
+					<text id="ipt_1-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="ipt_1-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="iron_folic-label">
+						<value>Iron supplements taken every day?</value>
+						<value form="image">jr://file/commcare/image/data/takes_iron.png</value>
+					</text>
+					<text id="hiv_status_known-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="hiv_status_known-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="deworming-label">
+						<value>Mother given deworming tablet?</value>
+						<value form="image">jr://file/commcare/image/data/deworming_pregnancy.png</value>
+					</text>
+					<text id="iron_folic-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="iron_folic-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="sleeping_under_bednet-label">
+						<value>Sleeping under ITN?</value>
+						<value form="image">jr://file/commcare/image/data/bednet_mother.png</value>
+					</text>
+					<text id="iron_folic-1-yes-label2">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="iron_folic-1-no-label2">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="adequate_rest-label">
+						<value>Mother having enough rest?</value>
+					</text>
+					<text id="sleeping_under_bednet-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="sleeping_under_bednet-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="eating-label">
+						<value>Do you eat 3 times a day?</value>
+						<value form="image">jr://file/commcare/image/data/eating.png</value>
+					</text>
+					<text id="eating-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="eating-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="birth_plan-label">
+						<value>Birth plan such as Transportation, Cloth for the baby, Money prepared?</value>
+						<value form="image">jr://file/commcare/image/data/birth_plan.png</value>
+					</text>
+					<text id="birth_plan-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="birth_plan-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="household_handwashing-label">
+						<value>Household has handwashing facility and soap near the toilet ?</value>
+						<value form="image">jr://file/commcare/image/data/handwashing.png</value>
+					</text>
+					<text id="birth_plan-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="birth_plan-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="plan_to_deliver_at_health_center-label">
+						<value>Plan to deliver at health center?</value>
+						<value form="image">jr://file/commcare/image/data/health_center_delivery.png</value>
+					</text>
+					<text id="household_handwashing-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="household_handwashing-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="mama_kit-label">
+						<value>Mother has mama kit (Pads, or cotton wool, Chitenge/wrapper, string)?</value>
+						<value form="image">jr://file/commcare/image/data/birth_kit.png</value>
+					</text>
+					<text id="plan_to_deliver_at_health_center-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="plan_to_deliver_at_health_center-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="male_present-label">
+						<value>Was the father or chosen supporter present during this visit?</value>
+						<value form="image">jr://file/commcare/image/data/male_present.png</value>
+					</text>
+					<text id="mama_kit-1-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="mama_kit-1-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_risk_label-label">
+						<value>Mother needs an ANC visit.  Follow up until it is complete.</value>
+					</text>
+					<text id="pregnancy_care-label">
+						<value>Mother is not receiving good care during pregnancy.  Follow up often.</value>
+					</text>
+					<text id="next_anc_label-label">
+						<value>Mother's next ANC visit is in <output value="/data/next_scheduled_anc - today() - 7"/> days.</value>
+					</text>
+					<text id="next_visit_immediate_label-label">
+						<value>Please visit the mother again immediately. </value>
+					</text>
+					<text id="next_visit_days_label-label">
+						<value>Please do a visit for mother in <output value="/data/days_to_next_visit"/> days.</value>
+					</text>
+					<text id="create_referral-label">
+						<value>Mother has danger signs. Please Refer her to the Health center IMMEDIATELY.</value>
+						<value form="image">jr://file/commcare/image/data/refer_mother.png</value>
+						<value form="audio">jr://file/commcare/audio/data/refer_mom.mp3</value>
+					</text>
+					<text id="create_referral-yes-label">
+						<value>1. ok</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="referral_questions-label">
+						<value>Referral</value>
+					</text>
+					<text id="danger_signs_label-label">
+						<value>Mother has following danger signs: <output value="/data/danger_signs_text"/></value>
+						<value form="image">jr://file/commcare/image/data/danger_sign_mother.png</value>
+					</text>
+					<text id="symptoms_noticed-label">
+						<value>How long since mother first noticed symptoms?</value>
+					</text>
+					<text id="symptoms_noticed-less_12_hours-label">
+						<value>1. Less than 12 hours</value>
+					</text>
+					<text id="symptoms_noticed-less_24_hours-label">
+						<value>2. Less than 24 hours</value>
+					</text>
+					<text id="symptoms_noticed-less_48_hours-label">
+						<value>3. Less than 48 hours</value>
+					</text>
+					<text id="symptoms_noticed-more_48_hours-label">
+						<value>4. More than 48 hours</value>
+					</text>
+					<text id="days_since_symptoms-label">
+						<value>Days Since Symptoms Noticed</value>
+					</text>
+					<text id="referral_comment-label">
+						<value>Any other comments?</value>
+					</text>
+					<text id="next_referral_date-label">
+						<value>Check mother's referral in 48 hours.</value>
+					</text>
+					<text id="CHW_name-label">
+						<value>Community Health Volunteer Name:</value>
+					</text>
+					<text id="form_complete-label">
+						<value>Form complete</value>
+						<value form="image">jr://file/commcare/image/data/form_complete.png</value>
+					</text>
+					<text id="debug_group-label">
+						<value>Debug</value>
+					</text>
+					<text id="debug1-label">
+						<value>Next Visit: <output value="/data/next_visit"/></value>
+					</text>
+					<text id="debug1-1-label">
+						<value>Next Visit ANC: <output value="/data/next_visit_anc"/></value>
+					</text>
+					<text id="debug1-2-label">
+						<value>Next Visit Care: <output value="/data/next_visit_care"/></value>
+					</text>
+					<text id="debug1-3-label">
+						<value>Next Visit High Risk: <output value="/data/next_visit_high_risk"/></value>
+					</text>
+					<text id="debug1-4-label">
+						<value>Next Visit High Normal: <output value="/data/next_visit_normal"/></value>
+					</text>
+					<text id="debug1-5-label">
+						<value>Danger Signs: <output value="/data/danger_signs_text"/></value>
+					</text>
+					<text id="debug10-label">
+						<value>Symptom Start: <output value="/data/referral_date_symptoms"/></value>
+					</text>
+					<text id="debug10-1-label">
+						<value>Referral Next Visit: <output value="/data/next_visit_referral"/></value>
+					</text>
+					<text id="debug10-2-label">
+						<value>ANC Schedule: <output value="/data/next_scheduled_anc"/></value>
+					</text>
+				</translation>
+				<translation lang="tog">
+					<text id="mother_label-label">
+						<value>Banyina: <output value="/data/case_name"/></value>
+					</text>
+					<text id="mother_alive-label">
+						<value>Sena banyina bacipona?</value>
+					</text>
+					<text id="mother_alive-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="mother_alive-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="experience_miscarriage-label">
+						<value>Sena banyina bakasowa?</value>
+					</text>
+					<text id="experience_miscarriage-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="experience_miscarriage-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="fill_out_dereg_form-label">
+						<value>Ikaka amuchilembe chipepa chakugwisya</value>
+					</text>
+					<text id="delivered-label">
+						<value>Sena banyina bakatumbuka?</value>
+					</text>
+					<text id="delivered-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="delivered-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="fill_out_delivery-label">
+						<value>Ikaka amuchilembe chipepa chakutumbuka</value>
+					</text>
+					<text id="update_edd-label">
+						<value>Buzuba bwakutumbuka<output value="format-date(/data/new_eddlmp, '%e/%n/%y')"/>. (Sena mwanda kubuchincha?)</value>
+						<value form="image">jr://file/commcare/image/data/edd.png</value>
+					</text>
+					<text id="update_edd-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="update_edd-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="updated_edd-label">
+						<value>Buzuba bwakutumbuka  bupya</value>
+						<value form="image">jr://file/commcare/image/data/edd.png</value>
+					</text>
+					<text id="updated_edd-constraintMsg">
+						<value>Buzuba bwakutmbuka bwelede kuti kabuli kumbele, alimwi kataleli kufuka lya myezi</value>
+					</text>
+					<text id="new_edd_label-label">
+						<value>Buzuba bwakutumbuka  bupya <output value="format-date(/data/edd, '%e/%n/%y')"/></value>
+						<value form="image">jr://file/commcare/image/data/edd.png</value>
+					</text>
+					<text id="anc_1-label">
+						<value>Sena mwakaliko kuchipimo chada chitaanzi (ANC1)</value>
+						<value form="image">jr://file/commcare/image/data/anc_1.png</value>
+					</text>
+					<text id="anc_1_complete-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_1_complete-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_1_completed_16_weeks-label">
+						<value>Sena mwakamanizya chipimo chada chitanzi munsondo zili kumi azibili?</value>
+					</text>
+					<text id="anc_1_completed_16_weeks-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_1_completed_16_weeks-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_2-label">
+						<value>Mwakamanizya chipimo chada chabili?</value>
+						<value form="image">jr://file/commcare/image/data/anc_2.png</value>
+					</text>
+					<text id="anc_1_complete-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_1_complete-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_3-label">
+						<value>Mwakamanizya chipimo chada chatatu?</value>
+						<value form="image">jr://file/commcare/image/data/anc_3.png</value>
+					</text>
+					<text id="anc_2_complete-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_2_complete-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_4-label">
+						<value>Mwakamanizya chipimo chada chane?</value>
+						<value form="image">jr://file/commcare/image/data/anc_4.png</value>
+					</text>
+					<text id="anc_3_complete-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_3_complete-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_warning-label">
+						<value>Ikaka amukulwaizye bamama kuti kabainka kuchibbadela kuyoopimwa kucipimo chada</value>
+						<value form="image">jr://file/commcare/image/data/visit_clinic.png</value>
+					</text>
+					<text id="tet_1-label">
+						<value>Sena mwakamanizya kuyaswa nsunda intaanzi?</value>
+						<value form="image">jr://file/commcare/image/data/tetanus_1.png</value>
+					</text>
+					<text id="anc_4_complete-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="anc_4_complete-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="tet_2-label">
+						<value>Sena mwakamanizya kuyaswa nsunda yabili?</value>
+						<value form="image">jr://file/commcare/image/data/tetanus_2.png</value>
+					</text>
+					<text id="tet_1_complete-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="tet_1_complete-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="tet_3-label">
+						<value>Sena mwakamanizya kuyaswa nsunda yatatu?</value>
+						<value form="image">jr://file/commcare/image/data/tetanus_3.png</value>
+					</text>
+					<text id="tet_2-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="tet_2-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="tet_warning-label">
+						<value>Ikaka amukulwaizye bamama kuti kabainka kuchibbadela kuyopegwa nsunda yakukwabilila chiganyana!</value>
+						<value form="image">jr://file/commcare/image/data/visit_clinic.png</value>
+					</text>
+					<text id="hiv_tested-label">
+						<value>Sena mwakapimwa sikalileke muchiindi cha da eyi?</value>
+						<value form="image">jr://file/commcare/image/data/hiv_test.png</value>
+					</text>
+					<text id="ipt_given-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="ipt_given-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="danger_signs_group-label">
+						<value>Zitondezyo ziyoosya</value>
+					</text>
+					<text id="check_danger_signs-label">
+						<value>Kolanga banyina zitondezyo ziyoosya zilifuka</value>
+						<value form="image">jr://file/commcare/image/data/danger_sign_mother.png</value>
+					</text>
+					<text id="vaginal_bleeding-label">
+						<value>Kuzwa bulowa kubukaintu?</value>
+						<value form="image">jr://file/commcare/image/data/vaginal_bleeding.png</value>
+					</text>
+					<text id="high_temp-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="high_temp-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="headache-label">
+						<value>Mutwe kucisa kapati?</value>
+						<value form="image">jr://file/commcare/image/data/headache.png</value>
+					</text>
+					<text id="abdomen_pain-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="abdomen_pain-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="high_temp-label">
+						<value>Kupya mubili na kumvwa mpeyo?</value>
+						<value form="image">jr://file/commcare/image/data/high_temperature.png</value>
+					</text>
+					<text id="danger_signs-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="danger_signs-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="vaginal_discharge-label">
+						<value>Sena kuli zizwa kubukaintu na kulikwezyakwezya</value>
+						<value form="image">jr://file/commcare/image/data/vaginal_discharge.png</value>
+					</text>
+					<text id="vaginal_bleeding-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="vaginal_bleeding-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="swelling-label">
+						<value>Sena zituta a maanza ala zimba?</value>
+						<value form="image">jr://file/commcare/image/data/swelling.png</value>
+					</text>
+					<text id="vaginal_discharge-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="vaginal_discharge-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="abdomen_pain-label">
+						<value>Sena muluse mulacisa na musana?</value>
+						<value form="image">jr://file/commcare/image/data/abdomen_pain.png</value>
+					</text>
+					<text id="swelling-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="swelling-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="baby_not_move-label">
+						<value>Sena mwana ulaputauka bwelede?</value>
+					</text>
+					<text id="item320-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/baby_not_move-yes.mp3</value>
+					</text>
+					<text id="baby_not_move-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="fainting-label">
+						<value>Sena kukatala loko, kufwambana kukatala, na mulatuba mumeso amumanza?</value>
+						<value form="image">jr://file/commcare/image/data/fainting.png</value>
+					</text>
+					<text id="headache-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="headache-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="baby_lying-label">
+						<value>Sena mwana wiingide biya nanka ulangide mutwe mujulu? (Ikaka amulange cipimo cha da)</value>
+					</text>
+					<text id="2">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/baby_lying-yes.mp3</value>
+					</text>
+					<text id="baby_lying-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="other_danger_sign-label">
+						<value>Sena kuli zitondezyo ziyoosys ziimbi?</value>
+					</text>
+					<text id="other_danger_sign-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="other_danger_sign-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="refer_mother-label2">
+						<value>Ikaka amubatumine kuchibbadela CHAKUFWAMBANA</value>
+						<value form="image">jr://file/commcare/image/data/refer_mother.png</value>
+					</text>
+					<text id="ipt_1-label">
+						<value>Sena mwakatambula musamu wa FANSIDAR kunywa kwakusanguna?</value>
+						<value form="image">jr://file/commcare/image/data/ipt_1.png</value>
+					</text>
+					<text id="ipt_1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="ipt_1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="ipt_2-label">
+						<value>Sena mwakatambula musamu wa FANSIDAR kunywa kwabili?</value>
+						<value form="image">jr://file/commcare/image/data/ipt_2.png</value>
+					</text>
+					<text id="ipt_1-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="ipt_1-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="iron_folic-label">
+						<value>Sena mulanywa mapilusi abulowa buzuba abuzuba?</value>
+						<value form="image">jr://file/commcare/image/data/takes_iron.png</value>
+					</text>
+					<text id="hiv_status_known-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="hiv_status_known-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="deworming-label">
+						<value>Sena Bamama bakapegwa musamu wamayoka?</value>
+						<value form="image">jr://file/commcare/image/data/deworming_pregnancy.png</value>
+					</text>
+					<text id="iron_folic-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="iron_folic-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="sleeping_under_bednet-label">
+						<value>Sena mulona mukansabwe kakwabilila mansenya?</value>
+						<value form="image">jr://file/commcare/image/data/bednet_mother.png</value>
+					</text>
+					<text id="iron_folic-1-yes-label2">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="iron_folic-1-no-label2">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="adequate_rest-label">
+						<value>Sena banyina bali aaciindi chakulyokezya?</value>
+					</text>
+					<text id="sleeping_under_bednet-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="sleeping_under_bednet-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="eating-label">
+						<value>Sena mulya zindi zyotatwe abuzuba?</value>
+						<value form="image">jr://file/commcare/image/data/eating.png</value>
+					</text>
+					<text id="eating-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="eating-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="birth_plan-label">
+						<value>Sena mwakalibambila kutumbuka mbuli bweende, zisani zyamwana, amali ibambidwe?</value>
+						<value form="image">jr://file/commcare/image/data/birth_plan.png</value>
+					</text>
+					<text id="birth_plan-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="birth_plan-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="household_handwashing-label">
+						<value>Sena mukwasyi ulijisi zibelesyo zyakusambila mumanza ansipa munsi acimbuzi?</value>
+						<value form="image">jr://file/commcare/image/data/handwashing.png</value>
+					</text>
+					<text id="birth_plan-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="birth_plan-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="plan_to_deliver_at_health_center-label">
+						<value>Sena muli amabambe akutumbikila kucibbadela?</value>
+						<value form="image">jr://file/commcare/image/data/health_center_delivery.png</value>
+					</text>
+					<text id="household_handwashing-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="household_handwashing-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="mama_kit-label">
+						<value>Sena banyina balijisi zintu zikwene mbuli zibbangisyo, butonge, chitenge, cisila, akalambo?</value>
+						<value form="image">jr://file/commcare/image/data/birth_kit.png</value>
+					</text>
+					<text id="plan_to_deliver_at_health_center-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="plan_to_deliver_at_health_center-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="male_present-label">
+						<value>Sena bawisi nanka basalidwe kugwasilizya baliko mukuswaigwa oku?</value>
+						<value form="image">jr://file/commcare/image/data/male_present.png</value>
+					</text>
+					<text id="mama_kit-1-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="mama_kit-1-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="anc_risk_label-label">
+						<value>Banyina beelede kwinka kuchipimo chada. Amutobelesye kusikila bakamanisye.</value>
+					</text>
+					<text id="pregnancy_care-label">
+						<value>Banyina tabalimukutambula lugwasyo lulikabotu mukumita oku. Amutobelesye ciindi aaciindi.</value>
+					</text>
+					<text id="next_anc_label-label">
+						<value>Kuswaya kwabanyina kutobela kunoli mu <output value="/data/next_scheduled_anc - today() - 7"/></value>
+					</text>
+					<text id="next_visit_immediate_label-label">
+						<value>Ikaka amukakubaswaye aba banyina alimwi CHAKUFWAMBANA</value>
+					</text>
+					<text id="next_visit_days_label-label">
+						<value>Ikaka amubaswaye aba banyina kwaiinda mazuba ali <output value="/data/days_to_next_visit"/></value>
+					</text>
+					<text id="create_referral-label">
+						<value>Bamama bali aanteenda. Ikaka amubatumine kucibbadela CHAKUFWAMBANA.</value>
+						<value form="image">jr://file/commcare/image/data/refer_mother.png</value>
+						<value form="audio">jr://file/commcare/audio/data/refer_mom.mp3</value>
+					</text>
+					<text id="create_referral-yes-label">
+						<value>1. Acibe boobo</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="referral_questions-label">
+						<value>Kutumina</value>
+					</text>
+					<text id="danger_signs_label-label">
+						<value>Banyina bajisi zitondezyo ziyoosya ezi zitobela: <output value="/data/danger_signs_text"/></value>
+						<value form="image">jr://file/commcare/image/data/danger_sign_mother.png</value>
+					</text>
+					<text id="symptoms_noticed-label">
+						<value>Nciindi cilamfu buti kuzwa banyina nibatalika kubona zitondezyo?</value>
+					</text>
+					<text id="symptoms_noticed-less_12_hours-label">
+						<value>1. Kutasika amawoola kumi aabili</value>
+					</text>
+					<text id="symptoms_noticed-less_24_hours-label">
+						<value>2. Kutasika amawoola makumi obile aane</value>
+					</text>
+					<text id="symptoms_noticed-less_48_hours-label">
+						<value>3. Kutasika amawoola makumi one amusanu aatatu</value>
+					</text>
+					<text id="symptoms_noticed-more_48_hours-label">
+						<value>4. Kwiinda amawoola ali makumi one amusanu aatatu</value>
+					</text>
+					<text id="days_since_symptoms-label">
+						<value>Mazuba kuzwa zitondezyo nizyakazibwa</value>
+					</text>
+					<text id="referral_comment-label">
+						<value>Kuli twaambo tumbi na?</value>
+					</text>
+					<text id="next_referral_date-label">
+						<value>Amulange banyina kutumwa kwabo mu mawoola ali makumi one amusanu aatatu</value>
+					</text>
+					<text id="CHW_name-label">
+						<value>Zyina Lya Mubelesi wanseba wamumunzi</value>
+					</text>
+					<text id="form_complete-label">
+						<value>Bulembo bwamana</value>
+						<value form="image">jr://file/commcare/image/data/form_complete.png</value>
+					</text>
+					<text id="debug_group-label">
+						<value>Debug</value>
+					</text>
+					<text id="debug1-label">
+						<value>Next Visit: <output value="/data/next_visit"/></value>
+					</text>
+					<text id="debug1-1-label">
+						<value>Next Visit ANC: <output value="/data/next_visit_anc"/></value>
+					</text>
+					<text id="debug1-2-label">
+						<value>Next Visit Care: <output value="/data/next_visit_care"/></value>
+					</text>
+					<text id="debug1-3-label">
+						<value>Next Visit High Risk: <output value="/data/next_visit_high_risk"/></value>
+					</text>
+					<text id="debug1-4-label">
+						<value>Next Visit High Normal: <output value="/data/next_visit_normal"/></value>
+					</text>
+					<text id="debug1-5-label">
+						<value>Danger Signs: <output value="/data/danger_signs_text"/></value>
+					</text>
+					<text id="debug10-label">
+						<value>Symptom Start: <output value="/data/referral_date_symptoms"/></value>
+					</text>
+					<text id="debug10-1-label">
+						<value>Referral Next Visit: <output value="/data/next_visit_referral"/></value>
+					</text>
+					<text id="debug10-2-label">
+						<value>ANC Schedule: <output value="/data/next_scheduled_anc"/></value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<trigger ref="/data/mother_label">
+			<label ref="jr:itext('mother_label-label')" />
+		</trigger>
+		<select1 ref="/data/mother_alive">
+			<label ref="jr:itext('mother_alive-label')" />
+			<item>
+				<label ref="jr:itext('mother_alive-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('mother_alive-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<select1 ref="/data/experience_miscarriage">
+			<label ref="jr:itext('experience_miscarriage-label')" />
+			<item>
+				<label ref="jr:itext('experience_miscarriage-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('experience_miscarriage-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<trigger ref="/data/fill_out_dereg_form">
+			<label ref="jr:itext('fill_out_dereg_form-label')" />
+		</trigger>
+		<select1 ref="/data/delivered">
+			<label ref="jr:itext('delivered-label')" />
+			<item>
+				<label ref="jr:itext('delivered-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('delivered-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<trigger ref="/data/fill_out_delivery">
+			<label ref="jr:itext('fill_out_delivery-label')" />
+		</trigger>
+		<group ref="/data/visit_questions">
+			<select1 ref="/data/visit_questions/update_edd">
+				<label ref="jr:itext('update_edd-label')" />
+				<item>
+					<label ref="jr:itext('update_edd-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('update_edd-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<input ref="/data/visit_questions/updated_edd">
+				<label ref="jr:itext('updated_edd-label')" />
+			</input>
+			<trigger ref="/data/visit_questions/new_edd_label">
+				<label ref="jr:itext('new_edd_label-label')" />
+			</trigger>
+			<select1 ref="/data/visit_questions/anc_1">
+				<label ref="jr:itext('anc_1-label')" />
+				<item>
+					<label ref="jr:itext('anc_1_complete-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('anc_1_complete-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/anc_1_completed_16_weeks">
+				<label ref="jr:itext('anc_1_completed_16_weeks-label')" />
+				<item>
+					<label ref="jr:itext('anc_1_completed_16_weeks-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('anc_1_completed_16_weeks-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/anc_2">
+				<label ref="jr:itext('anc_2-label')" />
+				<item>
+					<label ref="jr:itext('anc_1_complete-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('anc_1_complete-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/anc_3">
+				<label ref="jr:itext('anc_3-label')" />
+				<item>
+					<label ref="jr:itext('anc_2_complete-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('anc_2_complete-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/anc_4">
+				<label ref="jr:itext('anc_4-label')" />
+				<item>
+					<label ref="jr:itext('anc_3_complete-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('anc_3_complete-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<trigger ref="/data/visit_questions/anc_warning">
+				<label ref="jr:itext('anc_warning-label')" />
+			</trigger>
+			<select1 ref="/data/visit_questions/tet_1">
+				<label ref="jr:itext('tet_1-label')" />
+				<item>
+					<label ref="jr:itext('anc_4_complete-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('anc_4_complete-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/tet_2">
+				<label ref="jr:itext('tet_2-label')" />
+				<item>
+					<label ref="jr:itext('tet_1_complete-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('tet_1_complete-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/tet_3">
+				<label ref="jr:itext('tet_3-label')" />
+				<item>
+					<label ref="jr:itext('tet_2-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('tet_2-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<trigger ref="/data/visit_questions/tet_warning">
+				<label ref="jr:itext('tet_warning-label')" />
+			</trigger>
+			<select1 ref="/data/visit_questions/hiv_tested">
+				<label ref="jr:itext('hiv_tested-label')" />
+				<item>
+					<label ref="jr:itext('ipt_given-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('ipt_given-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<group ref="/data/visit_questions/danger_signs_group">
+				<label ref="jr:itext('danger_signs_group-label')" />
+				<trigger ref="/data/visit_questions/danger_signs_group/check_danger_signs">
+					<label ref="jr:itext('check_danger_signs-label')" />
+				</trigger>
+				<select1 ref="/data/visit_questions/danger_signs_group/vaginal_bleeding">
+					<label ref="jr:itext('vaginal_bleeding-label')" />
+					<item>
+						<label ref="jr:itext('high_temp-1-yes-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('high_temp-1-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/headache">
+					<label ref="jr:itext('headache-label')" />
+					<item>
+						<label ref="jr:itext('abdomen_pain-1-yes-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('abdomen_pain-1-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/high_temp">
+					<label ref="jr:itext('high_temp-label')" />
+					<item>
+						<label ref="jr:itext('danger_signs-1-yes-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('danger_signs-1-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/vaginal_discharge">
+					<label ref="jr:itext('vaginal_discharge-label')" />
+					<item>
+						<label ref="jr:itext('vaginal_bleeding-1-yes-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('vaginal_bleeding-1-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/swelling">
+					<label ref="jr:itext('swelling-label')" />
+					<item>
+						<label ref="jr:itext('vaginal_discharge-1-yes-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('vaginal_discharge-1-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/abdomen_pain">
+					<label ref="jr:itext('abdomen_pain-label')" />
+					<item>
+						<label ref="jr:itext('swelling-1-yes-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('swelling-1-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/baby_not_move">
+					<label ref="jr:itext('baby_not_move-label')" />
+					<item>
+						<label ref="jr:itext('item320-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('baby_not_move-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/fainting">
+					<label ref="jr:itext('fainting-label')" />
+					<item>
+						<label ref="jr:itext('headache-1-yes-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('headache-1-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/baby_lying">
+					<label ref="jr:itext('baby_lying-label')" />
+					<item>
+						<label ref="jr:itext('2')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('baby_lying-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+				<select1 ref="/data/visit_questions/danger_signs_group/other_danger_sign">
+					<label ref="jr:itext('other_danger_sign-label')" />
+					<item>
+						<label ref="jr:itext('other_danger_sign-yes-label')" />
+						<value>yes</value>
+					</item>
+					<item>
+						<label ref="jr:itext('other_danger_sign-no-label')" />
+						<value>no</value>
+					</item>
+				</select1>
+			</group>
+			<trigger ref="/data/visit_questions/refer_mother">
+				<label ref="jr:itext('refer_mother-label2')" />
+			</trigger>
+			<select1 ref="/data/visit_questions/ipt_1">
+				<label ref="jr:itext('ipt_1-label')" />
+				<item>
+					<label ref="jr:itext('ipt_1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('ipt_1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/ipt_2">
+				<label ref="jr:itext('ipt_2-label')" />
+				<item>
+					<label ref="jr:itext('ipt_1-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('ipt_1-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/iron_folic">
+				<label ref="jr:itext('iron_folic-label')" />
+				<item>
+					<label ref="jr:itext('hiv_status_known-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('hiv_status_known-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/deworming">
+				<label ref="jr:itext('deworming-label')" />
+				<item>
+					<label ref="jr:itext('iron_folic-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('iron_folic-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/sleeping_under_bednet">
+				<label ref="jr:itext('sleeping_under_bednet-label')" />
+				<item>
+					<label ref="jr:itext('iron_folic-1-yes-label2')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('iron_folic-1-no-label2')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/adequate_rest">
+				<label ref="jr:itext('adequate_rest-label')" />
+				<item>
+					<label ref="jr:itext('sleeping_under_bednet-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('sleeping_under_bednet-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/eating">
+				<label ref="jr:itext('eating-label')" />
+				<item>
+					<label ref="jr:itext('eating-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('eating-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/birth_plan">
+				<label ref="jr:itext('birth_plan-label')" />
+				<item>
+					<label ref="jr:itext('birth_plan-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('birth_plan-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/household_handwashing">
+				<label ref="jr:itext('household_handwashing-label')" />
+				<item>
+					<label ref="jr:itext('birth_plan-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('birth_plan-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/plan_to_deliver_at_health_center">
+				<label ref="jr:itext('plan_to_deliver_at_health_center-label')" />
+				<item>
+					<label ref="jr:itext('household_handwashing-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('household_handwashing-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/mama_kit">
+				<label ref="jr:itext('mama_kit-label')" />
+				<item>
+					<label ref="jr:itext('plan_to_deliver_at_health_center-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('plan_to_deliver_at_health_center-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<select1 ref="/data/visit_questions/male_present">
+				<label ref="jr:itext('male_present-label')" />
+				<item>
+					<label ref="jr:itext('mama_kit-1-yes-label')" />
+					<value>yes</value>
+				</item>
+				<item>
+					<label ref="jr:itext('mama_kit-1-no-label')" />
+					<value>no</value>
+				</item>
+			</select1>
+			<trigger ref="/data/visit_questions/anc_risk_label">
+				<label ref="jr:itext('anc_risk_label-label')" />
+			</trigger>
+			<trigger ref="/data/visit_questions/pregnancy_care">
+				<label ref="jr:itext('pregnancy_care-label')" />
+			</trigger>
+			<trigger ref="/data/visit_questions/next_anc_label">
+				<label ref="jr:itext('next_anc_label-label')" />
+			</trigger>
+			<trigger ref="/data/visit_questions/next_visit_immediate_label">
+				<label ref="jr:itext('next_visit_immediate_label-label')" />
+			</trigger>
+			<trigger ref="/data/visit_questions/next_visit_days_label">
+				<label ref="jr:itext('next_visit_days_label-label')" />
+			</trigger>
+			<select1 ref="/data/visit_questions/create_referral">
+				<label ref="jr:itext('create_referral-label')" />
+				<item>
+					<label ref="jr:itext('create_referral-yes-label')" />
+					<value>yes</value>
+				</item>
+			</select1>
+			<group ref="/data/visit_questions/referral_questions">
+				<label ref="jr:itext('referral_questions-label')" />
+				<trigger ref="/data/visit_questions/referral_questions/danger_signs_label">
+					<label ref="jr:itext('danger_signs_label-label')" />
+				</trigger>
+				<select1 ref="/data/visit_questions/referral_questions/symptoms_noticed">
+					<label ref="jr:itext('symptoms_noticed-label')" />
+					<item>
+						<label ref="jr:itext('symptoms_noticed-less_12_hours-label')" />
+						<value>less_12_hours</value>
+					</item>
+					<item>
+						<label ref="jr:itext('symptoms_noticed-less_24_hours-label')" />
+						<value>less_24_hours</value>
+					</item>
+					<item>
+						<label ref="jr:itext('symptoms_noticed-less_48_hours-label')" />
+						<value>less_48_hours</value>
+					</item>
+					<item>
+						<label ref="jr:itext('symptoms_noticed-more_48_hours-label')" />
+						<value>more_48_hours</value>
+					</item>
+				</select1>
+				<input ref="/data/visit_questions/referral_questions/days_since_symptoms">
+					<label ref="jr:itext('days_since_symptoms-label')" />
+				</input>
+				<input ref="/data/visit_questions/referral_questions/referral_comment">
+					<label ref="jr:itext('referral_comment-label')" />
+				</input>
+				<trigger ref="/data/visit_questions/referral_questions/next_referral_date">
+					<label ref="jr:itext('next_referral_date-label')" />
+				</trigger>
+				<input ref="/data/visit_questions/referral_questions/CHW_name">
+					<label ref="jr:itext('CHW_name-label')" />
+				</input>
+			</group>
+		</group>
+		<trigger ref="/data/form_complete">
+			<label ref="jr:itext('form_complete-label')" />
+		</trigger>
+		<group ref="/data/debug_group">
+			<label ref="jr:itext('debug_group-label')" />
+			<trigger ref="/data/debug_group/debug1">
+				<label ref="jr:itext('debug1-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug1-1">
+				<label ref="jr:itext('debug1-1-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug1-2">
+				<label ref="jr:itext('debug1-2-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug1-3">
+				<label ref="jr:itext('debug1-3-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug1-4">
+				<label ref="jr:itext('debug1-4-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug1-5">
+				<label ref="jr:itext('debug1-5-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug10">
+				<label ref="jr:itext('debug10-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug10-1">
+				<label ref="jr:itext('debug10-1-label')" />
+			</trigger>
+			<trigger ref="/data/debug_group/debug10-2">
+				<label ref="jr:itext('debug10-2-label')" />
+			</trigger>
+		</group>
+	</h:body>
+</h:html>

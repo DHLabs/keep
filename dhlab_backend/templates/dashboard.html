@@ -3,11 +3,17 @@
 
 {% block title %}{{ user.username }}{% endblock %}
 
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
 {% block js %}
 <script type='text/javascript' src='{% static "js/vendor/underscore-1.4.4.js" %}'></script>
 <script type='text/javascript' src='{% static "js/vendor/moment.min.js" %}'></script>
+
+{% if not is_other_user %}
 <script type='text/javascript' src='{% static "js/dashboard.js" %}'></script>
-<script id='user' type='text/html'>{{ account.username }}</script>
+<script id='user' type='text/html'>{{ user.username }}</script>
 <script id='submission_feed_tmpl' type='text/html'>
 	<div style='border-bottom: 1px solid #EEE;padding-bottom:4px;margin-bottom:4px;'>
 		<div>
@@ -20,6 +26,7 @@
 		</div>
 	</div>
 </script>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -28,10 +35,52 @@
 		<h3>
 			<a href='{% url "user_dashboard" username=user.username %}'>{{ account.username }}</a>
 		</h3>
+		<div style='padding-bottom:8px;margin-bottom:8px;'>
+			{% if not is_other_user %}
+			<div class='pull-right' style='margin-top:-2px;'>
+				<a href='{% url "organization_new" %}' style='font-size:12px;'>
+					<i class='icon-plus-sign'></i>&nbsp;Create Organization
+				</a>
+			</div>
+			{% endif %}
+			<h5>Organizations</h5>
+			<div id='org-list'>
+				{% if organizations|length == 0 %}
+					<div style='font-size:12px;color:#AAA;text-align:center;'>
+					You are not a part of any organizations =[
+					</div>
+				{% else %}
+					{% for org in organizations %}
+					<div>
+						{% if not org.pending or not is_other_user %}
+							{% if org.pending %}
+							<div class='pull-right'>
+								<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
+								   class='btn btn-small btn-success'>
+									Join
+								</a>
+								<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
+								   class='btn btn-small'>
+								   Ignore
+								</a>
+							</div>
+							{% endif %}
+							<a href='{% url "organization_dashboard" org=org.organization.name %}'>
+								<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
+								{{ org.organization.name }}
+							</a>
+						{% endif %}
+					</div>
+					{% endfor %}
+				{% endif %}
+			</div>
+		</div>
+		{% if not is_other_user %}
 		<div>
-			<h4>Recent Submissions</h4>
+			<h5>Recent Submissions</h5>
 			<div id='submissions_feed'></div>
 		</div>
+		{% endif %}
 	</div>
 	<div class='span8'>
 		<table class='table table-striped table-bordered'>
@@ -46,26 +95,26 @@
 								</a>
 							</div>
 							{% endif %}
-							Data Repositories
+							Personal Data Repositories
 						</h4>
 					</td>
 				</tr>
 			</thead>
 			<tbody>
-				{% if user_forms|length == 0 %}
+				{% if user_repos|length == 0 %}
 					<tr>
 						<td style='text-align:center;' colspan='4'>
-							You have no forms uploaded =[
+							You have no data repositories =[
 						</td>
 					</tr>
 				{% endif %}
-				{% for repo in user_forms %}
+				{% for repo in user_repos %}
 					<tr>
 						<td style='width:32px;text-align:center;'>
 							{% if repo.public %}
-								<img src='{% static "img/public_repo.png" %}' alt='Public'>
+								<i class='icon-unlock'></i>
 							{% else %}
-								<img src='{% static "img/private_repo.png" %}' alt='Private'>
+								<i class='icon-lock'></i>
 							{% endif %}
 						</td>
 						<td>
@@ -79,17 +128,68 @@
 							{% endif %}
 						</td>
 						<td style='width:102px;text-align:center;'>
-							<a href='{% url "repo_webform" repo_name=repo.name %}' class='btn btn-small'>
+							<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
 								<i class='icon-pencil'></i> Web Form
 							</a>
 						</td>
 						<td style='width:64px;text-align:right;'>
-							{{ repo.submission_count }} <i class='icon-file'></i>
+							{{ repo.submission_count }} <i class='icon-file-alt'></i>
 						</td>
 					</tr>
 				{% endfor %}
 			</tbody>
 		</table>
+		{% if not is_other_user %}
+		<table class='table table-striped table-bordered'>
+			<thead>
+				<tr>
+					<td colspan='4' style='background-color:#EEE;'>
+						<h4>
+							Shared Data Repositories
+						</h4>
+					</td>
+				</tr>
+			</thead>
+			<tbody>
+				{% if shared_repos|length == 0 %}
+					<tr>
+						<td style='text-align:center;' colspan='4'>
+							You have no shared repositories =[
+						</td>
+					</tr>
+				{% endif %}
+				{% for repo in shared_repos %}
+					<tr>
+						<td style='width:32px;text-align:center;'>
+							{% if repo.public %}
+								<i class='icon-unlock'></i>
+							{% else %}
+								<i class='icon-lock'></i>
+							{% endif %}
+						</td>
+						<td>
+							<a href='{% url "repo_visualize" username=repo.org repo_name=repo.name %}'>
+								{{ repo.org }} / {{ repo.name }}
+							</a>
+							{% if repo.description %}
+							<span class='help-block'>
+								{{ repo.description|slice:":42" }}...
+							</span>
+							{% endif %}
+						</td>
+						<td style='width:102px;text-align:center;'>
+							<a href='{% url "repo_webform" username=repo.org repo_name=repo.name %}' class='btn btn-small'>
+								<i class='icon-pencil'></i> Web Form
+							</a>
+						</td>
+						<td style='width:64px;text-align:right;'>
+							{{ repo.submission_count }} <i class='icon-file-alt'></i>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}
