@@ -4,14 +4,15 @@ var currentQuestion;
 function questionTypeChanged() {
 	var questionType = $("#questionType").val();
 
-	removeChoices();
-	removeConstraint();
+  	removeChoices();
+  	removeConstraint();
 
 	removeRelevance();//switch to showRelevance when relevances is ready
 
-	if( questionType == "select one" || questionType == "select all that apply" ) {
-		showChoices();
-	} else if( questionType == "audio" ||questionType == "photo" || questionType == "video" || questionType == "barcode" ) {
+  	if( questionType == "select one" || questionType == "select all that apply" ) {
+  		showChoices();
+  		showConstraint();
+  	} else if( questionType == "audio" ||questionType == "photo" || questionType == "video" || questionType == "barcode" ) {
 
 	} else if( questionType == "geopoint" ) {
 
@@ -21,24 +22,113 @@ function questionTypeChanged() {
 
 	} else if( questionType == "note" ) {
 
-	} else if( questionType == "date" ) {
-
-	} else if( questionType == "dateTime" ) {
-
-	} else if( questionType == "time" ) {
-
-	}
+  	} else if( questionType == "date" || questionType == "dateTime" || questionType == "time") {
+  		showConstraint();
+  	}
 }
 
 function closeDialog() {
 	$('#questionEditWindow').modal('hide');
 }
 
+function getValueInputForType(questionType, tagId) {
+	
+	var html = "<input id='" + tagId + "";
+	var inputType = "text";
+	if( questionType == "decimal" || questionType == "integer" ) {
+		inputType = 'number';
+	} else if ( questionType == "date" ) {
+		inputType = 'date';
+	} else if(questionType == "dateTime") {
+		inputType = 'datetime-local';
+	} else if(questionType == "time") {
+		inputType = 'time';
+	} else if( questionType == "select one" || questionType == "select all that apply" ) {
+		inputType = 'number';
+	}
+	html += "";
+}
+
+function getCompareSelectForType(questionType, tagId) {
+
+	var html = "<select id='" + tagId + "'>\n";
+	
+	if( questionType == "decimal" || questionType == "integer" ) {
+		html += "<option value='!='>Not Equal To</option>" +
+	     "<option value='='>Equal To</option>" +
+	     "<option value='&gt;'>Greater than</option>" +
+	     "<option value='&lt;'>Less than</option>" +
+	     "<option value='&gt;='>Greater than or equal to</option>" +
+	     "<option value='&lt;='>Less than or equal to</option>";
+	} else if ( questionType == "date" || questionType == "dateTime" || questionType == "time" ) {
+		html += "<option value='!='>Not Equal To</option>" +
+	    "<option value='='>Equal To</option>" +
+	    "<option value='&gt;'>Later than</option>" +
+	    "<option value='&lt;'>Earlier than</option>" +
+	    "<option value='&gt;='>Later than or equal to</option>" +
+	    "<option value='&lt;='>Earlier than or equal to</option>";
+	} else if( questionType == "select one" || questionType == "select all that apply" ) {
+		html += "<option value='='>Selected</option>" +
+	   "<option value='!='>Not Selected</option>";
+	}
+	    
+	html += "</select>\n";
+	return html;
+}
+
+function addRelevance(questionNum,relevantType,relevantValue) {
+	var relevantNum = $("#relevanceList tr").length;
+
+	var html = "<tr id='relevance" + relevantNum + "'>\n<td>\n";
+	html += "<select id='relevantQuestion" + relevantNum + " onchange='>\n";
+	for( var questionIndex=0; questionIndex<currentQuestion; questionIndex++ ) {
+		html+= "<option value='" + questionIndex + "'>" + 
+		questionList[questionIndex].name + "</option>\n"
+	}
+	html += "</select>\n</td>\n";
+	html += "<td id='relevantType"+ relevantNum +"''></td>\n";//relevantType selection
+	html += "<td id='relevantValue"+ relevantNum +"'></td>\n";//relevantValue
+
+	html += "<td style='width:40px;text-align:center;'>"+
+        "<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'" 
+        + " class='btn btn-danger'>" +
+        "   <i class='icon-trash'></i>"+
+        "</button>"+
+		"</td>\n</tr>\n";
+
+	if( questionNum > -1 ) {
+		$("#relevantQuestion" + relevantNum).val( questionNum );
+
+		if( relevantType ) {
+			relevanceQuestionChanged( relevantNum, questionNum );
+			if(  relevantValue ) {
+				$("#relevanceValue"+relevanceNum).val( relevantValue );
+			}
+		}
+	}
+
+}
+
+function relevanceQuestionChanged( relevanceNum, questionNum ) {
+
+	var typeTag = 'relevanceType' + relevanceNum;
+	var valueTag = 'relevanceValue' + relevanceNum;
+	var html = getCompareSelectForType( questionList[questionNum].type, typeTag );
+	$("#relevantType"+relevanceNum).html( html );
+
+	$("#relevantValue"+relevanceNum).html( getValueInputForType( 
+		getValueInputForType( questionList[questionNum].type ), valueTag ) );
+}
+
 function showRelevance() {
 	var relevanceHTML = "<table class='table table-striped table-bordered'>"
-	+ "<thead><tr><td colspan='3' style='background-color:#EEE;'>"
+	+ "<thead><tr><td colspan='4' style='background-color:#EEE;'>"
 	+ "<h4><div class='pull-right'>"
-	+ "<button type='button' onclick='addRelevance()'"
+	+ "<select id='relevanceType'>\n"
+	+ "<option value='AND'>AND Relevances</option>\n"
+	+ "<option value='OR'>OR Relevances</option>\n"
+	+ "</select>\n"
+	+ "<button type='button' onclick='addRelevance(-1,null,null)'"
 	+ " id='addrelevance' class='btn btn-small'>Add Relevance</button>"
 	+ "</div>Relevances</h4></td></tr></thead><tbody id='relevanceList'></tbody></table>";
 
@@ -58,17 +148,47 @@ function addConstraint(constraintType, constraintValue) {
 
 	var constraintNum = $("#constraintList tr").length;
 
-	var html = "<tr id='constraint" + constraintNum + "'>\n";
-	html += "<td><select id='constraintType" + constraintNum + "'>\n" +
-	   "<option value='!='>Not Equal To</option>" +
-	   "<option value='='>Equal To</option>" +
-	   "<option value='&gt;'>Greater than</option>" +
-	   "<option value='&lt;'>Less than</option>" +
-	   "<option value='&gt;='>Greater than or equal to</option>" +
-	   "<option value='&lt;='>Less than or equal to</option>" +
-	   "</select>\n</td>\n";
-	html += "<td><input id='constraintValue" + constraintNum
-	   +"' placeholder='Constraint Value' value='" + constraintValue + "' type='number' step='any'></td>\n";
+	var html = "<tr id='constraint" + constraintNum + "'>\n<td>\n";
+	//html += "<select id='constraintType" + constraintNum + "'>\n";
+
+	var questionType = $("#questionType").val();
+
+	var selectId = "constraintType" + constraintNum;
+	html += getCompareSelectForType( questionType, selectId );
+	html += "</td>\n<td>\n";
+
+	if( questionType == "decimal" || questionType == "integer" ) {
+		
+
+	   html += "<td><input id='constraintValue" + constraintNum 
+	     +"' placeholder='Constraint Value' value='" + constraintValue + 
+	     "' type='number' step='any'></td>\n";
+	} else if( questionType == "date" ) {
+		
+
+	   html += "<td><input id='constraintValue" + constraintNum 
+	   +"' placeholder='Constraint Value' value='" + constraintValue + 
+	   "' type='date'></td>\n";
+	} else if( questionType == "dateTime" ) {
+		
+
+	   html += "<td><input id='constraintValue" + constraintNum 
+	   +"' placeholder='Constraint Value' value='" + constraintValue + 
+	   "' type='datetime-local'></td>\n";
+	} else if( questionType == "time" ) {
+		
+
+	   html += "<td><input id='constraintValue" + constraintNum 
+	   +"' placeholder='Constraint Value' value='" + constraintValue + 
+	   "' type='time'></td>\n";
+	} else if( questionType == "select one" || questionType == "select all that apply" ) {
+		
+
+	   html += "<td><input id='constraintValue" + constraintNum 
+	   +"' placeholder='Constraint Value' value='" + constraintValue + 
+	   "' type='text'></td>\n";
+	}
+	
 	html += "<td style='width:40px;text-align:center;'>"+
 		"<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'"
 		+ " class='btn btn-danger'>" +
@@ -127,7 +247,6 @@ function populateQuestion( questionNum ) {
 	$("#questionType").val('note');
 	toggleHint();
 
-
 	if( questionNum > -1 ) {
 		var question = questionList[questionNum];
 		$("#questionName").val( question.name );
@@ -147,8 +266,6 @@ function populateQuestion( questionNum ) {
 			toggleHint();
 			$("#questionHint").val(hint);
 		}
-
-		//TODO: relevance
 
 		var bind = question.bind;
 		if( bind ) {
@@ -188,6 +305,9 @@ function populateQuestion( questionNum ) {
 					addConstraint(constraintType, constraintValue);
 				}
 			}
+
+			var relevantStr = bind.relevant;
+			//TODO: finish relevance
 		}
 	}
 }
@@ -230,12 +350,25 @@ function deleteChoice(choice) {
 
 function getIndivConstraintString(constraintNum) {
 
-	var constraintType = $("#constraintType" + constraintNum).val();
+	var constraintType =  $("#constraintType" + constraintNum).val();
 	var constraintValue = $("#constraintValue" + constraintNum).val();
 
 	var constraintString = ". " + constraintType + " " + constraintValue;
 
 	return constraintString;
+}
+
+function getIndivRelevanceString( relevanceNum ) {
+	var relevanceQuestionNum = $("#relevanceQuestion" + relevanceNum).val();
+	var relevanceQuestion = questionList[relevanceQuestionNum];
+
+	var relevanceType =  $("#relevanceType" + relevanceNum).val();
+	var relevanceValue = $("#relevanceValue" + relevanceNum).val();
+
+	var relevanceString = "${" + relevanceQuestion.name + "}";
+	relevanceString += " " + relevanceType + " " + relevanceValue;
+
+	return relevanceString;
 }
 
 function okClicked() {
@@ -283,6 +416,23 @@ function okClicked() {
 			}
 		}
 
+		//relevances
+		var relevanceList = document.getElementById("relevanceList");
+		if( relevanceList ) {
+			var numRelevants = relevanceList.getElementsByTagName("tr").length;
+			if( numRelevants > 0 ) {
+				useBind = true;
+				var relevanceString = getIndivRelevanceString( 0 );
+				var relevanceType = $("#relevanceType").val();
+
+				for( var index; index=1; index<numRelevants; index++ ) {
+					relevanceString += " " + relevanceType + " " + getIndivRelevanceString( index );
+				}
+
+				bind.relevant = relevanceString;
+			}
+		}
+
 		if( useBind ) {
 			question.bind = bind;
 		}
@@ -324,6 +474,15 @@ function buildSurvey() {
 
 function validateQuestion() {
 	//TODO: finish this
+
+	//name (no spaces allowed)
+
+	//constraints
+
+	//choices (choice names cannot have spaces)
+
+	//relevance
+
 	return true;
 }
 
@@ -337,6 +496,11 @@ function editQuestion(questionNum) {
 	populateQuestion(questionNum);
 	currentQuestion = questionNum;
 	$('#questionEditWindow').modal('show');
+}
+
+function sanitizeNameInput(inputElement) {
+	var inputString = inputElement.value;
+	//TODO: finish this
 }
 
 function getHTMLForQuestion(questionNum) {
