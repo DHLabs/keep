@@ -87,6 +87,20 @@ class NewRepoForm( forms.Form ):
         except Exception:
             return None
 
+        # Add a type & default language
+        data[ 'type' ] = 'survey'
+        data[ 'default_language' ] = 'default'
+
+        # Go through and remove fields that dont have a valid label
+        to_remove = []
+        for field in data[ 'children' ]:
+            if len( field[ 'label' ] ) == 0 or len( field[ 'name' ] ) == 0:
+                to_remove.append( field )
+
+        # Delete fields.
+        for el in to_remove:
+            data[ 'children' ].remove( el )
+
         return data
 
     def clean_xform_file( self ):
