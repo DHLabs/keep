@@ -65,7 +65,7 @@ def xml_submission( request, username ):
     if iphone_id:
         Repository.add_data( repo, valid_data, account, uuid=iphone_id )
     else:
-        Repository.add_data( repo, valid_data, account, uuid=iphone_id )
+        Repository.add_data( repo, valid_data, account )
 
     data = json.dumps( { 'success': True } )
     return HttpResponse( data, mimetype='application/json' )
