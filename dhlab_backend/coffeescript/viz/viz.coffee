@@ -29,8 +29,10 @@ class DataView extends Backbone.View
         "click #yaxis_options input":   "change_y_axis"
         "click #chart_options a.btn":   "switch_viz"
         "change #sharing_toggle":       "toggle_public"
+        "change #fps":                  "update_fps"
+        "change #playtime":             "update_playtime"
         "click #time_step a.btn":       "time_step"
-        "click #autostep a.btn":        "auto_step"
+        "click #auto_step a.btn":        "auto_step"
 
     # Current list of survey data
     data: new DataCollection()
@@ -49,7 +51,15 @@ class DataView extends Backbone.View
     # Time step variables
     step_clicked:  false
     step_current: 0
-    previous_control: null
+    num_steps: 0
+    quantum: 0
+    min_time:0
+    max_time:0
+    lower_bound:0
+    upper_bound:0
+    # Time step HTML values
+    fpsbox.innerHTML= fps.value
+    playtimebox.innerHTML= playtime.value
 
     # Yaxis chosen by the user
     yaxis: null
@@ -104,15 +114,64 @@ class DataView extends Backbone.View
             ).addClass( 'viz-active' )
         )
 
-    auto_step: (event) ->
+
+    auto_step: (event) =>
+        auto = () => 
+            @time_step()
+        #auto = () -> 
+        #    step_btn.click()
+        setInterval auto, 1000/fps.value
+
         
 
+    update_fps: () ->
+        fpsbox.innerHTML= fps.value
+        
+    update_playtime: () ->
+        playtimebox.innerHTML= playtime.value
+
     time_step: (event) ->
+        # setup for the first time they click step
         if @step_clicked == false
-            @step_clicked = true 
+            length = @data.models.length
+            @step_clicked = true
+
+
+            # min and max time in milliseconds for the array
+            @min_time = Date.parse (@data.models[0].get('timestamp'))
+            @max_time = Date.parse (@data.models[length-1].get('timestamp'))
+
+            # use start and end time fields if they are not empty
+            if (start_date.value != "")
+                alert (start_date.value)
+                @min_time = Date.parse( start_date.value )
+            if (end_date.value != "")
+                alert ("bye")
+                @max_time = Date.parse( end_date.value )
+
+            # split the time into frames based on fps * playtime
+            @num_steps = fps.value * playtime.value
+            alert(@num_steps)
+
+            # calc size of quantum
+            @quantum = Math.floor ((@max_time - @min_time) / @num_steps )
+            # set initial lower and upper bound of our current quantum
+            @lower_bound = @min_time
+            @upper_bound = @min_time + @quantum
+
+        # only call render for the number of quantums that we have
         @step_current += 1
-        if (@step_current <= @data.models.length)
+        if (@step_current <= @num_steps)
             @renderMap()
+            # display the range of the current quantum
+            current_time.innerHTML = new Date(@lower_bound)
+
+        # move on to the next quantum
+        #alert "old lower is: " + @lower_bound
+        @lower_bound += @quantum
+        #alert "new lower is: " + @lower_bound
+        @upper_bound += @quantum
+
 
     change_y_axis: (event) ->
         # Ensure everything else is unchecked
@@ -332,9 +391,9 @@ class DataView extends Backbone.View
         heatmapData = []
         @markers = []
         @constrained_markers = []
-        index = @step_current
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
+            timestamp = Date.parse(datum.get('timestamp'))
 
             marker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
 
@@ -346,9 +405,8 @@ class DataView extends Backbone.View
             @markers.push( marker )
             constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
 
-            if index > 0
+            if @lower_bound <= timestamp and timestamp <= @upper_bound
                 @constrained_markers.push( constrainedMarker )
-                index -= 1
 
             heatmapData.push(
                 lat: geopoint[0]
@@ -370,6 +428,7 @@ class DataView extends Backbone.View
             'Heatmap': @heatmap
             'Constrained': @constrained_layer
 
+        # why doesn't the constrained layer disappear??
         
         
         controls = L.control.layers( null, layers, { collapsed: false } )

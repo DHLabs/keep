@@ -85,11 +85,20 @@
 	</div>
 </div>
 <div class='container' id='viz'>
+        <div id='time_select'>
+            FPS: <input type='range' id='fps' min='1' max='10'/>
+            <div id='fpsbox'></div>
+            Play Time(Seconds): <input type='range' id='playtime' step='10' min='10' max='300'/>
+            <div id='playtimebox'></div> 
+            Current Time: <div id='current_time' style="display: inline"/>
+            </div> <br/>
+            Start Date: <input type='date' id='start_date' />
+            End Date: <input type='date' id='end_date' />
         <div id='time_step'>
             <a href='#' id='step_btn' data-type='map' class='btn'><i class='icon-map-marker'></i> Step</a>
         </div>
-	<div id='auto-step'>
-	    <a href='#' id='step_btn' data-type='map' class='btn'><i class='icon-map-marker'></i> Auto</a>
+	<div id='auto_step'>
+	    <a href='#' id='auto_btn' data-type='map' class='btn'><i class='icon-map-marker'></i> Auto</a>
 	</div>
 	<div class='row'>
 		<div class='span12'>
