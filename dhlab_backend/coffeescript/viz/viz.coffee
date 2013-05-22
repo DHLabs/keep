@@ -32,7 +32,8 @@ class DataView extends Backbone.View
         "change #fps":                  "update_fps"
         "change #playtime":             "update_playtime"
         "click #time_step a.btn":       "time_step"
-        "click #auto_step a.btn":        "auto_step"
+        "click #auto_step a.btn":       "auto_step"
+        "click #pause a.btn":           "pause_playback"
 
     # Current list of survey data
     data: new DataCollection()
@@ -57,6 +58,7 @@ class DataView extends Backbone.View
     max_time:0
     lower_bound:0
     upper_bound:0
+    is_paused: false
     # Time step HTML values
     fpsbox.innerHTML= fps.value
     playtimebox.innerHTML= playtime.value
@@ -116,13 +118,18 @@ class DataView extends Backbone.View
 
 
     auto_step: (event) =>
-        auto = () => 
-            @time_step()
-        #auto = () -> 
-        #    step_btn.click()
+        auto = () =>
+            #if @is_paused
+            
+            if not @is_paused
+                @time_step()
         setInterval auto, 1000/fps.value
 
-        
+    pause_playback: (event) ->
+        if @is_paused
+          @is_paused = false
+        else
+          @is_paused = true    
 
     update_fps: () ->
         fpsbox.innerHTML= fps.value
