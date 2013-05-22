@@ -124,8 +124,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
     xFormView.prototype.switch_question = function(element, forward) {
       var current_question, form_info, question_index, switch_question, switch_question_key;
-      if (!this.passes_question_constraints()) {
-        return this;
+      if (forward) {
+        if (!this.passes_question_constraints()) {
+          return this;
+        }
       }
       current_question = this._active_question();
       switch_question_key = $(element).data('key');

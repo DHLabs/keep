@@ -21,6 +21,12 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
         if child.type in [ 'string', 'text' ]
 
+            if child.bind.readonly
+                schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
+                                                        <strong></strong><%= title %>
+                                                   </div>' )
+                schema_dict['is_field'] = false
+
             schema_dict['type'] = 'Text'
 
         else if child.type in [ 'decimal', 'int', 'integer' ]
@@ -30,6 +36,11 @@ define( [ 'vendor/underscore' ], ( _ ) ->
         else if child.type is 'date'
 
             schema_dict['type'] = 'Date'
+
+        else if child.type is 'geopoint'
+
+            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %></div>' )
+            schema_dict['is_field'] = false
 
         else if child.type is 'today'
 
@@ -48,7 +59,7 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
             schema_dict['type'] = 'Text'
             schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
-                                                        <strong>Note: </strong><%= title %>
+                                                        <strong></strong><%= title %>
                                                    </div>' )
             schema_dict['is_field'] = false
 

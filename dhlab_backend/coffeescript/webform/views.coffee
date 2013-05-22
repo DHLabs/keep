@@ -136,8 +136,9 @@ define( [ 'jquery',
         switch_question: ( element, forward ) ->
 
             # Does the current active question pass our constraints?
-            if not @passes_question_constraints()
-                return @
+            if forward
+                if not @passes_question_constraints()
+                    return @
 
             # Current question
             current_question = @_active_question()
