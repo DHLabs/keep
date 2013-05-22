@@ -149,13 +149,12 @@ function addConstraint(constraintType, constraintValue) {
 	var constraintNum = $("#constraintList tr").length;
 
 	var html = "<tr id='constraint" + constraintNum + "'>\n<td>\n";
-	//html += "<select id='constraintType" + constraintNum + "'>\n";
 
 	var questionType = $("#questionType").val();
 
 	var selectId = "constraintType" + constraintNum;
 	html += getCompareSelectForType( questionType, selectId );
-	html += "</td>\n<td>\n";
+	html += "</td>\n";
 
 	if( questionType == "decimal" || questionType == "integer" ) {
 		
@@ -330,7 +329,7 @@ function addChoice(name, label) {
 	var choiceNum = $("#choiceList tr").length;
 
 	var html = "<tr id='choice" + choiceNum + "'>";
-	html += "<td><input id='name' placeholder='Name' value='" + name +"' type='text'></td>";
+	html += "<td><input id='name' placeholder='Name' onKeyUp='sanitizeNameInput(this)'' value='" + name +"' type='text'></td>";
 	html += "<td><input id='label' placeholder='Label' value='"+label+"' type='text'></td>";
 	html += "<td style='width:40px;text-align:center;'>"+
 							"<button type='button' onclick='deleteChoice(\"choice" + choiceNum + "\")'"
@@ -389,8 +388,6 @@ function okClicked() {
 			question.hint = $("#questionHint").val();
 		}
 
-		//TODO: bind(relevant),
-
 		var useBind = false;
 		var bind = new Object();
 
@@ -425,7 +422,7 @@ function okClicked() {
 				var relevanceString = getIndivRelevanceString( 0 );
 				var relevanceType = $("#relevanceType").val();
 
-				for( var index; index=1; index<numRelevants; index++ ) {
+				for( var index=1; index<numRelevants; index++ ) {
 					relevanceString += " " + relevanceType + " " + getIndivRelevanceString( index );
 				}
 
@@ -475,13 +472,32 @@ function buildSurvey() {
 function validateQuestion() {
 	//TODO: finish this
 
-	//name (no spaces allowed)
+	//name (needs to be there)
+	if( $( '#questionName' ).val() == '' ) {
+		//TODO: display that name is needed
+		return false;
+	}
 
-	//constraints
+	//constraints (make sure all have names and values)
 
-	//choices (choice names cannot have spaces)
+	//choices (all choices need names and values)
+	if( $('#questionType').val() == 'select one' || $('#questionType').val() == 'select all that apply' ) {
+
+		var choicetd = document.getElementById( 'choiceList' ).getElementsByTagName( 'tr' );
+		for( var i=0; i<choicetd.length; i++ ) {
+
+			var inputs = choicetd.item(i).getElementsByTagName('input');
+			for( var i2=0; i2<inputs.length; i2++ ) {
+				if( !inputs.item(i2).value || inputs.item(i2).value == '' ) {
+					//TODO: alert
+					return false;
+				}
+			}
+		}
+	}
 
 	//relevance
+	//TODO:
 
 	return true;
 }
@@ -500,7 +516,8 @@ function editQuestion(questionNum) {
 
 function sanitizeNameInput(inputElement) {
 	var inputString = inputElement.value;
-	//TODO: finish this
+	inputString = inputString.split(' ').join('_')
+	inputElement.value = inputString;
 }
 
 function getHTMLForQuestion(questionNum) {
