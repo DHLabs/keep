@@ -287,7 +287,7 @@ DataView = (function(_super) {
   };
 
   DataView.prototype.renderMap = function() {
-    var center, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    var center, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, valid_count, value, _i, _j, _len, _len1, _ref4, _ref5, _ref6;
     this.heatmap = L.TileLayer.heatMap({
       radius: 80,
       opacity: 0.8,
@@ -301,9 +301,9 @@ DataView = (function(_super) {
     });
     center = [0, 0];
     valid_count = 0;
-    _ref = this.data.models;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      datum = _ref[_i];
+    _ref4 = this.data.models;
+    for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+      datum = _ref4[_i];
       geopoint = datum.get('data')[this.map_headers];
       if (geopoint == null) {
         continue;
@@ -342,13 +342,10 @@ DataView = (function(_super) {
     });
     heatmapData = [];
     this.markers = [];
-    _ref1 = this.data.models;
-    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-      datum = _ref1[_j];
-      this.constrained_markers = [];
-      this.marker_layer = new L.MarkerClusterGroup();
-      _ref5 = this.data.models;
-      for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
+    this.constrained_markers = [];
+    this.marker_layer = new L.MarkerClusterGroup();
+    _ref5 = this.data.models;
+    for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
       datum = _ref5[_j];
       geopoint = datum.get('data')[this.map_headers].split(' ');
       if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
@@ -358,13 +355,13 @@ DataView = (function(_super) {
         icon: myIcon
       });
       html = '';
-      _ref2 = datum.get('data');
-      for (key in _ref2) {
-        value = _ref2[key];
+      _ref6 = datum.get('data');
+      for (key in _ref6) {
+        value = _ref6[key];
         html += "<div><strong>" + key + ":</strong> " + value + "</div>";
       }
       marker.bindPopup(html);
-      this.markers.push(marker);
+      //this.markers.push(marker);
       this.marker_layer.addLayer(marker);
       constrainedMarker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
@@ -374,21 +371,20 @@ DataView = (function(_super) {
         lon: geopoint[1],
         value: 1
       });
-      }
-      this.marker_layer = L.layerGroup(this.markers);
-      this.constrained_layer = L.layerGroup(this.constrained_markers);
-      this.heatmap.addData(heatmapData);
-      this.map.addLayer(this.heatmap);
-      this.map.addLayer(this.marker_layer);
-      layers = {
-        'Markers': this.marker_layer,
-        'Heatmap': this.heatmap
-      };
-      controls = L.control.layers(null, layers, {
-        collapsed: false
-      });
-      controls.addTo(this.map);
     }
+    //this.marker_layer = L.layerGroup(this.markers);
+    this.constrained_layer = L.layerGroup(this.constrained_markers);
+    this.heatmap.addData(heatmapData);
+    this.map.addLayer(this.heatmap);
+    this.map.addLayer(this.marker_layer);
+    layers = {
+      'Markers': this.marker_layer,
+      'Heatmap': this.heatmap
+    };
+    controls = L.control.layers(null, layers, {
+      collapsed: false
+    });
+    controls.addTo(this.map);
     return this;
   };
 
