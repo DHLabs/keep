@@ -2,6 +2,9 @@ from backend.db import Repository
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
 
+import json
+from bson import json_util
+
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import RequestSite
 from django.contrib.auth.decorators import login_required
@@ -22,7 +25,6 @@ def home( request ):
                              kwargs={ 'username': request.user.username } ) )
 
     return render_to_response( 'index.html' )
-
 
 def register( request ):
     if request.method == 'POST':
@@ -114,6 +116,29 @@ def user_dashboard( request, username ):
                                  'organizations': organizations },
                                context_instance=RequestContext(request) )
 
+@login_required
+def build_report( request ):
+
+    if request.method == 'POST':
+        #build the form and redirect
+
+    else:
+        user_repos = Repository.list_repos( request.user )
+        shared_repos = Repository.shared_repos( request.user )
+
+        # Find all the organization this user belongs to
+        organizations = OrganizationUser.objects.filter( user=request.user )
+
+        for user_repo in user_repos:
+            user_repo[ 'mongo_id' ] = str( user_repo[ 'mongo_id' ] )
+
+        return render_to_response( 'report_builder.html',
+                                  { 'user_repos': json.dumps(user_repos, default=json_util.default),
+                                  'shared_repos': shared_repos,
+                                  'account': request.user,
+                                  'organizations': organizations },
+                                  context_instance=RequestContext(request) )
+    
 
 @login_required
 def generate_api_key( request ):

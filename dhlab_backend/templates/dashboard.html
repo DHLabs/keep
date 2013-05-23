@@ -90,6 +90,9 @@
 						<h4>
 							{% if not is_other_user %}
 							<div class='pull-right'>
+                                <a href='{% url "report_build" %}' class='btn btn-small'>
+                                    Create Report
+                                </a>
 								<a href='{% url "repo_new" %}' class='btn btn-small'>
 									New Repository
 								</a>
