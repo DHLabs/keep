@@ -6,6 +6,8 @@
 {% block css %}
 <link rel="stylesheet" type="text/css" href='{% static "css/viz.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
+<link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.css" %}'>
+<link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.Default.css" %}'>
 {% endblock %}
 
 {% block js %}
@@ -34,7 +36,16 @@
 <!-- Chart viz -->
 <script src='{% static "js/vendor/d3.v3.min.js" %}'></script>
 <script src='{% static "js/viz/viz.js" %}'></script>
+
+<!-- Marker Cluster -->
+<script src='{% static "js/vendor/leaflet.markercluster-src.js" %}'></script>
+<script src='{% static "js/vendor/leaflet.markercluster.js" %}'></script>
+
 <script type='text/javascript'>
+
+
+
+
 	$( function() {
 		// Initialize data
 		document.initial_data = new DataCollection();

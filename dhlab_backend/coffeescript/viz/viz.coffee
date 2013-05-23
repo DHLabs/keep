@@ -29,6 +29,12 @@ class DataView extends Backbone.View
         "click #yaxis_options input":   "change_y_axis"
         "click #chart_options a.btn":   "switch_viz"
         "change #sharing_toggle":       "toggle_public"
+        "change #fps":                  "update_fps"
+        "change #playtime":             "update_playtime"
+        "click #time_step a.btn":       "time_step"
+        "click #auto_step a.btn":       "auto_step"
+        "click #time_static a.btn":     "time_static"
+        "click #pause a.btn":           "pause_playback"
 
     # Current list of survey data
     data: new DataCollection()
@@ -333,6 +339,8 @@ class DataView extends Backbone.View
 
         heatmapData = []
         @markers = []
+        @constrained_markers = []
+        @marker_layer = new L.MarkerClusterGroup()
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
 
@@ -346,20 +354,15 @@ class DataView extends Backbone.View
                 html += "<div><strong>#{key}:</strong> #{value}</div>"
             marker.bindPopup( html )
 
-            @markers.push( marker )
+            @marker_layer.addLayer( marker )
+            constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
 
             heatmapData.push(
                 lat: geopoint[0]
                 lon: geopoint[1]
                 value: 1 )
 
-        # polylines = [
-        #     new L.LatLng( 32.818862, -117.088589 ),
-        #     new L.LatLng( 37.785834, -122.406417 ) ]
-        # @test_map.addLayer( L.polyline( polylines, {color:'red'} ) )
-        # @map.addLayer( L.polyline( polylines, {color:'red'} ) )
-
-        @marker_layer = L.layerGroup( @markers )
+        @constrained_layer = L.layerGroup( @constrained_markers )
         @heatmap.addData( heatmapData )
         @map.addLayer( @heatmap )
         @map.addLayer( @marker_layer )
