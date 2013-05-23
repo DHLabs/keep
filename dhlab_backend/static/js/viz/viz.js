@@ -79,7 +79,8 @@ DataView = (function(_super) {
     "change #playtime": "update_playtime",
     "click #time_step a.btn": "time_step",
     "click #auto_step a.btn": "auto_step",
-    "click #time_static a.btn": "time_static"
+    "click #time_static a.btn": "time_static",
+    "click #pause a.btn": "pause_playback"
   };
 
   DataView.prototype.data = new DataCollection();
@@ -109,6 +110,8 @@ DataView = (function(_super) {
   DataView.prototype.lower_bound = 0;
 
   DataView.prototype.upper_bound = 0;
+
+  DataView.prototype.is_paused = false;
 
   fpsbox.innerHTML = fps.value;
 
@@ -173,9 +176,19 @@ DataView = (function(_super) {
       _this = this;
 
     auto = function() {
-      return _this.time_step();
+      if (!_this.is_paused) {
+        return _this.time_step();
+      }
     };
     return setInterval(auto, 1000 / fps.value);
+  };
+
+  DataView.prototype.pause_playback = function(event) {
+    if (this.is_paused) {
+      return this.is_paused = false;
+    } else {
+      return this.is_paused = true;
+    }
   };
 
   DataView.prototype.time_static = function(event) {

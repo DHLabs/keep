@@ -34,6 +34,7 @@ class DataView extends Backbone.View
         "click #time_step a.btn":       "time_step"
         "click #auto_step a.btn":       "auto_step"
         "click #time_static a.btn":     "time_static"
+        "click #pause a.btn":           "pause_playback"
 
     # Current list of survey data
     data: new DataCollection()
@@ -58,6 +59,7 @@ class DataView extends Backbone.View
     max_time:0
     lower_bound:0
     upper_bound:0
+    is_paused: false
     # Time step HTML values
     fpsbox.innerHTML= fps.value
     playtimebox.innerHTML= playtime.value
@@ -118,9 +120,18 @@ class DataView extends Backbone.View
 
     auto_step: (event) =>
         # continuously call time step
-        auto = () => 
-            @time_step()
+        auto = () =>
+            #if @is_paused
+            
+            if not @is_paused
+                @time_step()
         setInterval auto, 1000/fps.value
+
+    pause_playback: (event) ->
+        if @is_paused
+          @is_paused = false
+        else
+          @is_paused = true    
 
     # Reacts to click of "static_time" button in visualize.html
     # displays all markers within the chosen start/end date
