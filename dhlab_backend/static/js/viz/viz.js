@@ -369,9 +369,6 @@ DataView = (function(_super) {
       constrainedMarker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
       });
-      if (this.lower_bound <= timestamp && timestamp <= this.upper_bound) {
-        this.constrained_markers.push(constrainedMarker);
-      }
       heatmapData.push({
         lat: geopoint[0],
         lon: geopoint[1],
