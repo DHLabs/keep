@@ -432,6 +432,7 @@ DataView = (function(_super) {
     heatmapData = [];
     this.markers = [];
     this.constrained_markers = [];
+    this.marker_layer = new L.MarkerClusterGroup();
     _ref5 = this.data.models;
     for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
       datum = _ref5[_j];
@@ -447,7 +448,7 @@ DataView = (function(_super) {
         html += "<div><strong>" + key + ":</strong> " + value + "</div>";
       }
       marker.bindPopup(html);
-      this.markers.push(marker);
+      this.marker_layer.addLayer(marker);
       constrainedMarker = L.marker([geopoint[0], geopoint[1]], {
         icon: myIcon
       });
@@ -460,7 +461,6 @@ DataView = (function(_super) {
         value: 1
       });
     }
-    this.marker_layer = L.layerGroup(this.markers);
     this.constrained_layer = L.layerGroup(this.constrained_markers);
     this.heatmap.addData(heatmapData);
     if (!this.step_clicked) {
