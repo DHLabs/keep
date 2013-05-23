@@ -121,7 +121,7 @@ def build_report( request ):
 
     if request.method == 'POST':
         #build the form and redirect
-
+        print "nothing"
     else:
         user_repos = Repository.list_repos( request.user )
         shared_repos = Repository.shared_repos( request.user )
