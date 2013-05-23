@@ -32,7 +32,8 @@ class DataView extends Backbone.View
         "change #fps":                  "update_fps"
         "change #playtime":             "update_playtime"
         "click #time_step a.btn":       "time_step"
-        "click #auto_step a.btn":        "auto_step"
+        "click #auto_step a.btn":       "auto_step"
+        "click #time_static a.btn":     "time_static"
 
     # Current list of survey data
     data: new DataCollection()
@@ -116,13 +117,33 @@ class DataView extends Backbone.View
 
 
     auto_step: (event) =>
+        # continuously call time step
         auto = () => 
             @time_step()
-        #auto = () -> 
-        #    step_btn.click()
         setInterval auto, 1000/fps.value
 
+    # Reacts to click of "static_time" button in visualize.html
+    # displays all markers within the chosen start/end date
+    # TODO:  Due to UTC I think the times are off by 7 hours
+    time_static: (event) ->
+        @step_clicked = true
+        length = @data.models.length
         
+        # min and max time in milliseconds for the array
+        @min_time = Date.parse (@data.models[0].get('timestamp'))
+        @max_time = Date.parse (@data.models[length-1].get('timestamp'))
+
+        # use start and end time fields if they are not empty
+        if (start_date.value != "")
+            @min_time = Date.parse( start_date.value )
+        if (end_date.value != "")
+            @max_time = Date.parse( end_date.value )
+
+        # set upper and lower bound
+        @lower_bound = @min_time
+        @upper_bound = @max_time
+
+        @renderMap()
 
     update_fps: () ->
         fpsbox.innerHTML= fps.value
@@ -413,6 +434,7 @@ class DataView extends Backbone.View
                 lon: geopoint[1]
                 value: 1 )
 
+        #@marker_group = new L.MarkerClusterGroup()
         @marker_layer = L.layerGroup( @markers )
         @constrained_layer = L.layerGroup( @constrained_markers )
         @heatmap.addData( heatmapData )

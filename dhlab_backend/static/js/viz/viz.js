@@ -78,7 +78,8 @@ DataView = (function(_super) {
     "change #fps": "update_fps",
     "change #playtime": "update_playtime",
     "click #time_step a.btn": "time_step",
-    "click #auto_step a.btn": "auto_step"
+    "click #auto_step a.btn": "auto_step",
+    "click #time_static a.btn": "time_static"
   };
 
   DataView.prototype.data = new DataCollection();
@@ -175,6 +176,24 @@ DataView = (function(_super) {
       return _this.time_step();
     };
     return setInterval(auto, 1000 / fps.value);
+  };
+
+  DataView.prototype.time_static = function(event) {
+    var length;
+
+    this.step_clicked = true;
+    length = this.data.models.length;
+    this.min_time = Date.parse(this.data.models[0].get('timestamp'));
+    this.max_time = Date.parse(this.data.models[length - 1].get('timestamp'));
+    if (start_date.value !== "") {
+      this.min_time = Date.parse(start_date.value);
+    }
+    if (end_date.value !== "") {
+      this.max_time = Date.parse(end_date.value);
+    }
+    this.lower_bound = this.min_time;
+    this.upper_bound = this.max_time;
+    return this.renderMap();
   };
 
   DataView.prototype.update_fps = function() {
