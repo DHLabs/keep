@@ -185,8 +185,10 @@ DataView = (function(_super) {
 
   DataView.prototype.pause_playback = function(event) {
     if (this.is_paused) {
+      pause_btn.innerHTML = "Pause";
       return this.is_paused = false;
     } else {
+      pause_btn.innerHTML = "Resume";
       return this.is_paused = true;
     }
   };
@@ -466,8 +468,8 @@ DataView = (function(_super) {
     if (!this.step_clicked) {
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
+      this.map.addLayer(this.constrained_layer);
     }
-    this.map.addLayer(this.constrained_layer);
     layers = {
       'Markers': this.marker_layer,
       'Heatmap': this.heatmap,
