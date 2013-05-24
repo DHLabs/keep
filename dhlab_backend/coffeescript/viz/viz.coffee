@@ -129,8 +129,10 @@ class DataView extends Backbone.View
 
     pause_playback: (event) ->
         if @is_paused
+          pause_btn.innerHTML = "Pause"
           @is_paused = false
         else
+          pause_btn.innerHTML = "Resume"
           @is_paused = true    
 
     # Reacts to click of "static_time" button in visualize.html
@@ -453,7 +455,7 @@ class DataView extends Backbone.View
         if (!@step_clicked)
             @map.addLayer( @heatmap )
             @map.addLayer( @marker_layer )
-        @map.addLayer( @constrained_layer )
+            @map.addLayer( @constrained_layer )
 
         layers =
             'Markers': @marker_layer
