@@ -119,6 +119,10 @@ DataView = (function(_super) {
 
   DataView.prototype.current_constrained_layer = null;
 
+  DataView.prototype.controls = null;
+
+  DataView.prototype.current_controls = null;
+
   DataView.prototype.yaxis = null;
 
   DataView.prototype.chart_fields = [];
@@ -393,7 +397,7 @@ DataView = (function(_super) {
   };
 
   DataView.prototype.renderMap = function() {
-    var center, constrainedMarker, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, timestamp, value, _i, _j, _len, _len1, _ref4, _ref5, _ref6;
+    var center, constrainedMarker, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, timestamp, value, _i, _j, _len, _len1, _ref4, _ref5, _ref6;
 
     this.heatmap = L.TileLayer.heatMap({
       radius: 80,
@@ -481,12 +485,14 @@ DataView = (function(_super) {
       'Heatmap': this.heatmap,
       'Constrained': this.constrained_layer
     };
-    controls = L.control.layers(null, layers, {
+    this.controls = L.control.layers(null, layers, {
       collapsed: false
     });
-    if (!this.step_clicked) {
-      return controls.addTo(this.map);
+    if (this.step_clicked) {
+      this.current_controls.removeFrom(this.map);
     }
+    this.controls.addTo(this.map);
+    return this.current_controls = this.controls;
   };
 
   return DataView;

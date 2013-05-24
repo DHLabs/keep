@@ -64,6 +64,8 @@ class DataView extends Backbone.View
     fpsbox.innerHTML= fps.value
     playtimebox.innerHTML= playtime.value
     current_constrained_layer: null
+    controls: null
+    current_controls: null
 
     # Yaxis chosen by the user
     yaxis: null
@@ -469,6 +471,8 @@ class DataView extends Backbone.View
         # why doesn't the constrained layer disappear??
         
         
-        controls = L.control.layers( null, layers, { collapsed: false } )
-        if (!@step_clicked)
-            controls.addTo( @map )
+        @controls = L.control.layers( null, layers, { collapsed: false } )
+        if (@step_clicked)
+            @current_controls.removeFrom(@map)
+        @controls.addTo( @map )
+        @current_controls = @controls
