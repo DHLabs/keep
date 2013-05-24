@@ -201,7 +201,7 @@ class DataView extends Backbone.View
         if (@step_current <= @num_steps)
             @renderMap()
             # display the range of the current quantum
-            current_time.innerHTML = new Date(@lower_bound)
+            current_time.innerHTML = new Date(@lower_bound) + " through " + new Date(@upper_bound)
 
         # move on to the next quantum
         #alert "old lower is: " + @lower_bound
@@ -430,6 +430,7 @@ class DataView extends Backbone.View
         @markers = []
         @constrained_markers = []
         @marker_layer = new L.MarkerClusterGroup()
+        @constrained_layer = new L.MarkerClusterGroup()
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
             timestamp = Date.parse(datum.get('timestamp'))
@@ -445,14 +446,14 @@ class DataView extends Backbone.View
             constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
 
             if @lower_bound <= timestamp and timestamp <= @upper_bound
-                @constrained_markers.push( constrainedMarker )
+                @constrained_layer.addLayer(constrainedMarker)
 
             heatmapData.push(
                 lat: geopoint[0]
                 lon: geopoint[1]
                 value: 1 )
 
-        @constrained_layer = L.layerGroup( @constrained_markers )
+        #@constrained_layer = L.layerGroup( @constrained_markers )
         @heatmap.addData( heatmapData )
 
         

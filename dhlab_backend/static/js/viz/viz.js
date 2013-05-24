@@ -250,7 +250,7 @@ DataView = (function(_super) {
     this.step_current += 1;
     if (this.step_current <= this.num_steps) {
       this.renderMap();
-      current_time.innerHTML = new Date(this.lower_bound);
+      current_time.innerHTML = new Date(this.lower_bound) + " through " + new Date(this.upper_bound);
     }
     if (cumulativeCheck.checked === false) {
       this.lower_bound += this.quantum;
@@ -443,6 +443,7 @@ DataView = (function(_super) {
     this.markers = [];
     this.constrained_markers = [];
     this.marker_layer = new L.MarkerClusterGroup();
+    this.constrained_layer = new L.MarkerClusterGroup();
     _ref5 = this.data.models;
     for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
       datum = _ref5[_j];
@@ -463,7 +464,7 @@ DataView = (function(_super) {
         icon: myIcon
       });
       if (this.lower_bound <= timestamp && timestamp <= this.upper_bound) {
-        this.constrained_markers.push(constrainedMarker);
+        this.constrained_layer.addLayer(constrainedMarker);
       }
       heatmapData.push({
         lat: geopoint[0],
@@ -471,7 +472,6 @@ DataView = (function(_super) {
         value: 1
       });
     }
-    this.constrained_layer = L.layerGroup(this.constrained_markers);
     this.heatmap.addData(heatmapData);
     if (!this.step_clicked) {
       this.map.addLayer(this.heatmap);
