@@ -205,7 +205,8 @@ class DataView extends Backbone.View
 
         # move on to the next quantum
         #alert "old lower is: " + @lower_bound
-        @lower_bound += @quantum
+        if (cumulativeCheck.checked == false)
+            @lower_bound += @quantum
         #alert "new lower is: " + @lower_bound
         @upper_bound += @quantum
 

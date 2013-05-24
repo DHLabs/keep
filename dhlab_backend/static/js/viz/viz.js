@@ -252,7 +252,9 @@ DataView = (function(_super) {
       this.renderMap();
       current_time.innerHTML = new Date(this.lower_bound);
     }
-    this.lower_bound += this.quantum;
+    if (cumulativeCheck.checked === false) {
+      this.lower_bound += this.quantum;
+    }
     return this.upper_bound += this.quantum;
   };
 
