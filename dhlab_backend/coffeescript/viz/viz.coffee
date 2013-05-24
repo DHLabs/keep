@@ -455,7 +455,7 @@ class DataView extends Backbone.View
         if (!@step_clicked)
             @map.addLayer( @heatmap )
             @map.addLayer( @marker_layer )
-            @map.addLayer( @constrained_layer )
+        @map.addLayer( @constrained_layer )
 
         layers =
             'Markers': @marker_layer

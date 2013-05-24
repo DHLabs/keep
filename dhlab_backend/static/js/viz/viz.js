@@ -468,8 +468,8 @@ DataView = (function(_super) {
     if (!this.step_clicked) {
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
-      this.map.addLayer(this.constrained_layer);
     }
+    this.map.addLayer(this.constrained_layer);
     layers = {
       'Markers': this.marker_layer,
       'Heatmap': this.heatmap,
