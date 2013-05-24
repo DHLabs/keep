@@ -117,6 +117,8 @@ DataView = (function(_super) {
 
   playtimebox.innerHTML = playtime.value;
 
+  DataView.prototype.current_constrained_layer = null;
+
   DataView.prototype.yaxis = null;
 
   DataView.prototype.chart_fields = [];
@@ -469,7 +471,11 @@ DataView = (function(_super) {
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
     }
+    if (this.step_clicked) {
+      this.map.removeLayer(this.current_constrained_layer);
+    }
     this.map.addLayer(this.constrained_layer);
+    this.current_constrained_layer = this.constrained_layer;
     layers = {
       'Markers': this.marker_layer,
       'Heatmap': this.heatmap,

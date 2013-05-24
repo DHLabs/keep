@@ -63,6 +63,7 @@ class DataView extends Backbone.View
     # Time step HTML values
     fpsbox.innerHTML= fps.value
     playtimebox.innerHTML= playtime.value
+    current_constrained_layer: null
 
     # Yaxis chosen by the user
     yaxis: null
@@ -455,7 +456,10 @@ class DataView extends Backbone.View
         if (!@step_clicked)
             @map.addLayer( @heatmap )
             @map.addLayer( @marker_layer )
+        if (@step_clicked)
+            @map.removeLayer(@current_constrained_layer)
         @map.addLayer( @constrained_layer )
+        @current_constrained_layer = @constrained_layer
 
         layers =
             'Markers': @marker_layer
