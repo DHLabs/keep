@@ -1,11 +1,5 @@
 # Django settings for dhlab_backend project.
 import os
-import djcelery
-
-# Setup Celery
-djcelery.setup_loader()
-BROKER_URL = 'redis://localhost:6379/0'
-BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}  # 1 hour.
 
 CURRENT_FILE = os.path.abspath(__file__)
 PROJECT_ROOT = os.path.join( os.path.dirname(CURRENT_FILE), '..' )
@@ -131,9 +125,7 @@ INSTALLED_APPS = (
     'registration',             # Needed for user signup
     'tastypie',                 # Needed for our RESTful API
     'storages',                 # Needed for S3 file storage
-    'queued_storage',           # Queued storage for file uploads
     'django_mailgun',           # Easy email API
-    'djcelery',                 # Django Celery integration
     'south'                     # Database migrations
 )
 
