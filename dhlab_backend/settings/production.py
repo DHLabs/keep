@@ -1,9 +1,21 @@
 from settings import *
-from credentials import AWS, MAILGUN
+from credentials import AWS, MAILGUN, RDS
 
 ALLOWED_HOSTS = [ '*' ]
 
 DEBUG = False
+
+# # Setup Amazon RDS access
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'keep',
+#         'PORT': 3306,
+#         'HOST': RDS[ 'HOST' ],
+#         'USER': RDS[ 'USER' ],
+#         'PASSWORD': RDS[ 'PASSWORD' ]
+#     }
+# }
 
 # Setup S3 file storage for our static files.
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
