@@ -35,7 +35,7 @@ define(['vendor/underscore'], function(_) {
     } else if (child.type === 'date') {
       schema_dict['type'] = 'Date';
     } else if (child.type === 'geopoint') {
-      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong>Note: </strong><%= title %></div>');
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %></div>');
       schema_dict['is_field'] = false;
     } else if (child.type === 'today') {
       schema_dict['type'] = 'Date';
