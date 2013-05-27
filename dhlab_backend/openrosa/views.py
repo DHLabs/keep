@@ -12,6 +12,8 @@ from django.views.decorators.http import require_POST
 from django.core.files.storage import default_storage as storage
 
 from lxml import etree
+from queued_storage.backends import QueuedStorage
+
 from repos import validate_and_format
 
 
@@ -72,7 +74,10 @@ def xml_submission( request, username ):
     if len( request.FILES.keys() ) > 1:
 
         # If we have media data, save it to this repo's data folder
-        storage.bucket_name = 'keep-media'
+        #storage.bucket_name = 'keep-media'
+        queued_s3storage = QueuedStorage(
+                            'django.core.files.storage.FileSystemStorage',
+                            'storages.backends.s3boto.S3BotoStorage' )
 
         for key in request.FILES.keys():
             # Ignore the XML file
@@ -85,7 +90,7 @@ def xml_submission( request, username ):
             # TODO: Queue up file for download rather than uploading directly
             # to S3.
             s3_url = '%s/%s/%s' % ( repo[ '_id' ], new_data, key )
-            storage.save( s3_url, request.FILES[ key ] )
+            queued_s3storage.save( s3_url, request.FILES[ key ] )
 
     return HttpResponse( json.dumps( { 'success': True } ),
                          mimetype='application/json' )

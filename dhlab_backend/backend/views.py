@@ -26,6 +26,7 @@ def home( request ):
 
     return render_to_response( 'index.html' )
 
+
 def register( request ):
     if request.method == 'POST':
         form = RegistrationFormUserProfile( request.POST )
@@ -116,6 +117,7 @@ def user_dashboard( request, username ):
                                  'organizations': organizations },
                                context_instance=RequestContext(request) )
 
+
 @login_required
 def build_report( request ):
 
@@ -138,7 +140,7 @@ def build_report( request ):
                                   'account': request.user,
                                   'organizations': organizations },
                                   context_instance=RequestContext(request) )
-    
+
 
 @login_required
 def generate_api_key( request ):
