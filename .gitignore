@@ -3,3 +3,5 @@
 *.db.bak
 htmlcov
 *.coverage
+_*
+media
