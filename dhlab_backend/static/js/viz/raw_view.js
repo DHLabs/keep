@@ -29,7 +29,11 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
       }
     ];
 
-    RawView.prototype.card_tmpl = _.template('<div class=\'card\'>\n    <div class=\'card-image\'>\n        <img src=\'<%= card_image %>\'>\n    </div>\n    <div class=\'card-data\'>\n        <div><%= card_data %></div>\n    </div>\n</div>');
+    RawView.prototype.card_tmpl = _.template('<div class=\'card\'>\n    <%= card_image %>\n    <%= card_data %>\n</div>');
+
+    RawView.prototype.card_img_tmpl = _.template('<div class=\'card-image\'>\n    <img src=\'<%= url %>\'>\n</div>');
+
+    RawView.prototype.card_data_tmpl = _.template('<div class=\'card-data\'>\n    <div><%= data %></div>\n</div>');
 
     RawView.prototype._detect_headers = function(root) {
       var field, _i, _len, _ref, _ref1, _results;
@@ -121,22 +125,29 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         datum = _ref[_i];
         tmpl_options = {
-          card_image: '//placehold.it/220x100',
+          card_image: '',
           card_data: ''
         };
         _ref1 = this.column_headers;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           field = _ref1[_j];
           value = datum.get('data')[field.name];
-          if (value == null) {
-            value = '';
+          if ((value == null) || value.length === 0) {
+            continue;
           }
-          if (((_ref2 = field.type) === 'photo') && value.length > 0) {
+          if ((_ref2 = field.type) === 'photo') {
             url = this.media_base + ("" + (datum.get('repo')) + "/" + (datum.get('_id')) + "/" + value);
-            tmpl_options.card_image = url;
+            tmpl_options.card_image = this.card_img_tmpl({
+              url: url
+            });
           } else {
             tmpl_options.card_data += "<div><strong>" + field.name + ":</strong> " + value + "</div>";
           }
+        }
+        if (tmpl_options.card_data.length > 0) {
+          tmpl_options.card_data = this.card_data_tmpl({
+            data: tmpl_options.card_data
+          });
         }
         $('#raw_grid').append(this.card_tmpl(tmpl_options));
       }

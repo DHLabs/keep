@@ -19,12 +19,18 @@ define( [ 'jquery',
 
         card_tmpl: _.template( '''
             <div class='card'>
-                <div class='card-image'>
-                    <img src='<%= card_image %>'>
-                </div>
-                <div class='card-data'>
-                    <div><%= card_data %></div>
-                </div>
+                <%= card_image %>
+                <%= card_data %>
+            </div>''' )
+
+        card_img_tmpl: _.template( '''
+            <div class='card-image'>
+                <img src='<%= url %>'>
+            </div>''' )
+
+        card_data_tmpl: _.template( '''
+            <div class='card-data'>
+                <div><%= data %></div>
             </div>''' )
 
         _detect_headers: ( root ) ->
@@ -109,20 +115,23 @@ define( [ 'jquery',
             for datum in @data.models
 
                 tmpl_options =
-                    card_image: '//placehold.it/220x100'
+                    card_image: ''
                     card_data: ''
 
                 for field in @column_headers
                     value = datum.get( 'data' )[ field.name ]
-                    if not value?
-                        value = ''
 
-                    if field.type in [ 'photo' ] and value.length > 0
+                    if not value? or value.length == 0
+                        continue
+
+                    if field.type in [ 'photo' ]
                         url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
-                        tmpl_options.card_image = url
+                        tmpl_options.card_image = @card_img_tmpl( { url: url } )
                     else
                         tmpl_options.card_data += "<div><strong>#{field.name}:</strong> #{value}</div>"
 
+                if tmpl_options.card_data.length > 0
+                    tmpl_options.card_data = @card_data_tmpl( { data: tmpl_options.card_data } )
 
                 $( '#raw_grid' ).append( @card_tmpl( tmpl_options ) )
 

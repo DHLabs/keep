@@ -72,7 +72,9 @@
 	}
 
 	> .card-data {
-		padding:8px;
+		> div {
+			padding: 8px;
+		}
 	}
 }
 
