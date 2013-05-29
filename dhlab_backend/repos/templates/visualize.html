@@ -40,6 +40,11 @@
 				</div>
 			</div>
 			<h3>
+				<div class='pull-right'>
+					<a class='btn' href='/api/v1/data/{{ sid }}?format=csv&amp;user={{account.username}}'>
+						<i class='icon-download'></i> Download All Data
+					</a>
+				</div>
 				{% if account.username %}
 					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
 				{% else %}
@@ -75,11 +80,6 @@
 <div class='container' id='viz'>
 	<div class='row'>
 		<div class='span12'>
-			<div class='pull-right'>
-				<a class='btn' href='/api/v1/data/{{ sid }}?format=csv&amp;user={{account.username}}'>
-					<i class='icon-download'></i> Download Data
-				</a>
-			</div>
 			<div>
 				<ul id='viz_options' class='nav nav-tabs'>
 					<li id='raw_btn' class='active'>
