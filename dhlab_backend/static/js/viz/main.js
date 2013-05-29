@@ -5,7 +5,7 @@ requirejs.config({
     vendor: '/static/js/vendor',
     dataTables: '/static/js/vendor/datatables/jquery.dataTables.min',
     bootstrapTables: '/static/js/vendor/datatables/bootstrap.dataTables',
-    masonry: '/static/js/vendor/masonry/masonry',
+    masonry: '/static/js/vendor/masonry/jquery.masonry',
     leaflet: '/static/js/vendor/leaflet/leaflet',
     heatmap: '/static/js/vendor/leaflet/heatmap',
     leaflet_heatmap: '/static/js/vendor/leaflet/heatmap-leaflet',
@@ -26,7 +26,7 @@ requirejs.config({
       deps: ['dataTables']
     },
     'masonry': {
-      exports: 'Masonry'
+      deps: ['jquery']
     },
     'leaflet': {
       deps: ['jquery'],

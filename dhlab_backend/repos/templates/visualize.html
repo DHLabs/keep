@@ -120,11 +120,22 @@
 		<div class='span12'>
 			View as:&nbsp;
 			<div class='btn-group'>
-	            <button class='btn active'><i class='icon-align-justify'></i>&nbsp;List View</button>
-	            <button class='btn'><i class='icon-th-large'></i>&nbsp;Grid View</button>
+	            <button data-type='list' class='btn active'>
+	            	<i class='icon-align-justify'></i>&nbsp;List View
+	            </button>
+	            <button data-type='grid' class='btn'>
+	            	<i class='icon-th-large'></i>&nbsp;Grid View
+	            </button>
 	        </div>
+		</div>'
+		<div class='span12 active' id='raw_list'>
+			<table id="raw_table" class="table table-striped table-bordered">
+				<thead><tr></tr></thead>
+				<tbody></tbody>
+			</table>
 		</div>
-		<div class='span12' id='raw'></div>
+		<div class='span12' id='raw_grid' style='display:none;'>
+		</div>
 	</div>
 	<div class='row viz' id='map_viz'>
 		<div id='hidden_map'></div>
