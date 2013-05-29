@@ -2,7 +2,7 @@
 var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/backbone-forms.min', 'raw_view', 'map_view', 'chart_view'], function($, _, Backbone, Forms, RawView, render_map, render_charts) {
+define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/backbone-forms.min', 'raw_view', 'map_view', 'chart_view'], function($, _, Backbone, Forms, RawView, MapView, ChartView) {
   var DataCollection, DataModel, DataView, FormModel;
   DataModel = (function(_super) {
 
@@ -70,7 +70,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
     DataView.prototype.events = {
       "click #yaxis_options input": "change_y_axis",
-      "click #chart_options a.btn": "switch_viz",
+      "click #viz_options a": "switch_viz",
       "change #sharing_toggle": "toggle_public"
     };
 
@@ -106,13 +106,14 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
     DataView.prototype.toggle_public = function(event) {
       var _this = this;
+      console.log('called');
       $.post("/repo/share/" + this.form.form_id + "/", {}, function(response) {
         if (response.success) {
           $(event.currentTarget).attr('checked', response["public"]);
           if (response["public"]) {
-            return $('#privacy').html('<i class=\'icon-unlock\'></i>&nbsp;PUBLIC');
+            return $('#privacy > div').html('<i class=\'icon-unlock\'></i>&nbsp;PUBLIC');
           } else {
-            return $('#privacy').html('<i class=\'icon-lock\'></i>&nbsp;PRIVATE');
+            return $('#privacy > div').html('<i class=\'icon-lock\'></i>&nbsp;PRIVATE');
           }
         }
       });
@@ -128,13 +129,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         return;
       }
       $('.active').removeClass('active');
-      $(event.currentTarget).addClass('active');
+      $(event.currentTarget.parentNode).addClass('active');
       return $('.viz-active').fadeOut('fast', function() {
         var _this = this;
         $(this).removeClass('viz-active');
         return $('#' + viz_type + '_viz').fadeIn('fast', function() {
           if (viz_type === 'map') {
-            return document.vizApp.map.invalidateSize(false);
+            return document.vizApp.map_view.map.invalidateSize(false);
           }
         }).addClass('viz-active');
       });
@@ -156,7 +157,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           this._detect_types(field.children);
         }
         if ((_ref1 = field.type) !== 'note') {
-          this.raw_headers.push(field.name);
+          this.raw_headers.push(field);
         }
         if ((_ref2 = field.type) === 'decimal' || _ref2 === 'int' || _ref2 === 'integer') {
           this.chart_fields.push(field.name);
@@ -180,19 +181,38 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         return;
       }
       this._detect_types(this.form.attributes.children);
-      this.subviews.push(new RawView({
-        parent: this,
-        raw_headers: this.raw_headers,
-        data: this.data
-      }));
+      if (this.raw_view === void 0) {
+        this.raw_view = new RawView({
+          parent: this,
+          raw_headers: this.raw_headers,
+          data: this.data
+        });
+        this.subviews.push(this.raw_view);
+      }
+      if (this.chart_view === void 0) {
+        this.chart_view = new ChartView({
+          parent: this,
+          chart_fields: this.chart_fields,
+          data: this.data
+        });
+        this.subviews.push(this.chart_view);
+      }
+      if (this.map_view === void 0) {
+        this.map_view = new MapView({
+          parent: this,
+          map_headers: this.map_headers,
+          data: this.data
+        });
+        this.subviews.push(this.chart_view);
+      }
       if (this.data.models.length > 0) {
         if (this.map_enabled) {
-          this.renderMap();
+          this.map_view.render();
         } else {
           $('#map').hide();
         }
         if (this.chart_fields.length) {
-          this.renderCharts();
+          this.chart_view.render();
         } else {
           $('#line_btn').addClass('disabled');
         }
@@ -202,10 +222,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       }
       return this;
     };
-
-    DataView.prototype.renderMap = render_map;
-
-    DataView.prototype.renderCharts = render_charts;
 
     return DataView;
 

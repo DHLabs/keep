@@ -2,7 +2,7 @@
 var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Backbone) {
+define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], function($, _, Backbone, Masonry) {
   var RawView;
   RawView = (function(_super) {
 
@@ -24,15 +24,16 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
     };
 
     RawView.prototype.render = function() {
-      var datum, headers, html, key, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+      var datum, field, headers, html, media_html, url, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
       $('#raw').html('');
-      html = '<table id="raw_table" class="table table-striped table-bordered">';
+      media_html = "<div id='media-container'>";
+      html = '<div style=\'margin-bottom:16px;\'>\n    <a><i class=\'icon-align-justify\'></i>&nbsp;List View</a>\n    <a><i class=\'icon-th-large\'></i>&nbsp;Grid View</a>\n</div>\n<table id="raw_table" class="table table-striped table-bordered">';
       html += '<thead><tr>';
       headers = '';
       _ref = this.raw_headers;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        key = _ref[_i];
-        html += "<th>" + key + "</th>";
+        field = _ref[_i];
+        html += "<th>" + field.name + "</th>";
       }
       html += '</tr></thead>';
       html += '<tbody>';
@@ -42,10 +43,15 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
         html += '<tr>';
         _ref2 = this.raw_headers;
         for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          key = _ref2[_k];
-          value = datum.get('data')[key];
+          field = _ref2[_k];
+          value = datum.get('data')[field.name];
           if (value) {
-            html += "<td>" + value + "</td>";
+            if ((_ref3 = field.type) === 'photo') {
+              url = "//s3.amazonaws.com/keep-media/" + (datum.get('repo')) + "/" + (datum.get('_id')) + "/" + value;
+              html += "<td><a href='" + url + "'>" + value + "</a></td>";
+            } else {
+              html += "<td>" + value + "</td>";
+            }
           } else {
             html += "<td>N/A</td>";
           }
@@ -53,6 +59,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
         html += '</tr>';
       }
       html += '</tbody></table>';
+      html += media_html + "</div>";
       $('#raw').html(html);
       $('#raw_table').dataTable({
         'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",

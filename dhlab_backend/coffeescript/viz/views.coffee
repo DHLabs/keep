@@ -6,11 +6,12 @@ define( [ 'jquery',
           'map_view',
           'chart_view' ],
 
-( $, _, Backbone, Forms, RawView, render_map, render_charts ) ->
+( $, _, Backbone, Forms, RawView, MapView, ChartView ) ->
 
     class DataModel extends Backbone.Model
         defaults:
             data: []
+
 
     class FormModel extends Backbone.Model
         initialize: ->
@@ -18,6 +19,7 @@ define( [ 'jquery',
             @user    = $( '#user' ).html()
 
             @url = "/api/v1/repos/#{@form_id}/?format=json&user=#{@user}"
+
 
     class DataCollection extends Backbone.Collection
         model: DataModel
@@ -30,6 +32,7 @@ define( [ 'jquery',
         comparator: ( data ) ->
             return data.get( 'timestamp' )
 
+
     class DataView extends Backbone.View
 
         # The HTML element where the viz will be rendered
@@ -37,7 +40,7 @@ define( [ 'jquery',
 
         events:
             "click #yaxis_options input":   "change_y_axis"
-            "click #chart_options a.btn":   "switch_viz"
+            "click #viz_options a":         "switch_viz"
             "change #sharing_toggle":       "toggle_public"
 
         # Current list of survey data
@@ -75,14 +78,16 @@ define( [ 'jquery',
             @
 
         toggle_public: (event) ->
+            console.log( 'called' )
+
             $.post( "/repo/share/#{@form.form_id}/", {}, ( response ) =>
                 if response.success
                     $( event.currentTarget ).attr( 'checked', response.public )
 
                     if response.public
-                        $( '#privacy' ).html( '<i class=\'icon-unlock\'></i>&nbsp;PUBLIC' )
+                        $( '#privacy > div' ).html( '<i class=\'icon-unlock\'></i>&nbsp;PUBLIC' )
                     else
-                        $( '#privacy' ).html( '<i class=\'icon-lock\'></i>&nbsp;PRIVATE' )
+                        $( '#privacy > div' ).html( '<i class=\'icon-lock\'></i>&nbsp;PRIVATE' )
             )
 
             @
@@ -98,7 +103,7 @@ define( [ 'jquery',
                 return
 
             $( '.active' ).removeClass( 'active' )
-            $( event.currentTarget ).addClass( 'active' )
+            $( event.currentTarget.parentNode ).addClass( 'active' )
 
             $( '.viz-active' ).fadeOut( 'fast', ()->
                 $( @ ).removeClass( 'viz-active' )
@@ -106,7 +111,7 @@ define( [ 'jquery',
                 $( '#' + viz_type + '_viz' ).fadeIn( 'fast', ()=>
                     # Remember to redraw the map when we switch tabs
                     if viz_type == 'map'
-                        document.vizApp.map.invalidateSize( false )
+                        document.vizApp.map_view.map.invalidateSize( false )
                 ).addClass( 'viz-active' )
             )
 
@@ -129,7 +134,7 @@ define( [ 'jquery',
 
                 # Don't show notes in the raw data table
                 if field.type not in [ 'note' ]
-                    @raw_headers.push( field.name )
+                    @raw_headers.push( field )
 
                 # Only chart fields that are some sort of number
                 if field.type in [ 'decimal', 'int', 'integer' ]
@@ -157,22 +162,38 @@ define( [ 'jquery',
             # we can do.
             @_detect_types( @form.attributes.children )
 
-            @subviews.push( new RawView(
-                                parent: @
-                                raw_headers: @raw_headers
-                                data: @data ) )
+            if @raw_view is undefined
+                @raw_view = new RawView(
+                                    parent: @
+                                    raw_headers: @raw_headers
+                                    data: @data )
+                @subviews.push( @raw_view )
+
+            if @chart_view is undefined
+                @chart_view = new ChartView(
+                                    parent: @
+                                    chart_fields: @chart_fields
+                                    data: @data )
+                @subviews.push( @chart_view )
+
+            if @map_view is undefined
+                @map_view = new MapView(
+                                    parent: @
+                                    map_headers: @map_headers
+                                    data: @data )
+                @subviews.push( @chart_view )
 
             # Only render other vizs if we actually have data!
             if @data.models.length > 0
                 # Can we render a map?
                 if @map_enabled
-                    @renderMap()
+                    @map_view.render()
                 else
                     $( '#map' ).hide()
 
                 # Can we render any charts?
                 if @chart_fields.length
-                    @renderCharts()
+                    @chart_view.render()
                 else
                     $( '#line_btn' ).addClass( 'disabled' )
             else
@@ -180,9 +201,6 @@ define( [ 'jquery',
                 $( '#line_btn' ).addClass( 'disabled' )
                 $( '#map_btn' ).addClass( 'disabled' )
             @
-
-        renderMap: render_map
-        renderCharts: render_charts
 
     return DataView
 )

@@ -13,12 +13,6 @@
 {% block js %}
 <script id='form_id' type='text/plain'>{{ sid }}</script>
 <script id='user' type='text/plain'>{{ user.username }}</script>
-<script id='yaxis_tmpl' type='text/html'>
-	<label class="radio">
-  		<input type="radio" value="<%= value %>" <%= checked %>>
-  		<%= label %>
-	</label>
-</script>
 <script data-main='/static/js/viz/main' src='{% static 'js/vendor/require-jquery.js' %}'></script>
 
 <!-- Chart viz -->
@@ -36,12 +30,14 @@
 <div class='container'>
 	<div class='row'>
 		<div class='span12'>
-			<div class='pull-right alert' id='privacy'>
-				{% if repo.public %}
-					<i class='icon-unlock'></i>&nbsp;PUBLIC
-				{% else %}
-					<i class='icon-lock'></i>&nbsp;PRIVATE
-				{% endif %}
+			<div id='privacy'>
+				<div>
+					{% if repo.public %}
+						<i class='icon-unlock'></i>&nbsp;PUBLIC
+					{% else %}
+						<i class='icon-lock'></i>&nbsp;PRIVATE
+					{% endif %}
+				</div>
 			</div>
 			<h3>
 				{% if account.username %}
@@ -84,23 +80,44 @@
 					<i class='icon-download'></i> Download Data
 				</a>
 			</div>
-			<div class='btn-toolbar'>
-				<div class='btn-group' id='chart_options'>
-					<a href='#' id='raw_btn' data-type='raw' class='btn active'><i class='icon-list'></i> Raw</a>
-					<a href='#' id='map_btn' data-type='map' class='btn disabled'><i class='icon-map-marker'></i> Map</a>
-					<a href='#' id='line_btn' data-type='line' class='btn'><i class='icon-signal'></i> Line</a>
+			<div>
+				<ul id='viz_options' class='nav nav-tabs'>
+					<li id='raw_btn' class='active'>
+						<a href='#' data-type='raw'>
+							<div><i class='icon-list'></i></div>
+							<div>Raw</div>
+						</a>
+					</li>
+					<li id='map_btn' class='disabled'>
+						<a href='#' data-type='map'>
+							<div><i class='icon-map-marker'></i></div>
+							<div>Map</div>
+						</a>
+					</li>
+					<li id='line_btn'>
+						<a href='#' data-type='line'>
+							<div><i class='icon-signal'></i></div>
+							<div>Analytics</div>
+						</a>
+					</li>
 					{% if 'delete' in permissions %}
-					<a data-type='settings' class='btn'>
-						<i class='icon-cog'></i>
-						Settings
-					</a>
-					<a data-type='share' class='btn btn-primary'>Share Data</a>
+					<li>
+						<a href='#' data-type='settings'>
+							<div><i class='icon-cog'></i></div>
+							<div>Settings</div>
+						</a>
+					</li>
+					<li>
+						<a href='#' data-type='share'>
+							<div><i class='icon-group'></i></div>
+							<div>Share Data</div>
+						</a>
+					</li>
 					{% endif %}
-				</div>
+				</ul>
 			</div>
 		</div>
 	</div>
-	<hr/>
 	<div class='row viz viz-active' id='raw_viz'>
 		<div class='span12' id='raw' style='overflow-y:scroll;'></div>
 	</div>
@@ -152,43 +169,43 @@
 			</div>
 		</div>
 		<div style='display:none;'>
-		<div class='span12'><hr></div>
-		<div class='span12'>
-			<div class='span3'>
-				<strong>How is my data shown?</strong>
+			<div class='span12'><hr></div>
+			<div class='span12'>
+				<div class='span3'>
+					<strong>How is my data shown?</strong>
+				</div>
+				<div class='span6'>
+					<div>
+						<label class='checkbox'>
+							<input type='checkbox'>
+							Preserve Data Privacy
+						</label>
+						<span class='help-block'>
+							If you allow data sharing, by default we will ensure that
+							the data shown will also preserve the privacy of any
+							individuals who entered data.
+						</span>
+					</div>
+					<div>
+						<label class='checkbox'>
+							<input type='checkbox'>
+							Show Raw Data
+						</label>
+					</div>
+					<div>
+						<label class='checkbox'>
+							<input type='checkbox'>
+							Show Map Data
+						</label>
+					</div>
+					<div>
+						<label class='checkbox'>
+							<input type='checkbox'>
+							Show Line Data
+						</label>
+					</div>
+				</div>
 			</div>
-			<div class='span6'>
-				<div>
-					<label class='checkbox'>
-						<input type='checkbox'>
-						Preserve Data Privacy
-					</label>
-					<span class='help-block'>
-						If you allow data sharing, by default we will ensure that
-						the data shown will also preserve the privacy of any
-						individuals who entered data.
-					</span>
-				</div>
-				<div>
-					<label class='checkbox'>
-						<input type='checkbox'>
-						Show Raw Data
-					</label>
-				</div>
-				<div>
-					<label class='checkbox'>
-						<input type='checkbox'>
-						Show Map Data
-					</label>
-				</div>
-				<div>
-					<label class='checkbox'>
-						<input type='checkbox'>
-						Show Line Data
-					</label>
-				</div>
-			</div>
-		</div>
 		</div>
 	</div>
 	{% endif %}

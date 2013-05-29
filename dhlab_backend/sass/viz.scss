@@ -6,8 +6,34 @@
 	display: block !important;
 }
 
+.nav-tabs {
+	> li {
+		width: 100px;
+
+		a {
+			 text-align:center;
+			 padding-top:16px;
+
+			 i {
+			 	font-size: 24px;
+			 }
+		}
+	}
+}
+
+#viz_options {
+	margin-top:16px;
+}
+
 #privacy {
+	float:left;
+	width:104px;
+	margin-left:-104px;
 	margin-top:10px;
+
+	> div {
+		padding:12px;
+	}
 }
 
 #line {

@@ -1,8 +1,9 @@
 define( [ 'jquery',
           'vendor/underscore',
-          'vendor/backbone-min' ],
+          'vendor/backbone-min',
+          'masonry' ],
 
-( $, _, Backbone ) ->
+( $, _, Backbone, Masonry ) ->
 
     class RawView extends Backbone.View
 
@@ -20,33 +21,47 @@ define( [ 'jquery',
 
             $( '#raw' ).html( '' )
 
-            html = '<table id="raw_table" class="table table-striped table-bordered">'
+            media_html = "<div id='media-container'>"
+
+            html = '''
+                    <div style='margin-bottom:16px;'>
+                        <a><i class='icon-align-justify'></i>&nbsp;List View</a>
+                        <a><i class='icon-th-large'></i>&nbsp;Grid View</a>
+                    </div>
+                    <table id="raw_table" class="table table-striped table-bordered">'''
 
             html += '<thead><tr>'
             headers = ''
-            for key in @raw_headers
-                html += "<th>#{key}</th>"
+            for field in @raw_headers
+                html += "<th>#{field.name}</th>"
             html += '</tr></thead>'
 
             # Render the actual data
             html += '<tbody>'
             for datum in @data.models
                 html += '<tr>'
-                for key in @raw_headers
+                for field in @raw_headers
 
-                    value = datum.get( 'data' )[ key ]
+                    value = datum.get( 'data' )[ field.name ]
 
                     if value
-                        html += "<td>#{value}</td>"
+                        if field.type in [ 'photo' ]
+                            url = "//s3.amazonaws.com/keep-media/#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
+
+                            html += "<td><a href='#{url}'>#{value}</a></td>"
+                        else
+                            html += "<td>#{value}</td>"
                     else
                         html += "<td>N/A</td>"
 
                 html += '</tr>'
 
             html += '</tbody></table>'
-
+            html += media_html + "</div>"
 
             $( '#raw' ).html( html )
+
+            #wall = new Masonry( document.getElementById('media-container') );
 
             # Render the table using jQuery's DataTable
             #
