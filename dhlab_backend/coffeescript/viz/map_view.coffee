@@ -10,12 +10,33 @@ define( [ 'jquery',
     class MapView extends Backbone.View
 
         name: "MapView"
-        el: $( '#map' )
+
+        el: $( '#map_viz' )
+        btn: $( '#map_btn' )
+
+        map_headers: undefined
 
         initialize: ( options ) ->
             @parent = options.parent
             @data   = options.data
-            @map_headers = options.map_headers
+            @form   = options.form
+
+            @_detect_headers( @form.attributes.children )
+
+            if @map_headers?
+                @btn.removeClass( 'disabled' )
+                @render()
+
+        _detect_headers: ( root ) ->
+
+            for field in root
+                if field.type in [ 'group' ]
+                    @_detect_headers( field.children )
+
+                # Detect geopoints
+                if field.type in [ 'geopoint' ]
+                    @map_headers = field
+                    return
 
         render: () ->
             @heatmap = L.TileLayer.heatMap(
@@ -33,7 +54,7 @@ define( [ 'jquery',
             valid_count = 0
             for datum in @data.models
 
-                geopoint = datum.get( 'data' )[ @map_headers ]
+                geopoint = datum.get( 'data' )[ @map_headers.name ]
                 if not geopoint?
                     continue
 
@@ -76,7 +97,7 @@ define( [ 'jquery',
             @constrained_markers = []
             @marker_layer = new L.MarkerClusterGroup()
             for datum in @data.models
-                geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
+                geopoint = datum.get( 'data' )[ @map_headers.name ].split( ' ' )
 
                 if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
                     continue

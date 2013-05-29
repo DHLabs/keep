@@ -115,7 +115,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
     DataView.prototype.toggle_public = function(event) {
       var _this = this;
-      console.log('called');
       $.post("/repo/share/" + this.form.form_id + "/", {}, function(response) {
         if (response.success) {
           $(event.currentTarget).attr('checked', response["public"]);
@@ -132,9 +131,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     DataView.prototype.switch_viz = function(event) {
       var viz_type;
       viz_type = $(event.currentTarget).data('type');
-      if (viz_type === 'map' && !this.map_enabled) {
-        return;
-      }
       $('li.active').removeClass('active');
       $(event.currentTarget.parentNode).addClass('active');
       return $('.viz-active').fadeOut('fast', function() {
@@ -148,30 +144,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       });
     };
 
-    DataView.prototype._detect_types = function(root) {
-      var field, _i, _len, _ref, _ref1, _results;
-      _results = [];
-      for (_i = 0, _len = root.length; _i < _len; _i++) {
-        field = root[_i];
-        if ((_ref = field.type) === 'group') {
-          this._detect_types(field.children);
-        }
-        if ((_ref1 = field.type) === 'geopoint') {
-          $('#map_btn').removeClass('disabled');
-          this.map_enabled = true;
-          _results.push(this.map_headers = field.name);
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    };
-
     DataView.prototype.render = function() {
       if (!this.form.attributes.children || !this.data) {
         return;
       }
-      this._detect_types(this.form.attributes.children);
       if (this.raw_view === void 0) {
         this.raw_view = this.add_subview(RawView);
       }
@@ -179,23 +155,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         this.chart_view = this.add_subview(ChartView);
       }
       if (this.map_view === void 0) {
-        this.map_view = new MapView({
-          parent: this,
-          map_headers: this.map_headers,
-          data: this.data
-        });
-        this.subviews.push(this.chart_view);
+        return this.map_view = this.add_subview(MapView);
       }
-      if (this.data.models.length > 0) {
-        if (this.map_enabled) {
-          this.map_view.render();
-        } else {
-          $('#map').hide();
-        }
-      } else {
-        $('#map_btn').addClass('disabled');
-      }
-      return this;
     };
 
     return DataView;

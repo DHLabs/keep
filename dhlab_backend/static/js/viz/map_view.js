@@ -14,12 +14,35 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
 
     MapView.prototype.name = "MapView";
 
-    MapView.prototype.el = $('#map');
+    MapView.prototype.el = $('#map_viz');
+
+    MapView.prototype.btn = $('#map_btn');
+
+    MapView.prototype.map_headers = void 0;
 
     MapView.prototype.initialize = function(options) {
       this.parent = options.parent;
       this.data = options.data;
-      return this.map_headers = options.map_headers;
+      this.form = options.form;
+      this._detect_headers(this.form.attributes.children);
+      if (this.map_headers != null) {
+        this.btn.removeClass('disabled');
+        return this.render();
+      }
+    };
+
+    MapView.prototype._detect_headers = function(root) {
+      var field, _i, _len, _ref, _ref1;
+      for (_i = 0, _len = root.length; _i < _len; _i++) {
+        field = root[_i];
+        if ((_ref = field.type) === 'group') {
+          this._detect_headers(field.children);
+        }
+        if ((_ref1 = field.type) === 'geopoint') {
+          this.map_headers = field;
+          return;
+        }
+      }
     };
 
     MapView.prototype.render = function() {
@@ -40,7 +63,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       _ref = this.data.models;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         datum = _ref[_i];
-        geopoint = datum.get('data')[this.map_headers];
+        geopoint = datum.get('data')[this.map_headers.name];
         if (geopoint == null) {
           continue;
         }
@@ -83,7 +106,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         datum = _ref1[_j];
-        geopoint = datum.get('data')[this.map_headers].split(' ');
+        geopoint = datum.get('data')[this.map_headers.name].split(' ');
         if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
           continue;
         }

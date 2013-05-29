@@ -85,8 +85,6 @@ define( [ 'jquery',
             return subview
 
         toggle_public: (event) ->
-            console.log( 'called' )
-
             $.post( "/repo/share/#{@form.form_id}/", {}, ( response ) =>
                 if response.success
                     $( event.currentTarget ).attr( 'checked', response.public )
@@ -96,16 +94,11 @@ define( [ 'jquery',
                     else
                         $( '#privacy > div' ).html( '<i class=\'icon-lock\'></i>&nbsp;PRIVATE' )
             )
-
             @
 
         switch_viz: (event) ->
 
             viz_type = $( event.currentTarget ).data( 'type' )
-
-            # Check that the viz is enabled
-            if viz_type == 'map' and not @map_enabled
-                return
 
             $( 'li.active' ).removeClass( 'active' )
             $( event.currentTarget.parentNode ).addClass( 'active' )
@@ -120,27 +113,10 @@ define( [ 'jquery',
                 ).addClass( 'viz-active' )
             )
 
-        _detect_types: ( root ) ->
-            for field in root
-                if field.type in [ 'group' ]
-                    @_detect_types( field.children )
-
-                # Detect geopoints
-                if field.type in [ 'geopoint' ]
-                    # Enable the map button
-                    $( '#map_btn' ).removeClass( 'disabled' )
-
-                    @map_enabled = true
-                    @map_headers = field.name
-
         render: ->
             # Don't render until we get both the form & survey data
             if( !@form.attributes.children || !@data )
                 return
-
-            # Loop through the form fields and check to see what type of visualizations
-            # we can do.
-            @_detect_types( @form.attributes.children )
 
             if @raw_view is undefined
                 @raw_view = @add_subview( RawView )
@@ -149,23 +125,7 @@ define( [ 'jquery',
                 @chart_view = @add_subview( ChartView )
 
             if @map_view is undefined
-                @map_view = new MapView(
-                                    parent: @
-                                    map_headers: @map_headers
-                                    data: @data )
-                @subviews.push( @chart_view )
-
-            # Only render other vizs if we actually have data!
-            if @data.models.length > 0
-                # Can we render a map?
-                if @map_enabled
-                    @map_view.render()
-                else
-                    $( '#map' ).hide()
-            else
-                # Disable all the data viz buttons if we have no data
-                $( '#map_btn' ).addClass( 'disabled' )
-            @
+                @map_view = @add_subview( MapView )
 
     return DataView
 )
