@@ -31,7 +31,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
 
     RawView.prototype.card_tmpl = _.template('<div class=\'card\'>\n    <%= card_image %>\n    <%= card_data %>\n</div>');
 
-    RawView.prototype.card_img_tmpl = _.template('<div class=\'card-image\'>\n    <img src=\'<%= url %>\'>\n</div>');
+    RawView.prototype.card_img_tmpl = _.template('<div class=\'card-image\'>\n    <a href=\'<%= url %>\' target=\'_blank\'>\n        <img src=\'<%= url %>\'>\n    </a>\n</div>');
 
     RawView.prototype.card_data_tmpl = _.template('<div class=\'card-data\'>\n    <div><%= data %></div>\n</div>');
 

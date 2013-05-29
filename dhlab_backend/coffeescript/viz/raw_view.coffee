@@ -25,7 +25,9 @@ define( [ 'jquery',
 
         card_img_tmpl: _.template( '''
             <div class='card-image'>
-                <img src='<%= url %>'>
+                <a href='<%= url %>' target='_blank'>
+                    <img src='<%= url %>'>
+                </a>
             </div>''' )
 
         card_data_tmpl: _.template( '''
