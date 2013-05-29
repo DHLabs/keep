@@ -3,52 +3,118 @@ var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Backbone) {
-  var ChartView;
+  var ChartView,
+    _this = this;
   ChartView = (function(_super) {
-    var yaxis_template;
+    var yaxis_tmpl;
 
     __extends(ChartView, _super);
 
     function ChartView() {
+      var _this = this;
+      this._y_datum = function(d) {
+        return ChartView.prototype._y_datum.apply(_this, arguments);
+      };
+      this._x_datum = function(d) {
+        return ChartView.prototype._x_datum.apply(_this, arguments);
+      };
       return ChartView.__super__.constructor.apply(this, arguments);
     }
 
     ChartView.prototype.name = 'ChartView';
 
-    ChartView.prototype.el = $('#line');
+    ChartView.prototype.el = $('#line_viz');
 
-    yaxis_template = '<label class="radio">\n    <input type="radio" value="<%= value %>" <%= checked %>> <%= label %>\n</label>';
+    ChartView.prototype.btn = $('#line_btn');
+
+    ChartView.prototype.events = {
+      "click #yaxis_options input": "change_y_axis"
+    };
+
+    yaxis_tmpl = _.template('<label class="radio">\n    <input type="radio" value="<%= value %>" <%= checked %>> <%= label %>\n</label>');
+
+    ChartView.prototype.yaxis = void 0;
+
+    ChartView.prototype.yaxis_fields = [];
 
     ChartView.prototype.initialize = function(options) {
       this.parent = options.parent;
+      this.form = options.form;
       this.data = options.data;
-      return this.chart_fields = options.chart_fields;
+      this._parse_date = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
+      this._detect_axes(this.form.attributes.children);
+      if (this.yaxis_fields.length > 0) {
+        $('#line_btn').removeClass('disabled');
+        return this.render();
+      }
+    };
+
+    ChartView.prototype._detect_axes = function(root) {
+      var field, _i, _len, _ref, _ref1, _results;
+      _results = [];
+      for (_i = 0, _len = root.length; _i < _len; _i++) {
+        field = root[_i];
+        if ((_ref = field.type) === 'group') {
+          this._detect_types(field.children);
+        }
+        if ((_ref1 = field.type) === 'decimal' || _ref1 === 'int' || _ref1 === 'integer') {
+          this.yaxis_fields.push(field);
+          if (this.yaxis == null) {
+            _results.push(this.yaxis = field);
+          } else {
+            _results.push(void 0);
+          }
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    ChartView.prototype._x_datum = function(d) {
+      return this.x(this._parse_date(d.get('timestamp')));
+    };
+
+    ChartView.prototype._y_datum = function(d) {
+      return this.y(parseFloat(d.get('data')[this.yaxis.name]));
+    };
+
+    ChartView.prototype.change_y_axis = function(event) {
+      var field, _i, _len, _ref;
+      $('#yaxis_options input').attr('checked', false);
+      $(event.target).attr('checked', true);
+      _ref = this.yaxis_fields;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        field = _ref[_i];
+        if (field.name === event.target.value) {
+          this.yaxis = field;
+          break;
+        }
+      }
+      return this.render();
     };
 
     ChartView.prototype.render = function() {
-      var end, line, max, min, model, option, parseDate, start, value, x, xAxis, y, yAxis, yaxis_tmpl, _i, _j, _len, _len1, _ref, _ref1,
-        _this = this;
+      var end, field, line, max, min, model, start, value, xAxis, yAxis, _i, _j, _len, _len1, _ref, _ref1;
       d3.select('svg').remove();
       $('#yaxis_options').html('');
-      yaxis_tmpl = _.template(yaxis_template);
-      _ref = this.chart_fields;
+      _ref = this.yaxis_fields;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        option = _ref[_i];
+        field = _ref[_i];
         $('#yaxis_options').append(yaxis_tmpl({
-          label: option,
-          value: option,
-          checked: this.yaxis === option ? 'checked' : ''
+          label: field.label,
+          value: field.name,
+          checked: this.yaxis.name === field.name ? 'checked' : ''
         }));
       }
-      parseDate = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
-      start = parseDate(this.data.models[0].get('timestamp'));
-      end = parseDate(this.data.models[this.data.length - 1].get('timestamp'));
+      start = this._parse_date(this.data.models[0].get('timestamp'));
+      end = this._parse_date(this.data.models[this.data.length - 1].get('timestamp'));
       min = null;
       max = null;
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         model = _ref1[_j];
-        value = parseFloat(model.get('data')[this.yaxis]);
+        value = parseFloat(model.get('data')[this.yaxis.name]);
         if (!min || value < min) {
           min = value;
         }
@@ -56,22 +122,17 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
           max = value;
         }
       }
-      x = d3.time.scale().domain([start, end]).range([0, 800]);
-      y = d3.scale.linear().domain([min, max]).range([200, 0]);
-      xAxis = d3.svg.axis().scale(x).orient('bottom');
-      yAxis = d3.svg.axis().scale(y).orient('left');
-      line = d3.svg.line().x(function(d) {
-        return x(parseDate(d.get('timestamp')));
-      }).y(function(d) {
-        return y(parseFloat(d.get('data')[_this.yaxis]));
-      });
+      this.x = d3.time.scale().domain([start, end]).range([0, 800]);
+      this.y = d3.scale.linear().domain([min, max]).range([200, 0]);
+      xAxis = d3.svg.axis().scale(this.x).orient('bottom');
+      yAxis = d3.svg.axis().scale(this.y).orient('left');
+      line = d3.svg.line().x(this._x_datum).y(this._y_datum);
       this.svg = d3.select('#line').append('svg').attr('width', this.width).attr('height', this.height).append('g').attr('transform', 'translate( 32, 16 )');
       this.svg.append('g').attr('class', 'x axis').attr('transform', 'translate( 0, 200 )').call(xAxis);
       this.svg.append("g").attr("class", "y axis").call(yAxis);
-      return this.svg.append('path').datum(this.data.models).attr('class', 'line').attr('d', line);
+      this.svg.append('path').datum(this.data.models).attr('class', 'line').attr('d', line);
+      return this;
     };
-
-    ChartView;
 
     return ChartView;
 

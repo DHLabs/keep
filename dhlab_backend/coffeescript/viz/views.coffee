@@ -39,7 +39,6 @@ define( [ 'jquery',
         el: $( '#viz' )
 
         events:
-            "click #yaxis_options input":   "change_y_axis"
             "click #viz_options a":         "switch_viz"
             "change #sharing_toggle":       "toggle_public"
 
@@ -107,10 +106,8 @@ define( [ 'jquery',
             # Check that the viz is enabled
             if viz_type == 'map' and not @map_enabled
                 return
-            else if viz_type == 'line' and @chart_fields.length == 0
-                return
 
-            $( '.active' ).removeClass( 'active' )
+            $( 'li.active' ).removeClass( 'active' )
             $( event.currentTarget.parentNode ).addClass( 'active' )
 
             $( '.viz-active' ).fadeOut( 'fast', ()->
@@ -123,31 +120,10 @@ define( [ 'jquery',
                 ).addClass( 'viz-active' )
             )
 
-
-        change_y_axis: (event) ->
-            # Ensure everything else is unchecked
-            $( '#yaxis_options input' ).attr( 'checked', false )
-            $( event.target ).attr( 'checked', true )
-
-            # Assign the yaxis
-            @yaxis = event.target.value
-
-            # Re-render chart
-            @renderCharts()
-
         _detect_types: ( root ) ->
             for field in root
                 if field.type in [ 'group' ]
                     @_detect_types( field.children )
-
-                # Only chart fields that are some sort of number
-                if field.type in [ 'decimal', 'int', 'integer' ]
-
-                    @chart_fields.push( field.name )
-
-                    # If we haven't set a default Y-axis yet, set it!
-                    if not @yaxis
-                        @yaxis = field.name
 
                 # Detect geopoints
                 if field.type in [ 'geopoint' ]
@@ -170,11 +146,7 @@ define( [ 'jquery',
                 @raw_view = @add_subview( RawView )
 
             if @chart_view is undefined
-                @chart_view = new ChartView(
-                                    parent: @
-                                    chart_fields: @chart_fields
-                                    data: @data )
-                @subviews.push( @chart_view )
+                @chart_view = @add_subview( ChartView )
 
             if @map_view is undefined
                 @map_view = new MapView(
@@ -190,15 +162,8 @@ define( [ 'jquery',
                     @map_view.render()
                 else
                     $( '#map' ).hide()
-
-                # Can we render any charts?
-                if @chart_fields.length
-                    @chart_view.render()
-                else
-                    $( '#line_btn' ).addClass( 'disabled' )
             else
                 # Disable all the data viz buttons if we have no data
-                $( '#line_btn' ).addClass( 'disabled' )
                 $( '#map_btn' ).addClass( 'disabled' )
             @
 

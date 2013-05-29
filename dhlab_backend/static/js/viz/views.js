@@ -69,7 +69,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     DataView.prototype.el = $('#viz');
 
     DataView.prototype.events = {
-      "click #yaxis_options input": "change_y_axis",
       "click #viz_options a": "switch_viz",
       "change #sharing_toggle": "toggle_public"
     };
@@ -135,10 +134,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       viz_type = $(event.currentTarget).data('type');
       if (viz_type === 'map' && !this.map_enabled) {
         return;
-      } else if (viz_type === 'line' && this.chart_fields.length === 0) {
-        return;
       }
-      $('.active').removeClass('active');
+      $('li.active').removeClass('active');
       $(event.currentTarget.parentNode).addClass('active');
       return $('.viz-active').fadeOut('fast', function() {
         var _this = this;
@@ -151,28 +148,15 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       });
     };
 
-    DataView.prototype.change_y_axis = function(event) {
-      $('#yaxis_options input').attr('checked', false);
-      $(event.target).attr('checked', true);
-      this.yaxis = event.target.value;
-      return this.renderCharts();
-    };
-
     DataView.prototype._detect_types = function(root) {
-      var field, _i, _len, _ref, _ref1, _ref2, _results;
+      var field, _i, _len, _ref, _ref1, _results;
       _results = [];
       for (_i = 0, _len = root.length; _i < _len; _i++) {
         field = root[_i];
         if ((_ref = field.type) === 'group') {
           this._detect_types(field.children);
         }
-        if ((_ref1 = field.type) === 'decimal' || _ref1 === 'int' || _ref1 === 'integer') {
-          this.chart_fields.push(field.name);
-          if (!this.yaxis) {
-            this.yaxis = field.name;
-          }
-        }
-        if ((_ref2 = field.type) === 'geopoint') {
+        if ((_ref1 = field.type) === 'geopoint') {
           $('#map_btn').removeClass('disabled');
           this.map_enabled = true;
           _results.push(this.map_headers = field.name);
@@ -192,12 +176,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         this.raw_view = this.add_subview(RawView);
       }
       if (this.chart_view === void 0) {
-        this.chart_view = new ChartView({
-          parent: this,
-          chart_fields: this.chart_fields,
-          data: this.data
-        });
-        this.subviews.push(this.chart_view);
+        this.chart_view = this.add_subview(ChartView);
       }
       if (this.map_view === void 0) {
         this.map_view = new MapView({
@@ -213,13 +192,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         } else {
           $('#map').hide();
         }
-        if (this.chart_fields.length) {
-          this.chart_view.render();
-        } else {
-          $('#line_btn').addClass('disabled');
-        }
       } else {
-        $('#line_btn').addClass('disabled');
         $('#map_btn').addClass('disabled');
       }
       return this;
