@@ -80,8 +80,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
     DataView.prototype.subviews = [];
 
-    DataView.prototype.raw_headers = ['uuid'];
-
     DataView.prototype.map_headers = null;
 
     DataView.prototype.map_enabled = false;
@@ -102,6 +100,18 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       this.data = new DataCollection();
       this.data.reset(document.initial_data);
       return this;
+    };
+
+    DataView.prototype.add_subview = function(View) {
+      var options, subview;
+      options = {
+        parent: this,
+        data: this.data,
+        form: this.form
+      };
+      subview = new View(options);
+      this.subviews.push(subview);
+      return subview;
     };
 
     DataView.prototype.toggle_public = function(event) {
@@ -149,23 +159,20 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     };
 
     DataView.prototype._detect_types = function(root) {
-      var field, _i, _len, _ref, _ref1, _ref2, _ref3, _results;
+      var field, _i, _len, _ref, _ref1, _ref2, _results;
       _results = [];
       for (_i = 0, _len = root.length; _i < _len; _i++) {
         field = root[_i];
         if ((_ref = field.type) === 'group') {
           this._detect_types(field.children);
         }
-        if ((_ref1 = field.type) !== 'note') {
-          this.raw_headers.push(field);
-        }
-        if ((_ref2 = field.type) === 'decimal' || _ref2 === 'int' || _ref2 === 'integer') {
+        if ((_ref1 = field.type) === 'decimal' || _ref1 === 'int' || _ref1 === 'integer') {
           this.chart_fields.push(field.name);
           if (!this.yaxis) {
             this.yaxis = field.name;
           }
         }
-        if ((_ref3 = field.type) === 'geopoint') {
+        if ((_ref2 = field.type) === 'geopoint') {
           $('#map_btn').removeClass('disabled');
           this.map_enabled = true;
           _results.push(this.map_headers = field.name);
@@ -182,12 +189,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       }
       this._detect_types(this.form.attributes.children);
       if (this.raw_view === void 0) {
-        this.raw_view = new RawView({
-          parent: this,
-          raw_headers: this.raw_headers,
-          data: this.data
-        });
-        this.subviews.push(this.raw_view);
+        this.raw_view = this.add_subview(RawView);
       }
       if (this.chart_view === void 0) {
         this.chart_view = new ChartView({

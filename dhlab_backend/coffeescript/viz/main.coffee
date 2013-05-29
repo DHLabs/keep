@@ -12,17 +12,24 @@ requirejs.config
 		leaflet_cluster: '/static/js/vendor/leaflet/leaflet.markercluster'
 
 	shim:
+		# Backbone
 		'vendor/underscore':
 			exports: '_'
 		'vendor/backbone-min':
 			deps: [ 'vendor/underscore', 'jquery' ]
 			exports: 'Backbone'
+
+		# jQuery DataTables & associated plugins
 		'dataTables':
 			deps: [ 'jquery' ]
 		'bootstrapTables':
 			deps: [ 'dataTables' ]
+
+		# Masonry
 		'masonry':
 			exports: 'Masonry'
+
+		# Leaflet & associated plugins
 		'leaflet':
 			deps: [ 'jquery' ]
 			exports: 'L'

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
-{% block title %}{{ repo.name }}{% endblock %}
+{% block title %}{{ user.username }} / {{ repo.name }}{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" type="text/css" href='{% static "css/viz.css" %}'>
@@ -80,46 +80,51 @@
 <div class='container' id='viz'>
 	<div class='row'>
 		<div class='span12'>
-			<div>
-				<ul id='viz_options' class='nav nav-tabs'>
-					<li id='raw_btn' class='active'>
-						<a href='#' data-type='raw'>
-							<div><i class='icon-list'></i></div>
-							<div>Raw</div>
-						</a>
-					</li>
-					<li id='map_btn' class='disabled'>
-						<a href='#' data-type='map'>
-							<div><i class='icon-map-marker'></i></div>
-							<div>Map</div>
-						</a>
-					</li>
-					<li id='line_btn'>
-						<a href='#' data-type='line'>
-							<div><i class='icon-signal'></i></div>
-							<div>Analytics</div>
-						</a>
-					</li>
-					{% if 'delete' in permissions %}
-					<li>
-						<a href='#' data-type='settings'>
-							<div><i class='icon-cog'></i></div>
-							<div>Settings</div>
-						</a>
-					</li>
-					<li>
-						<a href='#' data-type='share'>
-							<div><i class='icon-group'></i></div>
-							<div>Share Data</div>
-						</a>
-					</li>
-					{% endif %}
-				</ul>
-			</div>
+			<ul id='viz_options' class='nav nav-tabs'>
+				<li id='raw_btn' class='active'>
+					<a href='#' data-type='raw'>
+						<div><i class='icon-list'></i></div>
+						<div>Raw</div>
+					</a>
+				</li>
+				<li id='map_btn' class='disabled'>
+					<a href='#' data-type='map'>
+						<div><i class='icon-map-marker'></i></div>
+						<div>Map</div>
+					</a>
+				</li>
+				<li id='line_btn'>
+					<a href='#' data-type='line'>
+						<div><i class='icon-signal'></i></div>
+						<div>Analytics</div>
+					</a>
+				</li>
+				{% if 'delete' in permissions %}
+				<li>
+					<a href='#' data-type='settings'>
+						<div><i class='icon-cog'></i></div>
+						<div>Settings</div>
+					</a>
+				</li>
+				<li>
+					<a href='#' data-type='share'>
+						<div><i class='icon-group'></i></div>
+						<div>Share Data</div>
+					</a>
+				</li>
+				{% endif %}
+			</ul>
 		</div>
 	</div>
 	<div class='row viz viz-active' id='raw_viz'>
-		<div class='span12' id='raw' style='overflow-y:scroll;'></div>
+		<div class='span12'>
+			View as:&nbsp;
+			<div class='btn-group'>
+	            <button class='btn active'><i class='icon-align-justify'></i>&nbsp;List View</button>
+	            <button class='btn'><i class='icon-th-large'></i>&nbsp;Grid View</button>
+	        </div>
+		</div>
+		<div class='span12' id='raw'></div>
 	</div>
 	<div class='row viz' id='map_viz'>
 		<div id='hidden_map'></div>

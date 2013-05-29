@@ -16,21 +16,46 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
 
     RawView.prototype.el = $('#raw');
 
+    RawView.prototype.column_headers = [
+      {
+        'name': 'uuid',
+        'type': 'text'
+      }
+    ];
+
+    RawView.prototype._detect_headers = function(root) {
+      var field, _i, _len, _ref, _ref1, _results;
+      _results = [];
+      for (_i = 0, _len = root.length; _i < _len; _i++) {
+        field = root[_i];
+        if ((_ref = field.type) === 'group') {
+          this._detect_types(field.children);
+        }
+        if ((_ref1 = field.type) !== 'note') {
+          _results.push(this.column_headers.push(field));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
     RawView.prototype.initialize = function(options) {
       this.parent = options.parent;
-      this.raw_headers = options.raw_headers;
+      this.form = options.form;
       this.data = options.data;
+      this._detect_headers(this.form.attributes.children);
       return this.render();
     };
 
     RawView.prototype.render = function() {
-      var datum, field, headers, html, media_html, url, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
+      var datum, field, headers, html, media_html, oTable, url, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
       $('#raw').html('');
       media_html = "<div id='media-container'>";
-      html = '<div style=\'margin-bottom:16px;\'>\n    <a><i class=\'icon-align-justify\'></i>&nbsp;List View</a>\n    <a><i class=\'icon-th-large\'></i>&nbsp;Grid View</a>\n</div>\n<table id="raw_table" class="table table-striped table-bordered">';
+      html = '<table id="raw_table" class="table table-striped table-bordered">';
       html += '<thead><tr>';
       headers = '';
-      _ref = this.raw_headers;
+      _ref = this.column_headers;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         field = _ref[_i];
         html += "<th>" + field.name + "</th>";
@@ -41,7 +66,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         datum = _ref1[_j];
         html += '<tr>';
-        _ref2 = this.raw_headers;
+        _ref2 = this.column_headers;
         for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
           field = _ref2[_k];
           value = datum.get('data')[field.name];
@@ -61,13 +86,14 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
       html += '</tbody></table>';
       html += media_html + "</div>";
       $('#raw').html(html);
-      $('#raw_table').dataTable({
+      oTable = $('#raw_table').dataTable({
         'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         'sPaginationType': 'bootstrap'
       });
       $.extend($.fn.dataTableExt.oStdClasses, {
         "sWrapper": "dataTables_wrapper form-inline"
       });
+      new FixedColumns(oTable);
       return this;
     };
 

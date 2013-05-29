@@ -10,10 +10,23 @@ define( [ 'jquery',
         name: 'RawView'
         el: $( '#raw' )
 
+        column_headers: [ {'name': 'uuid', 'type': 'text'} ]
+
+        _detect_headers: ( root ) ->
+            for field in root
+                if field.type in [ 'group' ]
+                    @_detect_types( field.children )
+
+                # Don't show notes in the raw data table
+                if field.type not in [ 'note' ]
+                    @column_headers.push( field )
+
         initialize: ( options ) ->
             @parent = options.parent
-            @raw_headers = options.raw_headers
-            @data = options.data
+            @form   = options.form
+            @data   = options.data
+
+            @_detect_headers( @form.attributes.children )
 
             @render()
 
@@ -23,16 +36,12 @@ define( [ 'jquery',
 
             media_html = "<div id='media-container'>"
 
-            html = '''
-                    <div style='margin-bottom:16px;'>
-                        <a><i class='icon-align-justify'></i>&nbsp;List View</a>
-                        <a><i class='icon-th-large'></i>&nbsp;Grid View</a>
-                    </div>
-                    <table id="raw_table" class="table table-striped table-bordered">'''
+            html = '<table id="raw_table" class="table table-striped table-bordered">'
 
             html += '<thead><tr>'
             headers = ''
-            for field in @raw_headers
+
+            for field in @column_headers
                 html += "<th>#{field.name}</th>"
             html += '</tr></thead>'
 
@@ -40,7 +49,7 @@ define( [ 'jquery',
             html += '<tbody>'
             for datum in @data.models
                 html += '<tr>'
-                for field in @raw_headers
+                for field in @column_headers
 
                     value = datum.get( 'data' )[ field.name ]
 
@@ -68,7 +77,7 @@ define( [ 'jquery',
             # NOTE: Elements taken from DataTables blog post about using DT with
             # Bootstrap, http://www.datatables.net/blog/Twitter_Bootstrap_2
             #
-            $( '#raw_table' ).dataTable(
+            oTable = $( '#raw_table' ).dataTable(
                 'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>"
                 'sPaginationType': 'bootstrap'
             )
@@ -76,6 +85,8 @@ define( [ 'jquery',
             $.extend( $.fn.dataTableExt.oStdClasses, {
                 "sWrapper": "dataTables_wrapper form-inline"
             } )
+
+            new FixedColumns( oTable )
 
             @
 

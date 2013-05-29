@@ -51,9 +51,6 @@ define( [ 'jquery',
 
         subviews: []
 
-        # Raw data stuff
-        raw_headers: [ 'uuid' ] # Headers used for the raw data table header
-
         # Map related stuff
         map_headers: null       # Map related headers (geopoint datatype)
         map_enabled: false      # Did we detect any geopoints in the data?
@@ -76,6 +73,17 @@ define( [ 'jquery',
             @data.reset( document.initial_data )
 
             @
+
+        add_subview: (View) ->
+            options =
+                parent: @
+                data: @data
+                form: @form
+
+            subview = new View( options )
+            @subviews.push( subview )
+
+            return subview
 
         toggle_public: (event) ->
             console.log( 'called' )
@@ -132,10 +140,6 @@ define( [ 'jquery',
                 if field.type in [ 'group' ]
                     @_detect_types( field.children )
 
-                # Don't show notes in the raw data table
-                if field.type not in [ 'note' ]
-                    @raw_headers.push( field )
-
                 # Only chart fields that are some sort of number
                 if field.type in [ 'decimal', 'int', 'integer' ]
 
@@ -163,11 +167,7 @@ define( [ 'jquery',
             @_detect_types( @form.attributes.children )
 
             if @raw_view is undefined
-                @raw_view = new RawView(
-                                    parent: @
-                                    raw_headers: @raw_headers
-                                    data: @data )
-                @subviews.push( @raw_view )
+                @raw_view = @add_subview( RawView )
 
             if @chart_view is undefined
                 @chart_view = new ChartView(
