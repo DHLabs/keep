@@ -76,7 +76,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
     };
 
     ChartView.prototype._y_datum = function(d) {
-      return this.y(parseFloat(d.get('data')[this.yaxis.name]));
+      var yval;
+      yval = parseFloat(d.get('data')[this.yaxis.name]);
+      if (yval === !NaN) {
+        return this.y(parseFloat(d.get('data')[this.yaxis.name]));
+      } else {
+        return this.y(0.0);
+      }
     };
 
     ChartView.prototype.change_y_axis = function(event) {

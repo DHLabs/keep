@@ -53,7 +53,13 @@ define( [ 'jquery',
             return @x( @_parse_date( d.get( 'timestamp' ) ) )
 
         _y_datum: ( d ) =>
-            return @y( parseFloat( d.get( 'data' )[ @yaxis.name ] ) )
+
+            yval = parseFloat( d.get( 'data' )[ @yaxis.name ] )
+
+            if yval is not NaN
+                return @y( parseFloat( d.get( 'data' )[ @yaxis.name ] ) )
+            else
+                return @y( 0.0 )
 
         change_y_axis: (event) ->
             # Ensure everything else is unchecked
