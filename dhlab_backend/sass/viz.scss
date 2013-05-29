@@ -88,6 +88,14 @@
 }
 
 // Needed for DataTables
+.dataTables_info {
+	padding-top:4px;
+}
+.pagination {
+	text-align:right;
+	margin:0 !important;
+}
+
 table.table thead .sorting,
 table.table thead .sorting_asc,
 table.table thead .sorting_desc,
