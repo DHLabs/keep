@@ -2,14 +2,14 @@
 
 requirejs.config({
   paths: {
-    vendor: '/static/js/vendor',
-    dataTables: '/static/js/vendor/datatables/jquery.dataTables.min',
-    bootstrapTables: '/static/js/vendor/datatables/bootstrap.dataTables',
-    masonry: '/static/js/vendor/masonry/jquery.masonry',
-    leaflet: '/static/js/vendor/leaflet/leaflet',
-    heatmap: '/static/js/vendor/leaflet/heatmap',
-    leaflet_heatmap: '/static/js/vendor/leaflet/heatmap-leaflet',
-    leaflet_cluster: '/static/js/vendor/leaflet/leaflet.markercluster'
+    vendor: '/js/vendor',
+    dataTables: '/js/vendor/datatables/jquery.dataTables.min',
+    bootstrapTables: '/js/vendor/datatables/bootstrap.dataTables',
+    masonry: '/js/vendor/masonry/jquery.masonry',
+    leaflet: '/js/vendor/leaflet/leaflet',
+    heatmap: '/js/vendor/leaflet/heatmap',
+    leaflet_heatmap: '/js/vendor/leaflet/heatmap-leaflet',
+    leaflet_cluster: '/js/vendor/leaflet/leaflet.markercluster'
   },
   shim: {
     'vendor/underscore': {

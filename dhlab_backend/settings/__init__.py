@@ -126,7 +126,7 @@ INSTALLED_APPS = (
     'tastypie',                 # Needed for our RESTful API
     'storages',                 # Needed for S3 file storage
     'django_mailgun',           # Easy email API
-    'south'                     # Database migrations
+    'south',                    # Database migrations
 )
 
 # Set up 2Factor authentication settings
