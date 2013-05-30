@@ -17,6 +17,7 @@ define( [ 'jquery',
         media_base: '//d2oeqvnrcsteq9.cloudfront.net/'
 
         column_headers: []
+        groups: []
 
         card_tmpl: _.template( '''
             <div class='card card-active'>
@@ -155,11 +156,54 @@ define( [ 'jquery',
 
             @
 
+        _render_group: ->
+            group_by = @column_headers[0]
+
+            # Setup the group table
+            $( '#raw_group_table > thead > tr' ).append( "<th>#{group_by.name}</th>" )
+            $( '#raw_group_table > thead > tr' ).append( "<th>Data</th>" )
+
+            # Group data
+            for datum in @data.models
+                val = datum.get( 'data' )[ group_by.name ]
+                if @groups[ val ]?
+                    @groups[ val ].push( datum )
+                else
+                    @groups[ val ] = [ datum ]
+
+            # Just render data out..?
+            for group, data of @groups
+                html = "<tr><td>#{group}</td><td>"
+                for datum in data
+                    html += "<div>"
+                    for field in @column_headers
+
+                        if field.name == group_by.name
+                            continue
+
+                        if datum.get( 'data' )[ field.name ]?
+                            html += datum.get( 'data' )[ field.name ] + "&nbsp;,&nbsp;"
+                    html += "</div>"
+
+                html += "</td></tr>"
+                $( '#raw_group_table > tbody' ).append( html )
+
+            $( '#raw_group_table' ).dataTable(
+                'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>"
+                'sPaginationType': 'bootstrap'
+                'bLengthChange': false
+                'bFilter': false
+                'iDisplayLength': 25
+            )
+
+            @
+
         render: ->
             @_render_list()
 
             if @data.models.length > 0
                 @_render_grid()
+                @_render_group()
 
             @
 
