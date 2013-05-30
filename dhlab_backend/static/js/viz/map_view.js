@@ -106,7 +106,11 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         datum = _ref1[_j];
-        geopoint = datum.get('data')[this.map_headers.name].split(' ');
+        geopoint = datum.get('data')[this.map_headers.name];
+        if (geopoint == null) {
+          continue;
+        }
+        geopoint = geopoint.split(' ');
         if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
           continue;
         }
