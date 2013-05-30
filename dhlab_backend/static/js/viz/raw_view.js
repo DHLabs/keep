@@ -119,33 +119,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
         'sPaginationType': 'bootstrap',
         'bLengthChange': false,
         'bFilter': false,
-        'iDisplayLength': 25,
-        "fnDrawCallback": function(oSettings) {
-          var i, iColspan, iDisplayIndex, nCell, nGroup, nTrs, sGroup, sLastGroup, _l, _ref4;
-          if (oSettings.aiDisplay.length === 0) {
-            return;
-          }
-          nTrs = $('#raw_table tbody tr');
-          iColspan = nTrs[0].getElementsByTagName('td').length;
-          sLastGroup = "";
-          for (i = _l = 0, _ref4 = nTrs.length; 0 <= _ref4 ? _l <= _ref4 : _l >= _ref4; i = 0 <= _ref4 ? ++_l : --_l) {
-            iDisplayIndex = oSettings._iDisplayStart + i;
-            if (oSettings.aoData[oSettings.aiDisplay[iDisplayIndex]] != null) {
-              sGroup = oSettings.aoData[oSettings.aiDisplay[iDisplayIndex]]._aData[0];
-              if (sGroup !== sLastGroup) {
-                nGroup = document.createElement('tr');
-                nCell = document.createElement('td');
-                nCell.colSpan = iColspan;
-                nCell.className = "group";
-                nCell.innerHTML = sGroup;
-                nGroup.appendChild(nCell);
-                nTrs[i].parentNode.insertBefore(nGroup, nTrs[i]);
-                sLastGroup = sGroup;
-              }
-            }
-          }
-          return this;
-        }
+        'iDisplayLength': 25
       });
       return $.extend($.fn.dataTableExt.oStdClasses, {
         "sWrapper": "dataTables_wrapper form-inline"

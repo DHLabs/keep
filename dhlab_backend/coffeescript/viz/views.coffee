@@ -50,19 +50,6 @@ define( [ 'jquery',
 
         subviews: []
 
-        # Map related stuff
-        map_headers: null       # Map related headers (geopoint datatype)
-        map_enabled: false      # Did we detect any geopoints in the data?
-        map: null               # Map object
-
-        # Yaxis chosen by the user
-        yaxis: null
-        chart_fields: []
-
-        # In pixels
-        width:  750
-        height: 250
-
         initialize: ->
             # Begin render when the list is finished syncing with the server
             @listenTo( @form, 'sync', @render )
@@ -100,6 +87,11 @@ define( [ 'jquery',
 
             viz_type = $( event.currentTarget ).data( 'type' )
 
+            # Make sure that this tab isn't disabled before trying to switch
+            # to the view.
+            if $( event.currentTarget.parentNode ).hasClass( 'disabled' )
+                return false
+
             $( 'li.active' ).removeClass( 'active' )
             $( event.currentTarget.parentNode ).addClass( 'active' )
 
@@ -112,6 +104,9 @@ define( [ 'jquery',
                         document.vizApp.map_view.map.invalidateSize( false )
                 ).addClass( 'viz-active' )
             )
+
+            # Prevent propagation of the event down the event chain.
+            return false
 
         render: ->
             # Don't render until we get both the form & survey data

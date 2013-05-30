@@ -79,20 +79,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
     DataView.prototype.subviews = [];
 
-    DataView.prototype.map_headers = null;
-
-    DataView.prototype.map_enabled = false;
-
-    DataView.prototype.map = null;
-
-    DataView.prototype.yaxis = null;
-
-    DataView.prototype.chart_fields = [];
-
-    DataView.prototype.width = 750;
-
-    DataView.prototype.height = 250;
-
     DataView.prototype.initialize = function() {
       this.listenTo(this.form, 'sync', this.render);
       this.form.fetch();
@@ -131,9 +117,12 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     DataView.prototype.switch_viz = function(event) {
       var viz_type;
       viz_type = $(event.currentTarget).data('type');
+      if ($(event.currentTarget.parentNode).hasClass('disabled')) {
+        return false;
+      }
       $('li.active').removeClass('active');
       $(event.currentTarget.parentNode).addClass('active');
-      return $('.viz-active').fadeOut('fast', function() {
+      $('.viz-active').fadeOut('fast', function() {
         var _this = this;
         $(this).removeClass('viz-active');
         return $('#' + viz_type + '_viz').fadeIn('fast', function() {
@@ -142,6 +131,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }).addClass('viz-active');
       });
+      return false;
     };
 
     DataView.prototype.render = function() {
