@@ -55,13 +55,13 @@ define( [ 'jquery',
             return @x( @_parse_date( d.get( 'timestamp' ) ) )
 
         _y_datum: ( d ) =>
-
             yval = parseFloat( d.get( 'data' )[ @yaxis.name ] )
 
-            if yval is not NaN
-                return @y( parseFloat( d.get( 'data' )[ @yaxis.name ] ) )
-            else
+            # TODO: Smarter data error handling.
+            if isNaN( yval )
                 return @y( 0.0 )
+
+            return @y( parseFloat( d.get( 'data' )[ @yaxis.name ] ) )
 
         change_y_axis: (event) ->
             # Ensure everything else is unchecked
@@ -100,10 +100,13 @@ define( [ 'jquery',
             for model in @data.models
                 value = parseFloat( model.get( 'data' )[ @yaxis.name ] )
 
-                if !min || value < min
+                if isNaN( value )
+                    continue
+
+                if not min? or value < min
                     min = value
 
-                if !max || value > max
+                if not max? or value > max
                     max = value
 
             @x = d3.time.scale().domain( [ start, end ] ).range( [ 0, 800 ] )

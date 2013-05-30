@@ -80,11 +80,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
     ChartView.prototype._y_datum = function(d) {
       var yval;
       yval = parseFloat(d.get('data')[this.yaxis.name]);
-      if (yval === !NaN) {
-        return this.y(parseFloat(d.get('data')[this.yaxis.name]));
-      } else {
+      if (isNaN(yval)) {
         return this.y(0.0);
       }
+      return this.y(parseFloat(d.get('data')[this.yaxis.name]));
     };
 
     ChartView.prototype.change_y_axis = function(event) {
@@ -123,10 +122,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         model = _ref1[_j];
         value = parseFloat(model.get('data')[this.yaxis.name]);
-        if (!min || value < min) {
+        if (isNaN(value)) {
+          continue;
+        }
+        if ((min == null) || value < min) {
           min = value;
         }
-        if (!max || value > max) {
+        if ((max == null) || value > max) {
           max = value;
         }
       }
