@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
-from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from backend.api import RepoResource, DataResource, UserResource
 
@@ -44,6 +44,4 @@ urlpatterns += patterns( '', url( r'', include( 'openrosa.urls' ) ) )
 
 # Handle static files on local dev machine
 if settings.DEBUG:
-    urlpatterns += static('/css/', document_root='static/css/')
-    urlpatterns += static('/img/', document_root='static/img/')
-    urlpatterns += static('/js/', document_root='static/js/')
+    urlpatterns += staticfiles_urlpatterns()

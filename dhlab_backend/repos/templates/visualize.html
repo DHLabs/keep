@@ -13,6 +13,9 @@
 {% block js %}
 <script id='form_id' type='text/plain'>{{ sid }}</script>
 <script id='user' type='text/plain'>{{ user.username }}</script>
+<script>
+	document.cdn = '{% static "" %}'
+</script>
 <script data-main='{% static "js/viz/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
 
 <!-- Chart viz -->

@@ -1,6 +1,6 @@
 requirejs.config
 	paths:
-		vendor: '/js/vendor'
+		vendor: document.cdn + 'js/vendor'
 	shim:
 		'vendor/underscore':
 			exports: '_'
