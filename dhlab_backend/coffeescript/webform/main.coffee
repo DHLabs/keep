@@ -1,4 +1,5 @@
 requirejs.config
+	baseUrl: '//d1sht9pkbliybl.cloudfront.net'
 	paths:
 		vendor: '/static/js/vendor'
 	shim:
