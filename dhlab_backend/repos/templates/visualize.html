@@ -13,7 +13,7 @@
 {% block js %}
 <script id='form_id' type='text/plain'>{{ sid }}</script>
 <script id='user' type='text/plain'>{{ user.username }}</script>
-<script data-main='/static/js/viz/main' src='{% static 'js/vendor/require-jquery.js' %}'></script>
+<script data-main='{% static "js/viz/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
 
 <!-- Chart viz -->
 <script src='{% static "js/vendor/d3.v3.min.js" %}'></script>

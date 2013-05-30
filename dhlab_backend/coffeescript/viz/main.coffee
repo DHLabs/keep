@@ -1,5 +1,4 @@
 requirejs.config
-	baseUrl: '//d1sht9pkbliybl.cloudfront.net'
 	paths:
 		vendor: '/static/js/vendor'
 		dataTables: '/static/js/vendor/datatables/jquery.dataTables.min'
