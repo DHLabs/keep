@@ -46,6 +46,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
       if (this.yaxis_fields.length > 0) {
         $('#line_btn').removeClass('disabled');
         return this.render();
+      } else {
+        return $('#line_btn').addClass('disabled');
       }
     };
 

@@ -34,6 +34,8 @@ define( [ 'jquery',
             if @yaxis_fields.length > 0
                 $( '#line_btn' ).removeClass( 'disabled' )
                 @render()
+            else
+                $( '#line_btn' ).addClass( 'disabled' )
 
         _detect_axes: ( root ) ->
 
