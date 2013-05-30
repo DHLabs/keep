@@ -17,7 +17,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
     RawView.prototype.el = $('#raw_viz');
 
     RawView.prototype.events = {
-      "click .btn-group > button": "change_viz_type"
+      "click .btn-group > button": "change_viz_type",
+      "change #test": "toggle_media"
     };
 
     RawView.prototype.media_base = '//d2oeqvnrcsteq9.cloudfront.net/';
@@ -29,7 +30,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
       }
     ];
 
-    RawView.prototype.card_tmpl = _.template('<div class=\'card\'>\n    <%= card_image %>\n    <%= card_data %>\n</div>');
+    RawView.prototype.card_tmpl = _.template('<div class=\'card card-active\'>\n    <%= card_image %>\n    <%= card_data %>\n</div>');
 
     RawView.prototype.card_img_tmpl = _.template('<div class=\'card-image\'>\n    <a href=\'<%= url %>\' target=\'_blank\'>\n        <img src=\'<%= url %>\'>\n    </a>\n</div>');
 
@@ -70,11 +71,22 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
         $('div.active').removeClass('active');
         $("#raw_" + viz_type).fadeIn('fast').addClass('active');
         if (viz_type === 'grid') {
-          return $('#raw_grid').masonry({
-            itemSelector: '.card'
-          });
+          return _this.wall.masonry('reload');
         }
       });
+    };
+
+    RawView.prototype.toggle_media = function(event) {
+      var only_photos;
+      only_photos = $(event.currentTarget).is(':checked');
+      $('.card').each(function() {
+        if ($('.card-image', this).length === 0 && only_photos) {
+          return $(this).fadeOut('fast').removeClass('card-active');
+        } else {
+          return $(this).fadeIn('fast').addClass('card-active');
+        }
+      });
+      return this.wall.masonry('reload');
     };
 
     RawView.prototype._render_list = function() {
@@ -150,6 +162,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
           });
         }
         $('#raw_grid').append(this.card_tmpl(tmpl_options));
+        this.wall = $('#raw_grid').masonry({
+          itemSelector: '.card-active',
+          isAnimated: true
+        });
       }
       return this;
     };

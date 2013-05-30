@@ -11,14 +11,15 @@ define( [ 'jquery',
         el: $( '#raw_viz' )
         events:
             # Change raw viz type from list to grid view
-            "click .btn-group > button":     "change_viz_type"
+            "click .btn-group > button":    "change_viz_type"
+            "change #test":                 "toggle_media"
 
         media_base: '//d2oeqvnrcsteq9.cloudfront.net/'
 
         column_headers: [ {'name': 'uuid', 'type': 'text'} ]
 
         card_tmpl: _.template( '''
-            <div class='card'>
+            <div class='card card-active'>
                 <%= card_image %>
                 <%= card_data %>
             </div>''' )
@@ -64,9 +65,20 @@ define( [ 'jquery',
                 $( "#raw_#{viz_type}" ).fadeIn( 'fast' ).addClass( 'active' )
 
                 if viz_type == 'grid'
-                    $( '#raw_grid' ).masonry(
-                        itemSelector: '.card' )
+                    @wall.masonry( 'reload' )
             )
+
+        toggle_media: ( event ) ->
+            only_photos = $( event.currentTarget ).is( ':checked' )
+
+            $( '.card' ).each( ()->
+                if $( '.card-image', @ ).length == 0 and only_photos
+                   $( @ ).fadeOut( 'fast' ).removeClass( 'card-active' )
+                else
+                    $( @ ).fadeIn( 'fast' ).addClass( 'card-active' )
+            )
+
+            @wall.masonry( 'reload' )
 
         _render_list: ->
             # Add column headers
@@ -136,6 +148,10 @@ define( [ 'jquery',
                     tmpl_options.card_data = @card_data_tmpl( { data: tmpl_options.card_data } )
 
                 $( '#raw_grid' ).append( @card_tmpl( tmpl_options ) )
+
+                @wall = $( '#raw_grid' ).masonry(
+                        itemSelector: '.card-active'
+                        isAnimated: true )
 
             @
 
