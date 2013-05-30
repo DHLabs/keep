@@ -24,7 +24,7 @@ AWS_ACCESS_KEY_ID       = AWS[ 'ACCESS_KEY_ID' ]
 AWS_SECRET_ACCESS_KEY   = AWS[ 'SECRET_KEY' ]
 AWS_STORAGE_BUCKET_NAME = 'keep-static'
 # Use Amazon Cloudfront
-AWS_S3_CUSTOM_DOMAIN    = '//d1sht9pkbliybl.cloudfront.net'
+AWS_S3_CUSTOM_DOMAIN    = 'd1sht9pkbliybl.cloudfront.net'
 AWS_HEADERS = {
     'Expires': 'Thu, 15 Apr 2030 20:00:00 GMT',
     'Cache-Control': 'max-age=86400',
