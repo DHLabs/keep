@@ -43,7 +43,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
       this.data = options.data;
       this._parse_date = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
       this._detect_axes(this.form.attributes.children);
-      if (this.yaxis_fields.length > 0) {
+      if (this.yaxis_fields.length > 0 && this.data.models.length > 0) {
         $('#line_btn').removeClass('disabled');
         return this.render();
       } else {
@@ -57,7 +57,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
       for (_i = 0, _len = root.length; _i < _len; _i++) {
         field = root[_i];
         if ((_ref = field.type) === 'group') {
-          this._detect_types(field.children);
+          this._detect_axes(field.children);
         }
         if ((_ref1 = field.type) === 'decimal' || _ref1 === 'int' || _ref1 === 'integer') {
           this.yaxis_fields.push(field);
@@ -110,7 +110,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min'], function($, _, Ba
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         field = _ref[_i];
         $('#yaxis_options').append(yaxis_tmpl({
-          label: field.label,
+          label: field.name,
           value: field.name,
           checked: this.yaxis.name === field.name ? 'checked' : ''
         }));

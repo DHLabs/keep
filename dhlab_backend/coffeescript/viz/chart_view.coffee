@@ -31,7 +31,7 @@ define( [ 'jquery',
 
             @_detect_axes( @form.attributes.children )
 
-            if @yaxis_fields.length > 0
+            if @yaxis_fields.length > 0 and @data.models.length > 0
                 $( '#line_btn' ).removeClass( 'disabled' )
                 @render()
             else
@@ -41,7 +41,7 @@ define( [ 'jquery',
 
             for field in root
                 if field.type in [ 'group' ]
-                    @_detect_types( field.children )
+                    @_detect_axes( field.children )
 
                 # Only chart fields that are some sort of number
                 if field.type in [ 'decimal', 'int', 'integer' ]
@@ -83,8 +83,9 @@ define( [ 'jquery',
             # Render the yaxis options
             $( '#yaxis_options' ).html( '' )
             for field in @yaxis_fields
+
                 $( '#yaxis_options' ).append( yaxis_tmpl(
-                        label: field.label
+                        label: field.name
                         value: field.name
                         checked: if @yaxis.name == field.name then 'checked' else ''
                 ))

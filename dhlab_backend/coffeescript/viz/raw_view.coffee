@@ -40,7 +40,7 @@ define( [ 'jquery',
 
             for field in root
                 if field.type in [ 'group' ]
-                    @_detect_types( field.children )
+                    @_detect_headers( field.children )
 
                 # Don't show notes in the raw data table
                 if field.type not in [ 'note' ]
@@ -64,7 +64,7 @@ define( [ 'jquery',
                 $( 'div.active' ).removeClass( 'active' )
                 $( "#raw_#{viz_type}" ).fadeIn( 'fast' ).addClass( 'active' )
 
-                if viz_type == 'grid'
+                if viz_type == 'grid' and @wall?
                     @wall.masonry( 'reload' )
             )
 
@@ -157,7 +157,9 @@ define( [ 'jquery',
 
         render: ->
             @_render_list()
-            @_render_grid()
+
+            if @data.models.length > 0
+                @_render_grid()
 
             @
 

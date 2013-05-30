@@ -42,7 +42,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
       for (_i = 0, _len = root.length; _i < _len; _i++) {
         field = root[_i];
         if ((_ref = field.type) === 'group') {
-          this._detect_types(field.children);
+          this._detect_headers(field.children);
         }
         if ((_ref1 = field.type) !== 'note') {
           _results.push(this.column_headers.push(field));
@@ -70,7 +70,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
       return $('div.active').fadeOut('fast', function() {
         $('div.active').removeClass('active');
         $("#raw_" + viz_type).fadeIn('fast').addClass('active');
-        if (viz_type === 'grid') {
+        if (viz_type === 'grid' && (_this.wall != null)) {
           return _this.wall.masonry('reload');
         }
       });
@@ -172,7 +172,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
 
     RawView.prototype.render = function() {
       this._render_list();
-      this._render_grid();
+      if (this.data.models.length > 0) {
+        this._render_grid();
+      }
       return this;
     };
 
