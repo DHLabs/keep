@@ -16,7 +16,7 @@ define( [ 'jquery',
 
         media_base: '//d2oeqvnrcsteq9.cloudfront.net/'
 
-        column_headers: [ {'name': 'uuid', 'type': 'text'} ]
+        column_headers: []
 
         card_tmpl: _.template( '''
             <div class='card card-active'>
@@ -118,6 +118,29 @@ define( [ 'jquery',
                 'bLengthChange': false
                 'bFilter': false
                 'iDisplayLength': 25
+                "fnDrawCallback": ( oSettings ) ->
+                    if oSettings.aiDisplay.length == 0
+                       return
+
+                    nTrs = $('#raw_table tbody tr')
+                    iColspan = nTrs[0].getElementsByTagName('td').length
+                    sLastGroup = ""
+
+                    for i in [0..nTrs.length]
+                        iDisplayIndex = oSettings._iDisplayStart + i;
+
+                        if oSettings.aoData[ oSettings.aiDisplay[iDisplayIndex] ]?
+                            sGroup = oSettings.aoData[ oSettings.aiDisplay[iDisplayIndex] ]._aData[0]
+                            if sGroup != sLastGroup
+                                nGroup = document.createElement( 'tr' )
+                                nCell = document.createElement( 'td' )
+                                nCell.colSpan = iColspan
+                                nCell.className = "group"
+                                nCell.innerHTML = sGroup
+                                nGroup.appendChild( nCell )
+                                nTrs[i].parentNode.insertBefore( nGroup, nTrs[i] )
+                                sLastGroup = sGroup
+                    @
             )
 
             $.extend( $.fn.dataTableExt.oStdClasses, {
