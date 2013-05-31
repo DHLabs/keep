@@ -1,6 +1,7 @@
 from backend.db import Repository
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
+from backend.forms import ReportForm
 
 import json
 from bson import json_util
@@ -120,24 +121,41 @@ def user_dashboard( request, username ):
 def build_report( request ):
 
     if request.method == 'POST':
-        #build the form and redirect
-        print "nothing"
+        form = ReportForm( request.POST, request.FILES )
+        if( form.is_valid ):
+            #build form
+            data = request.POST[ 'report_json' ].strip()
+
+            if len( data ) == 0:
+                return None
+
+            # Attempt to load the into a dict
+            try:
+                data = json.loads( data )
+            except Exception:
+                    return None
+
+            #TODO:
+            return HttpResponseRedirect( '/' )
     else:
-        user_repos = Repository.list_repos( request.user )
-        shared_repos = Repository.shared_repos( request.user )
+        form = ReportForm()
 
-        # Find all the organization this user belongs to
-        organizations = OrganizationUser.objects.filter( user=request.user )
+    user_repos = Repository.list_repos( request.user )
+    shared_repos = Repository.shared_repos( request.user )
 
-        for user_repo in user_repos:
-            user_repo[ 'mongo_id' ] = str( user_repo[ 'mongo_id' ] )
+    # Find all the organization this user belongs to
+    organizations = OrganizationUser.objects.filter( user=request.user )
 
-        return render_to_response( 'report_builder.html',
-                                  { 'user_repos': json.dumps(user_repos, default=json_util.default),
-                                  'shared_repos': shared_repos,
-                                  'account': request.user,
-                                  'organizations': organizations },
-                                  context_instance=RequestContext(request) )
+    for user_repo in user_repos:
+        user_repo[ 'mongo_id' ] = str( user_repo[ 'mongo_id' ] )
+
+    return render_to_response( 'report_builder.html',
+                                { 'user_repos': json.dumps(user_repos, default=json_util.default),
+                                'shared_repos': shared_repos,
+                                'account': request.user,
+                                'organizations': organizations,
+                                'form': form },
+                                context_instance=RequestContext(request) )
     
 
 @login_required
