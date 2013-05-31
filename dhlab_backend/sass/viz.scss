@@ -6,8 +6,34 @@
 	display: block !important;
 }
 
+.nav-tabs {
+	> li {
+		width: 100px;
+
+		a {
+			 text-align:center;
+			 padding-top:16px;
+
+			 i {
+			 	font-size: 24px;
+			 }
+		}
+	}
+}
+
+#viz_options {
+	margin-top:16px;
+}
+
 #privacy {
+	float:left;
+	width:104px;
+	margin-left:-104px;
 	margin-top:10px;
+
+	> div {
+		padding:12px;
+	}
 }
 
 #line {
@@ -22,6 +48,34 @@
 	    fill: none;
 	    stroke: orange;
 	    stroke-width: 2px;
+	}
+}
+
+// Styles for visualization panels
+#raw {
+	margin-top:16px;
+}
+
+.card {
+	background:white;
+	width:220px;
+	margin-top:8px;
+	margin-left:8px;
+	border:1px solid #AAA;
+	box-shadow: 0 0 2px #888;
+
+	> .card-image {
+		border-bottom:1px solid #AAA;
+
+		> img {
+			width: 220px;
+		}
+	}
+
+	> .card-data {
+		> div {
+			padding: 8px;
+		}
 	}
 }
 
@@ -57,6 +111,19 @@
 }
 
 // Needed for DataTables
+.dataTables_info {
+	padding-top:4px;
+}
+.pagination {
+	text-align:right;
+	margin:0 !important;
+}
+
+td.group {
+	background-color:#999 !important;
+	color:white;
+}
+
 table.table thead .sorting,
 table.table thead .sorting_asc,
 table.table thead .sorting_desc,

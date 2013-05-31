@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
-{% block title %}{{ repo.name }}{% endblock %}
+{% block title %}{{ user.username }} / {{ repo.name }}{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" type="text/css" href='{% static "css/viz.css" %}'>
@@ -13,47 +13,18 @@
 {% block js %}
 <script id='form_id' type='text/plain'>{{ sid }}</script>
 <script id='user' type='text/plain'>{{ user.username }}</script>
-<script id='yaxis_tmpl' type='text/html'>
-	<label class="radio">
-  		<input type="radio" value="<%= value %>" <%= checked %>>
-  		<%= label %>
-	</label>
+<script>
+	document.cdn = '{% static "" %}'
 </script>
-
-<script src='{% static "js/vendor/json2.js" %}'></script>
-<script src='{% static "js/vendor/underscore-1.4.4.js" %}'></script>
-<script src='{% static "js/vendor/backbone-min.js" %}'></script>
-
-<!-- DataTables -->
-<script src='{% static "js/vendor/jquery.dataTables.min.js" %}'></script>
-<script src='{% static "js/vendor/bootstrap.dataTables.js" %}'></script>
-
-<!-- Geo viz -->
-<script src='{% static "js/vendor/leaflet.js" %}'></script>
-<script src='{% static "js/vendor/heatmap.js" %}'></script>
-<script src='{% static "js/vendor/heatmap-leaflet.js" %}'></script>
+<script data-main='{% static "js/viz/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
 
 <!-- Chart viz -->
 <script src='{% static "js/vendor/d3.v3.min.js" %}'></script>
-<script src='{% static "js/viz/viz.js" %}'></script>
-
-<!-- Marker Cluster -->
-<script src='{% static "js/vendor/leaflet.markercluster-src.js" %}'></script>
-<script src='{% static "js/vendor/leaflet.markercluster.js" %}'></script>
 
 <script type='text/javascript'>
-
-
-
-
 	$( function() {
 		// Initialize data
-		document.initial_data = new DataCollection();
-		document.initial_data.reset( {{data|safe }} );
-
-		// Start up visualization
-		document.vizApp = new DataView();
-
+		document.initial_data = {{data|safe }};
 	});
 </script>
 {% endblock %}
@@ -62,14 +33,21 @@
 <div class='container'>
 	<div class='row'>
 		<div class='span12'>
-			<div class='pull-right alert' id='privacy'>
-				{% if repo.public %}
-					<i class='icon-unlock'></i>&nbsp;PUBLIC
-				{% else %}
-					<i class='icon-lock'></i>&nbsp;PRIVATE
-				{% endif %}
+			<div id='privacy'>
+				<div>
+					{% if repo.public %}
+						<i class='icon-unlock'></i>&nbsp;PUBLIC
+					{% else %}
+						<i class='icon-lock'></i>&nbsp;PRIVATE
+					{% endif %}
+				</div>
 			</div>
 			<h3>
+				<div class='pull-right'>
+					<a class='btn' href='/api/v1/data/{{ sid }}?format=csv&amp;user={{account.username}}'>
+						<i class='icon-download'></i> Download All Data
+					</a>
+				</div>
 				{% if account.username %}
 					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
 				{% else %}
@@ -105,31 +83,76 @@
 <div class='container' id='viz'>
 	<div class='row'>
 		<div class='span12'>
-			<div class='pull-right'>
-				<a class='btn' href='/api/v1/data/{{ sid }}?format=csv&amp;user={{account.username}}'>
-					<i class='icon-download'></i> Download Data
-				</a>
-			</div>
-			<div class='btn-toolbar'>
-				<div class='btn-group' id='chart_options'>
-					<a href='#' id='raw_btn' data-type='raw' class='btn active'><i class='icon-list'></i> Raw</a>
-					<a href='#' id='map_btn' data-type='map' class='btn disabled'><i class='icon-map-marker'></i> Map</a>
-					<a href='#' id='line_btn' data-type='line' class='btn'><i class='icon-signal'></i> Line</a>
-					<a href='#' data-type='generate_report' class='btn btn-primary'><i class='icon-file'></i> Generate Report</a>
-					{% if 'delete' in permissions %}
-					<a data-type='settings' class='btn'>
-						<i class='icon-cog'></i>
-						Settings
+			<ul id='viz_options' class='nav nav-tabs'>
+				<li id='raw_btn' class='active'>
+					<a href='#' data-type='raw'>
+						<div><i class='icon-list'></i></div>
+						<div>Raw</div>
 					</a>
-					<a data-type='share' class='btn btn-primary'>Share Data</a>
-					{% endif %}
-				</div>
-			</div>
+				</li>
+				<li id='map_btn' class='disabled'>
+					<a href='#' data-type='map'>
+						<div><i class='icon-map-marker'></i></div>
+						<div>Map</div>
+					</a>
+				</li>
+				<li id='line_btn'>
+					<a href='#' data-type='line'>
+						<div><i class='icon-signal'></i></div>
+						<div>Analytics</div>
+					</a>
+				</li>
+				{% if 'delete' in permissions %}
+				<li>
+					<a href='#' data-type='settings'>
+						<div><i class='icon-cog'></i></div>
+						<div>Settings</div>
+					</a>
+				</li>
+				<li>
+					<a href='#' data-type='share'>
+						<div><i class='icon-group'></i></div>
+						<div>Share Data</div>
+					</a>
+				</li>
+				{% endif %}
+			</ul>
 		</div>
 	</div>
-	<hr/>
 	<div class='row viz viz-active' id='raw_viz'>
-		<div class='span12' id='raw' style='overflow-y:scroll;'></div>
+		<div class='span12' style='margin-bottom:16px;'>
+	        <div class='pull-right'>
+	        	<label>
+	        		<input id='test' type='checkbox'>
+	        		Has Photos
+	        	</label>
+	        </div>
+			View as:&nbsp;
+			<div class='btn-group'>
+	            <button data-type='list' class='btn active'>
+	            	<i class='icon-align-justify'></i>&nbsp;List
+	            </button>
+	            <button data-type='grid' class='btn'>
+	            	<i class='icon-th-large'></i>&nbsp;Grid
+	            </button>
+	            <button data-type='group' class='btn'>
+	            	<i class='icon-group'></i>&nbsp;Group
+	            </button>
+	        </div>
+		</div>
+		<div class='span12 active' id='raw_list'>
+			<table id="raw_table" class="table table-striped table-bordered">
+				<thead><tr></tr></thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		<div class='span12' id='raw_grid' style='display:none;position:relative;'></div>
+		<div class='span12' id='raw_group' style='display:none;'>
+			<table id="raw_group_table" class="table table-striped table-bordered">
+				<thead><tr></tr></thead>
+				<tbody></tbody>
+			</table>
+		</div>
 	</div>
 	<div class='row viz' id='map_viz'>
 		<div id='hidden_map'></div>
@@ -141,12 +164,6 @@
 			<div id='yaxis_options'></div>
 		</div>
 		<div class='span10' id='line'></div>
-	</div>
-	<div class='row viz' id='generate_report_viz'>
-		<div class='span12' style='text-align:center;'>
-			<h2>Coming Soon</h2>
-			<img src='{% static "img/reportbuilder.png" %}'>
-		</div>
 	</div>
 	{% if 'delete' in permissions %}
 	<div class='row viz' id='settings_viz'>
@@ -185,43 +202,43 @@
 			</div>
 		</div>
 		<div style='display:none;'>
-		<div class='span12'><hr></div>
-		<div class='span12'>
-			<div class='span3'>
-				<strong>How is my data shown?</strong>
+			<div class='span12'><hr></div>
+			<div class='span12'>
+				<div class='span3'>
+					<strong>How is my data shown?</strong>
+				</div>
+				<div class='span6'>
+					<div>
+						<label class='checkbox'>
+							<input type='checkbox'>
+							Preserve Data Privacy
+						</label>
+						<span class='help-block'>
+							If you allow data sharing, by default we will ensure that
+							the data shown will also preserve the privacy of any
+							individuals who entered data.
+						</span>
+					</div>
+					<div>
+						<label class='checkbox'>
+							<input type='checkbox'>
+							Show Raw Data
+						</label>
+					</div>
+					<div>
+						<label class='checkbox'>
+							<input type='checkbox'>
+							Show Map Data
+						</label>
+					</div>
+					<div>
+						<label class='checkbox'>
+							<input type='checkbox'>
+							Show Line Data
+						</label>
+					</div>
+				</div>
 			</div>
-			<div class='span6'>
-				<div>
-					<label class='checkbox'>
-						<input type='checkbox'>
-						Preserve Data Privacy
-					</label>
-					<span class='help-block'>
-						If you allow data sharing, by default we will ensure that
-						the data shown will also preserve the privacy of any
-						individuals who entered data.
-					</span>
-				</div>
-				<div>
-					<label class='checkbox'>
-						<input type='checkbox'>
-						Show Raw Data
-					</label>
-				</div>
-				<div>
-					<label class='checkbox'>
-						<input type='checkbox'>
-						Show Map Data
-					</label>
-				</div>
-				<div>
-					<label class='checkbox'>
-						<input type='checkbox'>
-						Show Line Data
-					</label>
-				</div>
-			</div>
-		</div>
 		</div>
 	</div>
 	{% endif %}

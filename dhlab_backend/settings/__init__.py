@@ -116,6 +116,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'backend',
     'openrosa',
     'repos',
@@ -124,7 +125,8 @@ INSTALLED_APPS = (
     'registration',             # Needed for user signup
     'tastypie',                 # Needed for our RESTful API
     'storages',                 # Needed for S3 file storage
-    'django_mailgun',
+    'django_mailgun',           # Easy email API
+    'south',                    # Database migrations
 )
 
 # Set up 2Factor authentication settings

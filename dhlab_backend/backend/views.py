@@ -117,6 +117,7 @@ def user_dashboard( request, username ):
                                  'organizations': organizations },
                                context_instance=RequestContext(request) )
 
+
 @login_required
 def build_report( request ):
 
