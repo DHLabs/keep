@@ -35,6 +35,7 @@ class DataView extends Backbone.View
         "click #auto_step a.btn":       "auto_step"
         "click #time_static a.btn":     "time_static"
         "click #pause a.btn":           "pause_playback"
+        "click #reset":           "reset_playback"
 
     # Current list of survey data
     data: new DataCollection()
@@ -60,12 +61,15 @@ class DataView extends Backbone.View
     lower_bound:0
     upper_bound:0
     is_paused: false
+    reset: false
+
     # Time step HTML values
     fpsbox.innerHTML= fps.value
     playtimebox.innerHTML= playtime.value
     current_constrained_layer: null
     controls: null
     current_controls: null
+    playback: null
 
     # Yaxis chosen by the user
     yaxis: null
@@ -128,7 +132,7 @@ class DataView extends Backbone.View
             
             if not @is_paused
                 @time_step()
-        setInterval auto, 1000/fps.value
+        @playback = setInterval auto, 1000/fps.value
 
     pause_playback: (event) ->
         if @is_paused
@@ -137,6 +141,24 @@ class DataView extends Backbone.View
         else
           pause_btn.innerHTML = "Resume"
           @is_paused = true    
+
+    # resets playback
+    reset_playback: (event) ->
+        @reset = true
+        alert (@reset)
+        @step_current = 0
+        @num_steps = 0
+        @quantum = 0
+        @min_time = 0
+        @max_time = 0
+        @lower_bound = 0
+        @upper_bound = 0
+        current_time.innerHTML = ""
+        pause_btn.innerHTML = "Pause"
+        @is_paused = false
+        # stops auto loop
+        clearInterval (@playback)
+        @renderMap()
 
     # Reacts to click of "static_time" button in visualize.html
     # displays all markers within the chosen start/end date
@@ -169,10 +191,10 @@ class DataView extends Backbone.View
 
     time_step: (event) ->
         # setup for the first time they click step
-        if @step_clicked == false
+        if @step_clicked == false or @reset == true
             length = @data.models.length
             @step_clicked = true
-
+            @reset = false
 
             # min and max time in milliseconds for the array
             @min_time = Date.parse (@data.models[0].get('timestamp'))

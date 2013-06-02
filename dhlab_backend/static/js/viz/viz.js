@@ -80,7 +80,8 @@ DataView = (function(_super) {
     "click #time_step a.btn": "time_step",
     "click #auto_step a.btn": "auto_step",
     "click #time_static a.btn": "time_static",
-    "click #pause a.btn": "pause_playback"
+    "click #pause a.btn": "pause_playback",
+    "click #reset": "reset_playback"
   };
 
   DataView.prototype.data = new DataCollection();
@@ -113,6 +114,8 @@ DataView = (function(_super) {
 
   DataView.prototype.is_paused = false;
 
+  DataView.prototype.reset = false;
+
   fpsbox.innerHTML = fps.value;
 
   playtimebox.innerHTML = playtime.value;
@@ -122,6 +125,8 @@ DataView = (function(_super) {
   DataView.prototype.controls = null;
 
   DataView.prototype.current_controls = null;
+
+  DataView.prototype.playback = null;
 
   DataView.prototype.yaxis = null;
 
@@ -186,7 +191,7 @@ DataView = (function(_super) {
         return _this.time_step();
       }
     };
-    return setInterval(auto, 1000 / fps.value);
+    return this.playback = setInterval(auto, 1000 / fps.value);
   };
 
   DataView.prototype.pause_playback = function(event) {
@@ -197,6 +202,23 @@ DataView = (function(_super) {
       pause_btn.innerHTML = "Resume";
       return this.is_paused = true;
     }
+  };
+
+  DataView.prototype.reset_playback = function(event) {
+    this.reset = true;
+    alert(this.reset);
+    this.step_current = 0;
+    this.num_steps = 0;
+    this.quantum = 0;
+    this.min_time = 0;
+    this.max_time = 0;
+    this.lower_bound = 0;
+    this.upper_bound = 0;
+    current_time.innerHTML = "";
+    pause_btn.innerHTML = "Pause";
+    this.is_paused = false;
+    clearInterval(this.playback);
+    return this.renderMap();
   };
 
   DataView.prototype.time_static = function(event) {
@@ -228,9 +250,10 @@ DataView = (function(_super) {
   DataView.prototype.time_step = function(event) {
     var length;
 
-    if (this.step_clicked === false) {
+    if (this.step_clicked === false || this.reset === true) {
       length = this.data.models.length;
       this.step_clicked = true;
+      this.reset = false;
       this.min_time = Date.parse(this.data.models[0].get('timestamp'));
       this.max_time = Date.parse(this.data.models[length - 1].get('timestamp'));
       if (start_date.value !== "") {
