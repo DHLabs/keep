@@ -81,7 +81,9 @@ DataView = (function(_super) {
     "click #auto_step a.btn": "auto_step",
     "click #time_static a.btn": "time_static",
     "click #pause a.btn": "pause_playback",
-    "click #reset": "reset_playback"
+    "click #reset": "reset_playback",
+    "click #time_c": "time_c",
+    "click #clear": "clear_lines"
   };
 
   DataView.prototype.data = new DataCollection();
@@ -135,6 +137,10 @@ DataView = (function(_super) {
   DataView.prototype.width = 750;
 
   DataView.prototype.height = 250;
+
+  DataView.prototype.pL = [];
+
+  DataView.prototype.pLStyle = { color: 'red', weight: 1, opacity: 1, smoothFactor: 1 };
 
   DataView.prototype.initialize = function() {
     this.listenTo(this.form, 'sync', this.render);
@@ -280,6 +286,89 @@ DataView = (function(_super) {
     }
     return this.upper_bound += this.quantum;
   };
+
+DataView.prototype.time_c = function(event) {
+  var val = $("#tc_input").val();
+  var con = $('input:radio[name=const]:checked').val();
+  
+  var minutes=1000*60;
+  var hours=minutes*60;
+  var days=hours*24;
+
+  var secs;
+
+  if( con == "day" ){
+      secs = days;
+  }
+  else if( con == "hour" ){
+      secs = hours;
+  }
+  else if( con == "minute" ){
+      secs = minutes;
+  }
+
+  myIcon = L.icon({
+        iconUrl: '/static/img/leaflet/marker-icon.png',
+        iconRetinaUrl: '/static/img/leaflet/marker-icon@2x.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowUrl: '/static/img/leaflet/marker-shadow.png',
+        shadowSize: [41, 41],
+        shadowAnchor: [15, 41]
+      });
+
+    _ref5 = this.data.models;
+
+    for (_j = 0, _len1 = _ref5.length ; _j < (_len1 - 1); _j++) {
+      datum = _ref5[_j];
+      parseDate = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
+      start = parseDate(this.data.models[_j].get('timestamp'));
+      //alert(this.data.models[_j].get('timestamp'));
+      var d=Math.floor(start/secs);
+
+      geopoint = datum.get('data')[this.map_headers].split(' ');
+      this.pL.push ( [parseFloat(geopoint[0]),parseFloat(geopoint[1])] );
+
+      for (_k = _j+1, _len1 = _ref5.length; _k < _len1; _k++){
+        datum2 = _ref5[_k];
+        parseDate = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
+        start2 = parseDate(this.data.models[_k].get('timestamp'));
+        //alert(this.data.models[_k].get('timestamp'))
+        var d2=Math.floor(start2/secs);
+
+        geopoint = datum2.get('data')[this.map_headers].split(' ');
+
+        if( val >= Math.abs(d - d2) ){
+          this.pL.push ( [parseFloat(geopoint[0]),parseFloat(geopoint[1])] );
+          this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.hidden_map);
+          this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.map);
+        }
+        else{
+          break;
+        }
+
+      }
+    }
+    alert("done");
+    
+
+};
+
+DataView.prototype.clear_lines = function(event) {
+  for(i in this.map._layers){ 
+    if(this.map._layers[i]._path != undefined) { 
+      try{ 
+        this.map.removeLayer(this.map._layers[i]); 
+      } 
+      catch(e){ 
+        console.log("problem with " + e + this.map._layers[i]); 
+      } 
+    } 
+  } 
+
+};
+
 
   DataView.prototype.change_y_axis = function(event) {
     $('#yaxis_options input').attr('checked', false);
@@ -446,12 +535,14 @@ DataView = (function(_super) {
     center[0] = center[0] / this.data.models.length;
     center[1] = center[1] / this.data.models.length;
     if (this.step_clicked === false) {
+      this.hidden_map = L.map('hidden_map').setView(center, 10); 
       this.map = L.map('map').setView(center, 10);
     }
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 18
     }).addTo(this.map);
+
     myIcon = L.icon({
       iconUrl: '/static/img/leaflet/marker-icon.png',
       iconRetinaUrl: '/static/img/leaflet/marker-icon@2x.png',
@@ -462,11 +553,13 @@ DataView = (function(_super) {
       shadowSize: [41, 41],
       shadowAnchor: [15, 41]
     });
+
     heatmapData = [];
     this.markers = [];
     this.constrained_markers = [];
     this.marker_layer = new L.MarkerClusterGroup();
     this.constrained_layer = new L.MarkerClusterGroup();
+    var polyLines = [];
     _ref5 = this.data.models;
     for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
       datum = _ref5[_j];
@@ -496,6 +589,11 @@ DataView = (function(_super) {
       });
     }
     this.heatmap.addData(heatmapData);
+    this.marker_layer = L.layerGroup(this.markers);
+    this.constrained_layer = L.layerGroup(this.constrained_markers);
+    this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.hidden_map);
+    this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.map);    
+    this.polyLine_layers = L.polyline(this.pL, this.pLStyle);
     if (!this.step_clicked) {
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
@@ -514,6 +612,9 @@ DataView = (function(_super) {
       collapsed: false
     });
     if (this.step_clicked) {
+      this.map.addLayer(this.heatmap);
+      this.map.addLayer(this.marker_layer);
+      this.map.addLayer(this.polyLine_layers);
       this.current_controls.removeFrom(this.map);
     }
     this.controls.addTo(this.map);
