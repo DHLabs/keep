@@ -140,7 +140,7 @@ DataView = (function(_super) {
 
   DataView.prototype.pL = [];
 
-  DataView.prototype.pLStyle = { color: 'red', weight: 1, opacity: 1, smoothFactor: 1 };
+  DataView.prototype.pLStyle = { color: 'blue', weight: 0.5, opacity: 1, smoothFactor: 0.5 };
 
   DataView.prototype.initialize = function() {
     this.listenTo(this.form, 'sync', this.render);
@@ -290,12 +290,24 @@ DataView = (function(_super) {
 DataView.prototype.time_c = function(event) {
   var val = $("#tc_input").val();
   var con = $('input:radio[name=const]:checked').val();
-  
+  var time = $('input:radio[name=time]:checked').val();
+
   var minutes=1000*60;
   var hours=minutes*60;
   var days=hours*24;
 
   var secs;
+
+for(i in this.map._layers){ 
+    if(this.map._layers[i]._path != undefined) { 
+      try{ 
+        this.map.removeLayer(this.map._layers[i]); 
+      } 
+      catch(e){ 
+        console.log("problem with " + e + this.map._layers[i]); 
+      } 
+    } 
+  } 
 
   if( con == "day" ){
       secs = days;
@@ -307,41 +319,55 @@ DataView.prototype.time_c = function(event) {
       secs = minutes;
   }
 
-  myIcon = L.icon({
-        iconUrl: '/static/img/leaflet/marker-icon.png',
-        iconRetinaUrl: '/static/img/leaflet/marker-icon@2x.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowUrl: '/static/img/leaflet/marker-shadow.png',
-        shadowSize: [41, 41],
-        shadowAnchor: [15, 41]
-      });
-
     _ref5 = this.data.models;
 
     for (_j = 0, _len1 = _ref5.length ; _j < (_len1 - 1); _j++) {
       datum = _ref5[_j];
       parseDate = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
-      start = parseDate(this.data.models[_j].get('timestamp'));
-      //alert(this.data.models[_j].get('timestamp'));
+      
+      if(time == "date"){
+        try{
+          start = Date.parse(this.data.models[_j].attributes.data.Time);  
+        }
+        catch(err){
+          start = null;
+        }
+      }
+      else{
+        start = parseDate(this.data.models[_j].get('timestamp'));  
+      }
       var d=Math.floor(start/secs);
 
       geopoint = datum.get('data')[this.map_headers].split(' ');
+      this.pL = [];
       this.pL.push ( [parseFloat(geopoint[0]),parseFloat(geopoint[1])] );
-
       for (_k = _j+1, _len1 = _ref5.length; _k < _len1; _k++){
+        if(start  = null){
+          alert("true" + start)
+          break;
+        }
         datum2 = _ref5[_k];
         parseDate = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
-        start2 = parseDate(this.data.models[_k].get('timestamp'));
-        //alert(this.data.models[_k].get('timestamp'))
-        var d2=Math.floor(start2/secs);
 
+      if(time == "date"){
+        try{
+          start2 = Date.parse(this.data.models[_k].attributes.data.Time);  
+        }
+        catch(err){
+          start2 = null;
+        }
+      }
+      else{
+        start2 = parseDate(this.data.models[_k].get('timestamp'));  
+      }
+        var d2=Math.floor(start2/secs);
         geopoint = datum2.get('data')[this.map_headers].split(' ');
 
+        console.log( d);
+        console.log( d2);
+        console.log( Math.abs(d - d2));
         if( val >= Math.abs(d - d2) ){
           this.pL.push ( [parseFloat(geopoint[0]),parseFloat(geopoint[1])] );
-          this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.hidden_map);
           this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.map);
         }
         else{
@@ -350,9 +376,6 @@ DataView.prototype.time_c = function(event) {
 
       }
     }
-    alert("done");
-    
-
 };
 
 DataView.prototype.clear_lines = function(event) {
@@ -591,9 +614,7 @@ DataView.prototype.clear_lines = function(event) {
     this.heatmap.addData(heatmapData);
     this.marker_layer = L.layerGroup(this.markers);
     this.constrained_layer = L.layerGroup(this.constrained_markers);
-    this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.hidden_map);
-    this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.map);    
-    this.polyLine_layers = L.polyline(this.pL, this.pLStyle);
+ 
     if (!this.step_clicked) {
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
@@ -614,7 +635,6 @@ DataView.prototype.clear_lines = function(event) {
     if (this.step_clicked) {
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
-      this.map.addLayer(this.polyLine_layers);
       this.current_controls.removeFrom(this.map);
     }
     this.controls.addTo(this.map);
