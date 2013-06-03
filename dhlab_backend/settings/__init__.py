@@ -20,6 +20,10 @@ DATABASES = {
     }
 }
 
+FIXTURE_DIRS = (
+    '../_data/fixtures',
+)
+
 # MongoDB Settings
 MONGODB_HOST    = 'localhost'
 MONGODB_PORT    = 27017
@@ -117,16 +121,19 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+
+    # KEEP related modules
     'backend',
     'openrosa',
     'repos',
     'organizations',
+
+    # Third party modules
     'twofactor',                # Needed to harden login/database
     'registration',             # Needed for user signup
     'tastypie',                 # Needed for our RESTful API
     'storages',                 # Needed for S3 file storage
-    'django_mailgun',           # Easy email API
-    'south',                    # Database migrations
+    'django_mailgun'            # Easy email API
 )
 
 # Set up 2Factor authentication settings
