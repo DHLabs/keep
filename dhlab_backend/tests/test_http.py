@@ -25,7 +25,7 @@ class HttpTests( HttpTestCase ):
         assert 'Keep' in self.selenium.title
 
     def test_login( self ):
-        self.open( '/' )
+        self.open( '/accounts/login' )
         assert 'Keep' in self.selenium.title
 
         # Generate secret token
@@ -62,8 +62,7 @@ class HttpTests( HttpTestCase ):
         repo_name = 'xls_repo'
 
         # Click on new repo button
-        new_repo = '/html/body/div[2]/div/div[2]/table/thead/tr/td/h4/div/a'
-        self.selenium.find_element_by_xpath( new_repo ).click()
+        self.selenium.find_element_by_id( 'new_repo_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( repo_name )
@@ -87,8 +86,7 @@ class HttpTests( HttpTestCase ):
         repo_name = 'xml_repo'
 
         # Click on new repo button
-        new_repo = '/html/body/div[2]/div/div[2]/table/thead/tr/td/h4/div/a'
-        self.selenium.find_element_by_xpath( new_repo ).click()
+        self.selenium.find_element_by_id( 'new_repo_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( repo_name )
@@ -99,7 +97,7 @@ class HttpTests( HttpTestCase ):
         self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that the new repo was created
-        repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
+        repo_table = '/html/body/div[2]/div/div[2]/table[1]/tbody/tr/td[2]/a'
         repos = self.selenium.find_elements_by_xpath( repo_table )
         assert any( [ x.text == repo_name for x in repos ] )
 
@@ -112,8 +110,7 @@ class HttpTests( HttpTestCase ):
         repo_name = 'xml_repo_itext'
 
         # Click on new repo button
-        new_repo = '/html/body/div[2]/div/div[2]/table/thead/tr/td/h4/div/a'
-        self.selenium.find_element_by_xpath( new_repo ).click()
+        self.selenium.find_element_by_id( 'new_repo_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( repo_name )
@@ -135,8 +132,7 @@ class HttpTests( HttpTestCase ):
         self.test_login()
 
         # Click on new repo button
-        new_repo = '/html/body/div[2]/div/div[2]/table/thead/tr/td/h4/div/a'
-        self.selenium.find_element_by_xpath( new_repo ).click()
+        self.selenium.find_element_by_id( 'new_repo_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( 'tutorial' )
@@ -164,7 +160,7 @@ class HttpTests( HttpTestCase ):
         repo_name = repo.text
         repo.click()
 
-        assert self.selenium.title == repo_name
+        assert repo_name in self.selenium.title
 
     def test_repo_share( self ):
         '''
@@ -172,14 +168,14 @@ class HttpTests( HttpTestCase ):
         '''
         self.test_repo_detail()
 
-        share = '//*[@id="chart_options"]/a[5]'
+        share = '//*[@id="viz_options"]/li[5]/a'
         share = self.selenium.find_element_by_xpath( share )
         share.click()
 
         wait = ui.WebDriverWait( self.selenium, 10 )
         wait.until( lambda driver: driver.find_element_by_id( 'sharing_toggle' ).is_displayed() )
 
-        privacy = self.selenium.find_element_by_id( 'privacy' )
+        privacy = self.selenium.find_element_by_xpath( '//*[@id="privacy"]/div' )
         previous_privacy = privacy.text.strip()
 
         share = self.selenium.find_element_by_id( 'sharing_toggle' )

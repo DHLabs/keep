@@ -19,7 +19,7 @@ from tests import HttpTestCase
 class OrganizationHttpTests( HttpTestCase ):
 
     def test_login( self ):
-        self.open( '/' )
+        self.open( '/accounts/login' )
         assert 'Keep' in self.selenium.title
 
         # Generate secret token
