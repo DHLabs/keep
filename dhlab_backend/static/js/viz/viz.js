@@ -77,6 +77,7 @@ DataView = (function(_super) {
     "change #sharing_toggle": "toggle_public",
     "change #fps": "update_fps",
     "change #playtime": "update_playtime",
+    "change #progress_bar": "update_progress",
     "click #time_step a.btn": "time_step",
     "click #auto_step a.btn": "auto_step",
     "click #time_static a.btn": "time_static",
@@ -115,6 +116,10 @@ DataView = (function(_super) {
   DataView.prototype.is_paused = false;
 
   DataView.prototype.reset = false;
+
+  DataView.prototype.progress = 0;
+
+  DataView.prototype.progress_range = 100.0;
 
   fpsbox.innerHTML = fps.value;
 
@@ -215,9 +220,12 @@ DataView = (function(_super) {
     this.lower_bound = 0;
     this.upper_bound = 0;
     current_time.innerHTML = "";
+    this.progress = 0;
+    progress_bar.value = 0;
     pause_btn.innerHTML = "Pause";
     this.is_paused = false;
     clearInterval(this.playback);
+    this.playback = null;
     return this.renderMap();
   };
 
@@ -247,6 +255,24 @@ DataView = (function(_super) {
     return playtimebox.innerHTML = playtime.value;
   };
 
+  DataView.prototype.update_progress = function() {
+    if (this.step_clicked === true && this.reset === false) {
+      if (this.is_paused === false) {
+        this.is_paused = true;
+      }
+      this.progress = progress_bar.value;
+      this.upper_bound = this.progress / this.progress_range * (this.max_time - this.min_time) + this.min_time;
+      if (cumulativeCheck.checked === true) {
+        this.lower_bound = this.min_time;
+      } else {
+        this.lower_bound = this.upper_bound - this.quantum;
+      }
+      current_time.innerHTML = new Date(this.lower_bound) + " through " + new Date(this.upper_bound);
+      this.is_paused = false;
+      return this.renderMap();
+    }
+  };
+
   DataView.prototype.time_step = function(event) {
     var length;
 
@@ -274,6 +300,8 @@ DataView = (function(_super) {
     if (this.step_current <= this.num_steps) {
       this.renderMap();
       current_time.innerHTML = new Date(this.lower_bound) + " through " + new Date(this.upper_bound);
+      this.progress = this.progress_range * ((this.upper_bound - this.min_time) / (this.max_time - this.min_time));
+      progress_bar.value = this.progress;
     }
     if (cumulativeCheck.checked === false) {
       this.lower_bound += this.quantum;

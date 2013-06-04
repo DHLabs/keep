@@ -31,11 +31,12 @@ class DataView extends Backbone.View
         "change #sharing_toggle":       "toggle_public"
         "change #fps":                  "update_fps"
         "change #playtime":             "update_playtime"
+        "change #progress_bar":         "update_progress"
         "click #time_step a.btn":       "time_step"
         "click #auto_step a.btn":       "auto_step"
         "click #time_static a.btn":     "time_static"
         "click #pause a.btn":           "pause_playback"
-        "click #reset":           "reset_playback"
+        "click #reset":                 "reset_playback"
 
     # Current list of survey data
     data: new DataCollection()
@@ -62,6 +63,8 @@ class DataView extends Backbone.View
     upper_bound:0
     is_paused: false
     reset: false
+    progress: 0
+    progress_range: 100.0
 
     # Time step HTML values
     fpsbox.innerHTML= fps.value
@@ -154,10 +157,13 @@ class DataView extends Backbone.View
         @lower_bound = 0
         @upper_bound = 0
         current_time.innerHTML = ""
+        @progress = 0
+        progress_bar.value=0
         pause_btn.innerHTML = "Pause"
         @is_paused = false
         # stops auto loop
         clearInterval (@playback)
+        @playback = null
         @renderMap()
 
     # Reacts to click of "static_time" button in visualize.html
@@ -188,6 +194,24 @@ class DataView extends Backbone.View
         
     update_playtime: () ->
         playtimebox.innerHTML= playtime.value
+
+    # method called when progress bar changes - resets lower/upper bounds
+    update_progress: () ->
+        if @step_clicked == true and @reset == false 
+            if (@is_paused == false)
+                @is_paused = true
+                
+        #@progress =  (@progress_range * ((@lower_bound-@min_time) / (@max_time-@min_time)))
+            @progress = progress_bar.value
+            #alert ( (@max_time - @min_time))
+            @upper_bound = (@progress/@progress_range * (@max_time - @min_time) + @min_time)
+            if (cumulativeCheck.checked == true)
+                @lower_bound = @min_time
+            else
+                @lower_bound = @upper_bound - @quantum
+            current_time.innerHTML = new Date(@lower_bound) + " through " + new Date(@upper_bound)
+            @is_paused = false
+            @renderMap()
 
     time_step: (event) ->
         # setup for the first time they click step
@@ -224,6 +248,10 @@ class DataView extends Backbone.View
             @renderMap()
             # display the range of the current quantum
             current_time.innerHTML = new Date(@lower_bound) + " through " + new Date(@upper_bound)
+            #progress_bar.value = (int)(@progress_range * (@lower_bound / @max_time))
+            @progress =  (@progress_range * ((@upper_bound-@min_time) / (@max_time-@min_time)))
+            #alert @progress
+            progress_bar.value = @progress
 
         # move on to the next quantum
         #alert "old lower is: " + @lower_bound
