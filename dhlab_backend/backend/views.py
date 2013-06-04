@@ -1,10 +1,10 @@
-from backend.db import Repository
+from backend.db import Repository, db
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
 from backend.forms import ReportForm
 
 import json
-from bson import json_util
+from bson import json_util, ObjectId
 
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import RequestSite
@@ -118,6 +118,13 @@ def user_dashboard( request, username ):
                                context_instance=RequestContext(request) )
 
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
 @login_required
 def build_report( request ):
 
@@ -127,6 +134,8 @@ def build_report( request ):
             #build form
             data = request.POST[ 'report_json' ].strip()
 
+            #TODO: refactor report building to separate file, will get quite big eventually
+
             if len( data ) == 0:
                 return None
 
@@ -134,10 +143,50 @@ def build_report( request ):
             try:
                 data = json.loads( data )
             except Exception:
-                    return None
+                return None
 
-            #TODO:
-            return HttpResponseRedirect( '/' )
+            report_items = []
+
+            print data
+
+            for item in data:
+                report_item = {}
+                report_item['form_name'] = item['form_name']
+                report_item['form_question'] = item['form_question']
+
+                query = { 'repo': ObjectId( item['form_id'] ) }
+                #todo: add timestamp filtering
+
+                results = db.data.find( query )
+                sum = 0
+                num_responses = 0
+
+                for result in results:
+                    question_data = result['data'][ item['form_question'] ]
+                    print question_data
+                    if item['report_type'] == 'incidence':
+                        if is_number(question_data):
+                            num_responses = num_responses + 1
+                    else:
+                        if is_number(question_data):
+                            sum = sum + int(question_data)
+                            num_responses = num_responses + 1
+
+                if item['report_type'] == 'incidence':
+                    report_string = "%d" % num_responses + ' occurences'
+                else:
+                    report_string = "%.2f" % (float(sum) / float(num_responses))
+                    report_string += " average from " + "%d" % num_responses + " responses out of " + "%d" % results.count() + " surveys"
+
+                report_item['report_string'] = report_string
+
+                report_items.append( report_item )
+
+            print report_items
+
+            return render_to_response( 'report.html',
+                                      {'report_items': report_items },
+                                      context_instance=RequestContext(request) )
     else:
         form = ReportForm()
 
