@@ -16,7 +16,7 @@ from guardian.shortcuts import get_perms
 
 from backend.db import db, dehydrate_survey, user_or_organization
 
-from privacy import privatize_geo
+#from privacy import privatize_geo
 
 from . import validate_and_format
 from .forms import NewRepoForm
@@ -72,29 +72,16 @@ def toggle_public( request, repo_id ):
         is allowed to make such changes to the form settings.
     '''
 
-    # Find a survey, only looking for the user field
-    repo = db.survey.find_one( { '_id': ObjectId( repo_id ) },
-                               { 'user': True, 'org': True, 'public': True } )
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
 
-    if repo is None:
-        return HttpResponse( status=404 )
-
-    permissions = Repository.permissions( repo=repo,
-                                          user=request.user )
-
-    if 'sharing' not in permissions:
+    if not request.user.has_perm( 'share_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
 
-    if 'public' in repo:
-        repo[ 'public' ] = not repo[ 'public' ]
-    else:
-        repo[ 'public' ] = True
-
-    db.survey.update( { '_id': ObjectId( repo_id ) },
-                      { '$set': { 'public': repo[ 'public' ] } } )
+    repo.is_public = not repo.is_public
+    repo.save()
 
     return HttpResponse( json.dumps( { 'success': True,
-                                       'public': repo[ 'public' ] } ),
+                                       'public': repo.is_public } ),
                          mimetype='application/json' )
 
 
@@ -161,7 +148,7 @@ def repo_viz( request, username, repo_name ):
     permissions = get_perms( request.user, repo )
 
     # Check to see if the user has access to view this survey
-    if 'view_repository' not in permissions:
+    if not repo.is_public and 'view_repository' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
     # Grab the data for this repository

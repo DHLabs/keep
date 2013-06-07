@@ -102,19 +102,20 @@ class Repository( models.Model ):
         super( Repository, self ).delete()
 
     def save( self, *args, **kwargs ):
-        repo = kwargs.pop( 'repo', None )
-        if repo is None:
-            raise Exception( 'Unable to parse repo field data' )
+        # Only add repo object to MongoDB on a object creation
+        if self.pk is None:
+            repo = kwargs.pop( 'repo', None )
+            # Save repo field data to MongoDB and save repo metadata to a
+            # relational database
+            self.mongo_id = db.repo.insert( repo )
 
-        # Save repo field data to MongoDB and save repo metadata to a
-        # relational database
-        self.mongo_id = db.repo.insert( repo )
+            # Set up permissions for the user & org
+            assign_perm( 'view_repository', self.user, self )
+            assign_perm( 'delete_repository', self.user, self )
+            assign_perm( 'share_repository', self.user, self )
+
         super( Repository, self ).save( *args, **kwargs )
 
-        # Set up permissions for the user & org
-        assign_perm( 'view_repository', self.user, self )
-        assign_perm( 'delete_repository', self.user, self )
-        assign_perm( 'share_repository', self.user, self )
 
     def submissions( self ):
         return db.data.find({ 'repo': ObjectId( self.mongo_id ) } ).count()
