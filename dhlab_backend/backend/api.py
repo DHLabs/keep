@@ -20,8 +20,9 @@ from tastypie.http import HttpUnauthorized
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
-from backend.db import user_or_organization, Repository
+from backend.db import user_or_organization
 from organizations.models import Organization
+from repos.models import Repository
 
 # from twofactor.api_auth import ApiTokenAuthentication
 
@@ -88,22 +89,12 @@ class RepoAuthorization( Authorization ):
 
     def read_detail( self, object_detail, bundle ):
 
-        if object_detail.get( 'public', False ):
-            return True
-
         account = bundle.request.GET.get( 'user', None )
         account = user_or_organization( account )
         if account is None:
             return False
 
-        # If this repo is owned by an individual user, check if this is
-        # the repo's owner.
-        if 'user' in object_detail:
-            if isinstance( account, User ):
-                if object_detail[ 'user' ] != account.id:
-                    return False
-
-        return True
+        return account.has_perm( 'view_repository', bundle.obj )
 
     def create_detail( self, object_detail, bundle ):
         return True
@@ -149,26 +140,16 @@ class DataResource( MongoDBResource ):
             return HttpUnauthorized()
 
 
-class RepoResource( MongoDBResource ):
-    id          = fields.CharField( attribute='_id' )
-    name        = fields.CharField( attribute='name', null=True )
-    title       = fields.CharField( attribute='title', null=True )
-    default_language = fields.CharField( attribute='default_language',
-                                         null=True )
-    id_string   = fields.CharField( attribute='id_string', null=True )
-    type        = fields.CharField( attribute='type', null=True )
-    children    = fields.ListField( attribute='children', null=True )
-    user        = fields.IntegerField( attribute='user', null=True )
-    org         = fields.IntegerField( attribute='org', null=True )
-    public      = fields.BooleanField( attribute='public', default=False )
+class RepoResource( ModelResource ):
 
     class Meta:
-        collection = 'survey'
+        queryset = Repository.objects.all()
         resource_name = 'repos'
-        object_class = Document
 
         list_allowed_methods = [ 'get' ]
         detail_allowed_methods = [ 'get', 'post' ]
+
+        excludes = [ 'mongo_id' ]
 
         # Only return JSON & XForm xml
         serializer = XFormSerializer()
@@ -186,9 +167,13 @@ class RepoResource( MongoDBResource ):
 
     def prepend_urls(self):
         return [
-            url( r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/manifest/$" %
-                 ( self._meta.resource_name ),
-                 self.wrap_view('get_manifest'),
+
+            url( regex=r"^(?P<resource_name>%s)/(?P<mongo_id>\w+)/$" % ( self._meta.resource_name ),
+                 view=self.wrap_view('dispatch_detail'),
+                 name="api_dispatch_detail"),
+
+            url( regex=r"^(?P<resource_name>%s)/(?P<mongo_id>\w+)/manifest/$" % ( self._meta.resource_name ),
+                 view=self.wrap_view('get_manifest'),
                  name="api_get_resource"),
         ]
 
@@ -273,14 +258,14 @@ class RepoResource( MongoDBResource ):
 
     def dehydrate( self, bundle ):
         '''
-            Remove user/org key is it doesn't existself.
+            Add additional information to the Repository bundle.
+
+            - fields:
+                Fields are grabbed from MongoDB and appended to the bundle
+                dictionary.
         '''
-        if bundle.data.get( 'user', None ) is None:
-            del bundle.data[ 'user' ]
-
-        if bundle.data.get( 'org', None ) is None:
-            del bundle.data[ 'org' ]
-
+        repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
+        bundle.data['children'] = repo_fields[ 'fields' ]
         return bundle
 
     def dehydrate_user( self, bundle ):
@@ -288,18 +273,13 @@ class RepoResource( MongoDBResource ):
             Convert user ids into a more informative username when displaying
             results
         '''
-        if bundle.data[ 'user' ]:
-            return User.objects.get( id=bundle.data['user'] ).username
-        return None
+        return bundle.obj.user.username if bundle.obj.user else None
 
     def dehydrate_org( self, bundle ):
         '''
             Convert organization ids into the more informative org name.
         '''
-        if bundle.data[ 'org' ]:
-            return Organization.objects.get( id=bundle.data['org'] ).name
-
-        return None
+        return bundle.obj.org.name if bundle.obj.org else None
 
 
 class UserResource( ModelResource ):
