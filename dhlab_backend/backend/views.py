@@ -104,7 +104,8 @@ def user_dashboard( request, username ):
     # Grab a list of forms uploaded by the user
     if is_other_user:
         user_repos = Repository.objects.filter( user=user, is_public=True )
-        shared_repos = Repository.objects.filter( org__in=organizations, is_public=True )
+        shared_repos = Repository.objects.filter( org__in=organizations,
+                                                  is_public=True )
     else:
         user_repos = Repository.objects.filter( user=user )
         shared_repos = Repository.objects.filter( org__in=organizations )

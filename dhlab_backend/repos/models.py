@@ -1,5 +1,8 @@
 from bson import ObjectId
+from datetime import datetime
+
 from django.db import models
+
 from guardian.shortcuts import assign_perm
 
 from backend.db import db
@@ -116,6 +119,16 @@ class Repository( models.Model ):
 
         super( Repository, self ).save( *args, **kwargs )
 
+    def add_data( self, data ):
+        repo_data = {
+            'label': self.name,
+            'repo': ObjectId( self.mongo_id ),
+            'data': data,
+            'timestamp': datetime.utcnow() }
+        return db.data.insert( repo_data )
+
+    def fields( self ):
+        return db.repo.find_one( ObjectId( self.mongo_id ) )[ 'fields' ]
 
     def submissions( self ):
         return db.data.find({ 'repo': ObjectId( self.mongo_id ) } ).count()

@@ -96,17 +96,18 @@ def webform( request, username, repo_name ):
     if account is None:
         return HttpResponse( status=404 )
 
-    repo = Repository.get_repo( name=repo_name, account=account )
+    # Grab the repository
+    repo = Repository.objects.get( Q(name=repo_name),
+                                   Q(user__username=username) |
+                                        Q(org__name=username) )
     if repo is None:
         return HttpResponse( status=404 )
 
     if request.method == 'POST':
 
         # Do basic validation of the data
-        valid_data = validate_and_format( repo, request.POST )
-        Repository.add_data( repo=repo,
-                             data=valid_data,
-                             account=account )
+        valid_data = validate_and_format( repo.fields(), request.POST )
+        repo.add_data( valid_data )
 
         # Return to organization/user dashboard based on where the "New Repo"
         # button was clicked.
@@ -121,7 +122,7 @@ def webform( request, username, repo_name ):
 
     return render_to_response( 'get.html',
                                { 'repo': repo,
-                                 'repo_id': str( repo[ '_id' ] ),
+                                 'repo_id': repo.mongo_id,
                                  'account': account },
                                context_instance=RequestContext( request ))
 
