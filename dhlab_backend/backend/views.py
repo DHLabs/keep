@@ -1,4 +1,3 @@
-from backend.db import Repository
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
 
@@ -15,6 +14,7 @@ from django.template import RequestContext
 
 from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
+from repos.models import Repository
 from twofactor.models import UserAPIToken
 
 
@@ -98,23 +98,23 @@ def user_dashboard( request, username ):
 
     user = get_object_or_404( User, username=username )
 
-    # Grab a list of forms uploaded by the user
-    if is_other_user:
-        user_repos = Repository.list_repos( user, public=True )
-        shared_repos = None
-    else:
-        user_repos = Repository.list_repos( user )
-        shared_repos = Repository.shared_repos( user )
-
     # Find all the organization this user belongs to
     organizations = OrganizationUser.objects.filter( user=user )
 
+    # Grab a list of forms uploaded by the user
+    if is_other_user:
+        user_repos = Repository.objects.filter( user=user, is_public=True )
+        shared_repos = Repository.objects.filter( org__in=organizations, is_public=True )
+    else:
+        user_repos = Repository.objects.filter( user=user )
+        shared_repos = Repository.objects.filter( org__in=organizations )
+
     return render_to_response( 'dashboard.html',
-                               { 'user_repos': user_repos,
-                                 'shared_repos': shared_repos,
-                                 'is_other_user': is_other_user,
-                                 'account': user,
-                                 'organizations': organizations },
+                               {'user_repos': user_repos,
+                                'shared_repos': shared_repos,
+                                'is_other_user': is_other_user,
+                                'account': user,
+                                'organizations': organizations },
                                context_instance=RequestContext(request) )
 
 

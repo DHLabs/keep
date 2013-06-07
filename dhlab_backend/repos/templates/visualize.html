@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
-{% block title %}{{ user.username }} / {{ repo.name }}{% endblock %}
+{% block title %}{{ account_name }} / {{ repo.name }}{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" type="text/css" href='{% static "css/viz.css" %}'>
@@ -12,7 +12,7 @@
 
 {% block js %}
 <script id='form_id' type='text/plain'>{{ sid }}</script>
-<script id='user' type='text/plain'>{{ user.username }}</script>
+<script id='user' type='text/plain'>{{ account_name }}</script>
 <script>
 	document.cdn = '{% static "" %}'
 </script>
@@ -35,7 +35,7 @@
 		<div class='span12'>
 			<div id='privacy'>
 				<div>
-					{% if repo.public %}
+					{% if repo.is_public %}
 						<i class='icon-unlock'></i>&nbsp;PUBLIC
 					{% else %}
 						<i class='icon-lock'></i>&nbsp;PRIVATE
@@ -102,7 +102,7 @@
 						<div>Analytics</div>
 					</a>
 				</li>
-				{% if 'delete' in permissions %}
+				{% if 'delete_repository' in permissions %}
 				<li>
 					<a href='#' data-type='settings'>
 						<div><i class='icon-cog'></i></div>
@@ -156,7 +156,7 @@
 		</div>
 		<div class='span10' id='line'></div>
 	</div>
-	{% if 'delete' in permissions %}
+	{% if 'delete_repository' in permissions %}
 	<div class='row viz' id='settings_viz'>
 		<div class='span12'>
 			<div class='span3'>

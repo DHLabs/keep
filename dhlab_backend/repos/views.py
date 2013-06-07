@@ -2,6 +2,7 @@ import json
 
 from bson import ObjectId
 
+from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -11,13 +12,15 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
+from guardian.shortcuts import get_perms
+
 from backend.db import db, dehydrate_survey, user_or_organization
-from backend.db import Repository
 
 from privacy import privatize_geo
 
 from . import validate_and_format
 from .forms import NewRepoForm
+from .models import Repository
 
 
 @login_required
@@ -27,15 +30,10 @@ def new_repo( request ):
     '''
     # Handle XForm upload
     if request.method == 'POST':
-
-        form = NewRepoForm( request.POST, request.FILES, user=request.user )
-
         # Check for a valid XForm and parse the file!
+        form = NewRepoForm( request.POST, request.FILES, user=request.user )
         if form.is_valid():
-
-            repo = form.save()
-            db.survey.insert( repo )
-
+            form.save()
             return HttpResponseRedirect( '/' )
     else:
         form = NewRepoForm()
@@ -160,25 +158,25 @@ def repo_viz( request, username, repo_name ):
         return HttpResponse( status=404 )
 
     # Grab the repository
-    repo = Repository.get_repo( repo_name, account )
+    repo = Repository.objects.get( Q(name=repo_name), Q(user__username=username) | Q(org__name=username) )
     if repo is None:
         return HttpResponse( status=404 )
 
-    # Grab the user's permissions for this repository
-    permissions = Repository.permissions( repo=repo,
-                                          user=request.user )
+    permissions = get_perms( request.user, repo )
 
     # Check to see if the user has access to view this survey
-    if 'view' not in permissions:
+    if 'view_repository' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
     # Grab the data for this repository
-    data = db.data.find( {'repo': ObjectId( repo[ '_id' ] )} )
+    data = db.data.find( {'repo': ObjectId( repo.mongo_id )} )
     data = dehydrate_survey( data )
 
     # Is some unknown user looking at this data?
-    if 'view_raw' not in permissions:
-        data = privatize_geo( repo, data )
+    # TODO: Make the privatizer take into account
+    # geospatial location
+    # if 'view_raw' not in permissions:
+    #     data = privatize_geo( repo, data )
 
     if isinstance( account, User ):
         account_name = account.username
@@ -187,15 +185,9 @@ def repo_viz( request, username, repo_name ):
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
-                                 'sid': repo[ '_id' ],
+                                 'sid': repo.mongo_id,
                                  'data': json.dumps( data ),
                                  'permissions': permissions,
                                  'account': account,
                                  'account_name': account_name },
-                               context_instance=RequestContext(request) )
-
-
-@require_GET
-def map_visualize( request ):
-    return render_to_response( 'map_visualize.html',
                                context_instance=RequestContext(request) )
