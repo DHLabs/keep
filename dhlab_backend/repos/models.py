@@ -91,7 +91,15 @@ class Repository( models.Model ):
             ( 'share_repository', 'Share Repo' ),)
 
     def delete( self ):
-        pass
+        '''
+            Delete all data & objects related to this object
+        '''
+        # Remove related data from MongoDB
+        db.repo.remove( { '_id': ObjectId( self.mongo_id ) } )
+        db.data.remove( { 'repo': ObjectId( self.mongo_id ) } )
+
+        # Finally remove the repo metadata ifself
+        super( Repository, self ).delete()
 
     def save( self, *args, **kwargs ):
         repo = kwargs.pop( 'repo', None )

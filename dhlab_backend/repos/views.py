@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
@@ -51,19 +51,15 @@ def delete_repo( request, repo_id ):
         the repository and the accompaning repo data.
     '''
 
-    repo = db.survey.find_one( { '_id': ObjectId( repo_id ) },
-                               { 'user': True, 'org': True } )
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
 
-    if repo is None:
-        return HttpResponse( status=404 )
-
-    permissions = Repository.permissions( repo=repo,
-                                          user=request.user )
-
-    if 'delete' not in permissions:
+    # Check that this user has permission to delete this repo
+    if not request.user.has_perm( 'delete_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
 
-    Repository.delete( repo )
+    # Delete the sucker
+    repo.delete()
+
     return HttpResponseRedirect( '/' )
 
 
