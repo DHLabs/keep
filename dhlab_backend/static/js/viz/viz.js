@@ -123,6 +123,15 @@ DataView = (function(_super) {
 
   DataView.prototype.progress_range = 100.0;
 
+  DataView.prototype.pL = [];
+
+  DataView.prototype.pLStyle = {
+    color: "blue",
+    weight: 0.5,
+    opacity: 1,
+    smoothFactor: 0.5
+  };
+
   fpsbox.innerHTML = fps.value;
 
   playtimebox.innerHTML = playtime.value;
@@ -142,10 +151,6 @@ DataView = (function(_super) {
   DataView.prototype.width = 750;
 
   DataView.prototype.height = 250;
-
-  DataView.prototype.pL = [];
-
-  DataView.prototype.pLStyle = { color: 'blue', weight: 0.5, opacity: 1, smoothFactor: 0.5 };
 
   DataView.prototype.initialize = function() {
     this.listenTo(this.form, 'sync', this.render);
@@ -216,8 +221,9 @@ DataView = (function(_super) {
   };
 
   DataView.prototype.reset_playback = function(event) {
+    var e, i;
+
     this.reset = true;
-    alert(this.reset);
     this.step_current = 0;
     this.num_steps = 0;
     this.quantum = 0;
@@ -232,6 +238,16 @@ DataView = (function(_super) {
     this.is_paused = false;
     clearInterval(this.playback);
     this.playback = null;
+    for (i in this.map._layers) {
+      if (this.map._layers[i]._path !== undefined) {
+        try {
+          this.map.removeLayer(this.map._layers[i]);
+        } catch (_error) {
+          e = _error;
+          console.log("problem with " + e + this.map._layers[i]);
+        }
+      }
+    }
     return this.renderMap();
   };
 
@@ -289,15 +305,12 @@ DataView = (function(_super) {
       this.min_time = Date.parse(this.data.models[0].get('timestamp'));
       this.max_time = Date.parse(this.data.models[length - 1].get('timestamp'));
       if (start_date.value !== "") {
-        alert(start_date.value);
         this.min_time = Date.parse(start_date.value);
       }
       if (end_date.value !== "") {
-        alert("bye");
         this.max_time = Date.parse(end_date.value);
       }
       this.num_steps = fps.value * playtime.value;
-      alert(this.num_steps);
       this.quantum = Math.floor((this.max_time - this.min_time) / this.num_steps);
       this.lower_bound = this.min_time;
       this.upper_bound = this.min_time + this.quantum;
@@ -315,111 +328,107 @@ DataView = (function(_super) {
     return this.upper_bound += this.quantum;
   };
 
-DataView.prototype.time_c = function(event) {
-  var val = $("#tc_input").val();
-  var con = $('input:radio[name=const]:checked').val();
-  var time = $('input:radio[name=time]:checked').val();
+  DataView.prototype.time_c = function(event) {
+    var con, d, d2, datum, datum2, days, e, err, geopoint, hours, i, minutes, parseDate, secs, start, start2, time, val, _j, _k, _len1, _ref5, _results;
 
-  var minutes=1000*60;
-  var hours=minutes*60;
-  var days=hours*24;
-
-  var secs;
-
-for(i in this.map._layers){ 
-    if(this.map._layers[i]._path != undefined) { 
-      try{ 
-        this.map.removeLayer(this.map._layers[i]); 
-      } 
-      catch(e){ 
-        console.log("problem with " + e + this.map._layers[i]); 
-      } 
-    } 
-  } 
-
-  if( con == "day" ){
-      secs = days;
-  }
-  else if( con == "hour" ){
-      secs = hours;
-  }
-  else if( con == "minute" ){
-      secs = minutes;
-  }
-
-    _ref5 = this.data.models;
-
-    for (_j = 0, _len1 = _ref5.length ; _j < (_len1 - 1); _j++) {
-      datum = _ref5[_j];
-      parseDate = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
-      
-      if(time == "date"){
-        try{
-          start = Date.parse(this.data.models[_j].attributes.data.Time);  
+    val = $("#tc_input").val();
+    con = $("input:radio[name=const]:checked").val();
+    time = $("input:radio[name=time]:checked").val();
+    minutes = 1000 * 60;
+    hours = minutes * 60;
+    days = hours * 24;
+    secs = void 0;
+    for (i in this.map._layers) {
+      if (this.map._layers[i]._path !== undefined) {
+        try {
+          this.map.removeLayer(this.map._layers[i]);
+        } catch (_error) {
+          e = _error;
+          console.log("problem with " + e + this.map._layers[i]);
         }
-        catch(err){
+      }
+    }
+    if (con === "day") {
+      secs = days;
+    } else if (con === "hour") {
+      secs = hours;
+    } else {
+      if (con === "minute") {
+        secs = minutes;
+      }
+    }
+    _ref5 = this.data.models;
+    _j = 0;
+    _len1 = _ref5.length;
+    _results = [];
+    while (_j < (_len1 - 1)) {
+      datum = _ref5[_j];
+      parseDate = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
+      if (time === "date") {
+        try {
+          start = Date.parse(this.data.models[_j].attributes.data.Time);
+        } catch (_error) {
+          err = _error;
           start = null;
         }
+      } else {
+        start = parseDate(this.data.models[_j].get("timestamp"));
       }
-      else{
-        start = parseDate(this.data.models[_j].get('timestamp'));  
-      }
-      var d=Math.floor(start/secs);
-
-      geopoint = datum.get('data')[this.map_headers].split(' ');
+      d = Math.floor(start / secs);
+      geopoint = datum.get("data")[this.map_headers].split(" ");
       this.pL = [];
-      this.pL.push ( [parseFloat(geopoint[0]),parseFloat(geopoint[1])] );
-      for (_k = _j+1, _len1 = _ref5.length; _k < _len1; _k++){
-        if(start  = null){
-          alert("true" + start)
+      this.pL.push([parseFloat(geopoint[0]), parseFloat(geopoint[1])]);
+      _k = _j + 1;
+      _len1 = _ref5.length;
+      while (_k < _len1) {
+        if (start = null) {
           break;
         }
         datum2 = _ref5[_k];
-        parseDate = d3.time.format('%Y-%m-%dT%H:%M:%S').parse;
-
-      if(time == "date"){
-        try{
-          start2 = Date.parse(this.data.models[_k].attributes.data.Time);  
+        parseDate = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
+        if (time === "date") {
+          try {
+            start2 = Date.parse(this.data.models[_k].attributes.data.Time);
+          } catch (_error) {
+            err = _error;
+            start2 = null;
+          }
+        } else {
+          start2 = parseDate(this.data.models[_k].get("timestamp"));
         }
-        catch(err){
-          start2 = null;
-        }
-      }
-      else{
-        start2 = parseDate(this.data.models[_k].get('timestamp'));  
-      }
-        var d2=Math.floor(start2/secs);
-        geopoint = datum2.get('data')[this.map_headers].split(' ');
-
-        console.log( d);
-        console.log( d2);
-        console.log( Math.abs(d - d2));
-        if( val >= Math.abs(d - d2) ){
-          this.pL.push ( [parseFloat(geopoint[0]),parseFloat(geopoint[1])] );
+        d2 = Math.floor(start2 / secs);
+        geopoint = datum2.get("data")[this.map_headers].split(" ");
+        if (val >= Math.abs(d - d2)) {
+          this.pL.push([parseFloat(geopoint[0]), parseFloat(geopoint[1])]);
           this.poly = L.polyline(this.pL, this.pLStyle).addTo(this.map);
-        }
-        else{
+        } else {
           break;
         }
+        _k++;
+      }
+      _results.push(_j++);
+    }
+    return _results;
+  };
 
+  DataView.prototype.clear_lines = function(event) {
+    var e, i, _results;
+
+    _results = [];
+    for (i in this.map._layers) {
+      if (this.map._layers[i]._path !== undefined) {
+        try {
+          _results.push(this.map.removeLayer(this.map._layers[i]));
+        } catch (_error) {
+          e = _error;
+          _results.push(console.log("problem with " + e + this.map._layers[i]));
+        }
+      } else {
+        _results.push(void 0);
       }
     }
-};
-
-DataView.prototype.clear_lines = function(event) {
-  for(i in this.map._layers){ 
-    if(this.map._layers[i]._path != undefined) { 
-      try{ 
-        this.map.removeLayer(this.map._layers[i]); 
-      } 
-      catch(e){ 
-        console.log("problem with " + e + this.map._layers[i]); 
-      } 
-    } 
-  } 
-
-};
-
+    return _results;
+  };
 
   DataView.prototype.change_y_axis = function(event) {
     $('#yaxis_options input').attr('checked', false);
@@ -586,14 +595,12 @@ DataView.prototype.clear_lines = function(event) {
     center[0] = center[0] / this.data.models.length;
     center[1] = center[1] / this.data.models.length;
     if (this.step_clicked === false) {
-      this.hidden_map = L.map('hidden_map').setView(center, 10); 
       this.map = L.map('map').setView(center, 10);
     }
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 18
     }).addTo(this.map);
-
     myIcon = L.icon({
       iconUrl: '/static/img/leaflet/marker-icon.png',
       iconRetinaUrl: '/static/img/leaflet/marker-icon@2x.png',
@@ -604,13 +611,11 @@ DataView.prototype.clear_lines = function(event) {
       shadowSize: [41, 41],
       shadowAnchor: [15, 41]
     });
-
     heatmapData = [];
     this.markers = [];
     this.constrained_markers = [];
     this.marker_layer = new L.MarkerClusterGroup();
     this.constrained_layer = new L.MarkerClusterGroup();
-    var polyLines = [];
     _ref5 = this.data.models;
     for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
       datum = _ref5[_j];
@@ -640,9 +645,6 @@ DataView.prototype.clear_lines = function(event) {
       });
     }
     this.heatmap.addData(heatmapData);
-    this.marker_layer = L.layerGroup(this.markers);
-    this.constrained_layer = L.layerGroup(this.constrained_markers);
- 
     if (!this.step_clicked) {
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
@@ -661,8 +663,6 @@ DataView.prototype.clear_lines = function(event) {
       collapsed: false
     });
     if (this.step_clicked) {
-      this.map.addLayer(this.heatmap);
-      this.map.addLayer(this.marker_layer);
       this.current_controls.removeFrom(this.map);
     }
     this.controls.addTo(this.map);

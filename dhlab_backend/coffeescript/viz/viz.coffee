@@ -37,6 +37,9 @@ class DataView extends Backbone.View
         "click #time_static a.btn":     "time_static"
         "click #pause a.btn":           "pause_playback"
         "click #reset":                 "reset_playback"
+        "click #time_c":                "time_c"
+        "click #clear":                 "clear_lines"
+        
 
     # Current list of survey data
     data: new DataCollection()
@@ -65,6 +68,13 @@ class DataView extends Backbone.View
     reset: false
     progress: 0
     progress_range: 100.0
+
+    DataView::pL = []
+    DataView::pLStyle =
+        color: "blue"
+        weight: 0.5
+        opacity: 1
+        smoothFactor: 0.5
 
     # Time step HTML values
     fpsbox.innerHTML= fps.value
@@ -148,7 +158,6 @@ class DataView extends Backbone.View
     # resets playback
     reset_playback: (event) ->
         @reset = true
-        alert (@reset)
         @step_current = 0
         @num_steps = 0
         @quantum = 0
@@ -164,6 +173,12 @@ class DataView extends Backbone.View
         # stops auto loop
         clearInterval (@playback)
         @playback = null
+        for i of @map._layers
+            unless @map._layers[i]._path is `undefined`
+                try
+                    @map.removeLayer @map._layers[i]
+                catch e
+                    console.log "problem with " + e + @map._layers[i]
         @renderMap()
 
     # Reacts to click of "static_time" button in visualize.html
@@ -226,15 +241,12 @@ class DataView extends Backbone.View
 
             # use start and end time fields if they are not empty
             if (start_date.value != "")
-                alert (start_date.value)
                 @min_time = Date.parse( start_date.value )
             if (end_date.value != "")
-                alert ("bye")
                 @max_time = Date.parse( end_date.value )
 
             # split the time into frames based on fps * playtime
             @num_steps = fps.value * playtime.value
-            alert(@num_steps)
 
             # calc size of quantum
             @quantum = Math.floor ((@max_time - @min_time) / @num_steps )
@@ -260,6 +272,75 @@ class DataView extends Backbone.View
         #alert "new lower is: " + @lower_bound
         @upper_bound += @quantum
 
+
+    time_c: (event) ->
+        val = $("#tc_input").val()
+        con = $("input:radio[name=const]:checked").val()
+        time = $("input:radio[name=time]:checked").val()
+        minutes = 1000 * 60
+        hours = minutes * 60
+        days = hours * 24
+        secs = undefined
+        for i of @map._layers
+            unless @map._layers[i]._path is `undefined`
+                try
+                    @map.removeLayer @map._layers[i]
+                catch e
+                    console.log "problem with " + e + @map._layers[i]
+        if con is "day"
+            secs = days
+        else if con is "hour"
+            secs = hours
+        else secs = minutes  if con is "minute"
+        _ref5 = @data.models
+        _j = 0
+        _len1 = _ref5.length
+
+        while _j < (_len1 - 1)
+            datum = _ref5[_j]
+            parseDate = d3.time.format("%Y-%m-%dT%H:%M:%S").parse
+            if time is "date"
+                try
+                    start = Date.parse(@data.models[_j].attributes.data.Time)
+                catch err
+                    start = null
+            else
+                start = parseDate(@data.models[_j].get("timestamp"))
+            d = Math.floor(start / secs)
+            geopoint = datum.get("data")[@map_headers].split(" ")
+            @pL = []
+            @pL.push [parseFloat(geopoint[0]), parseFloat(geopoint[1])]
+            _k = _j + 1
+            _len1 = _ref5.length
+
+            while _k < _len1
+                break  if start = null
+                datum2 = _ref5[_k]
+                parseDate = d3.time.format("%Y-%m-%dT%H:%M:%S").parse
+                if time is "date"
+                    try
+                        start2 = Date.parse(@data.models[_k].attributes.data.Time)
+                    catch err
+                        start2 = null
+                else
+                    start2 = parseDate(@data.models[_k].get("timestamp"))
+                d2 = Math.floor(start2 / secs)
+                geopoint = datum2.get("data")[@map_headers].split(" ")
+                if val >= Math.abs(d - d2)
+                    @pL.push [parseFloat(geopoint[0]), parseFloat(geopoint[1])]
+                    @poly = L.polyline(@pL, @pLStyle).addTo(@map)
+                else
+                    break
+                _k++
+            _j++
+
+    clear_lines: (event) ->
+        for i of @map._layers
+            unless @map._layers[i]._path is `undefined`
+                try
+                    @map.removeLayer @map._layers[i]
+                catch e
+                    console.log "problem with " + e + @map._layers[i]
 
     change_y_axis: (event) ->
         # Ensure everything else is unchecked
