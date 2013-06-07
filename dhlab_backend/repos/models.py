@@ -2,6 +2,7 @@ from bson import ObjectId
 from datetime import datetime
 
 from django.db import models
+from django.db.models import Q
 
 from guardian.shortcuts import assign_perm
 
@@ -38,6 +39,15 @@ class Notebook( models.Model ):
         return self.name
 
 
+class RepositoryManager( models.Manager ):
+    def list_by_username( self, username ):
+        return self.filter( Q(user__username=username) | Q(org__name=username) )
+
+    def get_by_username( self, repo_name, username ):
+        return self.get( Q(name=repo_name),
+                         Q(user__username=username) | Q(org__name=username) )
+
+
 class Repository( models.Model ):
     '''
         Represents a data repository.
@@ -62,6 +72,8 @@ class Repository( models.Model ):
         date_uploaded - auto
             Datetime that the repository was created
     '''
+    objects     = RepositoryManager()
+
     mongo_id    = models.CharField( max_length=24,
                                     blank=False )
 
@@ -112,12 +124,14 @@ class Repository( models.Model ):
             # relational database
             self.mongo_id = db.repo.insert( repo )
 
+            super( Repository, self ).save( *args, **kwargs )
+
             # Set up permissions for the user & org
             assign_perm( 'view_repository', self.user, self )
             assign_perm( 'delete_repository', self.user, self )
             assign_perm( 'share_repository', self.user, self )
-
-        super( Repository, self ).save( *args, **kwargs )
+        else:
+            super( Repository, self ).save( *args, **kwargs )
 
     def add_data( self, data ):
         repo_data = {
@@ -139,4 +153,4 @@ class Repository( models.Model ):
         return self.user.name
 
     def __unicode__( self ):
-        return self.name
+        return self.related_name

@@ -11,6 +11,7 @@ from bson import ObjectId
 
 from django.conf.urls import url
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.http import HttpResponse
 
 from tastypie import fields
@@ -82,10 +83,7 @@ class RepoAuthorization( Authorization ):
         if account is None:
             raise ValueError
 
-        if isinstance( account, User ):
-            return object_list.find({ 'user': account.id } )
-        else:
-            return object_list.find({ 'org': account.id } )
+        return object_list.filter( Q(user__username=user) | Q(org__name=user) )
 
     def read_detail( self, object_detail, bundle ):
 
@@ -221,10 +219,10 @@ class RepoResource( ModelResource ):
         bundle = self.build_bundle( request=request )
         obj = self.obj_get( bundle, **self.remove_api_resource_names(kwargs) )
 
-        media = list( set( self._grab_media( obj[ 'children' ] ) ) )
-        media = [ ( med, base % ( obj['_id'], med ) ) for med in media ]
+        media = list( set( self._grab_media( obj.fields() ) ) )
+        media = [ ( med, base % ( obj.mongo_id, med ) ) for med in media ]
 
-        response = { 'repo': obj[ '_id' ], 'manifest': media }
+        response = { 'repo': obj.mongo_id, 'manifest': media }
         return self.create_response( request, response )
 
     def post_detail( self, request, **kwargs ):

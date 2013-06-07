@@ -2,7 +2,6 @@ import json
 
 from bson import ObjectId
 
-from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -97,9 +96,7 @@ def webform( request, username, repo_name ):
         return HttpResponse( status=404 )
 
     # Grab the repository
-    repo = Repository.objects.get( Q(name=repo_name),
-                                   Q(user__username=username) |
-                                        Q(org__name=username) )
+    repo = Repository.objects.get_by_username( repo_name, username )
     if repo is None:
         return HttpResponse( status=404 )
 
@@ -142,7 +139,7 @@ def repo_viz( request, username, repo_name ):
         return HttpResponse( status=404 )
 
     # Grab the repository
-    repo = Repository.objects.get( Q(name=repo_name), Q(user__username=username) | Q(org__name=username) )
+    repo = Repository.objects.get_by_username( repo_name, username )
     if repo is None:
         return HttpResponse( status=404 )
 
