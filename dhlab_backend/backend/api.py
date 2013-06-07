@@ -164,13 +164,16 @@ class RepoResource( ModelResource ):
         include_resource_uri = False
 
     def prepend_urls(self):
+
+        base_url = '^(?P<resource_name>%s)/' % ( self._meta.resource_name )
+
         return [
 
-            url( regex=r"^(?P<resource_name>%s)/(?P<mongo_id>\w+)/$" % ( self._meta.resource_name ),
+            url( regex=r"%s(?P<mongo_id>\w+)/$" % ( base_url ),
                  view=self.wrap_view('dispatch_detail'),
                  name="api_dispatch_detail"),
 
-            url( regex=r"^(?P<resource_name>%s)/(?P<mongo_id>\w+)/manifest/$" % ( self._meta.resource_name ),
+            url( regex=r"%s(?P<mongo_id>\w+)/manifest/$" % ( base_url ),
                  view=self.wrap_view('get_manifest'),
                  name="api_get_resource"),
         ]
