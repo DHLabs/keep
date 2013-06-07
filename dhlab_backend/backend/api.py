@@ -268,6 +268,9 @@ class RepoResource( ModelResource ):
         bundle.data['children'] = repo_fields[ 'fields' ]
         return bundle
 
+    def dehydrate_id( self, bundle ):
+        return bundle.obj.mongo_id
+
     def dehydrate_user( self, bundle ):
         '''
             Convert user ids into a more informative username when displaying
