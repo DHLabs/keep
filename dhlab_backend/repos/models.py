@@ -41,11 +41,16 @@ class Notebook( models.Model ):
 
 class RepositoryManager( models.Manager ):
     def list_by_username( self, username ):
-        return self.filter( Q(user__username=username) | Q(org__name=username) )
+        return self.filter(Q(user__username=username) | Q(org__name=username))
 
     def get_by_username( self, repo_name, username ):
         return self.get( Q(name=repo_name),
                          Q(user__username=username) | Q(org__name=username) )
+
+    def repo_exists( self, repo_name, username ):
+        return self.filter(Q(name=repo_name),
+                           Q(user__username=username) | Q(org__name=username))\
+                   .exists()
 
 
 class Repository( models.Model ):
@@ -133,7 +138,7 @@ class Repository( models.Model ):
 
             # As the owner of this repo we have full permissions!
             for perm in self._meta.permissions:
-                assign_perm( perm, self.user, self )
+                assign_perm( perm[0], self.user, self )
         else:
             super( Repository, self ).save( *args, **kwargs )
 

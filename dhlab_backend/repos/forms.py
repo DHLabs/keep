@@ -2,14 +2,10 @@ import json
 import os
 import re
 
-from datetime import datetime
-
 from django import forms
 
 from pyxform.xls2json import SurveyReader
 from openrosa.xform_reader import XFormReader
-
-from backend.db import db
 
 from .models import Repository
 
@@ -61,17 +57,8 @@ class NewRepoForm( forms.Form ):
                                             spaces or special characters''' )
 
         # Check that this form name isn't already taken by the user
-        query = { 'name': data }
-
-        if self._user:
-            query[ 'user' ] = self._user.id
-
-        if self._org:
-            query[ 'org' ] = self._org.id
-
-        repo_exists = db.survey.find( query )
-
-        if repo_exists.count() != 0:
+        username = self._user.username if self._user else self._org.name
+        if Repository.objects.repo_exists( data, username ):
             raise forms.ValidationError( '''Repository already exists with
                                             this name''' )
 
