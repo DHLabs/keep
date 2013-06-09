@@ -14,15 +14,16 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponse
 
+from guardian.shortcuts import get_perms
+
 from tastypie import fields
 from tastypie.authorization import Authorization
 from tastypie.exceptions import BadRequest
-from tastypie.http import HttpUnauthorized
+from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
 from backend.db import user_or_organization
-from organizations.models import Organization
 from repos.models import Repository
 
 # from twofactor.api_auth import ApiTokenAuthentication
@@ -51,27 +52,12 @@ class DataAuthorization( Authorization ):
 
     def read_detail( self, object_detail, bundle ):
         user = bundle.request.GET.get( 'user', None )
-
         account = user_or_organization( user )
 
-        if 'user' in object_detail:
+        if account is None:
+            return False
 
-            if isinstance( account, User ):
-                if object_detail[ 'user' ] == account.id:
-                    return True
-
-        elif 'org' in object_detail:
-
-            if isinstance( account, User ):
-                org = Organization.objects.get( id=object_detail['org'] )
-                if org.has_user( account ):
-                    return True
-
-            elif isinstance( account, Organization ):
-                if object_detail[ 'org' ] == account.id:
-                    return True
-
-        return False
+        return account.has_perm( 'view_data', object_detail )
 
 
 class RepoAuthorization( Authorization ):
@@ -123,7 +109,7 @@ class DataResource( MongoDBResource ):
 
         try:
             basic_bundle = self.build_bundle( request=request )
-            repo = db.survey.find_one( { '_id': ObjectId( repo_id ) } )
+            repo = Repository.objects.get( mongo_id=repo_id )
 
             if not self.authorized_read_detail( repo, basic_bundle ):
                 return HttpUnauthorized()
@@ -232,27 +218,21 @@ class RepoResource( ModelResource ):
 
         basic_bundle = self.build_bundle( request=request )
 
-        # The find the suervey object associated with this form name & user
-        repo = db.survey.find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
+        user_accessing = request.GET.get( 'user', None )
+        user = user_or_organization( user_accessing )
+        if user is None:
+            return HttpUnauthorized()
 
-        account = None
-        if 'user' in repo:
-            account = repo[ 'user' ]
-        elif 'org' in repo:
-            account = repo[ 'org' ]
+        repo = Repository.objects.get( mongo_id=kwargs.get( 'mongo_id' ) )
+        if repo is None:
+            return HttpNotFound()
 
-        account = user_or_organization( account )
-
-        # Are we authorized to post data here?
-        if not self.authorized_create_detail( repo, basic_bundle ):
+        if not user.has_perm( 'add_data', repo ):
             return HttpUnauthorized()
 
         # Do basic validation of the data
-        valid_data = validate_and_format( repo, request.POST )
-
-        new_id = Repository.add_data( repo=repo,
-                                      data=valid_data,
-                                      account=account )
+        valid_data = validate_and_format( repo.fields(), request.POST )
+        new_id = repo.add_data( valid_data )
 
         response_data = { 'success': True, 'id': str( new_id ) }
         return self.create_response( request, response_data )

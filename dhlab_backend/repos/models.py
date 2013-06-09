@@ -103,7 +103,12 @@ class Repository( models.Model ):
 
         permissions = (
             ( 'view_repository', 'View Repo' ),
-            ( 'share_repository', 'Share Repo' ),)
+            ( 'share_repository', 'Share Repo' ),
+
+            ( 'view_data', 'View data in Repo' ),
+            ( 'add_data', 'Add data to Repo' ),
+            ( 'edit_data', 'Edit data in Repo' ),
+            ( 'delete_data', 'Delete data from Repo' ), )
 
     def delete( self ):
         '''
@@ -126,10 +131,9 @@ class Repository( models.Model ):
 
             super( Repository, self ).save( *args, **kwargs )
 
-            # Set up permissions for the user & org
-            assign_perm( 'view_repository', self.user, self )
-            assign_perm( 'delete_repository', self.user, self )
-            assign_perm( 'share_repository', self.user, self )
+            # As the owner of this repo we have full permissions!
+            for perm in self._meta.permissions:
+                assign_perm( perm, self.user, self )
         else:
             super( Repository, self ).save( *args, **kwargs )
 
@@ -153,4 +157,4 @@ class Repository( models.Model ):
         return self.user.name
 
     def __unicode__( self ):
-        return self.related_name
+        return '<Repository %s>' % ( self.name )
