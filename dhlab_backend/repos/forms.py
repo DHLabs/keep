@@ -57,7 +57,7 @@ class NewRepoForm( forms.Form ):
                                             spaces or special characters''' )
 
         # Check that this form name isn't already taken by the user
-        username = self._user.username if self._user else self._org.name
+        username = self._org.name if self._org else self._user.username
         if Repository.objects.repo_exists( data, username ):
             raise forms.ValidationError( '''Repository already exists with
                                             this name''' )

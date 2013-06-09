@@ -32,8 +32,8 @@ class Notebook( models.Model ):
 
     class Meta:
         ordering = [ 'name' ]
-        verbose_name = 'project'
-        verbose_name_plural = 'projects'
+        verbose_name = 'notebook'
+        verbose_name_plural = 'notebooks'
 
     def __unicode__( self ):
         return self.name
@@ -51,6 +51,26 @@ class RepositoryManager( models.Manager ):
         return self.filter(Q(name=repo_name),
                            Q(user__username=username) | Q(org__name=username))\
                    .exists()
+
+
+class Relationship( models.Model ):
+    '''
+        Represents a relationship between two repos
+    '''
+    name        = models.CharField( max_length=256, blank=False )
+
+    repo_parent = models.ForeignKey( 'repos.Repository',
+                                     related_name='parent_relations',
+                                     blank=False )
+
+    repo_child  = models.ForeignKey( 'repos.Repository',
+                                     related_name='child_relations',
+                                     blank=False )
+
+    class Meta:
+        ordering = [ 'name' ]
+        verbose_name = 'relationship'
+        verbose_name_plural = 'relationships'
 
 
 class Repository( models.Model ):
