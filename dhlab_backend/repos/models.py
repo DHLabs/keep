@@ -44,8 +44,14 @@ class RepositoryManager( models.Manager ):
         return self.filter(Q(user__username=username) | Q(org__name=username))
 
     def get_by_username( self, repo_name, username ):
-        return self.get( Q(name=repo_name),
-                         Q(user__username=username) | Q(org__name=username) )
+        user_repo_q = Q( name=repo_name )
+        user_repo_q.add( Q( user__username=username ), Q.AND )
+        user_repo_q.add( Q( org=None ), Q.AND )
+
+        org_repo_q = Q( name=repo_name )
+        org_repo_q.add( Q( org__name=username ), Q.AND )
+
+        return self.get( user_repo_q | org_repo_q )
 
     def repo_exists( self, repo_name, username ):
         return self.filter(Q(name=repo_name),
