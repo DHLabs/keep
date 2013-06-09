@@ -40,8 +40,7 @@ class OrganizationHttpTests( HttpTestCase ):
 
         org_name = 'test_org'
 
-        new_org = '/html/body/div[2]/div/div[1]/div[1]/div[1]/a'
-        self.selenium.find_element_by_xpath( new_org ).click()
+        self.selenium.find_element_by_id( 'create_org_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
@@ -49,8 +48,8 @@ class OrganizationHttpTests( HttpTestCase ):
         submit = '/html/body/div[2]/div/div/div/form/div/button'
         self.selenium.find_element_by_xpath( submit ).click()
 
-        # Check that the new repo was created
-        org_list = '/html/body/div[2]/div/div[1]/div[1]/div/div/a'
+        # Check that the new org was created
+        org_list = '//*[@id="org-list"]/div/a'
         orgs = self.selenium.find_elements_by_xpath( org_list )
         assert any( [ x.text == org_name for x in orgs ] )
 
@@ -59,8 +58,7 @@ class OrganizationHttpTests( HttpTestCase ):
 
         org_name = 'test_org_2'
 
-        new_org = '/html/body/div[2]/div/div[1]/div[1]/div[1]/a'
-        self.selenium.find_element_by_xpath( new_org ).click()
+        self.selenium.find_element_by_id( 'create_org_btn' ).click()
         self.selenium.find_element_by_id( 'id_gravatar' )\
                      .send_keys( 'webmaster@distributedhealth.org' )
 
@@ -71,7 +69,7 @@ class OrganizationHttpTests( HttpTestCase ):
         self.selenium.find_element_by_xpath( submit ).click()
 
         # Check that the new repo was created
-        org_list = '/html/body/div[2]/div/div[1]/div[1]/div/div/a'
+        org_list = '//*[@id="org-list"]/div/a'
         orgs = self.selenium.find_elements_by_xpath( org_list )
         assert any( [ x.text == org_name for x in orgs ] )
 
@@ -80,8 +78,7 @@ class OrganizationHttpTests( HttpTestCase ):
 
         org_name = '1Q##$U ala2'
 
-        new_org = '/html/body/div[2]/div/div[1]/div[1]/div[1]/a'
-        self.selenium.find_element_by_xpath( new_org ).click()
+        self.selenium.find_element_by_id( 'create_org_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
@@ -99,8 +96,7 @@ class OrganizationHttpTests( HttpTestCase ):
 
         org_name = 'new'
 
-        new_org = '/html/body/div[2]/div/div[1]/div[1]/div[1]/a'
-        self.selenium.find_element_by_xpath( new_org ).click()
+        self.selenium.find_element_by_id( 'create_org_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
@@ -118,8 +114,7 @@ class OrganizationHttpTests( HttpTestCase ):
 
         org_name = 'test_user'
 
-        new_org = '/html/body/div[2]/div/div[1]/div[1]/div[1]/a'
-        self.selenium.find_element_by_xpath( new_org ).click()
+        self.selenium.find_element_by_id( 'create_org_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
@@ -136,8 +131,8 @@ class OrganizationHttpTests( HttpTestCase ):
         self.test_login()
 
         # Find the list of orgs on the page
-        org = '/html/body/div[2]/div/div[1]/div[1]/div/div/a'
-        elems = self.selenium.find_elements_by_xpath( org )
+        org_list = '//*[@id="org-list"]/div/a'
+        elems = self.selenium.find_elements_by_xpath( org_list )
 
         assert len( elems ) > 0
         # Click on the first one

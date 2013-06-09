@@ -73,7 +73,7 @@ class HttpTests( HttpTestCase ):
         self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that the new repo was created
-        repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
+        repo_table = '//*[@id="repo_list"]/tbody/tr/td[2]/a'
         repos = self.selenium.find_elements_by_xpath( repo_table )
         assert any( [ x.text == repo_name for x in repos ] )
 
@@ -97,7 +97,7 @@ class HttpTests( HttpTestCase ):
         self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that the new repo was created
-        repo_table = '/html/body/div[2]/div/div[2]/table[1]/tbody/tr/td[2]/a'
+        repo_table = '//*[@id="repo_list"]/tbody/tr/td[2]/a'
         repos = self.selenium.find_elements_by_xpath( repo_table )
         assert any( [ x.text == repo_name for x in repos ] )
 
@@ -121,8 +121,8 @@ class HttpTests( HttpTestCase ):
         self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that the new repo was created
-        repo_table = '/html/body/div[2]/div/div[2]/table/tbody/tr/td[2]/a'
-        repos = self.selenium.find_elements_by_xpath( repo_table )
+        repo_table = '//*[@id="repo_list"]/tbody/tr[2]/td[2]/a'
+        repos = self.selenium.find_element_by_xpath( repo_table )
         assert any( [ x.text == repo_name for x in repos ] )
 
     def test_create_repo_existing( self ):
@@ -143,7 +143,7 @@ class HttpTests( HttpTestCase ):
         self.selenium.find_element_by_id( 'submit_btn' ).click()
 
         # Check that we correctly report an error
-        error = '/html/body/div[2]/div/div/div/form/ul/li'
+        error = '//*[@class="errorlist"]/li'
         elem = self.selenium.find_element_by_xpath( error )
         assert elem.text == 'Repository already exists with this name'
 
@@ -154,7 +154,7 @@ class HttpTests( HttpTestCase ):
         self.test_login()
 
         # Find the first data repo
-        repo = '/html/body/div[2]/div/div[2]/table[1]/tbody/tr[1]/td[2]/a'
+        repo = '//*[@id="repo_list"]/tbody/tr[2]/td[2]/a'
         repo = self.selenium.find_element_by_xpath( repo )
 
         repo_name = repo.text
@@ -181,6 +181,7 @@ class HttpTests( HttpTestCase ):
         share = self.selenium.find_element_by_id( 'sharing_toggle' )
         share.click()
 
+        privacy = self.selenium.find_element_by_xpath( '//*[@id="privacy"]/div' )
         if previous_privacy == 'PUBLIC':
             assert 'PRIVATE' in privacy.text
         else:
