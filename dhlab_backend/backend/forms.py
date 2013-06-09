@@ -9,6 +9,9 @@ from registration.models import RegistrationProfile
 
 from twofactor.models import UserAuthToken
 
+class ReportForm( forms.Form ):
+    name = forms.CharField()
+    report_json = forms.CharField( widget=forms.HiddenInput )
 
 class ResendActivationForm( forms.Form ):
     email = forms.EmailField(widget=forms.TextInput())
