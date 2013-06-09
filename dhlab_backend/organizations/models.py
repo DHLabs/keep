@@ -1,20 +1,17 @@
 import hashlib
 
+from django.contrib.auth.models import Group, User
 from django.db import models
 
 USER_MODEL = 'auth.User'
 
 
-class Organization( models.Model ):
+class Organization( Group ):
     '''
         Umbrella object with which users are associated.
 
         An organization can have multiple users.
     '''
-    name = models.CharField( max_length=200,
-                             unique=True,
-                             help_text='The name of the organization' )
-
     gravatar = models.EmailField( blank=True )
     owner = models.ForeignKey( USER_MODEL )
     users = models.ManyToManyField( USER_MODEL,

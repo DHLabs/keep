@@ -57,7 +57,12 @@ class DataAuthorization( Authorization ):
         if account is None:
             return False
 
-        return account.has_perm( 'view_data', object_detail )
+        result = account.has_perm( 'view_data', object_detail )
+        if not result:
+            for org in account.organization_users.all():
+                if 'view_data' in get_perms( org, object_detail ):
+                    return True
+        return False
 
 
 class RepoAuthorization( Authorization ):
@@ -78,7 +83,12 @@ class RepoAuthorization( Authorization ):
         if account is None:
             return False
 
-        return account.has_perm( 'view_repository', bundle.obj )
+        result = account.has_perm( 'view_repository', bundle.obj )
+        if not result:
+            for org in account.organization_users.all():
+                if 'view_repository' in get_perms( org, bundle.obj ):
+                    return True
+        return False
 
     def create_detail( self, object_detail, bundle ):
         return True

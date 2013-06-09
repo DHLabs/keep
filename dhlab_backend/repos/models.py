@@ -139,6 +139,9 @@ class Repository( models.Model ):
             # As the owner of this repo we have full permissions!
             for perm in self._meta.permissions:
                 assign_perm( perm[0], self.user, self )
+
+                if self.org:
+                    assign_perm( perm[0], self.org, self )
         else:
             super( Repository, self ).save( *args, **kwargs )
 

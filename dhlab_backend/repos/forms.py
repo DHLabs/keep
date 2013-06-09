@@ -129,6 +129,4 @@ class NewRepoForm( forms.Form ):
                         user=self._user,
                         org=self._org,
                         is_public=self.cleaned_data[ 'privacy' ] == 'public' )
-        new_repo.save( repo=repo )
-
-        return None
+        return new_repo.save( repo=repo )

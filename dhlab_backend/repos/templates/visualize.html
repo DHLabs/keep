@@ -12,7 +12,7 @@
 
 {% block js %}
 <script id='form_id' type='text/plain'>{{ sid }}</script>
-<script id='user' type='text/plain'>{{ account_name }}</script>
+<script id='user' type='text/plain'>{{ user.username }}</script>
 <script>
 	document.cdn = '{% static "" %}'
 </script>
