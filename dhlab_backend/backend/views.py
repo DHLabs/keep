@@ -102,6 +102,15 @@ def user_dashboard( request, username ):
     # Find all the organization this user belongs to
     organizations = Organization.objects.filter( users=user )
 
+    patients = Repository.objects.filter( user=user, name='patients' )
+    if len( patients ) > 0:
+        patients = patients[0]
+        patient_list = []
+        patients = db.data.find( { 'repo': ObjectId( patients.mongo_id ) } )
+
+        for patient in patients:
+            patient_list.append( patient[ 'data' ] )
+
     # Grab a list of forms uploaded by the user
     if is_other_user:
         user_repos = Repository.objects.filter( user=user, org=None, is_public=True )
@@ -112,7 +121,8 @@ def user_dashboard( request, username ):
         shared_repos = Repository.objects.filter( org__in=organizations )
 
     return render_to_response( 'dashboard.html',
-                               {'user_repos': user_repos,
+                               {'patients': patient_list,
+                                'user_repos': user_repos,
                                 'shared_repos': shared_repos,
                                 'is_other_user': is_other_user,
                                 'account': user,

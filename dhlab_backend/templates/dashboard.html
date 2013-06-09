@@ -87,6 +87,34 @@
 	<!-- REPOSITORIES -->
 	<div class='span9'>
 		<div style='overflow:auto;margin-bottom:4px;margin-top:8px;'>
+			<h4>Patients</h4>
+		</div>
+		<table id='patient_list' class='table table-striped table-bordered'>
+			<thead>
+				<tr>
+					<th>First Name</th>
+					<th>Last Name</th>
+					<th>&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for patient in patients %}
+				<tr>
+					<td>{{ patient.first_name }}</td>
+					<td>{{ patient.last_name }}</td>
+					<td>
+						{% for repo in user_repos %}
+							{% if repo.name != 'patients' %}
+								<a class='btn' href='{% url "repo_visualize" username=account.username repo_name=repo.name %}?pid={{patient.pid}}'>{{ repo.name }}</a>
+							{% endif %}
+						{% endfor %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<div style='overflow:auto;margin-bottom:4px;margin-top:8px;'>
 			{% if not is_other_user %}
 			<div class='pull-right' style='margin-top:8px;'>
                 <a href='{% url "report_build" %}' class='btn btn-small'>
