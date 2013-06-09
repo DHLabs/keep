@@ -144,9 +144,11 @@ def repo_viz( request, username, repo_name ):
         return HttpResponse( status=404 )
 
     # Grab all the permissions!
-    permissions = get_perms( request.user, repo )
-    for org in request.user.organization_users.all():
-        permissions.extend( get_perms( org, repo ) )
+    permissions = []
+    if request.user.is_authenticated():
+        permissions = get_perms( request.user, repo )
+        for org in request.user.organization_users.all():
+            permissions.extend( get_perms( org, repo ) )
 
     # Check to see if the user has access to view this survey
     if not repo.is_public and 'view_repository' not in permissions:

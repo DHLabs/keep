@@ -51,6 +51,9 @@ class DataAuthorization( Authorization ):
                           .sort( 'timestamp', pymongo.DESCENDING )
 
     def read_detail( self, object_detail, bundle ):
+        if object_detail.is_public:
+            return True
+
         user = bundle.request.GET.get( 'user', None )
         account = user_or_organization( user )
 
@@ -80,12 +83,13 @@ class RepoAuthorization( Authorization ):
 
     def read_detail( self, object_detail, bundle ):
 
+        if bundle.obj.is_public:
+            return True
+
         account = bundle.request.GET.get( 'user', None )
         account = user_or_organization( account )
         if account is None:
             return False
-
-        print get_perms( account, bundle.obj )
 
         result = account.has_perm( 'view_repository', bundle.obj )
         if not result:
