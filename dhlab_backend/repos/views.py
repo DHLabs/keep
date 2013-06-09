@@ -2,6 +2,7 @@ import json
 
 from bson import ObjectId
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -96,8 +97,9 @@ def webform( request, username, repo_name ):
         return HttpResponse( status=404 )
 
     # Grab the repository
-    repo = Repository.objects.get_by_username( repo_name, username )
-    if repo is None:
+    try:
+        repo = Repository.objects.get_by_username( repo_name, username )
+    except ObjectDoesNotExist:
         return HttpResponse( status=404 )
 
     if request.method == 'POST':
@@ -139,9 +141,10 @@ def repo_viz( request, username, repo_name ):
         return HttpResponse( status=404 )
 
     # Grab the repository
-    repo = Repository.objects.get_by_username( repo_name, username )
-    if repo is None:
-        return HttpResponse( status=404 )
+    try:
+        repo = Repository.objects.get_by_username( repo_name, username )
+    except ObjectDoesNotExist:
+       return HttpResponse( status=404 )
 
     # Grab all the permissions!
     permissions = []
