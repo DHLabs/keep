@@ -24,17 +24,18 @@
 
 {% block content %}
 <div class='row'>
-	<div class='span4'>
+	<div class='span3'>
 		<h3>
 			<img width='40' src='{{ account.icon }}' class='account-icon-large'>
 			<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>
 		</h3>
+
 		<div>
 			<h5>Members</h5>
 			<div>
 				{% if is_owner %}
 				<div class='form-search' style='background:#EEE;padding:8px;border:1px solid #DDD;margin-bottom:8px;'>
-					<input id='add_member' type='text' class='input-medium search-query'>
+					<input id='add_member' type='text' class='input-small search-query'>
 					<button class='btn pull-right'>
 						<i class='icon-plus-sign'></i>&nbsp;Add
 					</button>
@@ -90,25 +91,23 @@
 			</div>
 		</div>
 	</div>
-	<div class='span8'>
-		<table class='table table-striped table-bordered'>
-			<thead>
-				<tr>
-					<td colspan='4' style='background-color:#EEE;'>
-						<h4>
-							{% if is_owner %}
-							<div class='pull-right'>
-								<a id='new_repo_btn' href='{% url "organization_repo_new" org=account.name %}' class='btn btn-small'>
-									New Repository
-								</a>
-							</div>
-							{% endif %}
-							{{ account.name }} Data Repositories
-						</h4>
-					</td>
-				</tr>
-			</thead>
+	<div class='span9'>
+		{% if is_owner %}
+		<div style='height:40px;margin:10px 0;'>
+			<div style='padding:8px;'>
+				<div class='pull-right'>
+					<a id='new_repo_btn'
+					   href='{% url "organization_repo_new" org=account.name %}'
+					   class='btn btn-small'>
+						New Repository
+					</a>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+		<table id='repo_list' class='table table-striped table-bordered'>
 			<tbody>
+				<tr><td colspan='4'>Data Diaries</td></tr>
 				{% if repos|length == 0 %}
 					<tr>
 						<td style='text-align:center;' colspan='4'>
