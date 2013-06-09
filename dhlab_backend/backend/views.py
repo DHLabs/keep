@@ -132,6 +132,7 @@ def build_report( request ):
 
     if request.method == 'POST':
         form = ReportForm( request.POST, request.FILES )
+
         if( form.is_valid ):
             #build form
             data = request.POST[ 'report_json' ].strip()
@@ -192,21 +193,19 @@ def build_report( request ):
     else:
         form = ReportForm()
 
-    user_repos = Repository.list_repos( request.user )
-    shared_repos = Repository.shared_repos( request.user )
+    user_repos = Repository.objects.filter( user=request.user, org=None )
 
-    # Find all the organization this user belongs to
-    organizations = OrganizationUser.objects.filter( user=request.user )
-
-    for user_repo in user_repos:
-        user_repo[ 'mongo_id' ] = str( user_repo[ 'mongo_id' ] )
+    repos = []
+    for repo in user_repos:
+        repo_info = {
+            'name': repo.name,
+            'mongo_id': repo.mongo_id,
+            'children': repo.fields() }
+        repos.append( repo_info )
 
     return render_to_response( 'report_builder.html',
-                                { 'user_repos': json.dumps(user_repos, default=json_util.default),
-                                'shared_repos': shared_repos,
-                                'account': request.user,
-                                'organizations': organizations,
-                                'form': form },
+                                { 'user_repos': json.dumps( repos ),
+                                  'form': form },
                                 context_instance=RequestContext(request) )
 
 
