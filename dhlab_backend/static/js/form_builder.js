@@ -245,8 +245,6 @@ function populateQuestion( questionName ) {
 	removeConstraint();
 	removeRelevance();
 
-    console.log( "question to populate: " + questionName );
-
     $("#questionName").val( "" );
 	$("#questionLabel").val( "" );
 	$("#questionRequired").checked = false;
@@ -459,7 +457,6 @@ function okClicked() {
 
 		//alert( JSON.stringify(question) );
 
-        console.log("asdf:" + currentQuestionName + ": " + currentGroupName);
         if( question.type == "group" && currentQuestionName == null ) {
             question.children = new Array();
         }
@@ -623,9 +620,7 @@ function deleteQuestion(questionName) {
 }
 
 function editQuestion(questionName) {
-console.log('test2');
     populateQuestion(questionName);
-    console.log('test');
 	currentQuestionName = questionName;
 	$('#questionEditWindow').modal('show');
 }
@@ -685,15 +680,8 @@ function getHTMLForQuestion(question) {
 }
 
 function addQuestionToGroup( groupName ) {
-    console.log('hello there');
     currentGroupName = groupName;
     editQuestion( null );
-}
-
-function editQuestionForGroup( groupName, questionName ) {
-    currentGroupName = groupName;
-    currentQuestionName = questionName;
-    editQuestion( questionName );
 }
 
 function getQuestionForName(questionName, listQuestions ) {
