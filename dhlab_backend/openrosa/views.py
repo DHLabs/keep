@@ -51,6 +51,15 @@ def _parse_xml_submission( xml_data, root, files ):
 @csrf_exempt
 @require_POST
 def xml_submission( request, username ):
+    '''
+        See: https://bitbucket.org/javarosa/javarosa/wiki/FormSubmissionAPI
+
+        Parse an xml_submission_file and add the data into the specified repo.
+    '''
+    success_response = '''
+        <OpenRosaResponse xmlns="http://openrosa.org/http/response">
+            <message>Form Received!</message>
+        </OpenRosaResponse>'''
 
     root = etree.fromstring(request.FILES[ 'xml_submission_file' ].read())
 
@@ -66,7 +75,9 @@ def xml_submission( request, username ):
     _parse_xml_submission( xml_data, root, request.FILES )
 
     # Do basic validation of the data
-    new_data = repo.add_data( xml_data, request.FILES )
+    repo.add_data( xml_data, request.FILES )
 
-    return HttpResponse( json.dumps( { 'success': True } ),
-                         mimetype='application/json' )
+    response = HttpResponse( success_response, mimetype='application/json' )
+    response[ 'X-OpenRosa-Version' ] = '1.0'
+
+    return response
