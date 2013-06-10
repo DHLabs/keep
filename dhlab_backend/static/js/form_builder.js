@@ -3,6 +3,20 @@ var currentQuestion;
 var currentQuestionName;
 var currentGroupName;
 
+$( function() {
+  if( repo ) {
+    console.log( repo );
+    questionList = repo;
+
+    //hide xls upload
+    $( '#build_form' ).hide();
+    $('#xform_file_upload').hide();
+    $( '#survey_builder' ).show();
+    reloadQuestionListHTML();
+    buildSurvey();
+  }
+});
+
 function questionTypeChanged() {
 	var questionType = $("#questionType").val();
 

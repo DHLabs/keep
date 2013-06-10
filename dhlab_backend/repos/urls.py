@@ -8,6 +8,11 @@ urlpatterns = patterns( 'repos.views',
         view='new_repo',
         name='repo_new'),
 
+    # Edit form
+    url(regex=r'^repo/edit/(?P<repo_id>\w+)/$',
+        view='edit_repo',
+        name='repo_edit'),
+
     # Delete form
     url(regex=r'^repo/delete/(?P<repo_id>\w+)/$',
         view='delete_repo',

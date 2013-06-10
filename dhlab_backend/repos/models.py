@@ -141,6 +141,13 @@ class Repository( models.Model ):
             ( 'edit_data', 'Edit data in Repo' ),
             ( 'delete_data', 'Delete data from Repo' ), )
 
+        ###def update(self, fields):
+        # repo = db.repo.find_one( ObjectId( self.mongo_id ) )
+        # print "updating repo:"
+        # print repo
+        #repo[fields] = fields
+    #db.repo.update( {"_id",ObjectId( self.mongo_id )},{"$set": {'fields': fields}} )
+
     def delete( self ):
         '''
             Delete all data & objects related to this object

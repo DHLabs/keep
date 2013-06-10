@@ -3,6 +3,9 @@
 
 {% block js %}
 <script src="{% static 'js/form_builder.js' %}"></script>
+{% if repo_json %}
+<script id='form_id' type='text/javascript'>var repo = {{ repo_json | safe }};</script>
+{% endif %}
 <script type='text/javascript'>
 	$( function() {
 		$( '#build_form' ).click( function() {
@@ -136,6 +139,7 @@
 				</div>
 				</p>
 
+            <div id="xform_file_upload">
 			<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
 				<strong>XForm File</strong>
 			</label>
@@ -143,6 +147,7 @@
 			<span class='help-block'>
 				Learn more about XForms <a href='http://en.wikipedia.org/wiki/XForms'>here</a>
 			</span>
+            </div>
 			{{ form.non_field_errors }}
 			{{ form.xform_file.errors }}
 			{{ form.survey_json.errors }}
@@ -176,7 +181,11 @@
 			</label>
 			<div style='clear:both;'>
 				<hr/>
+                    {% if repo_json %}
+                <button id='submit_btn' type='submit' class='btn btn-success'>Save Repository</button>
+                    {% else %}
 				<button id='submit_btn' type='submit' class='btn btn-success'>Create Repository</button>
+                    {% endif %}
 			</div>
 		</form>
 	</div>
