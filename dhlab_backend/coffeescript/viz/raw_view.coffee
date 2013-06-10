@@ -32,6 +32,13 @@ define( [ 'jquery',
                 </a>
             </div>''' )
 
+        card_video_tmpl: _.template( '''
+            <div class='card-image'>
+                <video controls>
+                    <source src='<%= url %>' type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+                </video>
+            </div>''' )
+
         card_data_tmpl: _.template( '''
             <div class='card-data'>
                 <div><%= data %></div>

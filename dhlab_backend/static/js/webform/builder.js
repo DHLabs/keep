@@ -54,7 +54,7 @@ define(['vendor/underscore'], function(_) {
       schema_dict['type'] = 'DateTime';
     } else if (child.type === 'photo') {
       schema_dict['type'] = 'Text';
-      schema_dict['template'] = _.template("<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>                                                        <label for='<%= editorId %>'><%= title %></label>                                                        <input type='file' accept='image/png'></input>                                                   </div>");
+      schema_dict['template'] = _.template("<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>                                                        <label for='<%= editorId %>'><%= title %></label>                                                        <input type='file' name='<%= editorId %>' accept='image/png'></input>                                                   </div>");
     } else if (child.type === 'select all that apply') {
       schema_dict['type'] = 'Checkboxes';
       schema_dict['options'] = [];

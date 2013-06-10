@@ -10,7 +10,7 @@
    * Bootstrap templates for Backbone Forms
    */
   Form.template = _.template('\
-    <form class="form" data-fieldsets method="post" action="."></form>\
+    <form class="form" data-fieldsets method="post" action="." enctype="multipart/form-data"></form>\
   ');
 
 

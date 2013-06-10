@@ -251,9 +251,7 @@ class RepoResource( ModelResource ):
         if not user.has_perm( 'add_data', repo ):
             return HttpUnauthorized()
 
-        # Do basic validation of the data
-        valid_data = validate_and_format( repo.fields(), request.POST )
-        new_id = repo.add_data( valid_data )
+        new_id = repo.add_data( request.POST, request.FILES )
 
         response_data = { 'success': True, 'id': str( new_id ) }
         return self.create_response( request, response_data )

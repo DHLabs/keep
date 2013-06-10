@@ -31,6 +31,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
 
     RawView.prototype.card_img_tmpl = _.template('<div class=\'card-image\'>\n    <a href=\'<%= url %>\' target=\'_blank\'>\n        <img src=\'<%= url %>\'>\n    </a>\n</div>');
 
+    RawView.prototype.card_video_tmpl = _.template('<div class=\'card-image\'>\n    <video controls>\n        <source src=\'<%= url %>\' type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />\n    </video>\n</div>');
+
     RawView.prototype.card_data_tmpl = _.template('<div class=\'card-data\'>\n    <div><%= data %></div>\n</div>');
 
     RawView.prototype._detect_headers = function(root) {

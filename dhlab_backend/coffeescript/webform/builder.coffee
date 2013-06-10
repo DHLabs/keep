@@ -72,7 +72,7 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             schema_dict['type'] = 'Text'
             schema_dict['template'] = _.template( "<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>
                                                         <label for='<%= editorId %>'><%= title %></label>
-                                                        <input type='file' accept='image/png'></input>
+                                                        <input type='file' name='<%= editorId %>' accept='image/png'></input>
                                                    </div>" )
 
         else if child.type is 'select all that apply'

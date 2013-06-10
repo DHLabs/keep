@@ -1,12 +1,15 @@
+table .help-block {
+  margin-bottom: 0; }
+
 #org-list > div {
   margin-bottom: 8px; }
 
 img.account-icon {
-  border: 1px solid #cccccc;
+  border: 1px solid #CCC;
   border-radius: 4px; }
 
 img.account-icon-large {
-  border: 1px solid #cccccc;
+  border: 1px solid #CCC;
   border-radius: 8px; }
 
 #member_list > div {
@@ -18,9 +21,9 @@ img.account-icon-large {
 #user_search_list {
   position: absolute; }
   #user_search_list .ui-autocomplete {
-    border-bottom: 1px solid #eeeeee;
-    border-right: 1px solid #eeeeee;
-    border-left: 1px solid #eeeeee;
+    border-bottom: 1px solid #EEE;
+    border-right: 1px solid #EEE;
+    border-left: 1px solid #EEE;
     list-style-type: none;
     background-color: white; }
   #user_search_list .ui-autocomplete > .ui-menu-item {
