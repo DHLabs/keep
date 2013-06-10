@@ -51,8 +51,7 @@
 							<td colspan='3' style='background-color:#EEE;'>
 								<h4>
 									<div class='pull-right'>
-                                        <button type='button' id='addgroup' onclick='addGroup()' class="btn btn btn-medium">Add Group</button>
-										<button type='button' id='addquestion' onclick='editQuestion(-1)' class="btn btn btn-medium">Add Question</button>
+										<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn btn btn-medium">Add Question</button>
 									</div>
 									Survey Questions
 								</h4>
@@ -111,6 +110,7 @@
 								<option value='audio'>Audio</option>
 								<option value='video'>Video</option>
 								<option value='barcode'>Barcode</option>
+                                <option value='group'>Group</option>
 							</select>
 							</div>
 

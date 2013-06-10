@@ -2,7 +2,16 @@
 function getQuestionOptions(select) {
 	//TODO: more stuff
 
+	var questionType = select.value.split(":")[1];
+
+	if( questionType == 'select' ) {
+
+	} else if( questionType == '' ) {
+
+	}
+
 	//incidence, average value, etc.
+	
 	var html = 'Type:<select>';
 	html += "<option value='incidence'>Incidence</option><option value='average'>Average</option>";
 	html += '</select>';
@@ -26,7 +35,7 @@ function submitReport() {
 			report.form_id = inputs.item(0).value.split(':')[0];
 			report.form_name = inputs.item(0).value.split(':')[1];
 			report.form_question = inputs.item(1).value;
-			report.report_type = inputs.item(2).value;
+			report.report_type = inputs.item(2).value.split(':')[0];
 
 			reports.push( report );
 		}
@@ -62,13 +71,22 @@ function showRepoQuestions(select) {
 	var html = 'Term:<select onchange="getQuestionOptions(this)">';
 
 	for( var i=0; i<questionList.length; i++ ) {
-		html += '<option>' + questionList[i].name + "</option>";
+		html += "<option value='" + questionList[i].name + ":" + questionList[i].type + "'>" + questionList[i].name + "</option>";
 	}
 
 	html += '</select>';
 
 	var tds = select.parentNode.parentNode.getElementsByTagName("td");
 	tds.item(1).innerHTML = html;
+
+	var items = document.getElementById('reportItems').getElementsByTagName('tr');
+	getQuestionOptions( items.item( items.length - 1 ).getElementsByTagName('select').item(1) );
+}
+
+function getQuestionList( repoIndex ) {
+	var questionList = new Array();
+	buildQuestionList( questionList, repos[repoIndex].children );
+	return questionList;
 }
 
 function buildQuestionList( questionList, formChildren )  {
@@ -77,6 +95,10 @@ function buildQuestionList( questionList, formChildren )  {
 		var question = formChildren[i];
 		if( question.type == 'group' ) {
 			buildQuestionList( questionList, question.children );
+		} else if( question.type == 'note' ) {
+			//don't add note
+		} else if( question.type == 'note' ) {
+
 		} else {
 			questionList.push( question );
 		}

@@ -1,5 +1,7 @@
 var questionList = new Array();
 var currentQuestion;
+var currentQuestionName;
+var currentGroupName;
 
 function questionTypeChanged() {
 	var questionType = $("#questionType").val();
@@ -76,15 +78,18 @@ function getCompareSelectForType(questionType, tagId) {
 	return html;
 }
 
-function addRelevance(questionNum,relevantType,relevantValue) {
+function addRelevance(questionName,relevantType,relevantValue) {
 	var relevantNum = $("#relevanceList tr").length;
 
 	var html = "<tr id='relevance" + relevantNum + "'>\n<td>\n";
 	html += "<select id='relevantQuestion" + relevantNum + " onchange='>\n";
+
+    //TODO: fix this with flat questionList
 	for( var questionIndex=0; questionIndex<currentQuestion; questionIndex++ ) {
 		html+= "<option value='" + questionIndex + "'>" + 
 		questionList[questionIndex].name + "</option>\n"
 	}
+    
 	html += "</select>\n</td>\n";
 	html += "<td id='relevantType"+ relevantNum +"''></td>\n";//relevantType selection
 	html += "<td id='relevantValue"+ relevantNum +"'></td>\n";//relevantValue
@@ -96,28 +101,29 @@ function addRelevance(questionNum,relevantType,relevantValue) {
         "</button>"+
 		"</td>\n</tr>\n";
 
-	if( questionNum > -1 ) {
-		$("#relevantQuestion" + relevantNum).val( questionNum );
+	if( questionName ) {
+		$("#relevantQuestion" + relevantNum).val( questionName );
 
 		if( relevantType ) {
-			relevanceQuestionChanged( relevantNum, questionNum );
+			relevanceQuestionChanged( relevantNum, questionName );
 			if(  relevantValue ) {
 				$("#relevanceValue"+relevanceNum).val( relevantValue );
 			}
 		}
 	}
-
 }
 
-function relevanceQuestionChanged( relevanceNum, questionNum ) {
+function relevanceQuestionChanged( relevanceNum, questionName ) {
 
 	var typeTag = 'relevanceType' + relevanceNum;
 	var valueTag = 'relevanceValue' + relevanceNum;
 	var html = getCompareSelectForType( questionList[questionNum].type, typeTag );
 	$("#relevantType"+relevanceNum).html( html );
 
+    var question = getQuestionForName(questionName);
+
 	$("#relevantValue"+relevanceNum).html( getValueInputForType( 
-		getValueInputForType( questionList[questionNum].type ), valueTag ) );
+		getValueInputForType( question.type ), valueTag ) );
 }
 
 function showRelevance() {
@@ -234,20 +240,23 @@ function showChoices() {
 	$("#choices").html(choiceHTML);
 }
 
-function populateQuestion( questionNum ) {
+function populateQuestion( questionName ) {
 	removeChoices();
 	removeConstraint();
 	removeRelevance();
 
-	$("#questionName").val( "" );
+    console.log( "question to populate: " + questionName );
+
+    $("#questionName").val( "" );
 	$("#questionLabel").val( "" );
 	$("#questionRequired").checked = false;
 	$("#questionHintUse").checked = false;
 	$("#questionType").val('note');
 	toggleHint();
 
-	if( questionNum > -1 ) {
-		var question = questionList[questionNum];
+	if( questionName != null ) {
+        var question = getQuestionForName(questionName);
+        
 		$("#questionName").val( question.name );
 		$("#questionLabel").val( question.label );
 		$("#questionType").val(question.type);
@@ -358,8 +367,8 @@ function getIndivConstraintString(constraintNum) {
 }
 
 function getIndivRelevanceString( relevanceNum ) {
-	var relevanceQuestionNum = $("#relevanceQuestion" + relevanceNum).val();
-	var relevanceQuestion = questionList[relevanceQuestionNum];
+	var relevanceQuestionName = $("#relevanceQuestion" + relevanceNum).val();
+	var relevanceQuestion = getQuestionForName(relevanceQuestionName);
 
 	var relevanceType =  $("#relevanceType" + relevanceNum).val();
 	var relevanceValue = $("#relevanceValue" + relevanceNum).val();
@@ -374,10 +383,10 @@ function okClicked() {
 
 	if( validateQuestion() ) {
 		var question;// = new Object();
-		if( currentQuestion == -1 ) {
+		if( currentQuestionName == null ) {
 			question = new Object();
 		} else {
-			question = questionList[currentQuestion];
+			question = getQuestionForName( currentQuestionName );
 		}
 
 		question.name = $("#questionName").val();
@@ -450,14 +459,78 @@ function okClicked() {
 
 		//alert( JSON.stringify(question) );
 
-		if( currentQuestion == -1 ) {
-			questionList.push(question);
-		} else {
-			questionList[currentQuestion] = question;
-		}
+        console.log("asdf:" + currentQuestionName + ": " + currentGroupName);
+        if( question.type == "group" && currentQuestionName == null ) {
+            question.children = new Array();
+        }
+
+        if( currentGroupName ) {
+
+            var group = getQuestionForName(currentGroupName);
+
+            if( currentQuestionName == null ) {
+                group.children.push(question);
+            } else {
+                var questionIndex = -1;
+                for( var index in group.children ) {
+                    if( group.children[index].name == question.name ) {
+                        questionIndex = index;
+                        break;
+                    }
+                }
+                if( questionIndex == -1 ) {
+                    console.log( "could not find question to modify" );
+                } else {
+                    group.children[questionIndex] = question;
+                }
+                
+            }
+        } else {
+
+            if( currentQuestionName == null ) {
+                questionList.push(question);
+            } else {
+                var questionIndex = -1;
+                for( var index in questionList ) {
+                    if( questionList[index].name == question.name ) {
+                        questionIndex = index;
+                        break;
+                    }
+                }
+                if( questionIndex == -1 ) {
+                    console.log( "could not find question to modify" );
+                } else {
+                    questionList[questionIndex] = question;
+                }
+            }
+        }
+		
 		buildSurvey();
 		reloadQuestionListHTML();
 		closeDialog();
+        currentGroupName = null;
+	}
+}
+
+function buildFlatQuestionList() {
+    var flatList = new Array();
+    buildQuestionList( flatList, questionList );
+    return flatList;
+}
+
+function buildQuestionList( listQuestions, formChildren )  {
+
+	for( var i=0; i<formChildren.length; i++ ) {
+		var question = formChildren[i];
+		if( question.type == "group" ) {
+			buildQuestionList( listQuestions, question.children );
+		} else if( question.type == 'note' ) {
+			//don't add note
+		} else if( question.type == 'note' ) {
+
+		} else {
+			questionList.push( question );
+		}
 	}
 }
 
@@ -477,6 +550,8 @@ function validateQuestion() {
 		//TODO: display that name is needed
 		return false;
 	}
+
+    //TODO: check to make sure question name is not repeated
 
 	//constraints (make sure all have names and values)
 
@@ -502,15 +577,56 @@ function validateQuestion() {
 	return true;
 }
 
-function deleteQuestion(questionNum) {
-	var questionId = "#question" + questionNum;
-	questionList.splice(questionNum, 1);
+function deleteQuestion(questionName) {
+    //TODO: fix this
+
+	var questionId = "#question" + questionName;
+
+    var question = getQuestionForName(questionName);
+    
+    if( currentGroupName ) {
+
+        var group = getQuestionForName(currentGroupName);
+
+        var questionIndex = -1;
+        for( var index in group.children ) {
+            if( group.children[index].name == question.name ) {
+                questionIndex = index;
+                break;
+            }
+        }
+        if( questionIndex == -1 ) {
+            console.log( "could not find question to delete" );
+        } else {
+            group.children.splice(questionIndex,1);
+        }
+
+    } else {
+        var questionIndex = -1;
+        for( var index in questionList ) {
+            if( questionList[index].name == question.name ) {
+                questionIndex = index;
+                break;
+            }
+        }
+        if( questionIndex == -1 ) {
+            console.log( "could not find question to delete" );
+        } else {
+            questionList.splice(questionIndex, 1);
+        }
+    }
+
+	//questionList.splice(questionNum, 1);
+
+    //remove the question from the interface
 	$(questionId).remove();
 }
 
-function editQuestion(questionNum) {
-	populateQuestion(questionNum);
-	currentQuestion = questionNum;
+function editQuestion(questionName) {
+console.log('test2');
+    populateQuestion(questionName);
+    console.log('test');
+	currentQuestionName = questionName;
 	$('#questionEditWindow').modal('show');
 }
 
@@ -520,34 +636,95 @@ function sanitizeNameInput(inputElement) {
 	inputElement.value = inputString;
 }
 
-function getHTMLForQuestion(questionNum) {
+function getHTMLForQuestion(question) {
 
-	var question = questionList[questionNum];
-	var html = "<tr id='question" + questionNum + "'>";
-	html += '<td>Name:&nbsp;' + question.name +
+    if( question.type == "group" ) {
+        var groupHTML = "<tr id='question" + question.name + "'>" +
+        "<td colspan='3'><table class='table table-striped table-bordered'>\n"
+        + "<thead>\n<tr><td colspan='3' style='background-color:#EEE;'>\n"
+        + "<h4>"+ question.name +"<div class='pull-right'>\n"
+        + "<button type='button' onclick=\"addQuestionToGroup('"
+        + question.name +"')\""
+        + " id='addQuestionForGroup' class='btn btn-small'>Add Question</button>\n" +
+        "<button class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
+        "	<i class='icon-pencil'></i> Edit"+
+        "</button>"+
+        "<button onclick=\"deleteQuestion('" + question.name
+        +"')\" class='btn btn-danger'>"+
+        "   <i class='icon-trash'></i> Delete"+
+        "</button></div></h4></td></tr>\n</thead>\n<tbody>";
+
+        //generate html from other questions
+        for( var groupQuestion in question.children ) {
+            groupHTML += getHTMLForQuestion( question.children[groupQuestion] );
+        }        
+        
+        groupHTML += "</tbody>\n</table></td></tr>\n";
+
+        return groupHTML;
+    } else {
+        var html = "<tr id='question" + question.name + "'>";
+        html += '<td>Name:&nbsp;' + question.name +
 		'&nbsp;&nbsp;&nbsp;Label:' + question.label +
 		'&nbsp;&nbsp;&nbsp;Question Type:' + question.type;
-	html += '</td>';
-	html += "<td style='width:70px;text-align:center;'>" +
-							"<button class='btn btn-small' data-toggle='modal' onclick='editQuestion("+ questionNum + ")'>"+
-							"	<i class='icon-pencil'></i> Edit"+
-							"</button>"+
-						"</td>"+
-						"<td style='width:90px;text-align:center;'>"+
-							"<button onclick='deleteQuestion(" + questionNum
-								+")' class='btn btn-danger'>"+
-							 "   <i class='icon-trash'></i> Delete"+
-							"</button>"+
-						"</td>";
-	html += '</tr>';
-	return html;
+        html += '</td>';
+        html += "<td style='width:70px;text-align:center;'>" +
+        "<button class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
+        "	<i class='icon-pencil'></i> Edit"+
+        "</button>"+
+        "</td>"+
+        "<td style='width:90px;text-align:center;'>"+
+        "<button onclick=\"deleteQuestion('" + question.name
+        +"')\" class='btn btn-danger'>"+
+        "   <i class='icon-trash'></i> Delete"+
+        "</button>"+
+        "</td>";
+        html += '</tr>';
+        return html;
+    }
+}
+
+function addQuestionToGroup( groupName ) {
+    console.log('hello there');
+    currentGroupName = groupName;
+    editQuestion( null );
+}
+
+function editQuestionForGroup( groupName, questionName ) {
+    currentGroupName = groupName;
+    currentQuestionName = questionName;
+    editQuestion( questionName );
+}
+
+function getQuestionForName(questionName, listQuestions ) {
+
+    if( !listQuestions ) {
+        listQuestions = questionList;
+        currentGroupName = null;
+    }
+
+    for( var question in listQuestions ) {
+
+        if( listQuestions[question].name == questionName ) {
+            return listQuestions[question];
+        } else {
+            if( listQuestions[question].type == "group" ) {
+                var theQuestion = getQuestionForName( questionName, listQuestions[question].children );
+                if( theQuestion ) {
+                    currentGroupName = listQuestions[question].name;
+                    return theQuestion;
+                }
+            }
+        }
+    }
+    currentGroupName = null;
+    return null;
 }
 
 function reloadQuestionListHTML() {
 	var html = '';
-
-	for( var index=0; index<questionList.length; index++ ) {
-		html = html + getHTMLForQuestion(index);
+	for( var question in questionList ) {
+		html = html + getHTMLForQuestion(questionList[question]);
 	}
 
 	$("#questionList").html( html );
