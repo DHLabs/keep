@@ -28,6 +28,9 @@ def validate_and_format( fields, data, files ):
                     valid_data[ ename ] = data.getlist( ename, [] )
                 else:
                     valid_data[ ename ] = data.get( ename, [] )
+            elif etype in [ 'photo', 'video' ]:
+                valid_data[ ename ] = data.get( ename ).name
+                valid_files[ ename ] = data.get( ename )
             else:
                 valid_data[ ename ] = data[ ename ]
 

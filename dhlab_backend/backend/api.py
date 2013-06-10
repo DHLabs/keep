@@ -266,6 +266,7 @@ class RepoResource( ModelResource ):
         '''
         repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
         bundle.data['children'] = repo_fields[ 'fields' ]
+        bundle.data['user']     = bundle.obj.user
         return bundle
 
     def dehydrate_id( self, bundle ):
