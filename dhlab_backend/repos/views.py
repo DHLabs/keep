@@ -134,7 +134,6 @@ def repo_viz( request, username, repo_name ):
         Does the checks necessary to determine whether the current user has the
         authority to view the current repository.
     '''
-
     # Grab the user/organization based on the username
     account = user_or_organization( username )
     if account is None:
@@ -158,8 +157,13 @@ def repo_viz( request, username, repo_name ):
         return HttpResponse( 'Unauthorized', status=401 )
 
     # Grab the data for this repository
-    data = db.data.find( {'repo': ObjectId( repo.mongo_id )} )
-    data = dehydrate_survey( data )
+    query = {
+        'repo': ObjectId( repo.mongo_id )
+    }
+    for key in request.GET.keys():
+        query[ 'data.%s' % ( key ) ] = request.GET.get( key )
+
+    data = dehydrate_survey( db.data.find( query ) )
 
     # Is some unknown user looking at this data?
     # TODO: Make the privatizer take into account
