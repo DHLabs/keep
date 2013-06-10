@@ -561,7 +561,7 @@ class DataView extends Backbone.View
         @markers = []
         @constrained_markers = []
         @marker_layer = new L.MarkerClusterGroup()
-        @constrained_layer = new L.MarkerClusterGroup()
+        @constrained_cluster_layer = new L.MarkerClusterGroup()
         for datum in @data.models
             geopoint = datum.get( 'data' )[ @map_headers ].split( ' ' )
             timestamp = Date.parse(datum.get('timestamp'))
@@ -577,14 +577,19 @@ class DataView extends Backbone.View
             constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
 
             if @lower_bound <= timestamp and timestamp <= @upper_bound
-                @constrained_layer.addLayer(constrainedMarker)
+                @constrained_cluster_layer.addLayer(constrainedMarker)
+                @constrained_markers.push( constrainedMarker )
 
             heatmapData.push(
                 lat: geopoint[0]
                 lon: geopoint[1]
                 value: 1 )
 
-        #@constrained_layer = L.layerGroup( @constrained_markers )
+        if (clusterCheck.checked == true)
+          @constrained_layer = @constrained_cluster_layer
+        else
+          @constrained_layer = L.layerGroup( @constrained_markers )
+        
         @heatmap.addData( heatmapData )
 
         

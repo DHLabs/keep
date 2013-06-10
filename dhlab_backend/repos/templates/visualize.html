@@ -106,23 +106,33 @@
             </div> <br/>
             Start Date: <input type='date' id='start_date' />
             End Date: <input type='date' id='end_date' />
-        <div id='time_step'>
-            <a href='#' id='step_btn' data-type='map' class='btn'><i class='icon-map-marker'></i>Step</a>
-        </div>
-	<div id='auto_step'>
-	    <a href='#' id='auto_btn' data-type='map' class='btn'><i class='icon-map-marker'></i>Auto</a>
-	</div>
+
 	<div id='time_static'>
 	    <a href='#' id='static_btn' data-type='map' class='btn'><i class='icon-map-marker'></i>Static</a>
 	</div>
-	<div id='pause'>
-	    <a href='#' id='pause_btn' data-type='map' class='btn'><i class='icon-map-marker'></i> Pause</a>
+	<div class="btn-toolbar">
+	<div class="btn-group">
+	<div id='auto_step'>
+	    <a href='#' id='auto_btn' data-type='map' class='btn'><i class='icon-retweet'></i></a>
 	</div>
+	<div id='pause'>
+	    <a href='#' id='pause_btn' data-type='map' class='btn'><i class='icon-pause'></i></a>
+	</div>
+	<div id='reset'>
+	    <a href='#' id='reset_btn' data-type='map' class='btn'><i class='icon-stop'></i></a>
+	</div>
+        <div id='time_step'>
+            <a href='#' id='step_btn' data-type='map' class='btn'><i class='icon-forward'></i></a>
+        </div>
+	</div>
+	</div>
+
 	<div id='cumulative'>
 	    <input id='cumulativeCheck' type="checkbox">Cumulative
 	</div>
-	<div id='reset'>
-	    <a href='#' id='reset_btn' data-type='map' class='btn'><i class='icon-map-marker'></i>Reset</a>
+
+	<div id='cluster'>
+	    <input id='clusterCheck' type="checkbox">Show Clusters
 	</div>
 
 	<div >
