@@ -26,8 +26,9 @@ AWS_STORAGE_BUCKET_NAME = 'keep-static'
 # Use Amazon Cloudfront
 AWS_S3_CUSTOM_DOMAIN    = 'd1sht9pkbliybl.cloudfront.net'
 AWS_HEADERS = {
-    'Expires': 'Thu, 15 Apr 2030 20:00:00 GMT',
-    'Cache-Control': 'max-age=86400',
+    #'Expires': 'Thu, 15 Apr 2030 20:00:00 GMT',
+    #'Cache-Control': 'max-age=86400',
+    'Cache-Control': 'max-age=3600',
 }
 
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'

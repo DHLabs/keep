@@ -6,12 +6,13 @@
 '''
 
 
-def validate_and_format( fields, data ):
+def validate_and_format( fields, data, files ):
     '''
         Do some basic validation and convert strings to <type> where
         necessary.
     '''
-    survey_data = {}
+    valid_data = {}
+    valid_files = {}
     for element in fields:
 
         etype = element[ 'type' ]
@@ -19,13 +20,22 @@ def validate_and_format( fields, data ):
 
         # Do type conversions
         if ename in data:
-
             # Convert to integer
             if etype is 'integer':
-                survey_data[ ename ] = int( data[ ename ] )
+                valid_data[ ename ] = int( data[ ename ] )
             elif 'select all' in etype:
-                survey_data[ ename ] = data.getlist( ename, [] )
+                if isinstance( data, QueryDict ):
+                    valid_data[ ename ] = data.getlist( ename, [] )
+                else:
+                    valid_data[ ename ] = data.get( ename, [] )
+            elif etype in [ 'photo', 'video' ]:
+                valid_data[ ename ] = data.get( ename ).name
+                valid_files[ ename ] = data.get( ename )
             else:
-                survey_data[ ename ] = data[ ename ]
+                valid_data[ ename ] = data[ ename ]
 
-    return survey_data
+        elif ename in files:
+            valid_data[ ename ] = files[ ename ].name
+            valid_files[ ename ] = files[ ename ]
+
+    return ( valid_data, valid_files )

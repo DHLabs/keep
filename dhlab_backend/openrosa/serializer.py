@@ -59,17 +59,18 @@ class XFormSerializer( Serializer ):
             root.set( 'xmlns', 'http://openrosa.org/xforms/xformsList' )
 
             for xform in data[ 'objects' ]:
+
                 element = etree.Element( 'xform' )
 
                 formId = etree.Element( 'formID' )
-                formId.text = xform[ 'title' ]
+                formId.text = xform[ 'name' ]
                 element.append( formId )
 
                 name = etree.Element( 'name' )
                 name.text = xform[ 'name' ]
                 element.append( name )
 
-                owner = xform['user'] if 'user' in xform else xform[ 'org' ]
+                owner = xform['user']
 
                 downloadUrl = etree.Element( 'downloadUrl' )
 

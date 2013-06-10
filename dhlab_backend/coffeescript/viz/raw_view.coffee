@@ -32,6 +32,13 @@ define( [ 'jquery',
                 </a>
             </div>''' )
 
+        card_video_tmpl: _.template( '''
+            <div class='card-video'>
+                <video controls>
+                    <source src='<%= url %>' type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+                </video>
+            </div>''' )
+
         card_data_tmpl: _.template( '''
             <div class='card-data'>
                 <div><%= data %></div>
@@ -98,7 +105,9 @@ define( [ 'jquery',
                         row_html += '<td>&nbsp;</td>'
                         continue
 
-                    if field.type in [ 'photo' ]
+                    console.log( field )
+
+                    if field.type in [ 'photo', 'video' ]
                         url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
                         row_html += "<td><a href='#{url}'>#{value}</a></td>"
                     else
@@ -142,6 +151,9 @@ define( [ 'jquery',
                     if field.type in [ 'photo' ]
                         url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
                         tmpl_options.card_image = @card_img_tmpl( { url: url } )
+                    else if field.type in [ 'video' ]
+                        url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
+                        tmpl_options.card_image = @card_video_tmpl( { url: url } )
                     else
                         tmpl_options.card_data += "<div><strong>#{field.name}:</strong> #{value}</div>"
 

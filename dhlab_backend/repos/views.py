@@ -18,7 +18,6 @@ from backend.db import db, dehydrate_survey, user_or_organization
 
 #from privacy import privatize_geo
 
-from . import validate_and_format
 from .forms import NewRepoForm
 from .models import Repository
 
@@ -104,9 +103,8 @@ def webform( request, username, repo_name ):
 
     if request.method == 'POST':
 
-        # Do basic validation of the data
-        valid_data = validate_and_format( repo.fields(), request.POST )
-        repo.add_data( valid_data )
+        # Do validation of the data and add to repo!
+        repo.add_data( request.POST, request.FILES )
 
         # Return to organization/user dashboard based on where the "New Repo"
         # button was clicked.
@@ -119,7 +117,7 @@ def webform( request, username, repo_name ):
                         reverse( 'organization_dashboard',
                                  kwargs={ 'org': account.name } ) )
 
-    return render_to_response( 'get.html',
+    return render_to_response( 'webform.html',
                                { 'repo': repo,
                                  'repo_id': repo.mongo_id,
                                  'account': account },

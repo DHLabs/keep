@@ -81,20 +81,21 @@ define( [ 'jquery',
             $( '.control-group' ).first().show().addClass( 'active' )
             $( '.active input' ).focus()
 
+            @_display_form_buttons( 0 )
             @
 
         _display_form_buttons: ( question_index ) ->
 
-            if question_index == 0
-                $( '#prev_btn' ).hide()
-                $( '#submit_btn' ).hide()
-
-                $( '#next_btn' ).show()
-            else if question_index == @input_fields.length - 1
+            if question_index == @input_fields.length - 1
                 $( '#prev_btn' ).show()
                 $( '#submit_btn' ).show()
 
                 $( '#next_btn' ).hide()
+            else if question_index == 0
+                $( '#prev_btn' ).hide()
+                $( '#submit_btn' ).hide()
+
+                $( '#next_btn' ).show()
             else
                 $( '#prev_btn' ).show()
                 $( '#next_btn' ).show()

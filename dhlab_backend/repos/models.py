@@ -7,6 +7,9 @@ from django.db.models import Q
 from guardian.shortcuts import assign_perm
 
 from backend.db import db
+from django.core.files.storage import default_storage as storage
+
+from . import validate_and_format
 
 
 class Notebook( models.Model ):
@@ -171,13 +174,36 @@ class Repository( models.Model ):
         else:
             super( Repository, self ).save( *args, **kwargs )
 
-    def add_data( self, data ):
+    def add_data( self, data, files ):
+        '''
+            Validate and add a new data record to this repo!
+        '''
+        fields = self.fields()
+        validated_data, valid_files = validate_and_format(fields, data, files)
+
         repo_data = {
             'label': self.name,
             'repo': ObjectId( self.mongo_id ),
-            'data': data,
+            'data': validated_data,
             'timestamp': datetime.utcnow() }
-        return db.data.insert( repo_data )
+
+        new_data_id = db.data.insert( repo_data )
+
+        # Once we save the repo data, save the files to S3
+        if len( valid_files ) > 0:
+            # If we have media data, save it to this repo's data folder
+            storage.bucket_name = 'keep-media'
+            for key in valid_files.keys():
+
+                file_to_upload = valid_files.get( key )
+
+                s3_url = '%s/%s/%s' % ( self.mongo_id,
+                                        new_data_id,
+                                        file_to_upload.name )
+
+                storage.save( s3_url, file_to_upload )
+
+        return new_data_id
 
     def fields( self ):
         return db.repo.find_one( ObjectId( self.mongo_id ) )[ 'fields' ]
