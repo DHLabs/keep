@@ -6,18 +6,20 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
-from backend.db import db, dehydrate_survey, user_or_organization
-from backend.db import Repository
+from guardian.shortcuts import get_perms
 
-from privacy import privatize_geo
+from backend.db import db, dehydrate_survey, user_or_organization
+
+#from privacy import privatize_geo
 
 from . import validate_and_format
 from .forms import NewRepoForm
+from .models import Repository
 
 
 @login_required
@@ -27,15 +29,10 @@ def new_repo( request ):
     '''
     # Handle XForm upload
     if request.method == 'POST':
-
-        form = NewRepoForm( request.POST, request.FILES, user=request.user )
-
         # Check for a valid XForm and parse the file!
+        form = NewRepoForm( request.POST, request.FILES, user=request.user )
         if form.is_valid():
-
-            repo = form.save()
-            db.survey.insert( repo )
-
+            form.save()
             return HttpResponseRedirect( '/' )
     else:
         form = NewRepoForm()
@@ -53,19 +50,15 @@ def delete_repo( request, repo_id ):
         the repository and the accompaning repo data.
     '''
 
-    repo = db.survey.find_one( { '_id': ObjectId( repo_id ) },
-                               { 'user': True, 'org': True } )
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
 
-    if repo is None:
-        return HttpResponse( status=404 )
-
-    permissions = Repository.permissions( repo=repo,
-                                          user=request.user )
-
-    if 'delete' not in permissions:
+    # Check that this user has permission to delete this repo
+    if not request.user.has_perm( 'delete_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
 
-    Repository.delete( repo )
+    # Delete the sucker
+    repo.delete()
+
     return HttpResponseRedirect( '/' )
 
 
@@ -78,29 +71,16 @@ def toggle_public( request, repo_id ):
         is allowed to make such changes to the form settings.
     '''
 
-    # Find a survey, only looking for the user field
-    repo = db.survey.find_one( { '_id': ObjectId( repo_id ) },
-                               { 'user': True, 'org': True, 'public': True } )
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
 
-    if repo is None:
-        return HttpResponse( status=404 )
-
-    permissions = Repository.permissions( repo=repo,
-                                          user=request.user )
-
-    if 'sharing' not in permissions:
+    if not request.user.has_perm( 'share_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
 
-    if 'public' in repo:
-        repo[ 'public' ] = not repo[ 'public' ]
-    else:
-        repo[ 'public' ] = True
-
-    db.survey.update( { '_id': ObjectId( repo_id ) },
-                      { '$set': { 'public': repo[ 'public' ] } } )
+    repo.is_public = not repo.is_public
+    repo.save()
 
     return HttpResponse( json.dumps( { 'success': True,
-                                       'public': repo[ 'public' ] } ),
+                                       'public': repo.is_public } ),
                          mimetype='application/json' )
 
 
@@ -115,17 +95,16 @@ def webform( request, username, repo_name ):
     if account is None:
         return HttpResponse( status=404 )
 
-    repo = Repository.get_repo( name=repo_name, account=account )
+    # Grab the repository
+    repo = Repository.objects.get_by_username( repo_name, username )
     if repo is None:
         return HttpResponse( status=404 )
 
     if request.method == 'POST':
 
         # Do basic validation of the data
-        valid_data = validate_and_format( repo, request.POST )
-        Repository.add_data( repo=repo,
-                             data=valid_data,
-                             account=account )
+        valid_data = validate_and_format( repo.fields(), request.POST )
+        repo.add_data( valid_data )
 
         # Return to organization/user dashboard based on where the "New Repo"
         # button was clicked.
@@ -140,7 +119,7 @@ def webform( request, username, repo_name ):
 
     return render_to_response( 'get.html',
                                { 'repo': repo,
-                                 'repo_id': str( repo[ '_id' ] ),
+                                 'repo_id': repo.mongo_id,
                                  'account': account },
                                context_instance=RequestContext( request ))
 
@@ -160,25 +139,30 @@ def repo_viz( request, username, repo_name ):
         return HttpResponse( status=404 )
 
     # Grab the repository
-    repo = Repository.get_repo( repo_name, account )
+    repo = Repository.objects.get_by_username( repo_name, username )
     if repo is None:
         return HttpResponse( status=404 )
 
-    # Grab the user's permissions for this repository
-    permissions = Repository.permissions( repo=repo,
-                                          user=request.user )
+    # Grab all the permissions!
+    permissions = []
+    if request.user.is_authenticated():
+        permissions = get_perms( request.user, repo )
+        for org in request.user.organization_users.all():
+            permissions.extend( get_perms( org, repo ) )
 
     # Check to see if the user has access to view this survey
-    if 'view' not in permissions:
+    if not repo.is_public and 'view_repository' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
     # Grab the data for this repository
-    data = db.data.find( {'repo': ObjectId( repo[ '_id' ] )} )
+    data = db.data.find( {'repo': ObjectId( repo.mongo_id )} )
     data = dehydrate_survey( data )
 
     # Is some unknown user looking at this data?
-    if 'view_raw' not in permissions:
-        data = privatize_geo( repo, data )
+    # TODO: Make the privatizer take into account
+    # geospatial location
+    # if 'view_raw' not in permissions:
+    #     data = privatize_geo( repo, data )
 
     if isinstance( account, User ):
         account_name = account.username
@@ -187,15 +171,9 @@ def repo_viz( request, username, repo_name ):
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
-                                 'sid': repo[ '_id' ],
+                                 'sid': repo.mongo_id,
                                  'data': json.dumps( data ),
                                  'permissions': permissions,
                                  'account': account,
                                  'account_name': account_name },
-                               context_instance=RequestContext(request) )
-
-
-@require_GET
-def map_visualize( request ):
-    return render_to_response( 'map_visualize.html',
                                context_instance=RequestContext(request) )

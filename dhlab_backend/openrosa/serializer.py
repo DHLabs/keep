@@ -95,10 +95,13 @@ class XFormSerializer( Serializer ):
 
             return etree.tostring( root )
         elif 'id' not in data:
-            return self.to_xml( data )
+            raise Exception( data )
 
         # Grab the form & convert into the xform format!
-        survey_data = db[ 'survey' ].find_one({'_id': ObjectId( data['id'])})
-        survey  = create_survey_element_from_dict( survey_data )
-
+        xform = {
+            'name': data[ 'name' ],
+            'type': 'survey',
+            'default_language': 'default' }
+        xform[ 'children' ] = db.repo.find_one( ObjectId( data[ 'id' ] ) )[ 'fields' ]
+        survey  = create_survey_element_from_dict( xform )
         return survey._to_pretty_xml()

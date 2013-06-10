@@ -1,4 +1,4 @@
-from backend.db import Repository, db
+from backend.db import db
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
 from backend.forms import ReportForm
@@ -14,8 +14,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-from organizations.models import OrganizationUser
+from organizations.models import Organization
 from registration.models import RegistrationProfile
+from repos.models import Repository
 from twofactor.models import UserAPIToken
 
 
@@ -98,23 +99,24 @@ def user_dashboard( request, username ):
 
     user = get_object_or_404( User, username=username )
 
+    # Find all the organization this user belongs to
+    organizations = Organization.objects.filter( users=user )
+
     # Grab a list of forms uploaded by the user
     if is_other_user:
-        user_repos = Repository.list_repos( user, public=True )
-        shared_repos = None
+        user_repos = Repository.objects.filter( user=user, org=None, is_public=True )
+        shared_repos = Repository.objects.filter( org__in=organizations,
+                                                  is_public=True )
     else:
-        user_repos = Repository.list_repos( user )
-        shared_repos = Repository.shared_repos( user )
-
-    # Find all the organization this user belongs to
-    organizations = OrganizationUser.objects.filter( user=user )
+        user_repos = Repository.objects.filter( user=user, org=None )
+        shared_repos = Repository.objects.filter( org__in=organizations )
 
     return render_to_response( 'dashboard.html',
-                               { 'user_repos': user_repos,
-                                 'shared_repos': shared_repos,
-                                 'is_other_user': is_other_user,
-                                 'account': user,
-                                 'organizations': organizations },
+                               {'user_repos': user_repos,
+                                'shared_repos': shared_repos,
+                                'is_other_user': is_other_user,
+                                'account': user,
+                                'organizations': organizations },
                                context_instance=RequestContext(request) )
 
 
@@ -130,6 +132,7 @@ def build_report( request ):
 
     if request.method == 'POST':
         form = ReportForm( request.POST, request.FILES )
+
         if( form.is_valid ):
             #build form
             data = request.POST[ 'report_json' ].strip()
@@ -190,23 +193,21 @@ def build_report( request ):
     else:
         form = ReportForm()
 
-    user_repos = Repository.list_repos( request.user )
-    shared_repos = Repository.shared_repos( request.user )
+    user_repos = Repository.objects.filter( user=request.user, org=None )
 
-    # Find all the organization this user belongs to
-    organizations = OrganizationUser.objects.filter( user=request.user )
-
-    for user_repo in user_repos:
-        user_repo[ 'mongo_id' ] = str( user_repo[ 'mongo_id' ] )
+    repos = []
+    for repo in user_repos:
+        repo_info = {
+            'name': repo.name,
+            'mongo_id': repo.mongo_id,
+            'children': repo.fields() }
+        repos.append( repo_info )
 
     return render_to_response( 'report_builder.html',
-                                { 'user_repos': json.dumps(user_repos, default=json_util.default),
-                                'shared_repos': shared_repos,
-                                'account': request.user,
-                                'organizations': organizations,
-                                'form': form },
+                                { 'user_repos': json.dumps( repos ),
+                                  'form': form },
                                 context_instance=RequestContext(request) )
-    
+
 
 @login_required
 def generate_api_key( request ):

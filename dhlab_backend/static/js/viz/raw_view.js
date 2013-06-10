@@ -167,58 +167,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
       return this;
     };
 
-    RawView.prototype._render_group = function() {
-      var data, datum, field, group, group_by, html, val, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
-      group_by = this.column_headers[0];
-      $('#raw_group_table > thead > tr').append("<th>" + group_by.name + "</th>");
-      $('#raw_group_table > thead > tr').append("<th>Data</th>");
-      _ref = this.data.models;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        datum = _ref[_i];
-        val = datum.get('data')[group_by.name];
-        if (this.groups[val] != null) {
-          this.groups[val].push(datum);
-        } else {
-          this.groups[val] = [datum];
-        }
-      }
-      _ref1 = this.groups;
-      for (group in _ref1) {
-        data = _ref1[group];
-        html = "<tr><td>" + group + "</td><td>";
-        for (_j = 0, _len1 = data.length; _j < _len1; _j++) {
-          datum = data[_j];
-          html += "<div>";
-          _ref2 = this.column_headers;
-          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-            field = _ref2[_k];
-            if (field.name === group_by.name) {
-              continue;
-            }
-            if (datum.get('data')[field.name] != null) {
-              html += datum.get('data')[field.name] + "&nbsp;,&nbsp;";
-            }
-          }
-          html += "</div>";
-        }
-        html += "</td></tr>";
-        $('#raw_group_table > tbody').append(html);
-      }
-      $('#raw_group_table').dataTable({
-        'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-        'sPaginationType': 'bootstrap',
-        'bLengthChange': false,
-        'bFilter': false,
-        'iDisplayLength': 25
-      });
-      return this;
-    };
-
     RawView.prototype.render = function() {
       this._render_list();
       if (this.data.models.length > 0) {
         this._render_grid();
-        this._render_group();
       }
       return this;
     };

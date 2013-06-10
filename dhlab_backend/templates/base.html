@@ -26,7 +26,7 @@
 <body>
     {% include "topbar.html" %}
     {% block outerspace %}
-    <div class="container" style='padding-top:16px;'>
+    <div class="container">
         {% block content %}
         {% if template %}{% include template %}{% endif %}
         {{ content|safe }}

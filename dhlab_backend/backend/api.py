@@ -11,17 +11,20 @@ from bson import ObjectId
 
 from django.conf.urls import url
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.http import HttpResponse
+
+from guardian.shortcuts import get_perms
 
 from tastypie import fields
 from tastypie.authorization import Authorization
 from tastypie.exceptions import BadRequest
-from tastypie.http import HttpUnauthorized
+from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
-from backend.db import user_or_organization, Repository
-from organizations.models import Organization
+from backend.db import user_or_organization
+from repos.models import Repository
 
 # from twofactor.api_auth import ApiTokenAuthentication
 
@@ -48,27 +51,22 @@ class DataAuthorization( Authorization ):
                           .sort( 'timestamp', pymongo.DESCENDING )
 
     def read_detail( self, object_detail, bundle ):
-        user = bundle.request.GET.get( 'user', None )
+        if object_detail.is_public:
+            return True
 
+        user = bundle.request.GET.get( 'user', None )
         account = user_or_organization( user )
 
-        if 'user' in object_detail:
+        if account is None:
+            return False
 
-            if isinstance( account, User ):
-                if object_detail[ 'user' ] == account.id:
+        result = account.has_perm( 'view_data', object_detail )
+        if not result:
+            for org in account.organization_users.all():
+                if 'view_data' in get_perms( org, object_detail ):
                     return True
-
-        elif 'org' in object_detail:
-
-            if isinstance( account, User ):
-                org = Organization.objects.get( id=object_detail['org'] )
-                if org.has_user( account ):
-                    return True
-
-            elif isinstance( account, Organization ):
-                if object_detail[ 'org' ] == account.id:
-                    return True
-
+        else:
+            return True
         return False
 
 
@@ -81,14 +79,11 @@ class RepoAuthorization( Authorization ):
         if account is None:
             raise ValueError
 
-        if isinstance( account, User ):
-            return object_list.find({ 'user': account.id } )
-        else:
-            return object_list.find({ 'org': account.id } )
+        return object_list.filter( Q(user__username=user) | Q(org__name=user) )
 
     def read_detail( self, object_detail, bundle ):
 
-        if object_detail.get( 'public', False ):
+        if bundle.obj.is_public:
             return True
 
         account = bundle.request.GET.get( 'user', None )
@@ -96,14 +91,15 @@ class RepoAuthorization( Authorization ):
         if account is None:
             return False
 
-        # If this repo is owned by an individual user, check if this is
-        # the repo's owner.
-        if 'user' in object_detail:
-            if isinstance( account, User ):
-                if object_detail[ 'user' ] != account.id:
-                    return False
+        result = account.has_perm( 'view_repository', bundle.obj )
+        if not result:
+            for org in account.organization_users.all():
+                if 'view_repository' in get_perms( org, bundle.obj ):
+                    return True
+        else:
+            return True
 
-        return True
+        return False
 
     def create_detail( self, object_detail, bundle ):
         return True
@@ -134,7 +130,7 @@ class DataResource( MongoDBResource ):
 
         try:
             basic_bundle = self.build_bundle( request=request )
-            repo = db.survey.find_one( { '_id': ObjectId( repo_id ) } )
+            repo = Repository.objects.get( mongo_id=repo_id )
 
             if not self.authorized_read_detail( repo, basic_bundle ):
                 return HttpUnauthorized()
@@ -149,26 +145,16 @@ class DataResource( MongoDBResource ):
             return HttpUnauthorized()
 
 
-class RepoResource( MongoDBResource ):
-    id          = fields.CharField( attribute='_id' )
-    name        = fields.CharField( attribute='name', null=True )
-    title       = fields.CharField( attribute='title', null=True )
-    default_language = fields.CharField( attribute='default_language',
-                                         null=True )
-    id_string   = fields.CharField( attribute='id_string', null=True )
-    type        = fields.CharField( attribute='type', null=True )
-    children    = fields.ListField( attribute='children', null=True )
-    user        = fields.IntegerField( attribute='user', null=True )
-    org         = fields.IntegerField( attribute='org', null=True )
-    public      = fields.BooleanField( attribute='public', default=False )
+class RepoResource( ModelResource ):
 
     class Meta:
-        collection = 'survey'
+        queryset = Repository.objects.all()
         resource_name = 'repos'
-        object_class = Document
 
         list_allowed_methods = [ 'get' ]
         detail_allowed_methods = [ 'get', 'post' ]
+
+        excludes = [ 'mongo_id' ]
 
         # Only return JSON & XForm xml
         serializer = XFormSerializer()
@@ -185,10 +171,17 @@ class RepoResource( MongoDBResource ):
         include_resource_uri = False
 
     def prepend_urls(self):
+
+        base_url = '^(?P<resource_name>%s)/' % ( self._meta.resource_name )
+
         return [
-            url( r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/manifest/$" %
-                 ( self._meta.resource_name ),
-                 self.wrap_view('get_manifest'),
+
+            url( regex=r"%s(?P<mongo_id>\w+)/$" % ( base_url ),
+                 view=self.wrap_view('dispatch_detail'),
+                 name="api_dispatch_detail"),
+
+            url( regex=r"%s(?P<mongo_id>\w+)/manifest/$" % ( base_url ),
+                 view=self.wrap_view('get_manifest'),
                  name="api_get_resource"),
         ]
 
@@ -236,70 +229,62 @@ class RepoResource( MongoDBResource ):
         bundle = self.build_bundle( request=request )
         obj = self.obj_get( bundle, **self.remove_api_resource_names(kwargs) )
 
-        media = list( set( self._grab_media( obj[ 'children' ] ) ) )
-        media = [ ( med, base % ( obj['_id'], med ) ) for med in media ]
+        media = list( set( self._grab_media( obj.fields() ) ) )
+        media = [ ( med, base % ( obj.mongo_id, med ) ) for med in media ]
 
-        response = { 'repo': obj[ '_id' ], 'manifest': media }
+        response = { 'repo': obj.mongo_id, 'manifest': media }
         return self.create_response( request, response )
 
     def post_detail( self, request, **kwargs ):
 
         basic_bundle = self.build_bundle( request=request )
 
-        # The find the suervey object associated with this form name & user
-        repo = db.survey.find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
+        user_accessing = request.GET.get( 'user', None )
+        user = user_or_organization( user_accessing )
+        if user is None:
+            return HttpUnauthorized()
 
-        account = None
-        if 'user' in repo:
-            account = repo[ 'user' ]
-        elif 'org' in repo:
-            account = repo[ 'org' ]
+        repo = Repository.objects.get( mongo_id=kwargs.get( 'mongo_id' ) )
+        if repo is None:
+            return HttpNotFound()
 
-        account = user_or_organization( account )
-
-        # Are we authorized to post data here?
-        if not self.authorized_create_detail( repo, basic_bundle ):
+        if not user.has_perm( 'add_data', repo ):
             return HttpUnauthorized()
 
         # Do basic validation of the data
-        valid_data = validate_and_format( repo, request.POST )
-
-        new_id = Repository.add_data( repo=repo,
-                                      data=valid_data,
-                                      account=account )
+        valid_data = validate_and_format( repo.fields(), request.POST )
+        new_id = repo.add_data( valid_data )
 
         response_data = { 'success': True, 'id': str( new_id ) }
         return self.create_response( request, response_data )
 
     def dehydrate( self, bundle ):
         '''
-            Remove user/org key is it doesn't existself.
+            Add additional information to the Repository bundle.
+
+            - fields:
+                Fields are grabbed from MongoDB and appended to the bundle
+                dictionary.
         '''
-        if bundle.data.get( 'user', None ) is None:
-            del bundle.data[ 'user' ]
-
-        if bundle.data.get( 'org', None ) is None:
-            del bundle.data[ 'org' ]
-
+        repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
+        bundle.data['children'] = repo_fields[ 'fields' ]
         return bundle
+
+    def dehydrate_id( self, bundle ):
+        return bundle.obj.mongo_id
 
     def dehydrate_user( self, bundle ):
         '''
             Convert user ids into a more informative username when displaying
             results
         '''
-        if bundle.data[ 'user' ]:
-            return User.objects.get( id=bundle.data['user'] ).username
-        return None
+        return bundle.obj.user.username if bundle.obj.user else None
 
     def dehydrate_org( self, bundle ):
         '''
             Convert organization ids into the more informative org name.
         '''
-        if bundle.data[ 'org' ]:
-            return Organization.objects.get( id=bundle.data['org'] ).name
-
-        return None
+        return bundle.obj.org.name if bundle.obj.org else None
 
 
 class UserResource( ModelResource ):

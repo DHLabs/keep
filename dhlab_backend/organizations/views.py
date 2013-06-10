@@ -12,7 +12,9 @@ from django.template import RequestContext
 from django.views.decorators.http import require_POST, require_GET
 
 from backend.db import db
+
 from repos.forms import NewRepoForm
+from repos.models import Repository
 
 from .forms import NewOrganizationForm
 from .models import Organization, OrganizationUser
@@ -82,26 +84,10 @@ def organization_dashboard( request, org ):
     account = get_object_or_404( Organization, name=org )
     is_owner = request.user == account.owner
 
-    try:
-        is_member = OrganizationUser.objects.get( organization=account,
-                                                  user=request.user )
-    except ObjectDoesNotExist:
-        is_member = None
+    is_member = OrganizationUser.objects.filter( organization=account,
+                                                 user=request.user ).exists()
 
-    repos = db.survey.find( { 'org': account.id } )
-    repos = [ repo for repo in repos ]
-    for repo in repos:
-        # Replace _id with mongo_id since the templates don't place nicely with
-        # variables that have an underscore in front.
-        repo[ 'id' ] = repo[ '_id' ]
-
-        # Count the number of submissions for this repo
-        repo[ 'submission_count' ] = db.data\
-                                       .find( {'repo':
-                                              ObjectId(repo[ '_id' ])})\
-                                       .count()
-        del repo[ '_id' ]
-
+    repos = Repository.objects.filter( org=account )
     members = OrganizationUser.objects.filter( organization=account )
 
     return render_to_response( 'organization_dashboard.html',
@@ -123,14 +109,14 @@ def organization_repo_new( request, org ):
 
     if request.method == 'POST':
 
-        form = NewRepoForm( request.POST, request.FILES, org=org )
+        form = NewRepoForm( request.POST,
+                            request.FILES,
+                            user=request.user,
+                            org=org )
 
         # Check for a valid XForm and parse the file!
         if form.is_valid():
-
             repo = form.save()
-            db.survey.insert( repo )
-
             return HttpResponseRedirect( reverse( 'organization_dashboard',
                                                   kwargs={ 'org': org.name } ))
 

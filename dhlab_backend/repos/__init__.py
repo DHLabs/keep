@@ -6,14 +6,13 @@
 '''
 
 
-def validate_and_format( form, data ):
+def validate_and_format( fields, data ):
     '''
         Do some basic validation and convert strings to <type> where
         necessary.
     '''
-
     survey_data = {}
-    for element in form[ 'children' ]:
+    for element in fields:
 
         etype = element[ 'type' ]
         ename = element[ 'name' ]
@@ -24,6 +23,8 @@ def validate_and_format( form, data ):
             # Convert to integer
             if etype is 'integer':
                 survey_data[ ename ] = int( data[ ename ] )
+            elif 'select all' in etype:
+                survey_data[ ename ] = data.getlist( ename, [] )
             else:
                 survey_data[ ename ] = data[ ename ]
 

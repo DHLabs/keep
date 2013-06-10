@@ -6,7 +6,7 @@ from fabric.colors import green
 PRODUCTION_DIR  = 'backend'
 PRODUCTION_SETTINGS = 'settings.production'
 
-SUPERVISOR_NAME = 'dhlab_backend'
+SUPERVISOR_NAME = 'keep'
 
 MONGODB_NAME    = 'dhlab'
 

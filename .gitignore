@@ -1,8 +1,9 @@
+*.pyc
 *sublime*
 *.db
 *.db.bak
 htmlcov
 *.coverage
-_*
+_artwork
 media
 credentials.py

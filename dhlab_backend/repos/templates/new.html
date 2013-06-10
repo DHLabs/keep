@@ -16,25 +16,24 @@
 {% block title %}Create new data repository{% endblock %}
 
 {% block content %}
-<div class='container'>
-	<div class='row'>
-		<div class='span12'>
-			<form action='.' method='post' enctype='multipart/form-data'>
-				{% csrf_token %}
+<div class='row' style='margin-top:16px;'>
+	<div class='span12'>
+		<form action='.' method='post' enctype='multipart/form-data'>
+			{% csrf_token %}
 
-				<label {% if form.name.errors %}style='color:red'{%endif%}>
-					<strong>Repository name</strong>
-				</label>
-				{{ form.name }}
-				{{ form.name.errors }}
+			<label {% if form.name.errors %}style='color:red'{%endif%}>
+				<strong>Repository name</strong>
+			</label>
+			{{ form.name }}
+			{{ form.name.errors }}
 
-				<label>
-					<strong>Description (optional)</strong>
-				</label>
-				<textarea rows='5' name='desc' class='input-xxlarge'></textarea>
-				{{ form.desc.errors }}
+			<label>
+				<strong>Description (optional)</strong>
+			</label>
+			<textarea rows='5' name='desc' class='input-xxlarge'></textarea>
+			{{ form.desc.errors }}
 
-				<hr/>
+			<hr/>
 
 				<p>
 				<div>
@@ -137,50 +136,49 @@
 				</div>
 				</p>
 
-				<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
-					<strong>XForm File</strong>
-				</label>
-				{{ form.xform_file }}
-				<span class='help-block'>
-					Learn more about XForms <a href='http://en.wikipedia.org/wiki/XForms'>here</a>
-				</span>
-				{{ form.non_field_errors }}
-				{{ form.xform_file.errors }}
-				{{ form.survey_json.errors }}
-				<hr/>
+			<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
+				<strong>XForm File</strong>
+			</label>
+			{{ form.xform_file }}
+			<span class='help-block'>
+				Learn more about XForms <a href='http://en.wikipedia.org/wiki/XForms'>here</a>
+			</span>
+			{{ form.non_field_errors }}
+			{{ form.xform_file.errors }}
+			{{ form.survey_json.errors }}
+			<hr/>
 
-				<label class='radio'>
-					<input type='radio' name='privacy' value='public' style='margin-top:16px;'>
-					<div class='pull-left' style='width:32px;text-align:center;padding-top:8px;'>
-						<i class='icon-unlock'></i>
-					</div>
-					<div class='pull-left'>
-						<strong>Public</strong>
-						<span class='help-block'>
-							Anyone can see this repository and the data associated
-							with it.
-						</span>
-					</div>
-				</label>
-				<label class='radio' style='clear:both;'>
-					<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
-					<div class='pull-left' style='width:32px;text-align:center;padding-top:8px;'>
-						<i class='icon-lock'></i>
-					</div>
-					<div class='pull-left'>
-						<strong>Private</strong>
-						<span class='help-block'>
-							You choose who can see this repository and the data
-							associated with it.
-						</span>
-					</div>
-				</label>
-				<div style='clear:both;'>
-					<hr/>
-					<button id='submit_btn' type='submit' class='btn btn-success'>Create Repository</button>
+			<label class='radio'>
+				<input type='radio' name='privacy' value='public' style='margin-top:16px;'>
+				<div class='pull-left' style='width:32px;text-align:center;padding-top:8px;'>
+					<i class='icon-unlock'></i>
 				</div>
-			</form>
-		</div>
+				<div class='pull-left'>
+					<strong>Public</strong>
+					<span class='help-block'>
+						Anyone can see this repository and the data associated
+						with it.
+					</span>
+				</div>
+			</label>
+			<label class='radio' style='clear:both;'>
+				<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
+				<div class='pull-left' style='width:32px;text-align:center;padding-top:8px;'>
+					<i class='icon-lock'></i>
+				</div>
+				<div class='pull-left'>
+					<strong>Private</strong>
+					<span class='help-block'>
+						You choose who can see this repository and the data
+						associated with it.
+					</span>
+				</div>
+			</label>
+			<div style='clear:both;'>
+				<hr/>
+				<button id='submit_btn' type='submit' class='btn btn-success'>Create Repository</button>
+			</div>
+		</form>
 	</div>
 </div>
 {% endblock %}

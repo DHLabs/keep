@@ -2,14 +2,12 @@ import json
 import os
 import re
 
-from datetime import datetime
-
 from django import forms
 
 from pyxform.xls2json import SurveyReader
 from openrosa.xform_reader import XFormReader
 
-from backend.db import db
+from .models import Repository
 
 
 class NewRepoForm( forms.Form ):
@@ -59,17 +57,8 @@ class NewRepoForm( forms.Form ):
                                             spaces or special characters''' )
 
         # Check that this form name isn't already taken by the user
-        query = { 'name': data }
-
-        if self._user:
-            query[ 'user' ] = self._user.id
-
-        if self._org:
-            query[ 'org' ] = self._org.id
-
-        repo_exists = db.survey.find( query )
-
-        if repo_exists.count() != 0:
+        username = self._org.name if self._org else self._user.username
+        if Repository.objects.repo_exists( data, username ):
             raise forms.ValidationError( '''Repository already exists with
                                             this name''' )
 
@@ -124,30 +113,20 @@ class NewRepoForm( forms.Form ):
 
     def save( self ):
 
+        repo = {}
         if self.cleaned_data[ 'xform_file' ]:
-            repo = self.cleaned_data[ 'xform_file' ]
+            repo['fields'] = self.cleaned_data[ 'xform_file' ]['children']
         else:
-            repo = self.cleaned_data[ 'survey_json' ]
-
-        # Basic form name/description
-        repo[ 'name' ] = self.cleaned_data[ 'name' ]
-        repo[ 'description' ] = self.cleaned_data[ 'desc' ]
+            repo['fields'] = self.cleaned_data[ 'survey_json' ]['children']
 
         # Needed for xform formatting
-        repo[ 'title' ]       = self.cleaned_data[ 'name' ]
-        repo[ 'id_string' ]   = self.cleaned_data[ 'name' ]
+        # repo[ 'title' ]       = self.cleaned_data[ 'name' ]
+        # repo[ 'id_string' ]   = self.cleaned_data[ 'name' ]
 
-        # Is this form public?
-        repo[ 'public' ] = self.cleaned_data[ 'privacy' ] == 'public'
-
-        # Store who uploaded this form
-        if self._user:
-            repo[ 'user' ] = self._user.id
-
-        if self._org:
-            repo[ 'org' ] = self._org.id
-
-        # Store when this form was uploaded
-        repo[ 'uploaded' ]  = datetime.now()
-
-        return repo
+        new_repo = Repository(
+                        name=self.cleaned_data[ 'name' ],
+                        description=self.cleaned_data[ 'desc' ],
+                        user=self._user,
+                        org=self._org,
+                        is_public=self.cleaned_data[ 'privacy' ] == 'public' )
+        return new_repo.save( repo=repo )
