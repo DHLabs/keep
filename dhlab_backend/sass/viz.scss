@@ -72,6 +72,12 @@
 		}
 	}
 
+	> .card-video {
+		> video {
+			width: 220px;
+		}
+	}
+
 	> .card-data {
 		> div {
 			padding: 8px;

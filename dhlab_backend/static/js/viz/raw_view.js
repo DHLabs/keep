@@ -31,7 +31,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
 
     RawView.prototype.card_img_tmpl = _.template('<div class=\'card-image\'>\n    <a href=\'<%= url %>\' target=\'_blank\'>\n        <img src=\'<%= url %>\'>\n    </a>\n</div>');
 
-    RawView.prototype.card_video_tmpl = _.template('<div class=\'card-image\'>\n    <video controls>\n        <source src=\'<%= url %>\' type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />\n    </video>\n</div>');
+    RawView.prototype.card_video_tmpl = _.template('<div class=\'card-video\'>\n    <video controls>\n        <source src=\'<%= url %>\' type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />\n    </video>\n</div>');
 
     RawView.prototype.card_data_tmpl = _.template('<div class=\'card-data\'>\n    <div><%= data %></div>\n</div>');
 
@@ -108,7 +108,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
             row_html += '<td>&nbsp;</td>';
             continue;
           }
-          if ((_ref3 = field.type) === 'photo') {
+          console.log(field);
+          if ((_ref3 = field.type) === 'photo' || _ref3 === 'video') {
             url = this.media_base + ("" + (datum.get('repo')) + "/" + (datum.get('_id')) + "/" + value);
             row_html += "<td><a href='" + url + "'>" + value + "</a></td>";
           } else {
@@ -131,7 +132,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
     };
 
     RawView.prototype._render_grid = function() {
-      var datum, field, tmpl_options, url, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      var datum, field, tmpl_options, url, value, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
       _ref = this.data.models;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         datum = _ref[_i];
@@ -149,6 +150,11 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
           if ((_ref2 = field.type) === 'photo') {
             url = this.media_base + ("" + (datum.get('repo')) + "/" + (datum.get('_id')) + "/" + value);
             tmpl_options.card_image = this.card_img_tmpl({
+              url: url
+            });
+          } else if ((_ref3 = field.type) === 'video') {
+            url = this.media_base + ("" + (datum.get('repo')) + "/" + (datum.get('_id')) + "/" + value);
+            tmpl_options.card_image = this.card_video_tmpl({
               url: url
             });
           } else {
