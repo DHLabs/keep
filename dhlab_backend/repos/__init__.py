@@ -4,6 +4,8 @@
     Views that have to do with manipulating/viewing forms and form data are
     placed in this module
 '''
+from django.core.files import File
+from django.http import QueryDict
 
 
 def validate_and_format( fields, data, files ):
@@ -28,7 +30,7 @@ def validate_and_format( fields, data, files ):
                     valid_data[ ename ] = data.getlist( ename, [] )
                 else:
                     valid_data[ ename ] = data.get( ename, [] )
-            elif etype in [ 'photo', 'video' ]:
+            elif etype in [ 'photo', 'video' ] and isinstance( data.get( ename ), File ):
                 valid_data[ ename ] = data.get( ename ).name
                 valid_files[ ename ] = data.get( ename )
             else:
