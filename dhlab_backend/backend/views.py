@@ -103,6 +103,7 @@ def user_dashboard( request, username ):
     organizations = Organization.objects.filter( users=user )
 
     patients = Repository.objects.filter( user=user, name='patients' )
+    patient_list = []
     if len( patients ) > 0:
         patients = patients[0]
         patient_list = []
