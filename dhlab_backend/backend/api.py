@@ -4,7 +4,6 @@ from backend.db import db, MongoDBResource, Document
 from backend.db import dehydrate_survey
 from backend.serializers import CSVSerializer
 
-from repos import validate_and_format
 from openrosa.serializer import XFormSerializer
 
 from bson import ObjectId
@@ -251,9 +250,7 @@ class RepoResource( ModelResource ):
         if not user.has_perm( 'add_data', repo ):
             return HttpUnauthorized()
 
-        # Do basic validation of the data
-        valid_data = validate_and_format( repo.fields(), request.POST )
-        new_id = repo.add_data( valid_data )
+        new_id = repo.add_data( request.POST, request.FILES )
 
         response_data = { 'success': True, 'id': str( new_id ) }
         return self.create_response( request, response_data )
@@ -268,6 +265,7 @@ class RepoResource( ModelResource ):
         '''
         repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
         bundle.data['children'] = repo_fields[ 'fields' ]
+        bundle.data['user']     = bundle.obj.user
         return bundle
 
     def dehydrate_id( self, bundle ):

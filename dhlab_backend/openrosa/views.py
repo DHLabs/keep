@@ -1,7 +1,7 @@
 import json
 import urllib
 
-from backend.db import Repository, user_or_organization
+from backend.db import user_or_organization
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -13,6 +13,7 @@ from django.core.files.storage import default_storage as storage
 
 from lxml import etree
 from repos import validate_and_format
+from repos.models import Repository
 
 
 def formlist( request, username ):
@@ -35,57 +36,48 @@ def submission_detail( request ):
     pass
 
 
-def _parse_xml_submission( xml_data, root ):
+def _parse_xml_submission( xml_data, root, files ):
     for element in root:
-        xml_data[ element.tag ] = element.text
+
+        if element.text in files:
+            xml_data[ element.tag ] = files.get( element.text )
+        else:
+            xml_data[ element.tag ] = element.text
 
         if element.getchildren() > 0:
-            _parse_xml_submission( xml_data, element )
+            _parse_xml_submission( xml_data, element, files )
 
 
 @csrf_exempt
 @require_POST
 def xml_submission( request, username ):
+    '''
+        See: https://bitbucket.org/javarosa/javarosa/wiki/FormSubmissionAPI
+
+        Parse an xml_submission_file and add the data into the specified repo.
+    '''
+    success_response = '''
+        <OpenRosaResponse xmlns="http://openrosa.org/http/response">
+            <message>Form Received!</message>
+        </OpenRosaResponse>'''
 
     root = etree.fromstring(request.FILES[ 'xml_submission_file' ].read())
 
     # Find the user object associated with this username
     account = user_or_organization( username )
 
-    # The find the suervey object associated with this form name & user
+    # The find the repo object associated with this form name & user
     repo_name = root.tag
-    repo = Repository.get_repo( repo_name, account )
+    repo = Repository.objects.get_by_username( repo_name, username )
 
     # Parse the xml data
     xml_data = {}
-    _parse_xml_submission( xml_data, root )
+    _parse_xml_submission( xml_data, root, request.FILES )
 
     # Do basic validation of the data
-    valid_data = validate_and_format( repo, xml_data )
+    repo.add_data( xml_data, request.FILES )
 
-    kwargs = {}
-    if 'iphone_id' in request.POST:
-        kwargs = { 'uuid': request.POST[ 'iphone_id' ] }
+    response = HttpResponse( success_response, mimetype='application/json' )
+    response[ 'X-OpenRosa-Version' ] = '1.0'
 
-    new_data = Repository.add_data( repo, valid_data, account, **kwargs )
-
-    if len( request.FILES.keys() ) > 1:
-
-        # If we have media data, save it to this repo's data folder
-        storage.bucket_name = 'keep-media'
-
-        for key in request.FILES.keys():
-            # Ignore the XML file
-            if key == 'xml_submission_file':
-                continue
-
-            # S3 URL consistes of the repo ID, the ID associated with this row
-            # of data, and then the filename.
-            #
-            # TODO: Queue up file for download rather than uploading directly
-            # to S3.
-            s3_url = '%s/%s/%s' % ( repo[ '_id' ], new_data, key )
-            storage.save( s3_url, request.FILES[ key ] )
-
-    return HttpResponse( json.dumps( { 'success': True } ),
-                         mimetype='application/json' )
+    return response

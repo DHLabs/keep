@@ -71,18 +71,19 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('#formDiv').html(this.renderedForm.el);
       $('.control-group').first().show().addClass('active');
       $('.active input').focus();
+      this._display_form_buttons(0);
       return this;
     };
 
     xFormView.prototype._display_form_buttons = function(question_index) {
-      if (question_index === 0) {
-        $('#prev_btn').hide();
-        $('#submit_btn').hide();
-        $('#next_btn').show();
-      } else if (question_index === this.input_fields.length - 1) {
+      if (question_index === this.input_fields.length - 1) {
         $('#prev_btn').show();
         $('#submit_btn').show();
         $('#next_btn').hide();
+      } else if (question_index === 0) {
+        $('#prev_btn').hide();
+        $('#submit_btn').hide();
+        $('#next_btn').show();
       } else {
         $('#prev_btn').show();
         $('#next_btn').show();
