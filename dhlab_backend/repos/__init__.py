@@ -36,7 +36,7 @@ def validate_and_format( fields, data, files ):
             else:
                 valid_data[ ename ] = data[ ename ]
 
-        elif ename in files:
+        if ename in files:
             valid_data[ ename ] = files[ ename ].name
             valid_files[ ename ] = files[ ename ]
 
