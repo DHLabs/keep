@@ -32,6 +32,7 @@ def new_repo( request ):
         # Check for a valid XForm and parse the file!
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
         if form.is_valid():
+            print 
             form.save()
             return HttpResponseRedirect( '/' )
     else:
@@ -40,6 +41,30 @@ def new_repo( request ):
     return render_to_response( 'new.html', { 'form': form },
                                context_instance=RequestContext(request) )
 
+
+@login_required
+def edit_repo( request, repo_id ):
+    '''
+        Edits a data repository
+        Takes user to Form Builder
+    '''
+
+    #TODO: finish this
+        
+
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
+
+    #if request.method == 'POST':
+    #do stuff here
+
+    # Check that this user has permission to delete this repo
+    if not request.user.has_perm( 'delete_repository', repo ):
+        return HttpResponse( 'Unauthorized', status=401 )
+
+    form = NewRepoForm()
+    form.name = repo.name
+    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(repo.fields()) },
+                          context_instance=RequestContext(request) )
 
 @login_required
 def delete_repo( request, repo_id ):
