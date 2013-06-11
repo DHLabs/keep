@@ -14,7 +14,7 @@ class NewRepoForm( forms.Form ):
 
     name    = forms.CharField()
 
-    desc    = forms.CharField( widget=forms.Textarea, required=False )
+    desc    = forms.CharField( widget=forms.Textarea(attrs={'rows':5,'class':'input-xxlarge'} ), required=False )
 
     privacy = forms.ChoiceField( choices=[ ('public', 'Public'),
                                            ('private', 'Private') ],

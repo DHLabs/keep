@@ -179,7 +179,7 @@ def build_report( request ):
                     question_data = result['data'][ item['form_question'] ]
                     print question_data
                     if item['report_type'] == 'incidence':
-                        if is_number(question_data):
+                        if question_data:
                             num_responses = num_responses + 1
                     else:
                         if is_number(question_data):
@@ -189,7 +189,11 @@ def build_report( request ):
                 if item['report_type'] == 'incidence':
                     report_string = "%d" % num_responses + ' occurences'
                 else:
-                    report_string = "%.2f" % (float(sum) / float(num_responses))
+                    if num_responses > 0:
+                        average = (float(sum) / float(num_responses))
+                    else:
+                        average = 0
+                    report_string = "%.2f" % average
                     report_string += " average from " + "%d" % num_responses + " responses out of " + "%d" % results.count() + " surveys"
 
                 report_item['report_string'] = report_string
