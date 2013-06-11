@@ -5,6 +5,8 @@
 <script src="{% static 'js/form_builder.js' %}"></script>
 {% if repo_json %}
 <script id='form_id' type='text/javascript'>var repo = {{ repo_json | safe }};</script>
+{% else %}
+<script id='form_id' type='text/javascript'>var repo = null;</script>
 {% endif %}
 <script type='text/javascript'>
 	$( function() {

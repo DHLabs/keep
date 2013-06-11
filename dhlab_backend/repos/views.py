@@ -31,7 +31,6 @@ def new_repo( request ):
         # Check for a valid XForm and parse the file!
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
         if form.is_valid():
-            print 
             form.save()
             return HttpResponseRedirect( '/' )
     else:
@@ -47,21 +46,31 @@ def edit_repo( request, repo_id ):
         Edits a data repository
         Takes user to Form Builder
     '''
-
-    #TODO: finish this
-        
-
     repo = get_object_or_404( Repository, mongo_id=repo_id )
-
-    #if request.method == 'POST':
-    #do stuff here
-
-    # Check that this user has permission to delete this repo
+    
+    # Check that this user has permission to edit this repo
     if not request.user.has_perm( 'delete_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
+    
+    if request.method == 'POST':
+        form = NewRepoForm( request.POST, request.FILES, user=request.user )
 
-    form = NewRepoForm()
-    form.name = repo.name
+        repo.name = request.POST['name']
+        repo.description = request.POST['name']
+        repo.save()
+        data_repo = db.repo.find_one( ObjectId( repo_id ) )
+        #print "updating repo:"
+        #print data_repo
+        newfields = json.loads( request.POST['survey_json'].strip() )['children']
+        #print "with fields"
+        #print newfields
+        db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields}} )
+        return HttpResponseRedirect( '/' )
+    else:
+        form = NewRepoForm()
+        form.initial["name"] = repo.name
+        form.initial["desc"] = repo.description
+
     return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(repo.fields()) },
                           context_instance=RequestContext(request) )
 
