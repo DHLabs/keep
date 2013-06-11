@@ -74,11 +74,10 @@ class XFormSerializer( Serializer ):
 
                 downloadUrl = etree.Element( 'downloadUrl' )
 
-                base_url = 'http://%s/api/v1/repos/'
                 if settings.DEBUG:
-                    base_url = base_url % ( 'localhost:8000' )
+                    base_url = 'http://%s/api/v1/repos/' % ('localhost:8000')
                 else:
-                    base_url = base_url % ( 'keep.distributedhealth.org' )
+                    base_url = 'http://%s/api/v1/repos/' % (settings.HOSTNAME)
 
                 downloadUrl.text = '%s%s/?format=xform&user=%s' %\
                                    ( base_url, xform[ 'id' ], owner )

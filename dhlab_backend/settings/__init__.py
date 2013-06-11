@@ -1,3 +1,5 @@
+import socket
+
 # Django settings for dhlab_backend project.
 from .defaults.database import *
 from .defaults.django import *
@@ -5,6 +7,11 @@ from .defaults.logging import *
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+try:
+    HOSTNAME = socket.gethostname()
+except:
+    HOSTNAME = 'localhost'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
