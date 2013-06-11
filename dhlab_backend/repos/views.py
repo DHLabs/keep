@@ -56,7 +56,7 @@ def edit_repo( request, repo_id ):
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
 
         repo.name = request.POST['name']
-        repo.description = request.POST['name']
+        repo.description = request.POST['desc']
         repo.save()
         data_repo = db.repo.find_one( ObjectId( repo_id ) )
         #print "updating repo:"
