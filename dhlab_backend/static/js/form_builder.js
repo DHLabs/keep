@@ -4,17 +4,17 @@ var currentQuestionName;
 var currentGroupName;
 
 $( function() {
-  if( repo ) {
-    console.log( repo );
-    questionList = repo;
+  // if( repo ) {
+  //   console.log( repo );
+  //   questionList = repo;
 
-    //hide xls upload
-    $( '#build_form' ).hide();
-    $('#xform_file_upload').hide();
-    $( '#survey_builder' ).show();
-    reloadQuestionListHTML();
-    buildSurvey();
-  }
+  //   //hide xls upload
+  //   $( '#build_form' ).hide();
+  //   $( '#xform_file_upload').hide();
+  //   $( '#survey_builder' ).show();
+  //   reloadQuestionListHTML();
+  //   buildSurvey();
+  // }
 });
 
 function questionTypeChanged() {
@@ -48,7 +48,7 @@ function closeDialog() {
 }
 
 function getValueInputForType(questionType, tagId) {
-	
+
 	var html = "<input id='" + tagId + "";
 	var inputType = "text";
 	if( questionType == "decimal" || questionType == "integer" ) {
@@ -68,7 +68,7 @@ function getValueInputForType(questionType, tagId) {
 function getCompareSelectForType(questionType, tagId) {
 
 	var html = "<select id='" + tagId + "'>\n";
-	
+
 	if( questionType == "decimal" || questionType == "integer" ) {
 		html += "<option value='!='>Not Equal To</option>" +
 	     "<option value='='>Equal To</option>" +
@@ -87,7 +87,7 @@ function getCompareSelectForType(questionType, tagId) {
 		html += "<option value='='>Selected</option>" +
 	   "<option value='!='>Not Selected</option>";
 	}
-	    
+
 	html += "</select>\n";
 	return html;
 }
@@ -100,16 +100,16 @@ function addRelevance(questionName,relevantType,relevantValue) {
 
     //TODO: fix this with flat questionList
 	for( var questionIndex=0; questionIndex<currentQuestion; questionIndex++ ) {
-		html+= "<option value='" + questionIndex + "'>" + 
+		html+= "<option value='" + questionIndex + "'>" +
 		questionList[questionIndex].name + "</option>\n"
 	}
-    
+
 	html += "</select>\n</td>\n";
 	html += "<td id='relevantType"+ relevantNum +"''></td>\n";//relevantType selection
 	html += "<td id='relevantValue"+ relevantNum +"'></td>\n";//relevantValue
 
 	html += "<td style='width:40px;text-align:center;'>"+
-        "<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'" 
+        "<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'"
         + " class='btn btn-danger'>" +
         "   <i class='icon-trash'></i>"+
         "</button>"+
@@ -136,7 +136,7 @@ function relevanceQuestionChanged( relevanceNum, questionName ) {
 
     var question = getQuestionForName(questionName);
 
-	$("#relevantValue"+relevanceNum).html( getValueInputForType( 
+	$("#relevantValue"+relevanceNum).html( getValueInputForType(
 		getValueInputForType( question.type ), valueTag ) );
 }
 
@@ -177,37 +177,37 @@ function addConstraint(constraintType, constraintValue) {
 	html += "</td>\n";
 
 	if( questionType == "decimal" || questionType == "integer" ) {
-		
 
-	   html += "<td><input id='constraintValue" + constraintNum 
-	     +"' placeholder='Constraint Value' value='" + constraintValue + 
+
+	   html += "<td><input id='constraintValue" + constraintNum
+	     +"' placeholder='Constraint Value' value='" + constraintValue +
 	     "' type='number' step='any'></td>\n";
 	} else if( questionType == "date" ) {
-		
 
-	   html += "<td><input id='constraintValue" + constraintNum 
-	   +"' placeholder='Constraint Value' value='" + constraintValue + 
+
+	   html += "<td><input id='constraintValue" + constraintNum
+	   +"' placeholder='Constraint Value' value='" + constraintValue +
 	   "' type='date'></td>\n";
 	} else if( questionType == "dateTime" ) {
-		
 
-	   html += "<td><input id='constraintValue" + constraintNum 
-	   +"' placeholder='Constraint Value' value='" + constraintValue + 
+
+	   html += "<td><input id='constraintValue" + constraintNum
+	   +"' placeholder='Constraint Value' value='" + constraintValue +
 	   "' type='datetime-local'></td>\n";
 	} else if( questionType == "time" ) {
-		
 
-	   html += "<td><input id='constraintValue" + constraintNum 
-	   +"' placeholder='Constraint Value' value='" + constraintValue + 
+
+	   html += "<td><input id='constraintValue" + constraintNum
+	   +"' placeholder='Constraint Value' value='" + constraintValue +
 	   "' type='time'></td>\n";
 	} else if( questionType == "select one" || questionType == "select all that apply" ) {
-		
 
-	   html += "<td><input id='constraintValue" + constraintNum 
-	   +"' placeholder='Constraint Value' value='" + constraintValue + 
+
+	   html += "<td><input id='constraintValue" + constraintNum
+	   +"' placeholder='Constraint Value' value='" + constraintValue +
 	   "' type='text'></td>\n";
 	}
-	
+
 	html += "<td style='width:40px;text-align:center;'>"+
 		"<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'"
 		+ " class='btn btn-danger'>" +
@@ -268,7 +268,7 @@ function populateQuestion( questionName ) {
 
 	if( questionName != null ) {
         var question = getQuestionForName(questionName);
-        
+
 		$("#questionName").val( question.name );
 		$("#questionLabel").val( question.label );
 		$("#questionType").val(question.type);
@@ -494,7 +494,7 @@ function okClicked() {
                 } else {
                     group.children[questionIndex] = question;
                 }
-                
+
             }
         } else {
 
@@ -515,7 +515,7 @@ function okClicked() {
                 }
             }
         }
-		
+
 		buildSurvey();
 		reloadQuestionListHTML();
 		closeDialog();
@@ -594,7 +594,7 @@ function deleteQuestion(questionName) {
 	var questionId = "#question" + questionName;
 
     var question = getQuestionForName(questionName);
-    
+
     if( currentGroupName ) {
 
         var group = getQuestionForName(currentGroupName);
@@ -666,8 +666,8 @@ function getHTMLForQuestion(question) {
         //generate html from other questions
         for( var groupQuestion in question.children ) {
             groupHTML += getHTMLForQuestion( question.children[groupQuestion] );
-        }        
-        
+        }
+
         groupHTML += "</tbody>\n</table></td></tr>\n";
 
         return groupHTML;
