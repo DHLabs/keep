@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>De-register Mother</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/3EB741FF-43FD-42D6-91E1-8C93DE82EE6F" uiVersion="1" version="1" name="De-register Mother">
+					<reason_for_closure />
+					<date_of_death />
+					<place_of_death />
+					<time_of_death_maternal />
+					<cause_of_death_maternal />
+					<are_you_sure />
+					<children_message />
+				</data>
+			</instance>
+			<bind nodeset="/data/reason_for_closure" required="false()" />
+			<bind nodeset="/data/date_of_death" type="xsd:date" relevant="/data/reason_for_closure = 'death'" />
+			<bind nodeset="/data/place_of_death" relevant="/data/reason_for_closure = 'death'" />
+			<bind nodeset="/data/time_of_death_maternal" relevant="/data/reason_for_closure = 'death'" />
+			<bind nodeset="/data/cause_of_death_maternal" relevant="/data/reason_for_closure = 'death'" />
+			<bind nodeset="/data/are_you_sure" required="true()" />
+			<bind nodeset="/data/children_message" relevant="/data/are_you_sure = 'yes'" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="reason_for_closure-label">
+						<value>Reason for closure</value>
+					</text>
+					<text id="closure_reason-death-label">
+						<value>1. Death</value>
+					</text>
+					<text id="reason_for_closure-change_of_location-label">
+						<value>2. Migration</value>
+					</text>
+					<text id="reason_for_closure-end_of_pregnancy-label">
+						<value>3. End of pregnancy</value>
+					</text>
+					<text id="closure_reason-not_pregnant-label">
+						<value>4. Not Pregnant</value>
+					</text>
+					<text id="date_of_death-label">
+						<value>Date of death</value>
+					</text>
+					<text id="place_of_death-label">
+						<value>Place of death</value>
+					</text>
+					<text id="place_of_death-home-label">
+						<value>1. Home</value>
+					</text>
+					<text id="place_of_death-health_centre-label">
+						<value>2. Health centre</value>
+					</text>
+					<text id="place_of_death-hospital-label">
+						<value>3. Hospital</value>
+					</text>
+					<text id="place_of_death-other-label">
+						<value>4. Other</value>
+					</text>
+					<text id="time_of_death_maternal-label">
+						<value>Death occurred during pregnancy or within 45 days of birth?</value>
+					</text>
+					<text id="time_of_death_maternal-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="time_of_death_maternal-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="cause_of_death_maternal-label">
+						<value>Cause of death</value>
+					</text>
+					<text id="cause_of_death_maternal-eclampsia-label">
+						<value>1. Eclampsia</value>
+					</text>
+					<text id="cause_of_death_maternal-hypersensitive-label">
+						<value>2. Hypersensitive illness</value>
+					</text>
+					<text id="cause_of_death_maternal-hemorrhage-label">
+						<value>3. Post-partum hemorrhage</value>
+					</text>
+					<text id="cause_of_death_maternal-infection-label">
+						<value>4. Post-partum infection</value>
+					</text>
+					<text id="cause_of_death_maternal-other-label">
+						<value>5. Other</value>
+					</text>
+					<text id="are_you_sure-label">
+						<value>Are you sure you wish to deregister this mother?</value>
+					</text>
+					<text id="are_you_sure-yes-label">
+						<value>1. Yes</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="are_you_sure-no-label">
+						<value>2. No</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="children_message-label">
+						<value>If this mother has any children, they will still need to be visited.</value>
+					</text>
+				</translation>
+				<translation lang="tog">
+					<text id="reason_for_closure-label">
+						<value>Kaambo ka kujala</value>
+					</text>
+					<text id="closure_reason-death-label">
+						<value>1. Lufu</value>
+					</text>
+					<text id="reason_for_closure-change_of_location-label">
+						<value>2. Kulonga</value>
+					</text>
+					<text id="reason_for_closure-end_of_pregnancy-label">
+						<value>3. Mamanino ada</value>
+					</text>
+					<text id="closure_reason-not_pregnant-label">
+						<value>4. Tajisi da</value>
+					</text>
+					<text id="date_of_death-label">
+						<value>Buzuba bwa kufwa</value>
+					</text>
+					<text id="place_of_death-label">
+						<value>Busena mbwakafwida</value>
+					</text>
+					<text id="place_of_death-home-label">
+						<value>1. Kung'anda</value>
+					</text>
+					<text id="place_of_death-health_centre-label">
+						<value>2. Kabaddela Kashonto</value>
+					</text>
+					<text id="place_of_death-hospital-label">
+						<value>3. Cibaddela cipati</value>
+					</text>
+					<text id="place_of_death-other-label">
+						<value>4. Busena bumbi</value>
+					</text>
+					<text id="time_of_death_maternal-label">
+						<value>Lufu lwacitika ciindi nali ada na mumazuba makumi one amusanu kuzwa ciindi ncakatumbuka?</value>
+					</text>
+					<text id="time_of_death_maternal-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="time_of_death_maternal-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="cause_of_death_maternal-label">
+						<value>Ceeta Lufu</value>
+					</text>
+					<text id="cause_of_death_maternal-eclampsia-label">
+						<value>1. Bulwazi bwakuzimba maulu and moyo kwindilila mpo uduntila lyoonse</value>
+					</text>
+					<text id="cause_of_death_maternal-hypersensitive-label">
+						<value>2. Malwazi mbuli acimyoonzi </value>
+					</text>
+					<text id="cause_of_death_maternal-hemorrhage-label">
+						<value>3. Kuzwa bulowa bunji kubukaintu wamana bwakumbuka</value>
+					</text>
+					<text id="cause_of_death_maternal-infection-label">
+						<value>4. Kuciswa kaambo kakutapona kabotu zilonda zyakutmbuka</value>
+					</text>
+					<text id="cause_of_death_maternal-other-label">
+						<value>5. Nteenda zimbi</value>
+					</text>
+					<text id="are_you_sure-label">
+						<value>Muli masimpe muyanda kubagwisya mu regista aba bamama?</value>
+					</text>
+					<text id="are_you_sure-yes-label">
+						<value>1. Iiyi</value>
+						<value form="audio">jr://file/commcare/audio/data/yes.mp3</value>
+					</text>
+					<text id="are_you_sure-no-label">
+						<value>2. Peepe</value>
+						<value form="audio">jr://file/commcare/audio/data/no.mp3</value>
+					</text>
+					<text id="children_message-label">
+						<value>Na aba bamama bajisi bana bambi, beleede kuti kabaciswaigwa</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/reason_for_closure">
+			<label ref="jr:itext('reason_for_closure-label')" />
+			<item>
+				<label ref="jr:itext('closure_reason-death-label')" />
+				<value>death</value>
+			</item>
+			<item>
+				<label ref="jr:itext('reason_for_closure-change_of_location-label')" />
+				<value>change_of_location</value>
+			</item>
+			<item>
+				<label ref="jr:itext('reason_for_closure-end_of_pregnancy-label')" />
+				<value>end_of_pregnancy</value>
+			</item>
+			<item>
+				<label ref="jr:itext('closure_reason-not_pregnant-label')" />
+				<value>not_pregnant</value>
+			</item>
+		</select1>
+		<input ref="/data/date_of_death">
+			<label ref="jr:itext('date_of_death-label')" />
+		</input>
+		<select1 ref="/data/place_of_death">
+			<label ref="jr:itext('place_of_death-label')" />
+			<item>
+				<label ref="jr:itext('place_of_death-home-label')" />
+				<value>home</value>
+			</item>
+			<item>
+				<label ref="jr:itext('place_of_death-health_centre-label')" />
+				<value>health_centre</value>
+			</item>
+			<item>
+				<label ref="jr:itext('place_of_death-hospital-label')" />
+				<value>hospital</value>
+			</item>
+			<item>
+				<label ref="jr:itext('place_of_death-other-label')" />
+				<value>other</value>
+			</item>
+		</select1>
+		<select1 ref="/data/time_of_death_maternal">
+			<label ref="jr:itext('time_of_death_maternal-label')" />
+			<item>
+				<label ref="jr:itext('time_of_death_maternal-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('time_of_death_maternal-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<select1 ref="/data/cause_of_death_maternal">
+			<label ref="jr:itext('cause_of_death_maternal-label')" />
+			<item>
+				<label ref="jr:itext('cause_of_death_maternal-eclampsia-label')" />
+				<value>eclampsia</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_maternal-hypersensitive-label')" />
+				<value>hypersensitive</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_maternal-hemorrhage-label')" />
+				<value>hemorrhage</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_maternal-infection-label')" />
+				<value>infection</value>
+			</item>
+			<item>
+				<label ref="jr:itext('cause_of_death_maternal-other-label')" />
+				<value>other</value>
+			</item>
+		</select1>
+		<select1 ref="/data/are_you_sure">
+			<label ref="jr:itext('are_you_sure-label')" />
+			<item>
+				<label ref="jr:itext('are_you_sure-yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('are_you_sure-no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<trigger ref="/data/children_message">
+			<label ref="jr:itext('children_message-label')" />
+		</trigger>
+	</h:body>
+</h:html>

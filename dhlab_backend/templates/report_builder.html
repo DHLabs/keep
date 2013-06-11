@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block js %}
+<script id='form_id' type='text/javascript'>var repos = {{ user_repos|safe }};</script>
+<script src="{% static 'js/report_builder.js' %}"></script>
+{% endblock %}
+
+{% block title %}Build Report{% endblock %}
+
+{% block content %}
+<div class='container'>
+	<div class='row'>
+		<div class='span12'>
+			<form action='.' method='post' onsubmit="submitReport()" enctype='multipart/form-data'>
+				{% csrf_token %}
+
+				<label {% if form.name.errors %}style='color:red'{%endif%}>
+					<strong>Report Name</strong>
+				</label>
+                {{ form.name }}
+				{{ form.name.errors }}
+				
+                <table class='table table-striped table-bordered'>
+                    <thead>
+                        <tr>
+                            <td colspan='4' style='background-color:#EEE;'>
+                                <h4>
+                                    <div class='pull-right'>
+                                        <button type='button' id='additem' onclick='addItem()' class="btn btn btn-medium">Add Item</button>
+                                    </div>
+                                    Report Items
+                                </h4>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id='reportItems'>
+
+                    </tbody>
+                </table>
+                {{ form.report_json }}
+
+                <label>
+					<strong>Start Date</strong>
+				</label>
+                <input id="startTime" name="startTime" type="date" />
+
+                <label>
+					<strong>End Date</strong>
+				</label>
+                <input id="endTime" name="endTime" type="date" />
+
+                <div style='clear:both;'>
+					<hr/>
+					<button id='submit_btn' type='submit' class='btn btn-success'>Create Report</button>
+				</div>
+            </form>
+		</div>
+	</div>
+</div>
+{% endblock %}

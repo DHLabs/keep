@@ -1,24 +1,29 @@
-import json
 import pymongo
 
 from backend.db import db, MongoDBResource, Document
-from backend.db import dehydrate_survey, encrypt_survey
+from backend.db import dehydrate_survey
 from backend.serializers import CSVSerializer
 
-from repos import validate_and_format
 from openrosa.serializer import XFormSerializer
 
 from bson import ObjectId
 
-from datetime import datetime
-
+from django.conf.urls import url
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.http import HttpResponse
+
+from guardian.shortcuts import get_perms
 
 from tastypie import fields
 from tastypie.authorization import Authorization
+from tastypie.exceptions import BadRequest
+from tastypie.http import HttpUnauthorized, HttpNotFound
+from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
+
+from backend.db import user_or_organization
+from repos.models import Repository
 
 # from twofactor.api_auth import ApiTokenAuthentication
 
@@ -26,27 +31,42 @@ from tastypie.utils.mime import build_content_type
 class DataAuthorization( Authorization ):
 
     def read_list( self, object_list, bundle ):
+
         user = bundle.request.GET.get( 'user', None )
 
-        try:
-            user = User.objects.get( username=user )
-        except ObjectDoesNotExist:
-            return []
+        account = user_or_organization( user )
+        if account is None:
+            raise ValueError
 
-        return object_list.find({ 'user': user.id } )
+        query = {}
+        if isinstance( account, User ):
+            query[ 'user' ] = account.id
+        else:
+            query[ 'org' ] = account.d
+
+        return object_list.find( query,
+                                 {'data': False, 'user': False, 'org': False})\
+                          .limit( 5 )\
+                          .sort( 'timestamp', pymongo.DESCENDING )
 
     def read_detail( self, object_detail, bundle ):
+        if object_detail.is_public:
+            return True
+
         user = bundle.request.GET.get( 'user', None )
+        account = user_or_organization( user )
 
-        try:
-            user = User.objects.get( username=user )
-        except ObjectDoesNotExist:
-            raise ValueError
+        if account is None:
+            return False
 
-        if object_detail[ 'user' ] != user.id:
-            raise ValueError
-
-        return object_detail
+        result = account.has_perm( 'view_data', object_detail )
+        if not result:
+            for org in account.organization_users.all():
+                if 'view_data' in get_perms( org, object_detail ):
+                    return True
+        else:
+            return True
+        return False
 
 
 class RepoAuthorization( Authorization ):
@@ -54,42 +74,45 @@ class RepoAuthorization( Authorization ):
     def read_list( self, object_list, bundle ):
         user = bundle.request.GET.get( 'user', None )
 
-        try:
-            user = User.objects.get( username=user )
-        except ObjectDoesNotExist:
-            return []
+        account = user_or_organization( user )
+        if account is None:
+            raise ValueError
 
-        return object_list.find({ 'user': user.id } )
+        return object_list.filter( Q(user__username=user) | Q(org__name=user) )
 
     def read_detail( self, object_detail, bundle ):
 
-        if object_detail.get( 'public', False ):
-            return object_detail
+        if bundle.obj.is_public:
+            return True
 
-        user = bundle.request.GET.get( 'user', None )
+        account = bundle.request.GET.get( 'user', None )
+        account = user_or_organization( account )
+        if account is None:
+            return False
 
-        try:
-            user = User.objects.get( username=user )
-        except ObjectDoesNotExist:
-            raise ValueError
+        result = account.has_perm( 'view_repository', bundle.obj )
+        if not result:
+            for org in account.organization_users.all():
+                if 'view_repository' in get_perms( org, bundle.obj ):
+                    return True
+        else:
+            return True
 
-        if object_detail[ 'user' ] != user.id:
-            raise ValueError
+        return False
 
-        return object_detail
-
-    def update_detail( self, object_detail, bundle ):
-        return object_detail
+    def create_detail( self, object_detail, bundle ):
+        return True
 
 
 class DataResource( MongoDBResource ):
     id          = fields.CharField( attribute='_id' )
-    survey_id   = fields.CharField( attribute='survey' )
+    repo_id     = fields.CharField( attribute='repo' )
+    survey_label = fields.CharField( attribute='survey_label', null=True )
     timestamp   = fields.DateTimeField( attribute='timestamp' )
-    data        = fields.DictField( attribute='data' )
+    data        = fields.DictField( attribute='data', null=True )
 
     class Meta:
-        collection = 'survey_data'
+        collection = 'data'
         resource_name = 'data'
         object_class = Document
         serializer = CSVSerializer()
@@ -100,53 +123,37 @@ class DataResource( MongoDBResource ):
         authorization = DataAuthorization()
 
     def get_detail( self, request, **kwargs ):
+
         # Grab the survey that we're querying survey data for
-        survey_id = kwargs[ 'pk' ]
+        repo_id = kwargs[ 'pk' ]
 
-        # Query the database for the data
-        cursor = db.survey_data.find( { 'survey': ObjectId( survey_id ) })
+        try:
+            basic_bundle = self.build_bundle( request=request )
+            repo = Repository.objects.get( mongo_id=repo_id )
 
-        data = dehydrate_survey( cursor )
+            if not self.authorized_read_detail( repo, basic_bundle ):
+                return HttpUnauthorized()
 
-        return self.create_response( request, data )
+            # Query the database for the data
+            cursor = db.data.find( { 'repo': ObjectId( repo_id ) } )
 
-    def get_list( self, request, **kwargs ):
-        user = request.GET.get( 'user', None )
-        user = User.objects.get( username=user )
+            data = dehydrate_survey( cursor )
 
-        # Don't show encrypted data information and user id.
-        # Limit to the last 5 submissions
-        # Sort by latest submission first
-        cursor = db.survey_data.find( { 'user': user.id },
-                                      { 'data': False, 'user': False } )\
-                               .limit( 5 )\
-                               .sort( 'timestamp', pymongo.DESCENDING )
-
-        # Format timestamp correctly such that Javascript can correctly parse
-        # the information
-        data = dehydrate_survey( cursor )
-
-        return self.create_response( request, data )
+            return self.create_response( request, data )
+        except ValueError:
+            return HttpUnauthorized()
 
 
-class RepoResource( MongoDBResource ):
-    id          = fields.CharField( attribute='_id' )
-    name        = fields.CharField( attribute='name', null=True )
-    title       = fields.CharField( attribute='title', null=True )
-    default_language = fields.CharField( attribute='default_language',
-                                         null=True )
-    id_string   = fields.CharField( attribute='id_string', null=True )
-    type        = fields.CharField( attribute='type', null=True )
-    children    = fields.ListField( attribute='children', null=True )
-    owner       = fields.IntegerField( attribute='user', null=True )
+class RepoResource( ModelResource ):
 
     class Meta:
-        collection = 'survey'
+        queryset = Repository.objects.all()
         resource_name = 'repos'
-        object_class = Document
 
         list_allowed_methods = [ 'get' ]
         detail_allowed_methods = [ 'get', 'post' ]
+
+        excludes = [ 'mongo_id' ]
 
         # Only return JSON & XForm xml
         serializer = XFormSerializer()
@@ -162,7 +169,23 @@ class RepoResource( MongoDBResource ):
         # Don't include resource uri
         include_resource_uri = False
 
-    def create_response( self, request, data, response_class=HttpResponse, **response_kwargs):
+    def prepend_urls(self):
+
+        base_url = '^(?P<resource_name>%s)/' % ( self._meta.resource_name )
+
+        return [
+
+            url( regex=r"%s(?P<mongo_id>\w+)/$" % ( base_url ),
+                 view=self.wrap_view('dispatch_detail'),
+                 name="api_dispatch_detail"),
+
+            url( regex=r"%s(?P<mongo_id>\w+)/manifest/$" % ( base_url ),
+                 view=self.wrap_view('get_manifest'),
+                 name="api_get_resource"),
+        ]
+
+    def create_response( self, request, data, response_class=HttpResponse,
+                         **response_kwargs):
         """
         Extracts the common "which-format/serialize/return-response" cycle.
 
@@ -172,45 +195,123 @@ class RepoResource( MongoDBResource ):
 
         serialized = self.serialize(request, data, desired_format)
         response = response_class( content=serialized,
-                            content_type=build_content_type(desired_format),
-                               **response_kwargs )
-        response[ 'X-OpenRosa-Version'] = '1.0'
+                                   content_type=build_content_type(desired_format),
+                                   **response_kwargs )
+
+        # FOR ODKCollect
+        # If the device requests an xform add an OpenRosa header
+        if desired_format == 'text/xml':
+            response[ 'X-OpenRosa-Version'] = '1.0'
         return response
+
+    def _grab_media( self, root ):
+
+        media = []
+        for field in root:
+            if 'children' in field:
+                media.extend( self._grab_media( field[ 'children' ] ) )
+                continue
+
+            if 'choices' in field:
+                for choice in field[ 'choices' ]:
+                    if 'media' in choice:
+                        media.extend( choice[ 'media' ].values() )
+
+            if 'media' in field:
+                media.extend( field[ 'media' ].values() )
+
+        return media
+
+    def get_manifest( self, request, **kwargs ):
+        base = 'http://s3.amazonaws.com/keep-media/%s/%s'
+
+        bundle = self.build_bundle( request=request )
+        obj = self.obj_get( bundle, **self.remove_api_resource_names(kwargs) )
+
+        media = list( set( self._grab_media( obj.fields() ) ) )
+        media = [ ( med, base % ( obj.mongo_id, med ) ) for med in media ]
+
+        response = { 'repo': obj.mongo_id, 'manifest': media }
+        return self.create_response( request, response )
 
     def post_detail( self, request, **kwargs ):
 
-        # The find the suervey object associated with this form name & user
-        repo = db.survey.find_one( { '_id': ObjectId( kwargs.get( 'pk' ) ) } )
-        repo_user = repo[ 'user' ]
+        basic_bundle = self.build_bundle( request=request )
 
-        # Do basic validation of the data
-        valid_data = validate_and_format( repo, request.POST )
+        user_accessing = request.GET.get( 'user', None )
+        user = user_or_organization( user_accessing )
+        if user is None:
+            return HttpUnauthorized()
 
-        # Include some metadata with the survey data
-        survey_data = {
-            'user':         repo_user,
-            # Survey/form ID associated with this data
-            'survey':       repo[ '_id' ],
+        repo = Repository.objects.get( mongo_id=kwargs.get( 'mongo_id' ) )
+        if repo is None:
+            return HttpNotFound()
 
-            # Survey name (used for feed purposes)
-            'survey_label': repo[ 'name' ],
+        if not user.has_perm( 'add_data', repo ):
+            return HttpUnauthorized()
 
-            # Timestamp of when this submission was received
-            'timestamp':    datetime.utcnow(),
-            # The validated & formatted survey data.
-            'data':         encrypt_survey( valid_data )
+        new_id = repo.add_data( request.POST, request.FILES )
+
+        response_data = { 'success': True, 'id': str( new_id ) }
+        return self.create_response( request, response_data )
+
+    def dehydrate( self, bundle ):
+        '''
+            Add additional information to the Repository bundle.
+
+            - fields:
+                Fields are grabbed from MongoDB and appended to the bundle
+                dictionary.
+        '''
+        repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
+        bundle.data['children'] = repo_fields[ 'fields' ]
+        bundle.data['user']     = bundle.obj.user
+        return bundle
+
+    def dehydrate_id( self, bundle ):
+        return bundle.obj.mongo_id
+
+    def dehydrate_user( self, bundle ):
+        '''
+            Convert user ids into a more informative username when displaying
+            results
+        '''
+        return bundle.obj.user.username if bundle.obj.user else None
+
+    def dehydrate_org( self, bundle ):
+        '''
+            Convert organization ids into the more informative org name.
+        '''
+        return bundle.obj.org.name if bundle.obj.org else None
+
+
+class UserResource( ModelResource ):
+    class Meta:
+        queryset = User.objects.all()
+        resource_name = 'user'
+
+        list_allowed_methods = [ 'get' ]
+        detail_allowed_methods = []
+
+        excludes = [ 'email',
+                     'password',
+                     'is_superuser',
+                     'is_staff',
+                     'is_active',
+                     'date_joined',
+                     'first_name',
+                     'last_name',
+                     'last_login' ]
+
+        filtering = {
+            'username': ( 'icontains', )
         }
 
-        # Insert into the database
-        db.survey_data.insert( survey_data )
-
-        data = json.dumps( { 'success': True } )
-        return data
-
-    def dehydrate_owner(self, bundle):
+    def build_filters( self, filters=None ):
         '''
-        Convert user ids into a more informative username when displaying
-        results
+            Since we're only using this API to search for users, require that
+            a filter be in the API call.
         '''
-        user = User.objects.get( id=bundle.data['owner'] )
-        return user.username
+        if 'username__icontains' not in filters:
+            raise BadRequest
+        return super( UserResource, self ).build_filters( filters )

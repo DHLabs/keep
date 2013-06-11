@@ -1,25 +1,24 @@
 import json
-import math
 
 from bson import ObjectId
-from datetime import datetime
-from numpy import linspace
 
+from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.forms.util import ErrorList
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
-from backend.db import db, dehydrate_survey
-from privacy.map import privatize
+from guardian.shortcuts import get_perms
 
-from pyxform.xls2json import SurveyReader
+from backend.db import db, dehydrate_survey, user_or_organization
 
-from .forms import NewRepoForm, BuildRepoForm
+#from privacy import privatize_geo
+
+from .forms import NewRepoForm
+from .models import Repository
 
 
 @login_required
@@ -29,49 +28,11 @@ def new_repo( request ):
     '''
     # Handle XForm upload
     if request.method == 'POST':
-
-        form = NewRepoForm( request.POST, request.FILES )
-
         # Check for a valid XForm and parse the file!
+        form = NewRepoForm( request.POST, request.FILES, user=request.user )
         if form.is_valid():
-
-            # Check that this form name isn't already taken by the user
-            form_exists = db.survey.find( { 'name': form.cleaned_data['name'],
-                                            'user': request.user.id } )
-
-            if form_exists.count() != 0:
-                errors = form._errors.setdefault( 'name', ErrorList() )
-                errors.append( 'Repository already exists with this name' )
-            else:
-                # Parse the file and store into our database
-                survey = SurveyReader( request.FILES[ 'xform_file' ] )
-
-                if len( survey._warnings ) > 0:
-                    print 'Warnings parsing xls file!'
-
-                data = survey.to_json_dict()
-
-                # Basic form name/description
-                data[ 'name' ] = form.cleaned_data[ 'name' ]
-                data[ 'description' ] = form.cleaned_data[ 'desc' ]
-
-                # Needed for xform formatting
-                data[ 'title' ]       = form.cleaned_data[ 'name' ]
-                data[ 'id_string' ]   = form.cleaned_data[ 'name' ]
-
-                # Is this form public?
-                data[ 'public' ] = form.cleaned_data[ 'privacy' ] == 'public'
-
-                # Store who uploaded this form
-                data[ 'user' ]      = request.user.id
-
-                # Store when this form was uploaded
-                data[ 'uploaded' ]  = datetime.now()
-
-                db.survey.insert( data )
-
-                return HttpResponseRedirect( '/' )
-
+            form.save()
+            return HttpResponseRedirect( '/' )
     else:
         form = NewRepoForm()
 
@@ -80,62 +41,38 @@ def new_repo( request ):
 
 
 @login_required
-def build_form( request ):
+def edit_repo( request, repo_id ):
     '''
-        Builds form.
-        '''
-    # Handle XForm upload
+        Edits a data repository
+        Takes user to Form Builder
+    '''
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
+    
+    # Check that this user has permission to edit this repo
+    if not request.user.has_perm( 'delete_repository', repo ):
+        return HttpResponse( 'Unauthorized', status=401 )
+    
     if request.method == 'POST':
+        form = NewRepoForm( request.POST, request.FILES, user=request.user )
 
-        form = BuildRepoForm( request.POST )
-
-        # Check for a valid XForm and parse the file!
-        if form.is_valid():
-
-            # Check that this form name isn't already taken by the user
-            form_exists = db.survey.find( { 'name': form.cleaned_data['name'],
-                                         'user': request.user.id } )
-
-            if form_exists.count() != 0:
-                errors = form._errors.setdefault( 'name', ErrorList() )
-                errors.append( 'Repository already exists with this name' )
-            else:
-
-                data = json.loads(request.POST['surveyjson'])
-
-                # Basic form name/description
-                data[ 'name' ] = form.cleaned_data[ 'name' ]
-                data[ 'description' ] = form.cleaned_data[ 'desc' ]
-
-                # Needed for xform formatting
-                data[ 'title' ]       = form.cleaned_data[ 'name' ]
-                data[ 'id_string' ]   = form.cleaned_data[ 'name' ]
-
-                # Is this form public?
-                data[ 'public' ] = form.cleaned_data[ 'privacy' ] == 'public'
-
-                # Store who uploaded this form
-                data[ 'user' ]      = request.user.id
-
-                data[ 'type' ]      = 'survey'
-
-                # Store when this form was uploaded
-                data[ 'uploaded' ]  = datetime.now()
-
-                print data
-
-                db.survey.insert( data )
-
-                return HttpResponseRedirect( '/' )
-        else:
-            print "form is not valid"
-
+        repo.name = request.POST['name']
+        repo.description = request.POST['desc']
+        repo.save()
+        data_repo = db.repo.find_one( ObjectId( repo_id ) )
+        #print "updating repo:"
+        #print data_repo
+        newfields = json.loads( request.POST['survey_json'].strip() )['children']
+        #print "with fields"
+        #print newfields
+        db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields}} )
+        return HttpResponseRedirect( '/' )
     else:
-        form = BuildRepoForm()
+        form = NewRepoForm()
+        form.initial["name"] = repo.name
+        form.initial["desc"] = repo.description
 
-    return render_to_response( 'build_form.html', { 'form': form },
-                              context_instance=RequestContext(request) )
-
+    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(repo.fields()) },
+                          context_instance=RequestContext(request) )
 
 @login_required
 def delete_repo( request, repo_id ):
@@ -146,14 +83,14 @@ def delete_repo( request, repo_id ):
         the repository and the accompaning repo data.
     '''
 
-    survey = db.survey.find_one( { '_id': ObjectId( repo_id ) },
-                                 { 'user': True } )
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
 
-    if survey[ 'user' ] != request.user.id:
+    # Check that this user has permission to delete this repo
+    if not request.user.has_perm( 'delete_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
 
-    db.survey.remove( { '_id': ObjectId( repo_id ) } )
-    db.survey_data.remove( { 'survey': ObjectId( repo_id ) } )
+    # Delete the sucker
+    repo.delete()
 
     return HttpResponseRedirect( '/' )
 
@@ -167,46 +104,55 @@ def toggle_public( request, repo_id ):
         is allowed to make such changes to the form settings.
     '''
 
-    # Find a survey, only looking for the user field
-    survey = db.survey.find_one( { '_id': ObjectId( repo_id ) },
-                                 { 'user': True, 'public': True } )
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
 
-    # Check if the owner of the survey matches the user who is logged in
-    if survey[ 'user' ] != request.user.id:
+    if not request.user.has_perm( 'share_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
 
-    if 'public' in survey:
-        survey[ 'public' ] = not survey[ 'public' ]
-    else:
-        survey[ 'public' ] = True
-
-    db.survey.update( { '_id': ObjectId( repo_id ) },
-                      { '$set': { 'public': survey[ 'public' ] } } )
+    repo.is_public = not repo.is_public
+    repo.save()
 
     return HttpResponse( json.dumps( { 'success': True,
-                                       'public': survey[ 'public' ] } ),
+                                       'public': repo.is_public } ),
                          mimetype='application/json' )
 
 
-@require_GET
+@csrf_exempt
 def webform( request, username, repo_name ):
     '''
         Simply grab the survey data and send it on the webform. The webform
         will handle rendering and submission of the final data to the server.
     '''
-    user = get_object_or_404( User, username=username )
 
-    repo = db.survey.find_one( { 'name': repo_name, 'user': user.id } )
+    account = user_or_organization( username )
+    if account is None:
+        return HttpResponse( status=404 )
 
+    # Grab the repository
+    repo = Repository.objects.get_by_username( repo_name, username )
     if repo is None:
         return HttpResponse( status=404 )
 
-    repo_user = get_object_or_404( User, id=repo[ 'user' ] )
+    if request.method == 'POST':
 
-    return render_to_response( 'get.html',
+        # Do validation of the data and add to repo!
+        repo.add_data( request.POST, request.FILES )
+
+        # Return to organization/user dashboard based on where the "New Repo"
+        # button was clicked.
+        if isinstance( account, User ):
+            return HttpResponseRedirect(
+                        reverse( 'user_dashboard',
+                                 kwargs={ 'username': account.username } ) )
+        else:
+            return HttpResponseRedirect(
+                        reverse( 'organization_dashboard',
+                                 kwargs={ 'org': account.name } ) )
+
+    return render_to_response( 'webform.html',
                                { 'repo': repo,
-                                 'repo_user': repo_user,
-                                 'repo_id': str( repo[ '_id' ] ) },
+                                 'repo_id': repo.mongo_id,
+                                 'account': account },
                                context_instance=RequestContext( request ))
 
 
@@ -219,91 +165,47 @@ def repo_viz( request, username, repo_name ):
         authority to view the current repository.
     '''
 
-    user = get_object_or_404( User, username=username )
+    # Grab the user/organization based on the username
+    account = user_or_organization( username )
+    if account is None:
+        return HttpResponse( status=404 )
 
-    # Looking our own viz or someone's public repo?
-    is_other_user = request.user.username != username
-
-    repo = db.survey.find_one({ 'name': repo_name, 'user': user.id })
-
+    # Grab the repository
+    repo = Repository.objects.get_by_username( repo_name, username )
     if repo is None:
         return HttpResponse( status=404 )
 
+    # Grab all the permissions!
+    permissions = []
+    if request.user.is_authenticated():
+        permissions = get_perms( request.user, repo )
+        for org in request.user.organization_users.all():
+            permissions.extend( get_perms( org, repo ) )
+
     # Check to see if the user has access to view this survey
-    if not repo.get( 'public', False ) and is_other_user:
+    if not repo.is_public and 'view_repository' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
     # Grab the data for this repository
-    data = db.survey_data.find( {'survey': ObjectId( repo[ '_id' ] )} )
+    data = db.data.find( {'repo': ObjectId( repo.mongo_id )} )
     data = dehydrate_survey( data )
 
     # Is some unknown user looking at this data?
-    if is_other_user:
-        # Does this data have any geo data?
-        has_geo = False
-        geo_index = None
-        for field in repo[ 'children' ]:
-            if field[ 'type' ] == 'geopoint':
-                has_geo = True
-                geo_index = field[ 'name' ]
-                break
+    # TODO: Make the privatizer take into account
+    # geospatial location
+    # if 'view_raw' not in permissions:
+    #     data = privatize_geo( repo, data )
 
-        # Great! We have geopoints, let's privatize this data
-        if has_geo:
-
-            xbounds     = [ None, None ]
-            ybounds     = [ None, None ]
-            fuzzed_data = []
-
-            for datum in data:
-
-                geopoint = datum[ 'data' ][ geo_index ].split( ' ' )
-
-                try:
-                    point = ( float( geopoint[0] ), float( geopoint[1] ) )
-                except ValueError:
-                    continue
-
-                if xbounds[0] is None or point[0] < xbounds[0]:
-                    xbounds[0] = point[0]
-
-                if xbounds[1] is None or point[0] > xbounds[1]:
-                    xbounds[1] = point[0]
-
-                if ybounds[0] is None or point[1] < ybounds[0]:
-                    ybounds[0] = point[1]
-
-                if ybounds[1] is None or point[1] > ybounds[1]:
-                    ybounds[1] = point[1]
-
-                fuzzed_data.append( point )
-
-            # Split the xbounds in a linear
-            num_x_samples = int(math.ceil( ( xbounds[1] - xbounds[0] ) / .2 ))
-            num_y_samples = int(math.ceil( ( ybounds[1] - ybounds[0] ) / .2 ))
-
-            xbounds = linspace( xbounds[0], xbounds[1], num=num_x_samples )
-            ybounds = linspace( ybounds[0], ybounds[1], num=num_y_samples )
-
-            fuzzed_data = privatize( points=fuzzed_data,
-                                     xbounds=xbounds,
-                                     ybounds=ybounds )
-            data = []
-            for datum in fuzzed_data:
-                data.append( {
-                    'data':
-                    {geo_index: ' '.join( [ str( x ) for x in datum ] )}})
+    if isinstance( account, User ):
+        account_name = account.username
+    else:
+        account_name = account.name
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
-                                 'sid': repo[ '_id' ],
+                                 'sid': repo.mongo_id,
                                  'data': json.dumps( data ),
-                                 'is_other_user': is_other_user,
-                                 'account': user},
-                               context_instance=RequestContext(request) )
-
-
-@require_GET
-def map_visualize( request ):
-    return render_to_response( 'map_visualize.html',
+                                 'permissions': permissions,
+                                 'account': account,
+                                 'account_name': account_name },
                                context_instance=RequestContext(request) )

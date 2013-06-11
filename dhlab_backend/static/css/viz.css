@@ -4,8 +4,24 @@
 .viz-active {
   display: block !important; }
 
+.nav-tabs > li {
+  width: 100px; }
+  .nav-tabs > li a {
+    text-align: center;
+    padding-top: 16px; }
+    .nav-tabs > li a i {
+      font-size: 24px; }
+
+#viz_options {
+  margin-top: 16px; }
+
 #privacy {
+  float: left;
+  width: 104px;
+  margin-left: -104px;
   margin-top: 10px; }
+  #privacy > div {
+    padding: 12px; }
 
 #line .axis path, #line .axis line {
   fill: none;
@@ -15,9 +31,28 @@
   stroke: orange;
   stroke-width: 2px; }
 
+#raw {
+  margin-top: 16px; }
+
+.card {
+  background: white;
+  width: 220px;
+  margin-top: 8px;
+  margin-left: 8px;
+  border: 1px solid #AAA;
+  box-shadow: 0 0 2px #888; }
+  .card > .card-image {
+    border-bottom: 1px solid #AAA; }
+    .card > .card-image > img {
+      width: 220px; }
+  .card > .card-video > video {
+    width: 220px; }
+  .card > .card-data > div {
+    padding: 8px; }
+
 #map {
   height: 512px;
-  border: 4px solid #aaaaaa; }
+  border: 4px solid #AAA; }
   #map .leaflet-control {
     -webkit-border-radius: 0px;
     border-radius: 0px;
@@ -27,13 +62,24 @@
     #map .leaflet-control label {
       font-weight: bold;
       padding: 4px 8px;
-      border-bottom: 1px solid #eeeeee;
+      border-bottom: 1px solid #EEE;
       font-size: 16px; }
     #map .leaflet-control label:last-child {
       padding-bottom: 0;
       border: 0; }
   #map .leaflet-control-layers-list {
     margin: 0; }
+
+.dataTables_info {
+  padding-top: 4px; }
+
+.pagination {
+  text-align: right;
+  margin: 0 !important; }
+
+td.group {
+  background-color: #999 !important;
+  color: white; }
 
 table.table thead .sorting,
 table.table thead .sorting_asc,

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+{{ repo.name }} Web Entry
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/webform.css' %}">
+{% endblock %}
+
+{% block js %}
+<script id='form_id' type='text/html'>{{ repo_id }}</script>
+<script id='user' type='text/html'>{{ user.username }}</script>
+
+<script data-main='{% static "js/webform/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
+<script>
+	document.cdn = '{% static "" %}'
+</script>
+<script src="{% static 'js/vendor/bootstrap.2.3.1.min.js' %}"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class='container' id='webform'>
+	<div class='row'>
+		<div class='span12'>
+			<h2>
+				{% if account.username %}
+					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>
+				{% else %}
+					<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>
+				{% endif %}
+				/&nbsp;{{ repo.name }}
+			</h2>
+		</div>
+	</div>
+	<div class="row">
+	  	<div id="xform_view" class="span12">
+	    	<div id="form_fields" class="formbox">
+		  		<div id="formDiv"></div>
+	    	</div>
+	    	<div id='form_actions' style='overflow:auto;'>
+	    		<div class='pull-right'>
+	    			<a href="#" class='btn' id="next_btn">Next</a>
+	    			<a href='#' class='btn btn-success' style='display:none;' id='submit_btn'>Submit</a>
+	    		</div>
+				<a href="#" class='btn' style='display:none;' id="prev_btn">Previous</a>
+			</div>
+	  	</div>
+	</div>
+</div>
+{% endblock %}

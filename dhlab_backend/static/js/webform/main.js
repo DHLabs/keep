@@ -2,7 +2,7 @@
 
 requirejs.config({
   paths: {
-    vendor: '/static/js/vendor'
+    vendor: document.cdn + 'js/vendor'
   },
   shim: {
     'vendor/underscore': {
