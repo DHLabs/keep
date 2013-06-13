@@ -1,15 +1,29 @@
 table .help-block {
   margin-bottom: 0; }
 
+.sidebar {
+  width: 218px;
+  height: 512px;
+  border-right: 2px solid #EEE;
+  padding-top: 8px; }
+  .sidebar h4, .sidebar h5 {
+    color: #666; }
+  .sidebar h5 {
+    font-size: 12px;
+    font-weight: normal;
+    text-transform: uppercase; }
+  .sidebar .actions > div {
+    height: 32px;
+    line-height: 32px;
+    padding: 4px 8px; }
+
 #org-list > div {
   margin-bottom: 8px; }
 
 img.account-icon {
-  border: 1px solid #CCC;
   border-radius: 4px; }
 
 img.account-icon-large {
-  border: 1px solid #CCC;
   border-radius: 8px; }
 
 #member_list > div {

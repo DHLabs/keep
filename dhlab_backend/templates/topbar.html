@@ -1,17 +1,22 @@
 {% load i18n %}
 {% load staticfiles %}
-<div style='border-bottom:1px solid #EEE;padding:8px 0;'>
+<div class='topbar'>
 	<div class='container'>
-		<div class='row'>
-			<div class='span9'>
+		<div class='logo'>
+			<div>
 				<a href='{% url "home" %}'>
 					<img width='48' src='{% static "img/masthead/keep-logo.png" %}'>
 				</a>
 			</div>
+		</div>
+		<div class='row'>
+			<div class='span2'>
+				{% block topbarleft %}{% endblock %}
+			</div>
 			{% if user.is_authenticated %}
-			<div class='offset1 span2'>
-				<ul class='nav pull-right' style='margin:16px 0 0 0;'>
-					<li>
+			<div class='offset8 span2'>
+				<ul class='nav pull-right'>
+					<li style='text-align:center;'>
 						<a href='{% url "auth_logout" %}'>
 							<i class='icon-signout' style='font-size:1.5em;'></i>
 						</a>

@@ -12,19 +12,45 @@
     <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
     <link href='{% static "css/bootstrap.2.3.1.min.css" %}' rel='stylesheet'>
     <link href='{% static "css/font-awesome.min.css" %}' rel='stylesheet'>
+    <link href='{% static "css/layout.css" %}' rel='stylesheet'>
     <!--[if IE 7]>
-    <link href='{% static "css/font-awesome-ie7.min.css" %}' rel='stylesheet'>
+    <link href='{% static "css/font-awesome-ie7.min.css" %}' rel='styslesheet'>
     <![endif]-->
     <style type='text/css'>
         span.help-block { font-size: 13px; color: #AAA; }
     </style>
     {% block css %}{% endblock %}
-
-    <!-- spot to insert stuff for google maps -->
-    {% block additional-headers %}{% endblock %}
 </head>
 <body>
-    {% include "topbar.html" %}
+    <div class='topbar'>
+        <div class='container'>
+            <div class='logo'>
+                <div>
+                    <a href='{% url "home" %}'>
+                        <img width='48' src='{% static "img/masthead/keep-logo.png" %}'>
+                    </a>
+                </div>
+            </div>
+            <div class='row'>
+                {% if user.is_authenticated %}
+                <div class='span5'>
+                    <div style='padding-top:4px;'>
+                        <input type='text' style='margin:0;width:100%;' placeholder='Search Data Diaries'>
+                    </div>
+                </div>
+                <div class='offset6 span1'>
+                    <ul class='nav pull-right'>
+                        <li style='text-align:center;'>
+                            <a href='{% url "auth_logout" %}'>
+                                <i class='icon-signout' style='font-size:1.5em;'></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
     {% block outerspace %}
     <div class="container">
         {% block content %}

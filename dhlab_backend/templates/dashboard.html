@@ -9,50 +9,41 @@
 
 {% block content %}
 <div class='row'>
-	<div class='span3'>
-		<h3>
-			<a href='{% url "user_dashboard" username=account.username %}'>
-				{{ account.username }}
-			</a>
-		</h3>
+	<div class='span3 sidebar'>
+		<div style='text-align:center;'>
+			<h4>{{ account.username }}</h4>
+		</div>
 
-		<div style='display:none;'>
-			<ul>
-				<li><a href=''>My Repositories</a></li>
-				<li><a href=''>Shared with me</a></li>
-			</ul>
+		<hr/>
 
-			<!-- PROJECTS -->
-			<div style='margin-bottom:16px;'>
-				<h5>Projects</h5>
-				{% if projects %}
-				<ul>
-					{% for project in projects %}
-					<li><a href='#'>{{ project }}</a></li>
-					{% endfor %}
-				</ul>
-				{% else %}
-				<div style='font-size:0.8em;color:#AAA;'>
-					Projects represent a group of related repositories.
+		<div class='section'>
+			<div class='actions'>
+				<div>
+					<a href='#'>Dashboard Overview</a>
 				</div>
-				{% endif %}
+				<div>
+					<a href='#'>Data Diaries</a>
+				</div>
+				<div>
+					<a href='#'>Reports</a>
+				</div>
 			</div>
 		</div>
 
-		<!-- ORGANIZATIONS -->
-		<div style='margin-bottom:16px;'>
-			{% if not is_other_user %}
-			<div class='pull-right' style='margin-top:-2px;'>
-				<a href='{% url "organization_new" %}'
-				   style='font-size:0.8em;'
-				   id='create_org_btn'>
-					<i class='icon-plus-sign'></i>&nbsp;Create Organization
-				</a>
-			</div>
-			{% endif %}
+		<hr/>
 
+		<!-- ORGANIZATIONS -->
+		<div class='section'>
 			<h5>Organizations</h5>
 			<div id='org-list'>
+				{% if not is_other_user %}
+					<div>
+						<a href='{% url "organization_new" %}' id='create_org_btn'>
+							<i class='icon-plus-sign' style='width:20px;text-align:center;'></i>
+							&nbsp;New Organization
+						</a>
+					</div>
+				{% endif %}
 				{% if organizations|length == 0 %}
 					<div style='font-size:0.8em;color:#AAA;'>
 						You are not a part of any organizations =[
@@ -75,7 +66,7 @@
 							{% endif %}
 							<a href='{% url "organization_dashboard" org=org.organization.name %}'>
 								<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
-								{{ org.organization.name }}
+								&nbsp;{{ org.organization.name }}
 							</a>
 						{% endif %}
 					</div>
@@ -83,6 +74,7 @@
 				{% endif %}
 			</div>
 		</div>
+
 	</div>
 	<!-- REPOSITORIES -->
 	<div class='span9'>
