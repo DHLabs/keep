@@ -94,6 +94,8 @@ define( [ 'jquery',
             for field in @column_headers
                 $( '#raw_table > thead > tr' ).append( "<th>#{field.name}</th>" )
 
+            $( '#raw_table > tbody' ).empty()
+
             # Add data from data models
             for datum in @data.models
                 row_html = '<tr>'
