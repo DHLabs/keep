@@ -107,8 +107,6 @@ define( [ 'jquery',
                         row_html += '<td>&nbsp;</td>'
                         continue
 
-                    console.log( field )
-
                     if field.type in [ 'photo', 'video' ]
                         url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
                         row_html += "<td><a href='#{url}'>#{value}</a></td>"

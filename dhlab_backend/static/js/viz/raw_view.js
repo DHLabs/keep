@@ -109,7 +109,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
             row_html += '<td>&nbsp;</td>';
             continue;
           }
-          console.log(field);
           if ((_ref3 = field.type) === 'photo' || _ref3 === 'video') {
             url = this.media_base + ("" + (datum.get('repo')) + "/" + (datum.get('_id')) + "/" + value);
             row_html += "<td><a href='" + url + "'>" + value + "</a></td>";
