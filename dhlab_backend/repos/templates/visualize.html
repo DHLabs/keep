@@ -15,18 +15,13 @@
 <script id='user' type='text/plain'>{{ user.username }}</script>
 <script>
 	document.cdn = '{% static "" %}'
+	document.initial_data = {{data|safe}};
 </script>
 <script data-main='{% static "js/viz/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
 
 <!-- Chart viz -->
 <script src='{% static "js/vendor/d3.v3.min.js" %}'></script>
 
-<script type='text/javascript'>
-	$( function() {
-		// Initialize data
-		document.initial_data = {{data|safe }};
-	});
-</script>
 {% endblock %}
 
 {% block content %}

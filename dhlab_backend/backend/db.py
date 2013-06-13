@@ -28,6 +28,9 @@ def dehydrate( survey ):
     if 'timestamp' in survey:
         survey[ 'timestamp' ] = survey[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
 
+    if '_id' in survey:
+        survey[ 'id' ] = survey.pop( '_id' )
+
     return survey
 
 
