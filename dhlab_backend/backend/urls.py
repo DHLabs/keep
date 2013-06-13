@@ -17,9 +17,6 @@ urlpatterns = patterns( 'backend.views',
     # Basic index page
     url( r'^$', 'home', name='home' ),
 
-    # Create new data repository
-    url( r'^report/new/$', 'build_report', name='report_build' ),
-
     # User settings
     url( r'^settings/$', 'settings', name='settings' ),
 
