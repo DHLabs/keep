@@ -15,22 +15,12 @@
 <script id='user' type='text/plain'>{{ user.username }}</script>
 <script>
 	document.cdn = '{% static "" %}'
+	document.initial_data = {{data|safe}};
 </script>
 <script data-main='{% static "js/viz/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
 
 <!-- Chart viz -->
 <script src='{% static "js/vendor/d3.v3.min.js" %}'></script>
-
-<!-- Marker Cluster -->
-<script src='{% static "js/vendor/leaflet.markercluster-src.js" %}'></script>
-<script src='{% static "js/vendor/leaflet.markercluster.js" %}'></script>
-
-<script type='text/javascript'>
-	$( function() {
-		// Initialize data
-		document.initial_data = {{data|safe }};
-	});
-</script>
 {% endblock %}
 
 {% block content %}
@@ -197,7 +187,9 @@
 		<div class='span12 active' id='raw_list'>
 			<table id="raw_table" class="table table-striped table-bordered">
 				<thead><tr></tr></thead>
-				<tbody></tbody>
+				<tbody>
+					<tr><td>Loading data...</td></tr>
+				</tbody>
 			</table>
 		</div>
 		<div class='span12' id='raw_grid' style='display:none;position:relative;'></div>
