@@ -10,6 +10,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     __extends(MapView, _super);
 
     function MapView() {
+      var _this = this;
+      this.auto_step = function(event) {
+        return MapView.prototype.auto_step.apply(_this, arguments);
+      };
       return MapView.__super__.constructor.apply(this, arguments);
     }
 
@@ -20,6 +24,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     MapView.prototype.btn = $('#map_btn');
 
     MapView.prototype.map_headers = void 0;
+
+    MapView.prototype.map = void 0;
 
     MapView.prototype.events = {
       "change #fps": "update_fps",
@@ -33,51 +39,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       "click #time_c": "time_c",
       "click #clear": "clear_lines"
     };
-
-    MapView.prototype.step_clicked = false;
-
-    MapView.prototype.step_current = 0;
-
-    MapView.prototype.num_steps = 0;
-
-    MapView.prototype.quantum = 0;
-
-    MapView.prototype.min_time = 0;
-
-    MapView.prototype.max_time = 0;
-
-    MapView.prototype.lower_bound = 0;
-
-    MapView.prototype.upper_bound = 0;
-
-    MapView.prototype.is_paused = false;
-
-    MapView.prototype.reset = false;
-
-    MapView.prototype.progress = 0;
-
-    MapView.prototype.progress_range = 100.0;
-
-    DataView.prototype.pL = [];
-
-    DataView.prototype.pLStyle = {
-      color: "blue",
-      weight: 0.5,
-      opacity: 1,
-      smoothFactor: 0.5
-    };
-
-    fpsbox.innerHTML = fps.value;
-
-    playtimebox.innerHTML = playtime.value;
-
-    MapView.prototype.current_constrained_layer = null;
-
-    MapView.prototype.controls = null;
-
-    MapView.prototype.current_controls = null;
-
-    MapView.prototype.playback = null;
 
     MapView.prototype.initialize = function(options) {
       this.parent = options.parent;
@@ -143,7 +104,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       center[0] = center[0] / valid_count;
       center[1] = center[1] / valid_count;
       this.map = L.map('map').setView(center, 10);
-      this.test_map = L.map('hidden_map').setView(center, 10);
       L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18
@@ -208,29 +168,28 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       return this;
     };
 
-    return MapView;
-
-  })(Backbone.View);
-  ({
-    auto_step: function(event) {
-      var auto;
+    MapView.prototype.auto_step = function(event) {
+      var auto,
+        _this = this;
       auto = function() {
         if (!_this.is_paused) {
           return _this.time_step();
         }
       };
-      return _this.playback = setInterval(auto, 1000 / fps.value);
-    },
-    pause_playback: function(event) {
+      return this.playback = setInterval(auto, 1000 / fps.value);
+    };
+
+    MapView.prototype.pause_playback = function(event) {
       if (this.is_paused) {
-        pause_btn.innerHTML = "Pause";
+        $('#pause_btn').html('Pause');
         return this.is_paused = false;
       } else {
-        pause_btn.innerHTML = "Resume";
+        $('#pause_btn').html('Resume');
         return this.is_paused = true;
       }
-    },
-    reset_playback: function(event) {
+    };
+
+    MapView.prototype.reset_playback = function(event) {
       var i;
       this.reset = true;
       this.step_current = 0;
@@ -257,8 +216,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         }
       }
       return this.renderMap();
-    },
-    time_static: function(event) {
+    };
+
+    MapView.prototype.time_static = function(event) {
       var length;
       this.step_clicked = true;
       length = this.data.models.length;
@@ -273,14 +233,19 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       this.lower_bound = this.min_time;
       this.upper_bound = this.max_time;
       return this.renderMap();
-    },
-    update_fps: function() {
-      return fpsbox.innerHTML = fps.value;
-    },
-    update_playtime: function() {
-      return playtimebox.innerHTML = playtime.value;
-    },
-    update_progress: function() {
+    };
+
+    MapView.prototype.update_fps = function() {
+      $('#fpsbox').html(fps.value);
+      return this;
+    };
+
+    MapView.prototype.update_playtime = function() {
+      $('#playtimebox').html(playtime.value);
+      return this;
+    };
+
+    MapView.prototype.update_progress = function() {
       if (this.step_clicked === true && this.reset === false) {
         if (this.is_paused === false) {
           this.is_paused = true;
@@ -296,8 +261,26 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         this.is_paused = false;
         return this.renderMap();
       }
-    },
-    time_step: function(event) {
+    };
+
+    MapView.prototype.clear_lines = function(event) {
+      var i, _results;
+      _results = [];
+      for (i in this.map._layers) {
+        if (this.map._layers[i]._path !== undefined) {
+          try {
+            _results.push(this.map.removeLayer(this.map._layers[i]));
+          } catch (e) {
+            _results.push(console.log("problem with " + e + this.map._layers[i]));
+          }
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    MapView.prototype.time_step = function(event) {
       var length;
       if (this.step_clicked === false || this.reset === true) {
         length = this.data.models.length;
@@ -327,8 +310,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         this.lower_bound += this.quantum;
       }
       return this.upper_bound += this.quantum;
-    },
-    time_c: function(event) {
+    };
+
+    MapView.prototype.time_c = function(event) {
       var con, d, d2, datum, datum2, days, geopoint, hours, i, minutes, parseDate, secs, start, start2, time, val, _j, _k, _len1, _ref5, _results;
       val = $("#tc_input").val();
       con = $("input:radio[name=const]:checked").val();
@@ -405,7 +389,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         _results.push(_j++);
       }
       return _results;
-    }
-  });
+    };
+
+    return MapView;
+
+  })(Backbone.View);
   return MapView;
 });

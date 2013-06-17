@@ -8,13 +8,15 @@ define( [ 'jquery',
 ( $, _, Backbone, L ) ->
 
     class MapView extends Backbone.View
+        name:           "MapView"
 
-        name: "MapView"
 
-        el: $( '#map_viz' )
-        btn: $( '#map_btn' )
+        el:             $( '#map_viz' )
+        btn:            $( '#map_btn' )
 
-        map_headers: undefined
+        map_headers:    undefined
+        map:            undefined
+
 
         events:
             "change #fps":              "update_fps"
@@ -27,35 +29,6 @@ define( [ 'jquery',
             "click #reset":             "reset_playback"
             "click #time_c":            "time_c"
             "click #clear":             "clear_lines"
-
-        # Time step variables
-        step_clicked:  false
-        step_current: 0
-        num_steps: 0
-        quantum: 0
-        min_time:0
-        max_time:0
-        lower_bound:0
-        upper_bound:0
-        is_paused: false
-        reset: false
-        progress: 0
-        progress_range: 100.0
-
-        DataView::pL = []
-        DataView::pLStyle =
-            color: "blue"
-            weight: 0.5
-            opacity: 1
-            smoothFactor: 0.5
-
-        # Time step HTML values
-        fpsbox.innerHTML= fps.value
-        playtimebox.innerHTML= playtime.value
-        current_constrained_layer: null
-        controls: null
-        current_controls: null
-        playback: null
 
         initialize: ( options ) ->
             @parent = options.parent
@@ -116,8 +89,7 @@ define( [ 'jquery',
             center[0] = center[0] / valid_count
             center[1] = center[1] / valid_count
 
-            @map = L.map('map').setView( center, 10 )
-            @test_map = L.map( 'hidden_map' ).setView( center, 10 );
+            @map = L.map( 'map' ).setView( center, 10 )
 
             L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -175,7 +147,7 @@ define( [ 'jquery',
             controls.addTo( @map )
             @
 
-       auto_step: (event) =>
+        auto_step: (event) =>
             # continuously call time step
             auto = () =>
                 #if @is_paused
@@ -186,11 +158,11 @@ define( [ 'jquery',
 
         pause_playback: (event) ->
             if @is_paused
-              pause_btn.innerHTML = "Pause"
-              @is_paused = false
+                $( '#pause_btn' ).html( 'Pause' )
+                @is_paused = false
             else
-              pause_btn.innerHTML = "Resume"
-              @is_paused = true
+                $( '#pause_btn' ).html( 'Resume' )
+                @is_paused = true
 
         # resets playback
         reset_playback: (event) ->
@@ -242,10 +214,13 @@ define( [ 'jquery',
             @renderMap()
 
         update_fps: () ->
-            fpsbox.innerHTML= fps.value
+            $( '#fpsbox' ).html( fps.value )
+            @
+
 
         update_playtime: () ->
-            playtimebox.innerHTML= playtime.value
+            $( '#playtimebox' ).html( playtime.value )
+            @
 
         # method called when progress bar changes - resets lower/upper bounds
         update_progress: () ->
@@ -264,6 +239,14 @@ define( [ 'jquery',
                 current_time.innerHTML = new Date(@lower_bound) + " through " + new Date(@upper_bound)
                 @is_paused = false
                 @renderMap()
+
+        clear_lines: (event) ->
+            for i of @map._layers
+                unless @map._layers[i]._path is `undefined`
+                    try
+                        @map.removeLayer @map._layers[i]
+                    catch e
+                        console.log "problem with " + e + @map._layers[i]
 
         time_step: (event) ->
             # setup for the first time they click step
