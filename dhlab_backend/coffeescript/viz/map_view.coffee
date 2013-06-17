@@ -45,10 +45,6 @@ define( [ 'jquery',
         playback: null
 
         events:
-            "change #fps":              "update_fps"
-            "change #playtime":         "update_playtime"
-            "change #progress_bar":     "update_progress"
-
             "click #time_step":         "time_step"
             "click #auto_step":         "auto_step"
             "click #pause":             "pause_playback"
@@ -228,37 +224,10 @@ define( [ 'jquery',
 
             $( '#current_time' ).html( '' )
 
-            @progress = 0
-            $( '#progress_bar' ).val( 0 )
+            $( '#progress_bar > .bar' ).width( 0 )
 
             $( '#pause_btn' ).html( '<icon class="icon-play"></i>' )
             @is_paused = false
-
-        update_fps: () ->
-            $( '#fpsbox' ).html( fps.value )
-            @
-
-
-        update_playtime: () ->
-            $( '#playtimebox' ).html( playtime.value )
-            @
-
-        # method called when progress bar changes - resets lower/upper bounds
-        update_progress: () ->
-            if @step_clicked == true and @reset == false
-                if (@is_paused == false)
-                    @is_paused = true
-
-                @progress = progress_bar.value
-                #alert ( (@max_time - @min_time))
-                @upper_bound = (@progress/@progress_range * (@max_time - @min_time) + @min_time)
-                if (cumulativeCheck.checked == true)
-                    @lower_bound = @min_time
-                else
-                    @lower_bound = @upper_bound - @quantum
-                current_time.innerHTML = new Date(@lower_bound) + " through " + new Date(@upper_bound)
-                @is_paused = false
-                @render()
 
         clear_lines: (event) ->
             for i of @map._layers

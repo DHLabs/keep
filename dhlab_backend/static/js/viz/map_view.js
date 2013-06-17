@@ -63,9 +63,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     MapView.prototype.playback = null;
 
     MapView.prototype.events = {
-      "change #fps": "update_fps",
-      "change #playtime": "update_playtime",
-      "change #progress_bar": "update_progress",
       "click #time_step": "time_step",
       "click #auto_step": "auto_step",
       "click #pause": "pause_playback",
@@ -246,38 +243,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       this.upper_bound = this.min_time + this.quantum;
       this.step_current = 0;
       $('#current_time').html('');
-      this.progress = 0;
-      $('#progress_bar').val(0);
+      $('#progress_bar > .bar').width(0);
       $('#pause_btn').html('<icon class="icon-play"></i>');
       return this.is_paused = false;
-    };
-
-    MapView.prototype.update_fps = function() {
-      $('#fpsbox').html(fps.value);
-      return this;
-    };
-
-    MapView.prototype.update_playtime = function() {
-      $('#playtimebox').html(playtime.value);
-      return this;
-    };
-
-    MapView.prototype.update_progress = function() {
-      if (this.step_clicked === true && this.reset === false) {
-        if (this.is_paused === false) {
-          this.is_paused = true;
-        }
-        this.progress = progress_bar.value;
-        this.upper_bound = this.progress / this.progress_range * (this.max_time - this.min_time) + this.min_time;
-        if (cumulativeCheck.checked === true) {
-          this.lower_bound = this.min_time;
-        } else {
-          this.lower_bound = this.upper_bound - this.quantum;
-        }
-        current_time.innerHTML = new Date(this.lower_bound) + " through " + new Date(this.upper_bound);
-        this.is_paused = false;
-        return this.render();
-      }
     };
 
     MapView.prototype.clear_lines = function(event) {
