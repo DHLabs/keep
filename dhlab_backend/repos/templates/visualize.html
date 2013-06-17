@@ -142,23 +142,14 @@
 		<div class='span12' id='raw_grid' style='display:none;position:relative;'></div>
 	</div>
 	<div class='row viz' id='map_viz'>
-		<div class='span12'>
-			<div id='time_select' style='display:none;'>
+		<div class='span12' style='display:none;'>
+			<div id='time_select'>
 				<input type='range' id='fps' min='1' max='10'/>
 				<input type='range' id='playtime' step='10' min='10' max='300'/> <br />
 			</div>
 
-			<div id='time_static'>
-				<a href='#' id='static_btn' data-type='map' class='btn'>
-					<i class='icon-map-marker'></i>Static
-				</a>
-			</div>
-
 			<div id='cumulative'>
 				<input id='cumulativeCheck' type="checkbox">Cumulative
-			</div>
-
-			<div id='cluster'>
 				<input id='clusterCheck' type="checkbox">Show Clusters
 			</div>
 
@@ -170,12 +161,10 @@
 				<input type="submit" value="submit" class='btn'id ='time_c'>
 				Date: <input type ="radio" name="time" value = "date" checked="checked"/>
 				Time stamp: <input type ="radio" name="time" value = "timestamp"/>
-			</div>
-
-			<div>
-				<a href='#' id='clear' data-type='map' class='btn'>Clear Lines</a>
+  				<a href='#' id='clear' data-type='map' class='btn'>Clear Lines</a>
 			</div>
 		</div>
+
 		<div class='span12' id='map'></div>
 
 		<div class='offset1 span10' style='clear:both;margin-top:16px;'>
