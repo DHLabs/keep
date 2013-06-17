@@ -70,7 +70,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       "click #auto_step": "auto_step",
       "click #pause": "pause_playback",
       "click #reset": "reset_playback",
-      "click #time_static": "time_static",
       "click #time_c": "time_c",
       "click #clear": "clear_lines"
     };
@@ -102,7 +101,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         if (((_ref1 = end_date.value) != null ? _ref1.length : void 0) > 0) {
           this.max_time = Date.parse(end_date.value);
         }
-        this.num_steps = fps.value * $('#playtime').val();
+        this.num_steps = $('#fps').val() * $('#playtime').val();
         this.quantum = Math.floor((this.max_time - this.min_time) / this.num_steps);
         this.lower_bound = this.min_time;
         return this.upper_bound = this.min_time + this.quantum;
@@ -253,25 +252,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       return this.is_paused = false;
     };
 
-    MapView.prototype.time_static = function(event) {
-      var length, _ref, _ref1;
-      this.step_clicked = true;
-      length = this.data.models.length;
-      this.min_time = Date.parse(this.data.models[0].get('timestamp'));
-      this.max_time = Date.parse(this.data.models[this.data.models.length - 1].get('timestamp'));
-      if (((_ref = start_date.value) != null ? _ref.length : void 0) > 0) {
-        this.min_time = Date.parse(start_date.value);
-      }
-      if (((_ref1 = end_date.value) != null ? _ref1.length : void 0) > 0) {
-        this.max_time = Date.parse(end_date.value);
-      }
-      this.num_steps = $('#fps').val() * $('#playtime').val();
-      this.quantum = Math.floor((this.max_time - this.min_time) / this.num_steps);
-      this.lower_bound = this.min_time;
-      this.upper_bound = this.min_time + this.quantum;
-      return this.render();
-    };
-
     MapView.prototype.update_fps = function() {
       $('#fpsbox').html(fps.value);
       return this;
@@ -318,7 +298,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype.time_step = function(event) {
-      var _this = this;
+      var lower_bound_str, upper_bound_str,
+        _this = this;
       this.step_current += 1;
       if (this.step_current <= this.num_steps) {
         this.constrained_markers.eachLayer(function(layer) {
@@ -330,9 +311,11 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
             return layer.setOpacity(0.0);
           }
         });
-        current_time.innerHTML = new Date(this.lower_bound) + " through " + new Date(this.upper_bound);
+        lower_bound_str = new Date(this.lower_bound);
+        upper_bound_str = new Date(this.upper_bound);
+        $('#current_time').html("" + lower_bound_str + " through " + upper_bound_str);
         this.progress = this.progress_range * ((this.upper_bound - this.min_time) / (this.max_time - this.min_time));
-        progress_bar.value = this.progress;
+        $('#progress_bar > .bar').width(this.progress + '%');
       }
       return this.upper_bound += this.quantum;
     };

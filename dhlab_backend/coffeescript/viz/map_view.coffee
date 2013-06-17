@@ -54,7 +54,6 @@ define( [ 'jquery',
             "click #pause":             "pause_playback"
             "click #reset":             "reset_playback"
 
-            "click #time_static":       "time_static"
             "click #time_c":            "time_c"
             "click #clear":             "clear_lines"
 
@@ -91,10 +90,10 @@ define( [ 'jquery',
                     @max_time = Date.parse( end_date.value )
 
                 # split the time into frames based on fps * playtime
-                @num_steps = fps.value * $( '#playtime' ).val()
+                @num_steps = $( '#fps' ).val() * $( '#playtime' ).val()
 
                 # calc size of quantum
-                @quantum = Math.floor ((@max_time - @min_time) / @num_steps )
+                @quantum = Math.floor( (@max_time - @min_time) / @num_steps )
 
                 # set upper and lower bound
                 @lower_bound = @min_time
@@ -235,34 +234,6 @@ define( [ 'jquery',
             $( '#pause_btn' ).html( '<icon class="icon-play"></i>' )
             @is_paused = false
 
-        # Reacts to click of "static_time" button in visualize.html
-        # displays all markers within the chosen start/end date
-        # TODO:  Due to UTC I think the times are off by 7 hours
-        time_static: (event) ->
-            @step_clicked = true
-            length = @data.models.length
-
-            # min and max time in milliseconds for the array
-            @min_time = Date.parse( @data.models[0].get( 'timestamp' ) )
-            @max_time = Date.parse( @data.models[ @data.models.length-1].get( 'timestamp' ) )
-
-            # use start and end time fields if they are not empty
-            if start_date.value?.length > 0
-                @min_time = Date.parse( start_date.value )
-
-            if end_date.value?.length > 0
-                @max_time = Date.parse( end_date.value )
-
-            @num_steps = $( '#fps' ).val() * $( '#playtime' ).val()
-
-            @quantum = Math.floor( (@max_time - @min_time) / @num_steps )
-
-            # set upper and lower bound
-            @lower_bound = @min_time
-            @upper_bound = @min_time + @quantum
-
-            @render()
-
         update_fps: () ->
             $( '#fpsbox' ).html( fps.value )
             @
@@ -278,7 +249,6 @@ define( [ 'jquery',
                 if (@is_paused == false)
                     @is_paused = true
 
-            #@progress =  (@progress_range * ((@lower_bound-@min_time) / (@max_time-@min_time)))
                 @progress = progress_bar.value
                 #alert ( (@max_time - @min_time))
                 @upper_bound = (@progress/@progress_range * (@max_time - @min_time) + @min_time)
@@ -313,13 +283,14 @@ define( [ 'jquery',
                 )
 
                 # display the range of the current quantum
-                current_time.innerHTML = new Date(@lower_bound) + " through " + new Date(@upper_bound)
+                lower_bound_str = new Date( @lower_bound )
+                upper_bound_str = new Date( @upper_bound )
 
-                #progress_bar.value = (int)(@progress_range * (@lower_bound / @max_time))
-                @progress =  (@progress_range * ((@upper_bound-@min_time) / (@max_time-@min_time)))
+                $( '#current_time' ).html( "#{lower_bound_str} through #{upper_bound_str}" )
 
-                #alert @progress
-                progress_bar.value = @progress
+                @progress = (@progress_range * ((@upper_bound-@min_time) / (@max_time-@min_time)))
+
+                $( '#progress_bar > .bar' ).width( @progress + '%' )
 
             # move on to the next quantum
             #if cumulativeCheck.checked == false
