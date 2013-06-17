@@ -27,27 +27,85 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
 
     MapView.prototype.map = void 0;
 
+    MapView.prototype.step_clicked = false;
+
+    MapView.prototype.step_current = 0;
+
+    MapView.prototype.num_steps = 0;
+
+    MapView.prototype.quantum = 0;
+
+    MapView.prototype.is_paused = true;
+
+    MapView.prototype.reset = false;
+
+    MapView.prototype.progress = 0;
+
+    MapView.prototype.progress_range = 100.0;
+
+    DataView.prototype.pL = [];
+
+    DataView.prototype.pLStyle = {
+      color: "blue",
+      weight: 0.5,
+      opacity: 1,
+      smoothFactor: 0.5
+    };
+
+    $('#fpsbox').html($('#fps').val());
+
+    $('#playtimebox').html($('#playtime').val());
+
+    MapView.prototype.controls = null;
+
+    MapView.prototype.current_controls = null;
+
+    MapView.prototype.playback = null;
+
     MapView.prototype.events = {
       "change #fps": "update_fps",
       "change #playtime": "update_playtime",
       "change #progress_bar": "update_progress",
-      "click #time_step a.btn": "time_step",
-      "click #auto_step a.btn": "auto_step",
-      "click #time_static a.btn": "time_static",
-      "click #pause a.btn": "pause_playback",
+      "click #time_step": "time_step",
+      "click #auto_step": "auto_step",
+      "click #pause": "pause_playback",
       "click #reset": "reset_playback",
+      "click #time_static": "time_static",
       "click #time_c": "time_c",
       "click #clear": "clear_lines"
     };
 
     MapView.prototype.initialize = function(options) {
+      var _ref, _ref1;
       this.parent = options.parent;
       this.data = options.data;
       this.form = options.form;
       this._detect_headers(this.form.attributes.children);
+      this.mapIcon = L.icon({
+        iconUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon.png',
+        iconRetinaUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon@2x.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-shadow.png',
+        shadowSize: [41, 41],
+        shadowAnchor: [15, 41]
+      });
       if (this.map_headers != null) {
         this.btn.removeClass('disabled');
-        return this.render();
+        this.render();
+        this.min_time = Date.parse(this.data.models[0].get('timestamp'));
+        this.max_time = Date.parse(this.data.models[this.data.models.length - 1].get('timestamp'));
+        if (((_ref = start_date.value) != null ? _ref.length : void 0) > 0) {
+          this.min_time = Date.parse(start_date.value);
+        }
+        if (((_ref1 = end_date.value) != null ? _ref1.length : void 0) > 0) {
+          this.max_time = Date.parse(end_date.value);
+        }
+        this.num_steps = fps.value * $('#playtime').val();
+        this.quantum = Math.floor((this.max_time - this.min_time) / this.num_steps);
+        this.lower_bound = this.min_time;
+        return this.upper_bound = this.min_time + this.quantum;
       }
     };
 
@@ -66,7 +124,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype.render = function() {
-      var center, constrainedMarker, controls, datum, geopoint, heatmapData, html, key, layers, marker, myIcon, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      var center, controls, datum, geopoint, heatmapData, html, key, layers, marker, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
       this.heatmap = L.TileLayer.heatMap({
         radius: 80,
         opacity: 0.8,
@@ -108,19 +166,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18
       }).addTo(this.map);
-      myIcon = L.icon({
-        iconUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon.png',
-        iconRetinaUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon@2x.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-shadow.png',
-        shadowSize: [41, 41],
-        shadowAnchor: [15, 41]
-      });
       heatmapData = [];
       this.markers = [];
-      this.constrained_markers = [];
+      this.constrained_markers = new L.layerGroup();
       this.marker_layer = new L.MarkerClusterGroup();
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
@@ -134,32 +182,33 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
           continue;
         }
         marker = L.marker([geopoint[0], geopoint[1]], {
-          icon: myIcon
+          icon: this.mapIcon
         });
+        marker.data = datum.get('data');
+        marker.timestamp = datum.get('timestamp');
         html = '';
-        _ref2 = datum.get('data');
+        _ref2 = marker.data;
         for (key in _ref2) {
           value = _ref2[key];
           html += "<div><strong>" + key + ":</strong> " + value + "</div>";
         }
         marker.bindPopup(html);
         this.marker_layer.addLayer(marker);
-        constrainedMarker = L.marker([geopoint[0], geopoint[1]], {
-          icon: myIcon
-        });
+        this.constrained_markers.addLayer(marker);
         heatmapData.push({
           lat: geopoint[0],
           lon: geopoint[1],
           value: 1
         });
       }
-      this.constrained_layer = L.layerGroup(this.constrained_markers);
       this.heatmap.addData(heatmapData);
       this.map.addLayer(this.heatmap);
       this.map.addLayer(this.marker_layer);
+      this.map.addLayer(this.constrained_markers);
       layers = {
         'Markers': this.marker_layer,
-        'Heatmap': this.heatmap
+        'Heatmap': this.heatmap,
+        'Constrained': this.constrained_markers
       };
       controls = L.control.layers(null, layers, {
         collapsed: false
@@ -181,58 +230,46 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
 
     MapView.prototype.pause_playback = function(event) {
       if (this.is_paused) {
-        $('#pause_btn').html('Pause');
+        $('#pause').html("<i class='icon-pause'></i>");
         return this.is_paused = false;
       } else {
-        $('#pause_btn').html('Resume');
+        $('#pause').html("<i class='icon-play'></i>");
         return this.is_paused = true;
       }
     };
 
     MapView.prototype.reset_playback = function(event) {
-      var i;
-      this.reset = true;
-      this.step_current = 0;
-      this.num_steps = 0;
-      this.quantum = 0;
-      this.min_time = 0;
-      this.max_time = 0;
-      this.lower_bound = 0;
-      this.upper_bound = 0;
-      current_time.innerHTML = "";
-      this.progress = 0;
-      progress_bar.value = 0;
-      pause_btn.innerHTML = "Pause";
-      this.is_paused = false;
-      clearInterval(this.playback);
-      this.playback = null;
-      for (i in this.map._layers) {
-        if (this.map._layers[i]._path !== undefined) {
-          try {
-            this.map.removeLayer(this.map._layers[i]);
-          } catch (e) {
-            console.log("problem with " + e + this.map._layers[i]);
-          }
-        }
+      if (this.playback != null) {
+        clearInterval(this.playback);
+        this.playback = null;
       }
-      return this.renderMap();
+      this.lower_bound = this.min_time;
+      this.upper_bound = this.min_time + this.quantum;
+      this.step_current = 0;
+      $('#current_time').html('');
+      this.progress = 0;
+      $('#progress_bar').val(0);
+      $('#pause_btn').html('<icon class="icon-play"></i>');
+      return this.is_paused = false;
     };
 
     MapView.prototype.time_static = function(event) {
-      var length;
+      var length, _ref, _ref1;
       this.step_clicked = true;
       length = this.data.models.length;
       this.min_time = Date.parse(this.data.models[0].get('timestamp'));
-      this.max_time = Date.parse(this.data.models[length - 1].get('timestamp'));
-      if (start_date.value !== "") {
+      this.max_time = Date.parse(this.data.models[this.data.models.length - 1].get('timestamp'));
+      if (((_ref = start_date.value) != null ? _ref.length : void 0) > 0) {
         this.min_time = Date.parse(start_date.value);
       }
-      if (end_date.value !== "") {
+      if (((_ref1 = end_date.value) != null ? _ref1.length : void 0) > 0) {
         this.max_time = Date.parse(end_date.value);
       }
+      this.num_steps = $('#fps').val() * $('#playtime').val();
+      this.quantum = Math.floor((this.max_time - this.min_time) / this.num_steps);
       this.lower_bound = this.min_time;
-      this.upper_bound = this.max_time;
-      return this.renderMap();
+      this.upper_bound = this.min_time + this.quantum;
+      return this.render();
     };
 
     MapView.prototype.update_fps = function() {
@@ -259,7 +296,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         }
         current_time.innerHTML = new Date(this.lower_bound) + " through " + new Date(this.upper_bound);
         this.is_paused = false;
-        return this.renderMap();
+        return this.render();
       }
     };
 
@@ -281,33 +318,21 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype.time_step = function(event) {
-      var length;
-      if (this.step_clicked === false || this.reset === true) {
-        length = this.data.models.length;
-        this.step_clicked = true;
-        this.reset = false;
-        this.min_time = Date.parse(this.data.models[0].get('timestamp'));
-        this.max_time = Date.parse(this.data.models[length - 1].get('timestamp'));
-        if (start_date.value !== "") {
-          this.min_time = Date.parse(start_date.value);
-        }
-        if (end_date.value !== "") {
-          this.max_time = Date.parse(end_date.value);
-        }
-        this.num_steps = fps.value * playtime.value;
-        this.quantum = Math.floor((this.max_time - this.min_time) / this.num_steps);
-        this.lower_bound = this.min_time;
-        this.upper_bound = this.min_time + this.quantum;
-      }
+      var _this = this;
       this.step_current += 1;
       if (this.step_current <= this.num_steps) {
-        this.renderMap();
+        this.constrained_markers.eachLayer(function(layer) {
+          var timestamp;
+          timestamp = Date.parse(layer.timestamp);
+          if ((_this.lower_bound <= timestamp && timestamp <= _this.upper_bound)) {
+            return layer.setOpacity(1.0);
+          } else {
+            return layer.setOpacity(0.0);
+          }
+        });
         current_time.innerHTML = new Date(this.lower_bound) + " through " + new Date(this.upper_bound);
         this.progress = this.progress_range * ((this.upper_bound - this.min_time) / (this.max_time - this.min_time));
         progress_bar.value = this.progress;
-      }
-      if (cumulativeCheck.checked === false) {
-        this.lower_bound += this.quantum;
       }
       return this.upper_bound += this.quantum;
     };

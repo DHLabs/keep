@@ -17,16 +17,44 @@ define( [ 'jquery',
         map_headers:    undefined
         map:            undefined
 
+        # Time step variables
+        step_clicked:  false
+        step_current: 0
+        num_steps: 0
+        quantum: 0
+
+        is_paused: true
+        reset: false
+
+        progress: 0
+        progress_range: 100.0
+
+        DataView::pL = []
+        DataView::pLStyle =
+            color: "blue"
+            weight: 0.5
+            opacity: 1
+            smoothFactor: 0.5
+
+        # Time step HTML values
+        $( '#fpsbox' ).html( $( '#fps' ).val() )
+        $( '#playtimebox' ).html( $( '#playtime' ).val() )
+
+        controls: null
+        current_controls: null
+        playback: null
 
         events:
             "change #fps":              "update_fps"
             "change #playtime":         "update_playtime"
             "change #progress_bar":     "update_progress"
-            "click #time_step a.btn":   "time_step"
-            "click #auto_step a.btn":   "auto_step"
-            "click #time_static a.btn": "time_static"
-            "click #pause a.btn":       "pause_playback"
+
+            "click #time_step":         "time_step"
+            "click #auto_step":         "auto_step"
+            "click #pause":             "pause_playback"
             "click #reset":             "reset_playback"
+
+            "click #time_static":       "time_static"
             "click #time_c":            "time_c"
             "click #clear":             "clear_lines"
 
@@ -37,9 +65,40 @@ define( [ 'jquery',
 
             @_detect_headers( @form.attributes.children )
 
+            @mapIcon = L.icon(
+                        iconUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon.png'
+                        iconRetinaUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon@2x.png'
+                        iconSize: [25, 41]
+                        iconAnchor: [12, 41]
+                        popupAnchor: [1, -34]
+                        shadowUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-shadow.png'
+                        shadowSize: [41, 41]
+                        shadowAnchor: [15, 41] )
+
             if @map_headers?
                 @btn.removeClass( 'disabled' )
                 @render()
+
+                # min and max time in milliseconds for the array
+                @min_time = Date.parse( @data.models[0].get('timestamp') )
+                @max_time = Date.parse( @data.models[ @data.models.length - 1 ].get('timestamp') )
+
+                # use start and end time fields if they are not empty
+                if start_date.value?.length > 0
+                    @min_time = Date.parse( start_date.value )
+
+                if end_date.value?.length > 0
+                    @max_time = Date.parse( end_date.value )
+
+                # split the time into frames based on fps * playtime
+                @num_steps = fps.value * $( '#playtime' ).val()
+
+                # calc size of quantum
+                @quantum = Math.floor ((@max_time - @min_time) / @num_steps )
+
+                # set upper and lower bound
+                @lower_bound = @min_time
+                @upper_bound = @min_time + @quantum
 
         _detect_headers: ( root ) ->
 
@@ -95,19 +154,9 @@ define( [ 'jquery',
                             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
                             maxZoom: 18 }).addTo( @map )
 
-            myIcon = L.icon(
-                        iconUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon.png'
-                        iconRetinaUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon@2x.png'
-                        iconSize: [25, 41]
-                        iconAnchor: [12, 41]
-                        popupAnchor: [1, -34]
-                        shadowUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-shadow.png'
-                        shadowSize: [41, 41]
-                        shadowAnchor: [15, 41] )
-
             heatmapData = []
             @markers = []
-            @constrained_markers = []
+            @constrained_markers = new L.layerGroup()
             @marker_layer = new L.MarkerClusterGroup()
             for datum in @data.models
                 geopoint = datum.get( 'data' )[ @map_headers.name ]
@@ -119,29 +168,33 @@ define( [ 'jquery',
                 if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
                     continue
 
-                marker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
+                marker = L.marker( [geopoint[0], geopoint[1]], {icon: @mapIcon})
+                marker.data = datum.get( 'data' )
+                marker.timestamp = datum.get( 'timestamp' )
 
                 html = ''
-                for key, value of datum.get( 'data' )
+                for key, value of marker.data
                     html += "<div><strong>#{key}:</strong> #{value}</div>"
                 marker.bindPopup( html )
 
                 @marker_layer.addLayer( marker )
-                constrainedMarker = L.marker( [geopoint[0], geopoint[1]], {icon: myIcon})
+                @constrained_markers.addLayer( marker )
 
                 heatmapData.push(
                     lat: geopoint[0]
                     lon: geopoint[1]
                     value: 1 )
 
-            @constrained_layer = L.layerGroup( @constrained_markers )
             @heatmap.addData( heatmapData )
+
             @map.addLayer( @heatmap )
             @map.addLayer( @marker_layer )
+            @map.addLayer( @constrained_markers )
 
             layers =
                 'Markers': @marker_layer
                 'Heatmap': @heatmap
+                'Constrained': @constrained_markers
 
             controls = L.control.layers( null, layers, { collapsed: false } )
             controls.addTo( @map )
@@ -150,45 +203,37 @@ define( [ 'jquery',
         auto_step: (event) =>
             # continuously call time step
             auto = () =>
-                #if @is_paused
-
                 if not @is_paused
                     @time_step()
-            @playback = setInterval auto, 1000/fps.value
+            @playback = setInterval( auto, 1000/fps.value )
 
         pause_playback: (event) ->
             if @is_paused
-                $( '#pause_btn' ).html( 'Pause' )
+                $( '#pause' ).html( "<i class='icon-pause'></i>" )
                 @is_paused = false
             else
-                $( '#pause_btn' ).html( 'Resume' )
+                $( '#pause' ).html( "<i class='icon-play'></i>" )
                 @is_paused = true
 
         # resets playback
         reset_playback: (event) ->
-            @reset = true
+            if @playback?
+                clearInterval( @playback )
+                @playback = null
+
+            # set initial lower and upper bound of our current quantum
+            @lower_bound = @min_time
+            @upper_bound = @min_time + @quantum
+
             @step_current = 0
-            @num_steps = 0
-            @quantum = 0
-            @min_time = 0
-            @max_time = 0
-            @lower_bound = 0
-            @upper_bound = 0
-            current_time.innerHTML = ""
+
+            $( '#current_time' ).html( '' )
+
             @progress = 0
-            progress_bar.value=0
-            pause_btn.innerHTML = "Pause"
+            $( '#progress_bar' ).val( 0 )
+
+            $( '#pause_btn' ).html( '<icon class="icon-play"></i>' )
             @is_paused = false
-            # stops auto loop
-            clearInterval (@playback)
-            @playback = null
-            for i of @map._layers
-                unless @map._layers[i]._path is `undefined`
-                    try
-                        @map.removeLayer @map._layers[i]
-                    catch e
-                        console.log "problem with " + e + @map._layers[i]
-            @renderMap()
 
         # Reacts to click of "static_time" button in visualize.html
         # displays all markers within the chosen start/end date
@@ -198,20 +243,25 @@ define( [ 'jquery',
             length = @data.models.length
 
             # min and max time in milliseconds for the array
-            @min_time = Date.parse (@data.models[0].get('timestamp'))
-            @max_time = Date.parse (@data.models[length-1].get('timestamp'))
+            @min_time = Date.parse( @data.models[0].get( 'timestamp' ) )
+            @max_time = Date.parse( @data.models[ @data.models.length-1].get( 'timestamp' ) )
 
             # use start and end time fields if they are not empty
-            if (start_date.value != "")
+            if start_date.value?.length > 0
                 @min_time = Date.parse( start_date.value )
-            if (end_date.value != "")
+
+            if end_date.value?.length > 0
                 @max_time = Date.parse( end_date.value )
+
+            @num_steps = $( '#fps' ).val() * $( '#playtime' ).val()
+
+            @quantum = Math.floor( (@max_time - @min_time) / @num_steps )
 
             # set upper and lower bound
             @lower_bound = @min_time
-            @upper_bound = @max_time
+            @upper_bound = @min_time + @quantum
 
-            @renderMap()
+            @render()
 
         update_fps: () ->
             $( '#fpsbox' ).html( fps.value )
@@ -238,7 +288,7 @@ define( [ 'jquery',
                     @lower_bound = @upper_bound - @quantum
                 current_time.innerHTML = new Date(@lower_bound) + " through " + new Date(@upper_bound)
                 @is_paused = false
-                @renderMap()
+                @render()
 
         clear_lines: (event) ->
             for i of @map._layers
@@ -249,47 +299,32 @@ define( [ 'jquery',
                         console.log "problem with " + e + @map._layers[i]
 
         time_step: (event) ->
-            # setup for the first time they click step
-            if @step_clicked == false or @reset == true
-                length = @data.models.length
-                @step_clicked = true
-                @reset = false
-
-                # min and max time in milliseconds for the array
-                @min_time = Date.parse (@data.models[0].get('timestamp'))
-                @max_time = Date.parse (@data.models[length-1].get('timestamp'))
-
-                # use start and end time fields if they are not empty
-                if (start_date.value != "")
-                    @min_time = Date.parse( start_date.value )
-                if (end_date.value != "")
-                    @max_time = Date.parse( end_date.value )
-
-                # split the time into frames based on fps * playtime
-                @num_steps = fps.value * playtime.value
-
-                # calc size of quantum
-                @quantum = Math.floor ((@max_time - @min_time) / @num_steps )
-                # set initial lower and upper bound of our current quantum
-                @lower_bound = @min_time
-                @upper_bound = @min_time + @quantum
-
             # only call render for the number of quantums that we have
             @step_current += 1
-            if (@step_current <= @num_steps)
-                @renderMap()
+            if @step_current <= @num_steps
+
+                @constrained_markers.eachLayer( ( layer ) =>
+                    timestamp = Date.parse( layer.timestamp )
+
+                    if @lower_bound <= timestamp <= @upper_bound
+                        layer.setOpacity( 1.0 )
+                    else
+                        layer.setOpacity( 0.0 )
+                )
+
                 # display the range of the current quantum
                 current_time.innerHTML = new Date(@lower_bound) + " through " + new Date(@upper_bound)
+
                 #progress_bar.value = (int)(@progress_range * (@lower_bound / @max_time))
                 @progress =  (@progress_range * ((@upper_bound-@min_time) / (@max_time-@min_time)))
+
                 #alert @progress
                 progress_bar.value = @progress
 
             # move on to the next quantum
-            #alert "old lower is: " + @lower_bound
-            if (cumulativeCheck.checked == false)
-                @lower_bound += @quantum
-            #alert "new lower is: " + @lower_bound
+            #if cumulativeCheck.checked == false
+            #   @lower_bound += @quantum
+
             @upper_bound += @quantum
 
 
