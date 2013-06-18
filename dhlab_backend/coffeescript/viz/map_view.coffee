@@ -124,8 +124,8 @@ define( [ 'jquery',
                 if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
                     continue
 
-                center[0] += parseFloat( geopoint[0] )
-                center[1] += parseFloat( geopoint[1] )
+                center[0]   += parseFloat( geopoint[0] )
+                center[1]   += parseFloat( geopoint[1] )
                 valid_count += 1
 
             if valid_count == 0
@@ -152,6 +152,7 @@ define( [ 'jquery',
             @clusters       = new L.MarkerClusterGroup()
             @connections    = new L.layerGroup()
 
+            last_marker = undefined
             for datum in @data.models
                 geopoint = datum.get( 'data' )[ @map_headers.name ]
 
@@ -164,7 +165,17 @@ define( [ 'jquery',
 
                 marker = L.marker( [geopoint[0], geopoint[1]], {icon: @mapIcon})
                 marker.data = datum.get( 'data' )
-                marker.timestamp = datum.get( 'timestamp' )
+                marker.timestamp = new Date( datum.get( 'timestamp' ) )
+
+                if last_marker?
+                    day = 1000 * 60 * 60 * 24
+                    if marker.timestamp.getTime() - last_marker.timestamp.getTime() < day
+                        pline = [ marker.getLatLng(), last_marker.getLatLng() ]
+                        @connections.addLayer( L.polyline( pline ) )
+
+                    last_marker = marker
+                else
+                    last_marker = marker
 
                 html = ''
                 for key, value of marker.data
@@ -252,9 +263,8 @@ define( [ 'jquery',
             # marker if it meets our timestamp constraints.
             last_marker = undefined
             @markers.eachLayer( ( layer ) =>
-                timestamp = Date.parse( layer.timestamp )
 
-                if @lower_bound <= timestamp <= @upper_bound
+                if @lower_bound <= layer.timestamp <= @upper_bound
                     layer.setOpacity( 1.0 )
                     last_marker = layer
                 else

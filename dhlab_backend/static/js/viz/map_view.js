@@ -115,7 +115,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype.render = function() {
-      var center, datum, geopoint, heatmapData, heatmap_value, html, key, layers, marker, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      var center, datum, day, geopoint, heatmapData, heatmap_value, html, key, last_marker, layers, marker, pline, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
       center = [0, 0];
       valid_count = 0;
       _ref = this.data.models;
@@ -155,6 +155,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       this.markers = new L.layerGroup();
       this.clusters = new L.MarkerClusterGroup();
       this.connections = new L.layerGroup();
+      last_marker = void 0;
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         datum = _ref1[_j];
@@ -170,7 +171,17 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
           icon: this.mapIcon
         });
         marker.data = datum.get('data');
-        marker.timestamp = datum.get('timestamp');
+        marker.timestamp = new Date(datum.get('timestamp'));
+        if (last_marker != null) {
+          day = 1000 * 60 * 60 * 24;
+          if (marker.timestamp.getTime() - last_marker.timestamp.getTime() < day) {
+            pline = [marker.getLatLng(), last_marker.getLatLng()];
+            this.connections.addLayer(L.polyline(pline));
+          }
+          last_marker = marker;
+        } else {
+          last_marker = marker;
+        }
         html = '';
         _ref2 = marker.data;
         for (key in _ref2) {
@@ -262,9 +273,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       }
       last_marker = void 0;
       this.markers.eachLayer(function(layer) {
-        var timestamp;
-        timestamp = Date.parse(layer.timestamp);
-        if ((_this.lower_bound <= timestamp && timestamp <= _this.upper_bound)) {
+        var _ref;
+        if ((_this.lower_bound <= (_ref = layer.timestamp) && _ref <= _this.upper_bound)) {
           layer.setOpacity(1.0);
           return last_marker = layer;
         } else {
