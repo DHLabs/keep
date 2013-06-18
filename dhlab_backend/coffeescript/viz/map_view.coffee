@@ -16,15 +16,15 @@ define( [ 'jquery',
 
         map_headers:    undefined
         map:            undefined
+        controls:       undefined
+        playback:       undefined
 
         # Time step variables
-        step_clicked:  false
         step_current: 0
         num_steps: 0
         quantum: 0
 
         is_paused: true
-        reset: false
 
         progress: 0
         progress_range: 100.0
@@ -35,14 +35,6 @@ define( [ 'jquery',
             weight: 0.5
             opacity: 1
             smoothFactor: 0.5
-
-        # Time step HTML values
-        $( '#fpsbox' ).html( $( '#fps' ).val() )
-        $( '#playtimebox' ).html( $( '#playtime' ).val() )
-
-        controls: null
-        current_controls: null
-        playback: null
 
         events:
             "click #time_step":         "time_step"
@@ -107,15 +99,10 @@ define( [ 'jquery',
                     return
 
         render: () ->
-            @heatmap = L.TileLayer.heatMap(
-                                radius: 80
-                                opacity: 0.8
-                                gradient:
-                                    0.45: "rgb(0,0,255)",
-                                    0.55: "rgb(0,255,255)",
-                                    0.65: "rgb(0,255,0)",
-                                    0.95: "yellow",
-                                    1.0: "rgb(255,0,0)" )
+
+            # Setup heatmap
+            @heatmap = L.TileLayer.heatMap( { radius: 42, opacity: 0.8 } )
+            heatmap_value = 10.0 / @data.models.length
 
             # Calculate the center of the data
             center = [ 0, 0 ]
@@ -140,19 +127,20 @@ define( [ 'jquery',
                 $( '#map' ).hide()
                 return @
 
+            # Create Leaflet map and setup markers, connectiosn and cluster layer
             center[0] = center[0] / valid_count
             center[1] = center[1] / valid_count
 
             @map = L.map( 'map' ).setView( center, 10 )
-
             L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
                             maxZoom: 18 }).addTo( @map )
 
             heatmapData = []
-            @markers = []
-            @constrained_markers = new L.layerGroup()
-            @marker_layer = new L.MarkerClusterGroup()
+            @markers        = new L.layerGroup()
+            @clusters       = new L.MarkerClusterGroup()
+            @connections    = new L.layerGroup()
+
             for datum in @data.models
                 geopoint = datum.get( 'data' )[ @map_headers.name ]
 
@@ -172,27 +160,28 @@ define( [ 'jquery',
                     html += "<div><strong>#{key}:</strong> #{value}</div>"
                 marker.bindPopup( html )
 
-                @marker_layer.addLayer( marker )
-                @constrained_markers.addLayer( marker )
+                @markers.addLayer( marker )
+                @clusters.addLayer( marker )
 
                 heatmapData.push(
                     lat: geopoint[0]
                     lon: geopoint[1]
-                    value: 1 )
+                    count: heatmap_value )
 
+            # By default we'll have the heatmap layer enabled and everything
+            # else disabled
             @heatmap.addData( heatmapData )
-
             @map.addLayer( @heatmap )
-            @map.addLayer( @marker_layer )
-            @map.addLayer( @constrained_markers )
 
             layers =
-                'Markers': @marker_layer
+                'Clusters': @clusters
+                'Connections': @connections
                 'Heatmap': @heatmap
-                'Constrained': @constrained_markers
+                'Markers': @markers
 
-            controls = L.control.layers( null, layers, { collapsed: false } )
-            controls.addTo( @map )
+            @controls = L.control.layers( null, layers, { collapsed: false } )
+            @controls.addTo( @map )
+
             @
 
         auto_step: (event) =>
@@ -242,7 +231,7 @@ define( [ 'jquery',
             @step_current += 1
             if @step_current <= @num_steps
 
-                @constrained_markers.eachLayer( ( layer ) =>
+                @markers.eachLayer( ( layer ) =>
                     timestamp = Date.parse( layer.timestamp )
 
                     if @lower_bound <= timestamp <= @upper_bound

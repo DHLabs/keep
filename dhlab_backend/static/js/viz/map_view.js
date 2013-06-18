@@ -27,7 +27,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
 
     MapView.prototype.map = void 0;
 
-    MapView.prototype.step_clicked = false;
+    MapView.prototype.controls = void 0;
+
+    MapView.prototype.playback = void 0;
 
     MapView.prototype.step_current = 0;
 
@@ -36,8 +38,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     MapView.prototype.quantum = 0;
 
     MapView.prototype.is_paused = true;
-
-    MapView.prototype.reset = false;
 
     MapView.prototype.progress = 0;
 
@@ -51,16 +51,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       opacity: 1,
       smoothFactor: 0.5
     };
-
-    $('#fpsbox').html($('#fps').val());
-
-    $('#playtimebox').html($('#playtime').val());
-
-    MapView.prototype.controls = null;
-
-    MapView.prototype.current_controls = null;
-
-    MapView.prototype.playback = null;
 
     MapView.prototype.events = {
       "click #time_step": "time_step",
@@ -120,18 +110,12 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype.render = function() {
-      var center, controls, datum, geopoint, heatmapData, html, key, layers, marker, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      var center, datum, geopoint, heatmapData, heatmap_value, html, key, layers, marker, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
       this.heatmap = L.TileLayer.heatMap({
-        radius: 80,
-        opacity: 0.8,
-        gradient: {
-          0.45: "rgb(0,0,255)",
-          0.55: "rgb(0,255,255)",
-          0.65: "rgb(0,255,0)",
-          0.95: "yellow",
-          1.0: "rgb(255,0,0)"
-        }
+        radius: 42,
+        opacity: 0.8
       });
+      heatmap_value = 10.0 / this.data.models.length;
       center = [0, 0];
       valid_count = 0;
       _ref = this.data.models;
@@ -163,9 +147,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         maxZoom: 18
       }).addTo(this.map);
       heatmapData = [];
-      this.markers = [];
-      this.constrained_markers = new L.layerGroup();
-      this.marker_layer = new L.MarkerClusterGroup();
+      this.markers = new L.layerGroup();
+      this.clusters = new L.MarkerClusterGroup();
+      this.connections = new L.layerGroup();
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         datum = _ref1[_j];
@@ -189,27 +173,26 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
           html += "<div><strong>" + key + ":</strong> " + value + "</div>";
         }
         marker.bindPopup(html);
-        this.marker_layer.addLayer(marker);
-        this.constrained_markers.addLayer(marker);
+        this.markers.addLayer(marker);
+        this.clusters.addLayer(marker);
         heatmapData.push({
           lat: geopoint[0],
           lon: geopoint[1],
-          value: 1
+          count: heatmap_value
         });
       }
       this.heatmap.addData(heatmapData);
       this.map.addLayer(this.heatmap);
-      this.map.addLayer(this.marker_layer);
-      this.map.addLayer(this.constrained_markers);
       layers = {
-        'Markers': this.marker_layer,
+        'Clusters': this.clusters,
+        'Connections': this.connections,
         'Heatmap': this.heatmap,
-        'Constrained': this.constrained_markers
+        'Markers': this.markers
       };
-      controls = L.control.layers(null, layers, {
+      this.controls = L.control.layers(null, layers, {
         collapsed: false
       });
-      controls.addTo(this.map);
+      this.controls.addTo(this.map);
       return this;
     };
 
@@ -270,7 +253,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         _this = this;
       this.step_current += 1;
       if (this.step_current <= this.num_steps) {
-        this.constrained_markers.eachLayer(function(layer) {
+        this.markers.eachLayer(function(layer) {
           var timestamp;
           timestamp = Date.parse(layer.timestamp);
           if ((_this.lower_bound <= timestamp && timestamp <= _this.upper_bound)) {
