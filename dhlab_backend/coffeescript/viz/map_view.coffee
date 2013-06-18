@@ -19,6 +19,9 @@ define( [ 'jquery',
         controls:       undefined
         playback:       undefined
 
+        start_date:     $( '#start_date' )
+        end_date:       $( '#end_date' )
+
         # Time step variables
         step_current: 0
         num_steps: 0
@@ -27,7 +30,6 @@ define( [ 'jquery',
         is_paused: true
 
         progress: 0
-        progress_range: 100.0
 
         DataView::pL = []
         DataView::pLStyle =
@@ -37,8 +39,6 @@ define( [ 'jquery',
             smoothFactor: 0.5
 
         events:
-            "click #time_step":         "time_step"
-            "click #auto_step":         "auto_step"
             "click #pause":             "pause_playback"
             "click #reset":             "reset_playback"
 
@@ -67,15 +67,27 @@ define( [ 'jquery',
                 @render()
 
                 # min and max time in milliseconds for the array
-                @min_time = Date.parse( @data.models[0].get('timestamp') )
-                @max_time = Date.parse( @data.models[ @data.models.length - 1 ].get('timestamp') )
+                if @start_date.val().length > 0
+                    @min_time = Date.parse( @start_date.val() )
+                else
+                    @min_time = Date.parse( @data.models[0].get('timestamp') )
 
-                # use start and end time fields if they are not empty
-                if start_date.value?.length > 0
-                    @min_time = Date.parse( start_date.value )
+                    now = new Date( @min_time )
+                    day      = ( '0' + now.getDate() ).slice( -2 )
+                    month    = ( '0' + (now.getMonth() + 1) ).slice( -2 )
 
-                if end_date.value?.length > 0
-                    @max_time = Date.parse( end_date.value )
+                    @start_date.val( now.getFullYear() + '-' + month + '-' + day )
+
+                if @end_date.val().length > 0
+                    @max_time = Date.parse( @end_date.val() )
+                else
+                    @max_time = Date.parse( @data.models[ @data.models.length - 1 ].get('timestamp') )
+
+                    now = new Date( @max_time )
+                    day      = ( '0' + now.getDate() ).slice( -2 )
+                    month    = ( '0' + (now.getMonth() + 1) ).slice( -2 )
+
+                    @end_date.val( now.getFullYear() + '-' + month + '-' + day )
 
                 # split the time into frames based on fps * playtime
                 @num_steps = $( '#fps' ).val() * $( '#playtime' ).val()
@@ -99,11 +111,6 @@ define( [ 'jquery',
                     return
 
         render: () ->
-
-            # Setup heatmap
-            @heatmap = L.TileLayer.heatMap( { radius: 42, opacity: 0.8 } )
-            heatmap_value = 10.0 / @data.models.length
-
             # Calculate the center of the data
             center = [ 0, 0 ]
             valid_count = 0
@@ -135,6 +142,10 @@ define( [ 'jquery',
             L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
                             maxZoom: 18 }).addTo( @map )
+
+            # Setup heatmap
+            @heatmap = L.TileLayer.heatMap( { radius: 42, opacity: 0.8 } )
+            heatmap_value = 1.0 / @data.models.length
 
             heatmapData = []
             @markers        = new L.layerGroup()
@@ -184,17 +195,18 @@ define( [ 'jquery',
 
             @
 
-        auto_step: (event) =>
-            # continuously call time step
-            auto = () =>
-                if not @is_paused
-                    @time_step()
-            @playback = setInterval( auto, 1000/fps.value )
-
         pause_playback: (event) ->
             if @is_paused
                 $( '#pause' ).html( "<i class='icon-pause'></i>" )
                 @is_paused = false
+
+                # Start up playback interval if it's not already started up.
+                if not @playback?
+                    auto = () =>
+                        @time_step() if not @is_paused
+
+                    @playback = setInterval( auto, 1000.0 / $( '#fps' ).val() )
+
             else
                 $( '#pause' ).html( "<i class='icon-play'></i>" )
                 @is_paused = true
@@ -227,35 +239,44 @@ define( [ 'jquery',
                         console.log "problem with " + e + @map._layers[i]
 
         time_step: (event) ->
-            # only call render for the number of quantums that we have
+
             @step_current += 1
-            if @step_current <= @num_steps
 
-                @markers.eachLayer( ( layer ) =>
-                    timestamp = Date.parse( layer.timestamp )
+            # If we've made it past the number steps, pause the playback and
+            # return.
+            if @step_current > @num_steps
+                @is_paused = true
+                return @
 
-                    if @lower_bound <= timestamp <= @upper_bound
-                        layer.setOpacity( 1.0 )
-                    else
-                        layer.setOpacity( 0.0 )
-                )
+            # Go through each marker in the layer and enable/disable the
+            # marker if it meets our timestamp constraints.
+            last_marker = undefined
+            @markers.eachLayer( ( layer ) =>
+                timestamp = Date.parse( layer.timestamp )
 
-                # display the range of the current quantum
-                lower_bound_str = new Date( @lower_bound )
-                upper_bound_str = new Date( @upper_bound )
+                if @lower_bound <= timestamp <= @upper_bound
+                    layer.setOpacity( 1.0 )
+                    last_marker = layer
+                else
+                    layer.setOpacity( 0.0 )
+            )
 
-                $( '#current_time' ).html( "#{lower_bound_str} through #{upper_bound_str}" )
+            # Pan to the last marker that was enabled
+            @map.panTo( last_marker.getLatLng() ) if last_marker?
 
-                @progress = (@progress_range * ((@upper_bound-@min_time) / (@max_time-@min_time)))
+            # Calculate the percent progress we have progressed.
+            @progress = 100 * ( @upper_bound - @min_time ) / ( @max_time - @min_time )
 
-                $( '#progress_bar > .bar' ).width( @progress + '%' )
+            # display the range of the current quantum
+            lower_bound_str = new Date( @lower_bound )
+            upper_bound_str = new Date( @upper_bound )
 
-            # move on to the next quantum
-            #if cumulativeCheck.checked == false
-            #   @lower_bound += @quantum
+            $( '#current_time' ).html( "#{lower_bound_str} through #{upper_bound_str}" )
+            $( '#progress_bar > .bar' ).width( "#{@progress}%" )
 
             @upper_bound += @quantum
 
+            @
 
         time_c: (event) ->
             val = $("#tc_input").val()

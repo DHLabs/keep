@@ -3,17 +3,12 @@ var __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leaflet_heatmap', 'leaflet_cluster'], function($, _, Backbone, L) {
-  var MapView,
-    _this = this;
+  var MapView;
   MapView = (function(_super) {
 
     __extends(MapView, _super);
 
     function MapView() {
-      var _this = this;
-      this.auto_step = function(event) {
-        return MapView.prototype.auto_step.apply(_this, arguments);
-      };
       return MapView.__super__.constructor.apply(this, arguments);
     }
 
@@ -31,6 +26,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
 
     MapView.prototype.playback = void 0;
 
+    MapView.prototype.start_date = $('#start_date');
+
+    MapView.prototype.end_date = $('#end_date');
+
     MapView.prototype.step_current = 0;
 
     MapView.prototype.num_steps = 0;
@@ -40,8 +39,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     MapView.prototype.is_paused = true;
 
     MapView.prototype.progress = 0;
-
-    MapView.prototype.progress_range = 100.0;
 
     DataView.prototype.pL = [];
 
@@ -53,8 +50,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype.events = {
-      "click #time_step": "time_step",
-      "click #auto_step": "auto_step",
       "click #pause": "pause_playback",
       "click #reset": "reset_playback",
       "click #time_c": "time_c",
@@ -62,7 +57,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype.initialize = function(options) {
-      var _ref, _ref1;
+      var day, month, now;
       this.parent = options.parent;
       this.data = options.data;
       this.form = options.form;
@@ -80,13 +75,23 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       if (this.map_headers != null) {
         this.btn.removeClass('disabled');
         this.render();
-        this.min_time = Date.parse(this.data.models[0].get('timestamp'));
-        this.max_time = Date.parse(this.data.models[this.data.models.length - 1].get('timestamp'));
-        if (((_ref = start_date.value) != null ? _ref.length : void 0) > 0) {
-          this.min_time = Date.parse(start_date.value);
+        if (this.start_date.val().length > 0) {
+          this.min_time = Date.parse(this.start_date.val());
+        } else {
+          this.min_time = Date.parse(this.data.models[0].get('timestamp'));
+          now = new Date(this.min_time);
+          day = ('0' + now.getDate()).slice(-2);
+          month = ('0' + (now.getMonth() + 1)).slice(-2);
+          this.start_date.val(now.getFullYear() + '-' + month + '-' + day);
         }
-        if (((_ref1 = end_date.value) != null ? _ref1.length : void 0) > 0) {
-          this.max_time = Date.parse(end_date.value);
+        if (this.end_date.val().length > 0) {
+          this.max_time = Date.parse(this.end_date.val());
+        } else {
+          this.max_time = Date.parse(this.data.models[this.data.models.length - 1].get('timestamp'));
+          now = new Date(this.max_time);
+          day = ('0' + now.getDate()).slice(-2);
+          month = ('0' + (now.getMonth() + 1)).slice(-2);
+          this.end_date.val(now.getFullYear() + '-' + month + '-' + day);
         }
         this.num_steps = $('#fps').val() * $('#playtime').val();
         this.quantum = Math.floor((this.max_time - this.min_time) / this.num_steps);
@@ -111,11 +116,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
 
     MapView.prototype.render = function() {
       var center, datum, geopoint, heatmapData, heatmap_value, html, key, layers, marker, valid_count, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
-      this.heatmap = L.TileLayer.heatMap({
-        radius: 42,
-        opacity: 0.8
-      });
-      heatmap_value = 10.0 / this.data.models.length;
       center = [0, 0];
       valid_count = 0;
       _ref = this.data.models;
@@ -146,6 +146,11 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18
       }).addTo(this.map);
+      this.heatmap = L.TileLayer.heatMap({
+        radius: 42,
+        opacity: 0.8
+      });
+      heatmap_value = 1.0 / this.data.models.length;
       heatmapData = [];
       this.markers = new L.layerGroup();
       this.clusters = new L.MarkerClusterGroup();
@@ -196,21 +201,20 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       return this;
     };
 
-    MapView.prototype.auto_step = function(event) {
+    MapView.prototype.pause_playback = function(event) {
       var auto,
         _this = this;
-      auto = function() {
-        if (!_this.is_paused) {
-          return _this.time_step();
-        }
-      };
-      return this.playback = setInterval(auto, 1000 / fps.value);
-    };
-
-    MapView.prototype.pause_playback = function(event) {
       if (this.is_paused) {
         $('#pause').html("<i class='icon-pause'></i>");
-        return this.is_paused = false;
+        this.is_paused = false;
+        if (this.playback == null) {
+          auto = function() {
+            if (!_this.is_paused) {
+              return _this.time_step();
+            }
+          };
+          return this.playback = setInterval(auto, 1000.0 / $('#fps').val());
+        }
       } else {
         $('#pause').html("<i class='icon-play'></i>");
         return this.is_paused = true;
@@ -249,26 +253,34 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype.time_step = function(event) {
-      var lower_bound_str, upper_bound_str,
+      var last_marker, lower_bound_str, upper_bound_str,
         _this = this;
       this.step_current += 1;
-      if (this.step_current <= this.num_steps) {
-        this.markers.eachLayer(function(layer) {
-          var timestamp;
-          timestamp = Date.parse(layer.timestamp);
-          if ((_this.lower_bound <= timestamp && timestamp <= _this.upper_bound)) {
-            return layer.setOpacity(1.0);
-          } else {
-            return layer.setOpacity(0.0);
-          }
-        });
-        lower_bound_str = new Date(this.lower_bound);
-        upper_bound_str = new Date(this.upper_bound);
-        $('#current_time').html("" + lower_bound_str + " through " + upper_bound_str);
-        this.progress = this.progress_range * ((this.upper_bound - this.min_time) / (this.max_time - this.min_time));
-        $('#progress_bar > .bar').width(this.progress + '%');
+      if (this.step_current > this.num_steps) {
+        this.is_paused = true;
+        return this;
       }
-      return this.upper_bound += this.quantum;
+      last_marker = void 0;
+      this.markers.eachLayer(function(layer) {
+        var timestamp;
+        timestamp = Date.parse(layer.timestamp);
+        if ((_this.lower_bound <= timestamp && timestamp <= _this.upper_bound)) {
+          layer.setOpacity(1.0);
+          return last_marker = layer;
+        } else {
+          return layer.setOpacity(0.0);
+        }
+      });
+      if (last_marker != null) {
+        this.map.panTo(last_marker.getLatLng());
+      }
+      this.progress = 100 * (this.upper_bound - this.min_time) / (this.max_time - this.min_time);
+      lower_bound_str = new Date(this.lower_bound);
+      upper_bound_str = new Date(this.upper_bound);
+      $('#current_time').html("" + lower_bound_str + " through " + upper_bound_str);
+      $('#progress_bar > .bar').width("" + this.progress + "%");
+      this.upper_bound += this.quantum;
+      return this;
     };
 
     MapView.prototype.time_c = function(event) {

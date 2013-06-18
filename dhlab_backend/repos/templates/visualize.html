@@ -145,7 +145,7 @@
 		<div class='span12' style='display:none;'>
 			<div id='time_select'>
 				<input type='range' id='fps' min='1' max='10'/>
-				<input type='range' id='playtime' step='10' min='10' max='300'/> <br />
+				<input type='range' id='playtime' step='10' min='10' max='300'/>
 			</div>
 
 			<div id='cumulative'>
@@ -168,7 +168,9 @@
 		<div class='span12' id='map'></div>
 
 		<div class='offset1 span10' style='clear:both;margin-top:16px;'>
-			<div id='current_time' style='text-align:center;'></div>
+			<div id='current_time' style='text-align:center;'>
+				Playback Paused
+			</div>
 			<div id='progress_bar' class='progress progress-striped'>
 				<div class='bar'></div>
 			</div>
@@ -176,19 +178,17 @@
 		<div id='playback-controls'>
 			<div class='span3'>
 				<input type='date' id='start_date'><br>
-				Start Date
+				<strong>Start Date</strong>
 			</div>
 			<div class='span6'>
 				<div class="btn-group">
-					<button id='auto_step' class='btn'><i class='icon-retweet'></i></button>
 					<button id='pause' class='btn'><i class='icon-play'></i></button>
 					<button id='reset' class='btn'><i class='icon-stop'></i></button>
-					<button id='time_step' class='btn'><i class='icon-forward'></i></button>
 				</div>
 			</div>
 			<div class='span3'>
 				<input type='date' id='end_date'><br>
-				End Date
+				<strong>End Date</strong>
 			</div>
 		</div>
 	</div>
