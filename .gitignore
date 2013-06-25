@@ -10,5 +10,6 @@ _artwork
 media
 node_modules
 bower_components
+static
 
 credentials.py
