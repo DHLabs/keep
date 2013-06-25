@@ -1,0 +1,67 @@
+// Styles for visualization panels
+#raw {
+	margin-top:16px;
+}
+
+.card {
+	background:white;
+	width:220px;
+	margin-top:8px;
+	margin-left:8px;
+	border:1px solid #AAA;
+	box-shadow: 0 0 2px #888;
+
+	> .card-image {
+		border-bottom:1px solid #AAA;
+
+		> img {
+			width: 220px;
+		}
+	}
+
+	> .card-video {
+		> video {
+			width: 220px;
+		}
+	}
+
+	> .card-data {
+		> div {
+			padding: 8px;
+		}
+	}
+}
+
+// Needed for DataTables
+.dataTables_info {
+	padding-top:4px;
+}
+.pagination {
+	text-align:right;
+	margin:0 !important;
+}
+
+td.group {
+	background-color:#999 !important;
+	color:white;
+}
+
+table.table thead .sorting,
+table.table thead .sorting_asc,
+table.table thead .sorting_desc,
+table.table thead .sorting_asc_disabled,
+table.table thead .sorting_desc_disabled {
+    cursor: pointer;
+    *cursor: hand;
+}
+
+table.table thead .sorting { background: url('images/sort_both.png') no-repeat center right; }
+table.table thead .sorting_asc { background: url('images/sort_asc.png') no-repeat center right; }
+table.table thead .sorting_desc { background: url('images/sort_desc.png') no-repeat center right; }
+
+table.table thead .sorting_asc_disabled { background: url('images/sort_asc_disabled.png') no-repeat center right; }
+table.table thead .sorting_desc_disabled { background: url('images/sort_desc_disabled.png') no-repeat center right; }
+
+.dataTables_filter {
+	text-align: right;
+}

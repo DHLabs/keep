@@ -138,13 +138,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       if (!this.form.attributes.children || !this.data) {
         return;
       }
-      if (this.raw_view === void 0) {
+      if (this.raw_view == null) {
         this.raw_view = this.add_subview(RawView);
       }
-      if (this.chart_view === void 0) {
+      if (this.chart_view == null) {
         this.chart_view = this.add_subview(ChartView);
       }
-      if (this.map_view === void 0) {
+      if (this.map_view == null) {
         return this.map_view = this.add_subview(MapView);
       }
     };
