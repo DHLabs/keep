@@ -1,10 +1,10 @@
 define( [ 'jquery',
-          'vendor/underscore',
-          'vendor/backbone-min',
-          'vendor/forms/backbone-forms.min',
-          'raw_view',
-          'map_view',
-          'chart_view' ],
+          'underscore',
+          'backbone',
+          'backbone-forms',
+          'app/viz/raw_view',
+          'app/viz/map_view',
+          'app/viz/chart_view' ],
 
 ( $, _, Backbone, Forms, RawView, MapView, ChartView ) ->
 

@@ -6,12 +6,12 @@
 #
 #
 define( [ 'jquery',
-          'vendor/underscore',
-          'vendor/backbone-min',
-          'vendor/forms/backbone-forms.min',
-          'models',
-          'builder',
-          'constraints' ],
+          'underscore',
+          'backbone',
+          'backbone-forms',
+          'app/webform/models',
+          'app/webform/builder',
+          'app/webform/constraints' ],
 
 ( $, _, Backbone, Forms, xFormModel, build_form, XFormConstraintChecker ) ->
 

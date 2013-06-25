@@ -1,6 +1,6 @@
 define( [ 'jquery',
-          'vendor/underscore',
-          'vendor/backbone-min',
+          'underscore',
+          'backbone',
           'leaflet',
           'leaflet_heatmap',
           'leaflet_cluster' ],

@@ -1,4 +1,4 @@
-define( [ 'vendor/backbone-min' ], ( Backbone ) ->
+define( [ 'backbone' ], ( Backbone ) ->
 
     class xFormModel extends Backbone.Model
 

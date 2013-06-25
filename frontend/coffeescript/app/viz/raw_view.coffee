@@ -1,6 +1,6 @@
 define( [ 'jquery',
-          'vendor/underscore',
-          'vendor/backbone-min',
+          'underscore',
+          'backbone',
           'masonry' ],
 
 ( $, _, Backbone, Masonry ) ->
