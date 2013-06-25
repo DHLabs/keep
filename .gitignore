@@ -2,8 +2,12 @@
 *sublime*
 *.db
 *.db.bak
+
 htmlcov
 *.coverage
+
 _artwork
 media
+node_modules
+
 credentials.py
