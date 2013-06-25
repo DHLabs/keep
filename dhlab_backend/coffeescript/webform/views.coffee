@@ -56,6 +56,17 @@ define( [ 'jquery',
             #     groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
             #     groupEnd: '<div><hr></div>'
 
+            # Creates submission page, takes care of corner case
+            submitChild =
+              bind:
+                readonly: "true()"
+
+              label: "Form Complete!  Click Submit, or hit Previous to review your answers."
+              name: "knozr563kj04tyn748945"
+              type: "note"
+
+            @model.attributes.children.push submitChild
+
             # Create the form to render
             _.each( @model.attributes.children, ( child ) =>
                 @recursiveAdd( child, @model.attributes.default_language )
