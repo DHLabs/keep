@@ -9,6 +9,11 @@
   "devDependencies": {
     "jquery": "~2.0.2",
     "backbone": "~1.0.0",
-    "underscore": "~1.4.4"
+    "underscore": "~1.4.4",
+    "backbone-forms": "~0.12.0",
+    "masonry": "~3.0.1",
+    "leaflet": "~0.5.1",
+    "leaflet.markerclusterer": "latest",
+    "moment": "~2.0.0"
   }
 }
