@@ -9,5 +9,6 @@ htmlcov
 _artwork
 media
 node_modules
+bower_components
 
 credentials.py

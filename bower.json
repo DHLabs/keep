@@ -1,0 +1,14 @@
+{
+  "name": "keep",
+  "version": "0.0.1",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "devDependencies": {
+    "jquery": "~2.0.2",
+    "backbone": "~1.0.0",
+    "underscore": "~1.4.4"
+  }
+}
