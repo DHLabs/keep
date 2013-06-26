@@ -18,6 +18,9 @@ requirejs.config(
 		underscore:
 			exports: '_'
 
+		'd3':
+			exports: 'd3'
+
 		# Leaflet & associated plugins
 		leaflet:
 			deps: [ 'jquery' ]

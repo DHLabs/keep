@@ -1,8 +1,9 @@
 define( [ 'jquery',
           'underscore',
-          'backbone' ],
+          'backbone',
+          'd3' ],
 
-( $, _, Backbone ) ->
+( $, _, Backbone, d3 ) ->
 
     class ChartView extends Backbone.View
 

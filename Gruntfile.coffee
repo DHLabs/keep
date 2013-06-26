@@ -8,7 +8,7 @@ module.exports = ( grunt ) ->
 		watch:
 			scripts:
 				files: [ 'frontend/coffeescript/**/*.coffee' ]
-				tasks: [ 'bower', 'copy:components', 'coffee', 'requirejs' ]
+				tasks: [ 'bower', 'copy:components', 'coffee:requirejs', 'requirejs' ]
 
 			styles:
 				files: [ 'frontend/sass/**/*.scss' ]
@@ -19,7 +19,7 @@ module.exports = ( grunt ) ->
 				dest: 'build/js/vendor'
 
 		coffee:
-			glob_to_multiple:
+			requirejs:
 				options:
 					bare: true
 				expand: true
@@ -39,7 +39,7 @@ module.exports = ( grunt ) ->
 			css:
 				expand: true
 				cwd: 'frontend/css'
-				src: [ '**/*.css' ]
+				src: [ '**/*' ]
 				dest: '<%= pkg.static_dir %>/css'
 
 			# Javascript components specifically go into an intermediary folder
@@ -68,6 +68,8 @@ module.exports = ( grunt ) ->
 					appDir: 'build'
 					mainConfigFile: 'build/js/common.js'
 					dir: '<%= pkg.static_dir %>'
+					keepBuildDir: true
+					optimize: 'none'
 					modules: [ {
 						name: '../common'
 						include: [ 'jquery',
