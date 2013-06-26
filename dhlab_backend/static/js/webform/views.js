@@ -73,8 +73,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         data: this._data,
         fields: this._fieldsets
       }).render();
+
       _.each(this.item_dict, function(child, key) {
         child.name = key;
+
         return _this.input_fields.push(child);
       });
       $('#formDiv').html(this.renderedForm.el);
@@ -82,6 +84,18 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.active input').focus();
       this._display_form_buttons(0);
       return this;
+    };
+
+    _geopointDisplay = function() {
+      console.log("H");
+      var mapForm = L.map('map', {
+        center: [51.505, -0.09],
+        zoom: 13});
+      console.log("E");
+      L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+      }).addTo(mapForm);
     };
 
     xFormView.prototype._display_form_buttons = function(question_index) {
@@ -109,6 +123,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         question_index += 1;
         return child.name === question;
       });
+      if(form_info.bind.map != undefined){
+        _geopointDisplay();
+      }
       return {
         'key': question,
         'idx': question_index,

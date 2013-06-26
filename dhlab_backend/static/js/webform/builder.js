@@ -35,8 +35,9 @@ define(['vendor/underscore'], function(_) {
     } else if (child.type === 'date') {
       schema_dict['type'] = 'Date';
     } else if (child.type === 'geopoint') {
-      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %></div>');
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %><div id="map" style="width:100%; height: 512px; position: relative;"></div></div>');
       schema_dict['is_field'] = false;
+      schema_dict['bind'] = { map: true };
     } else if (child.type === 'today') {
       schema_dict['type'] = 'Date';
       schema_dict['title'] = 'Today';
@@ -48,6 +49,7 @@ define(['vendor/underscore'], function(_) {
       schema_dict['type'] = 'Text';
       schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
                                                         <strong></strong><%= title %>\
+                                                   <div id="map"></div>\
                                                    </div>');
       schema_dict['is_field'] = false;
     } else if (child.type === 'datetime') {
