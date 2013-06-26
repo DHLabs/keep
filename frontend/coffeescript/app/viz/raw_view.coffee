@@ -1,9 +1,8 @@
 define( [ 'jquery',
           'underscore',
-          'backbone',
-          'masonry' ],
+          'backbone' ],
 
-( $, _, Backbone, Masonry ) ->
+( $, _, Backbone ) ->
 
     class RawView extends Backbone.View
 
@@ -72,8 +71,8 @@ define( [ 'jquery',
                 $( 'div.active' ).removeClass( 'active' )
                 $( "#raw_#{viz_type}" ).fadeIn( 'fast' ).addClass( 'active' )
 
-                if viz_type == 'grid' and @wall?
-                    @wall.masonry( 'reload' )
+                #if viz_type == 'grid' and @wall?
+                #    @wall.masonry( 'reload' )
             )
 
         toggle_media: ( event ) ->
@@ -86,7 +85,7 @@ define( [ 'jquery',
                     $( @ ).fadeIn( 'fast' ).addClass( 'card-active' )
             )
 
-            @wall.masonry( 'reload' )
+            #@wall.masonry( 'reload' )
 
         _render_list: ->
             # Add column headers
@@ -162,9 +161,9 @@ define( [ 'jquery',
 
                 $( '#raw_grid' ).append( @card_tmpl( tmpl_options ) )
 
-                @wall = $( '#raw_grid' ).masonry(
-                        itemSelector: '.card-active'
-                        isAnimated: true )
+                # @wall = $( '#raw_grid' ).masonry(
+                #         itemSelector: '.card-active'
+                #         isAnimated: true )
 
             @
 

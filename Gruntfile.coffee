@@ -12,8 +12,7 @@ module.exports = ( grunt ) ->
 
 			styles:
 				files: [ 'frontend/sass/**/*.scss' ]
-				tasks: [ 'compass:dist' ]
-
+				tasks: [ 'copy:css', 'compass:dist' ]
 
 		bower:
 			dev:
@@ -37,29 +36,43 @@ module.exports = ( grunt ) ->
 					outputStyle: 'compressed'
 
 		copy:
+			css:
+				expand: true
+				cwd: 'frontend/css'
+				src: [ '**/*.css' ]
+				dest: '<%= pkg.static_dir %>/css'
+
+			# Javascript components specifically go into an intermediary folder
+			# due to a two-stage build-process with Require-JS
 			components:
 				expand: true
 				cwd: 'frontend/components'
 				src: [ '**/*.js' ]
 				dest: 'build/js/vendor'
 
-			html:
+			font:
 				expand: true
-				cwd: 'frontend/templates'
-				src: [ '**/*.html' ]
-				dest: '<%= pkg.static_dir %>/templates'
+				cwd: 'frontend/font'
+				src: [ '**/*' ]
+				dest: '<%= pkg.static_dir %>/font'
 
+			img:
+				expand: true
+				cwd: 'frontend/img'
+				src: [ '**/*.png', '**/*.jpg', ]
+				dest: '<%= pkg.static_dir %>/img'
 
 		requirejs:
 			compile:
 				options:
 					appDir: 'build'
 					mainConfigFile: 'build/js/common.js'
-					dir: 'release'
-					removeCombined: true
+					dir: '<%= pkg.static_dir %>'
 					modules: [ {
 						name: '../common'
-						include: [ 'jquery', 'app/viz/main', 'app/webform/main']
+						include: [ 'jquery',
+								   'app/viz/main',
+								   'app/webform/main']
 					},{
 						name: 'app/viz/main'
 						exclude: [ '../common' ]
@@ -76,3 +89,8 @@ module.exports = ( grunt ) ->
 	grunt.loadNpmTasks( 'grunt-contrib-copy' )
 
 	grunt.registerTask( 'default', [ 'watch' ] )
+
+	grunt.registerTask( 'build', [ 'copy:components',
+								   'copy:css',
+								   'copy:font',
+								   'copy:img' ] )
