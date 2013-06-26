@@ -8,46 +8,69 @@ module.exports = ( grunt ) ->
 		watch:
 			scripts:
 				files: [ 'frontend/coffeescript/**/*.coffee' ]
-				tasks: [ 'coffee' ]
+				tasks: [ 'bower', 'copy:components', 'coffee', 'requirejs' ]
 
 			styles:
 				files: [ 'frontend/sass/**/*.scss' ]
 				tasks: [ 'compass:dist' ]
 
 
+		bower:
+			dev:
+				dest: 'build/js/vendor'
+
 		coffee:
 			glob_to_multiple:
 				options:
 					bare: true
 				expand: true
-				cwd: 'assets/coffee'
+				cwd: 'frontend/coffeescript'
 				src: [ '**/*.coffee' ]
-				dest: 'dist/js'
+				dest: 'build/js'
 				ext: '.js'
 
 		compass:
 			dist:
 				options:
-					sassDir: 'assets/sass'
-					cssDir: 'dist/css'
+					sassDir: 'frontend/sass'
+					cssDir: '<%= pkg.static_dir %>/css'
 					outputStyle: 'compressed'
 
 		copy:
+			components:
+				expand: true
+				cwd: 'frontend/components'
+				src: [ '**/*.js' ]
+				dest: 'build/js/vendor'
+
 			html:
 				expand: true
-				cwd: 'assets/templates'
+				cwd: 'frontend/templates'
 				src: [ '**/*.html' ]
-				dest: 'dist'
+				dest: '<%= pkg.static_dir %>/templates'
 
-		uglify:
-			options:
-				banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-			build:
-				src: 'assets/js/<%= pkg.name %>.js'
-				dest: 'dist/js/<%= pkg.name %>.min.js'
 
+		requirejs:
+			compile:
+				options:
+					appDir: 'build'
+					mainConfigFile: 'build/js/common.js'
+					dir: 'release'
+					removeCombined: true
+					modules: [ {
+						name: '../common'
+						include: [ 'jquery', 'app/viz/main', 'app/webform/main']
+					},{
+						name: 'app/viz/main'
+						exclude: [ '../common' ]
+					},{
+						name: 'app/webform/main'
+						exclude: [ '../common' ]
+					}]
+
+	grunt.loadNpmTasks( 'grunt-bower' )
 	grunt.loadNpmTasks( 'grunt-contrib-watch' )
-	grunt.loadNpmTasks( 'grunt-contrib-uglify' )
+	grunt.loadNpmTasks( 'grunt-contrib-requirejs' )
 	grunt.loadNpmTasks( 'grunt-contrib-coffee' )
 	grunt.loadNpmTasks( 'grunt-contrib-compass' )
 	grunt.loadNpmTasks( 'grunt-contrib-copy' )
