@@ -1,5 +1,19 @@
 define( [ 'underscore' ], ( _ ) ->
 
+    note_tmpl  = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
+                                <strong></strong><%= title %>
+                            </div>' )
+
+    photo_tmpl = _.template("<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>
+                                <label for='<%= editorId %>'><%= title %></label>
+                                <input type='file' name='<%= editorId %>' accept='image/*'></input>
+                            </div>" )
+
+    video_tmpl = _.template("<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>
+                                <label for='<%= editorId %>'><%= title %></label>
+                                <input type='file' name='<%= editorId %>' accept='video/*'></input>
+                            </div>" )
+
     build_form = ( child, lang ) ->
 
         label = ''
@@ -19,35 +33,24 @@ define( [ 'underscore' ], ( _ ) ->
             is_field: true
             bind: child.bind
 
-        if child.type in [ 'string', 'text' ]
-
-            if child.bind.readonly
-                schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
-                                                        <strong></strong><%= title %>
-                                                   </div>' )
-                schema_dict['is_field'] = false
+        if child.type in [ 'string', 'text', 'note' ]
 
             schema_dict['type'] = 'Text'
+
+            if child.type is 'note' or ( child.bind? and child.bind.readonly )
+                schema_dict['template'] = note_tmpl
+                schema_dict['is_field'] = false
 
         else if child.type in [ 'decimal', 'int', 'integer' ]
 
             schema_dict['type'] = 'Number'
-
-        else if child.type is 'date'
-
-            schema_dict['type'] = 'Date'
-
-        else if child.type is 'geopoint'
-
-            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %></div>' )
-            schema_dict['is_field'] = false
 
         else if child.type is 'today'
 
             schema_dict['type'] = 'Date'
             schema_dict['title'] = 'Today'
 
-        else if child.type is 'time'
+        else if child.type in [ 'date', 'time', 'datetime' ]
 
             schema_dict['type'] = 'DateTime'
 
@@ -55,37 +58,21 @@ define( [ 'underscore' ], ( _ ) ->
 
             schema_dict['type'] = 'Checkbox'
 
-        else if child.type is 'note'
-
-            schema_dict['type'] = 'Text'
-            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
-                                                        <strong></strong><%= title %>
-                                                   </div>' )
-            schema_dict['is_field'] = false
-
-        else if child.type is 'datetime'
-
-            schema_dict['type'] = 'DateTime'
-
         else if child.type is 'photo'
 
-            schema_dict['type'] = 'Text'
-            schema_dict['template'] = _.template( "<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>
-                                                        <label for='<%= editorId %>'><%= title %></label>
-                                                        <input type='file' name='<%= editorId %>' accept='image/*'></input>
-                                                   </div>" )
+            schema_dict['template'] = photo_tmpl
 
         else if child.type is 'video'
 
-            schema_dict['type'] = 'Text'
-            schema_dict['template'] = _.template( "<div id='<%= editorId %>_field' data-key='<%= editorId %>' class='control-group'>
-                                                        <label for='<%= editorId %>'><%= title %></label>
-                                                        <input type='file' name='<%= editorId %>' accept='video/*'></input>
-                                                   </div>" )
+            schema_dict['template'] = video_tmpl
 
-        else if child.type is 'select all that apply'
+        else if child.type in [ 'select all that apply', 'select one' ]
 
-            schema_dict['type'] = 'Checkboxes'
+            if child.type is 'select one'
+                schema_dict['type'] = 'Select'
+            else
+                schema_dict['type'] = 'Checkboxes'
+
             schema_dict['options'] = []
 
             _.each( child.choices, ( option ) ->
@@ -108,32 +95,15 @@ define( [ 'underscore' ], ( _ ) ->
 
             return @
 
-        else if child.type is 'select one'
-
-            schema_dict['type'] = 'Select'
-            schema_dict['options'] = []
-
-            _.each( child.choices, ( option ) ->
-
-                choice_label = option.label
-                if typeof option.label == 'object'
-                    choice_label = option.label[ lang ]
-
-                schema_dict['options'].push(
-                    val:    option.name
-                    label:  choice_label
-                )
-            )
-
         else
             schema_dict['type']     = 'Text'
             schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
                                                         <label for="<%= editorId %>"><strong>Unsupported:</strong><%= title %></label>
                                                    </div>' )
 
-        @item_dict[child.name] = schema_dict
+        @item_dict[ child.name ] = schema_dict
         @_fieldsets.push( child.name )
-        @_data[child.name] = child.default
+        @_data[ child.name ] = child.default
 
     return build_form
 )

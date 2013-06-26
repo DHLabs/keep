@@ -53,21 +53,14 @@ define( [ 'jquery',
         recursiveAdd: build_form
 
         render: () ->
-            #     groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
-            #     groupEnd: '<div><hr></div>'
-
             # Create the form to render
             _.each( @model.attributes.children, ( child ) =>
                 @recursiveAdd( child, @model.attributes.default_language )
             )
 
-            console.log( @languages )
-
             # Create the Form object with the schema we want
             @renderedForm = new Backbone.Form(
                 schema: @item_dict
-                data:   @_data
-                fields: @_fieldsets
             ).render()
 
             _.each( @item_dict, ( child, key ) =>

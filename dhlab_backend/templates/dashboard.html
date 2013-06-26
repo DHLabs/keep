@@ -5,6 +5,11 @@
 
 {% block css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<style type="text/css">
+	.table td {
+		border-top:none;
+	}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -88,7 +93,7 @@
 			{% endif %}
 			<h4>Data Diaries</h4>
 		</div>
-		<table id='repo_list' class='table table-striped table-bordered'>
+		<table id='repo_list' class='table'>
 			<tbody>
 				{% if user_repos|length == 0 %}
 					<tr>
@@ -99,7 +104,7 @@
 				{% endif %}
 				{% for repo in user_repos %}
 					<tr>
-						<td style='width:32px;text-align:center;'>
+						<td style='width:32px;text-align:center;vertical-align:middle;'>
 							{% if repo.is_public %}
 								<i class='icon-unlock'></i>
 							{% else %}
@@ -116,12 +121,12 @@
 							</span>
 							{% endif %}
 						</td>
-						<td style='width:102px;text-align:center;'>
+						<td style='width:102px;text-align:center;vertical-align:middle;'>
 							<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
-								<i class='icon-pencil'></i> Web Form
+								<i class='icon-pencil'></i> Add Data
 							</a>
 						</td>
-						<td style='width:64px;text-align:right;'>
+						<td style='width:64px;text-align:right;vertical-align:middle;'>
 							{{ repo.submissions }} <i class='icon-file-alt'></i>
 						</td>
 					</tr>
@@ -133,11 +138,11 @@
 		<div style='overflow:auto;margin-bottom:4px;'>
 			<h4>Shared Data Diaries</h4>
 		</div>
-		<table id='shared_repo_list' class='table table-striped table-bordered'>
+		<table id='shared_repo_list' class='table'>
 			<tbody>
 				{% for repo in shared_repos %}
 				<tr>
-					<td style='width:32px;text-align:center;'>
+					<td style='width:32px;text-align:center;vertical-align:middle;'>
 						{% if repo.is_public %}
 							<i class='icon-unlock'></i>
 						{% else %}
@@ -154,12 +159,12 @@
 						</span>
 						{% endif %}
 					</td>
-					<td style='width:102px;text-align:center;'>
-						<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
-							<i class='icon-pencil'></i> Web Form
+					<td style='width:102px;text-align:center;vertical-align:middle;'>
+						<a href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}' class='btn btn-small'>
+							<i class='icon-pencil'></i> Add Data
 						</a>
 					</td>
-					<td style='width:64px;text-align:right;'>
+					<td style='width:64px;text-align:right;vertical-align:middle;'>
 						{{ repo.submissions }} <i class='icon-file-alt'></i>
 					</td>
 				</tr>

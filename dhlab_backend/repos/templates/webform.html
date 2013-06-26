@@ -13,11 +13,17 @@
 <script id='form_id' type='text/html'>{{ repo_id }}</script>
 <script id='user' type='text/html'>{{ user.username }}</script>
 
-<script data-main='{% static "js/webform/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
-<script>
-	document.cdn = '{% static "" %}'
+<script src='{% static 'js/vendor/requirejs.js' %}'></script>
+<script type='text/javascript'>
+	require([ '{% static "js/common.js" %}' ], function (common) {
+
+		require.config({
+			baseUrl: '{% static "js/vendor" %}'
+		});
+
+		require( [ 'app/webform/main' ] )
+	});
 </script>
-<script src="{% static 'js/vendor/bootstrap.2.3.1.min.js' %}"></script>
 
 {% endblock %}
 
