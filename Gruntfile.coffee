@@ -12,12 +12,15 @@ module.exports = ( grunt ) ->
 
 			styles:
 				files: [ 'frontend/sass/**/*.scss' ]
-				tasks: [ 'copy:css', 'compass:dist' ]
+				tasks: [ 'compass:dist' ]
 
+		# Copy the appropriate bower components to our <vendor> folder
 		bower:
 			dev:
 				dest: 'build/js/vendor'
 
+		# Compile all javascript and place into our intermediary folder for
+		# RequireJS optimization
 		coffee:
 			requirejs:
 				options:
@@ -92,7 +95,18 @@ module.exports = ( grunt ) ->
 
 	grunt.registerTask( 'default', [ 'watch' ] )
 
-	grunt.registerTask( 'build', [ 'copy:components',
+	grunt.registerTask( 'build', [ # Run through javascript compilation process
+								   'bower',
+		 						   'copy:components',
+		 						   'coffee:requirejs',
+		 						   'requirejs',
+
+		 						   # Compile SCSS
+		 						   'compass:dist',
+
+		 						   # Finally copy oher basic components over to
+		 						   # <static> folder
+								   'copy:components',
 								   'copy:css',
 								   'copy:font',
 								   'copy:img' ] )
