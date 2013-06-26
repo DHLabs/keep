@@ -67,7 +67,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       _.each(this.model.attributes.children, function(child) {
         return _this.recursiveAdd(child, _this.model.attributes.default_language);
       });
-      console.log(this.languages);
       this.renderedForm = new Backbone.Form({
         schema: this.item_dict,
         data: this._data,
@@ -83,19 +82,21 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.control-group').first().show().addClass('active');
       $('.active input').focus();
       this._display_form_buttons(0);
+      // TODO: Fix edge case of map being first question
+
       return this;
     };
 
-    _geopointDisplay = function() {
-      console.log("H");
-      var mapForm = L.map('map', {
-        center: [51.505, -0.09],
-        zoom: 13});
-      console.log("E");
+    _geopointDisplay = function(map) {
+      var map;
+      if(map === undefined) {
+        console.log("CALL");
+        map = L.map('map').setView([51.505, -0.09], 13);
+      }
       L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18
-      }).addTo(mapForm);
+      }).addTo(map);
     };
 
     xFormView.prototype._display_form_buttons = function(question_index) {
@@ -123,9 +124,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         question_index += 1;
         return child.name === question;
       });
-      if(form_info.bind.map != undefined){
-        _geopointDisplay();
-      }
       return {
         'key': question,
         'idx': question_index,
@@ -163,6 +161,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         question_index += 1;
         return child.name === switch_question_key;
       });
+
       if (!XFormConstraintChecker.isRelevant(form_info, this.renderedForm.getValue())) {
         if (forward) {
           if (question_index < this.input_fields.length) {
@@ -173,6 +172,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
             question_index -= 1;
           }
         }
+
         this.switch_question($('.control-group').eq(question_index), forward);
         return;
       }
@@ -181,8 +181,12 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.active').removeClass('active');
       current_question.fadeOut('fast', function() {
         switch_question.fadeIn('fast').addClass('active');
+        
         return $('.active input').focus();
       });
+      if(form_info.bind != undefined && form_info.bind.map != undefined){
+        _geopointDisplay();
+      };
       this._display_form_buttons(question_index);
       return this;
     };

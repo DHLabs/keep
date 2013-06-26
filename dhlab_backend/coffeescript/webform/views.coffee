@@ -95,15 +95,15 @@ define( [ 'jquery',
             @_display_form_buttons( 0 )
             @
 
-        _geopointDisplay = ->
-            mapForm = L.map("map",
-                center: [51.505, -0.09]
-                zoom: 13
-            )
+        _geopointDisplay = (map) ->
+            map = undefined
+            if map is `undefined`
+                console.log "CALL"
+                map = L.map("map").setView([51.505, -0.09], 13)
             L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png",
                 attribution: "&copy; <a href=\"http://osm.org/copyright\">OpenStreetMap</a> contributors"
                 maxZoom: 18
-            ).addTo mapForm
+            ).addTo map
 
         _display_form_buttons: ( question_index ) ->
 
@@ -135,7 +135,6 @@ define( [ 'jquery',
                 question_index += 1
                 return child.name == question
             )
-            _geopointDisplay()  unless form_info.bind.map is `undefined`
             return { 'key': question, 'idx': question_index, 'info': form_info }
 
         passes_question_constraints: ->

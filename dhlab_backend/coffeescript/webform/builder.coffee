@@ -39,7 +39,7 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
         else if child.type is 'geopoint'
 
-            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %><div id="map" style="width:100%; height: 512px; position: relative;"></div></div>' )
+            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %><div id="map" style="width:50%; height: 256px; position: relative;"></div></div>' )
             schema_dict['is_field'] = false
             schema_dict['bind'] = map: true
 
