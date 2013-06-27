@@ -82,7 +82,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.control-group').first().show().addClass('active');
       $('.active input').focus();
       this._display_form_buttons(0);
-      // TODO: Fix edge case of map being first question
+      // TODO: Fix edge case of map being first question, 
+      // if geopoint is the first question, the map doesn't show
 
       return this;
     };
@@ -107,8 +108,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           .setContent("Latitude and Longitude: " + e.latlng.toString())
           .openOn(map);
         question = ($('.active').data('key'));
-        $("#" + question + "_lat").val(e.latlng.lat);
-        $("#" + question + "_lng").val(e.latlng.lng);
+        $("#" + question).val(e.latlng.lat + " " + e.latlng.lng + " 0 0");
       }
       map.on('click', onMapClick);
     };
@@ -118,12 +118,11 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         $('#prev_btn').show();
         $('#submit_btn').show();
         $('#next_btn').hide();
-        $('html').keydown (function(e) {
+        $('#xform_view').keydown (function(e) {
           if (e.keyCode === 13) {
             $('#submit_btn').click();
           }
         })
-        console.log("Here")
       } else if (question_index === 0) {
         $('#prev_btn').hide();
         $('#submit_btn').hide();
@@ -138,7 +137,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         $('#next_btn').show();
         $('#submit_btn').hide();
         $('#xform_view').keydown (function(e) {
-          if (e.keyCode == =13) {
+          if (e.keyCode === 13) {
             $('#next_btn').click();
           }
         })
@@ -164,6 +163,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     xFormView.prototype.passes_question_constraints = function() {
       var question;
       question = this._active_question();
+      console.log(question);
       if (question.info.bind && question.info.bind.required === "yes") {
         if (this.renderedForm.getValue()[question.key].length === 0) {
           alert("Answer is required");

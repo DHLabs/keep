@@ -38,11 +38,11 @@ define(['vendor/underscore'], function(_) {
       schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
           <strong></strong>\
           <%= title %><br>\
-          <input id="<%= editorId %>_lat" type="text" placeholder="Latitude">\
-          <input id="<%= editorId %>_lng" type="text" placeholder="Longitude">\
+          <input id="<%= editorId %>" type="hidden" name="<%= editorId %>" >\
           <div id="map" style="width:100%; height: 500px; position: relative;">\
           </div></div>');
       //schema_dict['is_field'] = false;
+      //<input id="<%= editorId %>_lng" type="text" placeholder="Longitude">\
       schema_dict['bind'] = { map: true };
     } else if (child.type === 'today') {
       schema_dict['type'] = 'Date';

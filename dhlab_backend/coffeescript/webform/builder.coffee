@@ -39,8 +39,7 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
         else if child.type is 'geopoint'
 
-            schema_dict['template'] = schema_dict["template"] = _.template("<div id=\"<%= editorId %>_field\" data-key=\"<%= editorId %>\" class=\"control-group\">          <strong></strong>          <%= title %><br>          <input id=\"<%= editorId %>_lat\" type=\"text\" placeholder=\"Latitude\">          <input id=\"<%= editorId %>_lng\" type=\"text\" placeholder=\"Longitude\">          <div id=\"map\" style=\"width:100%; height: 500px; position: relative;\">          </div></div>")
-            #schema_dict['is_field'] = false
+            schema_dict["template"] = _.template("<div id=\"<%= editorId %>_field\" data-key=\"<%= editorId %>\" class=\"control-group\">          <strong></strong>          <%= title %><br>          <input id=\"<%= editorId %>\" type=\"hidden\" name=\"<%= editorId %>\" >          <div id=\"map\" style=\"width:100%; height: 500px; position: relative;\">          </div></div>")
             schema_dict['bind'] = map: true
 
         else if child.type is 'today'

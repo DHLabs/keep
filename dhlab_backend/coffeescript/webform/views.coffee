@@ -98,7 +98,6 @@ define( [ 'jquery',
         _geopointDisplay = (map) ->
             map = undefined
             if map is `undefined`
-                console.log "CALL"
                 map = L.map("map").setView([51.505, -0.09], 13)
             L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png",
                 attribution: "&copy; <a href=\"http://osm.org/copyright\">OpenStreetMap</a> contributors"
@@ -110,6 +109,8 @@ define( [ 'jquery',
                 question = ($(".active").data("key"))
                 $("#" + question + "_lat").val e.latlng.lat
                 $("#" + question + "_lng").val e.latlng.lng
+                question = ($(".active").data("key"))
+                $("#" + question).val e.latlng.lat + " " + e.latlng.lng + " 0 0"
             popup = L.popup()
             map.on "click", onMapClick
 
