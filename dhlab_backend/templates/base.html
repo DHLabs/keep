@@ -19,7 +19,7 @@
     {% block css %}{% endblock %}
 </head>
 <body>
-    <div class='topbar'>
+    <div class='topbar-wrapper'>
         <div class='container'>
             <div class='logo'>
                 <div>
@@ -28,21 +28,18 @@
                     </a>
                 </div>
             </div>
-            <div class='row'>
+            <div class='row topbar'>
                 {% if user.is_authenticated %}
-                <div class='span5'>
+                <div class='span3 user-panel'>
+                    <h4>{{ user.username }}</h4>
+                    <a href='{% url "auth_logout" %}'>
+                        <i class='icon-signout'></i>
+                    </a>
+                </div>
+                <div class='offset4 span5'>
                     <div style='padding-top:4px;'>
                         <input type='text' style='margin:0;width:100%;' placeholder='Search Data Diaries'>
                     </div>
-                </div>
-                <div class='offset6 span1'>
-                    <ul class='nav pull-right'>
-                        <li style='text-align:center;'>
-                            <a href='{% url "auth_logout" %}'>
-                                <i class='icon-signout' style='font-size:1.5em;'></i>
-                            </a>
-                        </li>
-                    </ul>
                 </div>
                 {% endif %}
             </div>
