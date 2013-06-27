@@ -105,6 +105,14 @@ define( [ 'jquery',
                 maxZoom: 18
             ).addTo map
 
+            onMapClick = (e) ->
+                popup.setLatLng(e.latlng).setContent("Latitude and Longitude: " + e.latlng.toString()).openOn map
+                question = ($(".active").data("key"))
+                $("#" + question + "_lat").val e.latlng.lat
+                $("#" + question + "_lng").val e.latlng.lng
+            popup = L.popup()
+            map.on "click", onMapClick
+
         _display_form_buttons: ( question_index ) ->
 
             if question_index == @input_fields.length - 1
@@ -200,6 +208,9 @@ define( [ 'jquery',
                 switch_question.fadeIn( 'fast' ).addClass( 'active' )
                 $( '.active input' ).focus()
             )
+            
+            #Start the Geopoint display if geopoint
+            _geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
 
             @_display_form_buttons( question_index )
 

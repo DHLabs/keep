@@ -90,13 +90,27 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     _geopointDisplay = function(map) {
       var map;
       if(map === undefined) {
-        console.log("CALL");
-        map = L.map('map').setView([51.505, -0.09], 13);
+        map = L.map('map', {
+          center: [36.60, -120.65],
+          zoom: 10});
       }
       L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18
+        maxZoom: 18,
+        rehuseTiles: true
       }).addTo(map);
+
+      var popup = L.popup();
+      function onMapClick(e) {
+        popup
+          .setLatLng(e.latlng)
+          .setContent("Latitude and Longitude: " + e.latlng.toString())
+          .openOn(map);
+        question = ($('.active').data('key'));
+        $("#" + question + "_lat").val(e.latlng.lat);
+        $("#" + question + "_lng").val(e.latlng.lng);
+      }
+      map.on('click', onMapClick);
     };
 
     xFormView.prototype._display_form_buttons = function(question_index) {
