@@ -139,7 +139,7 @@ class DataResource( MongoDBResource ):
             # Query the database for the data
             cursor = db.data.find( { 'repo': ObjectId( repo_id ) } )
 
-            offset = int( request.GET.get( 'offset', 1 ) )
+            offset = int( request.GET.get( 'offset', 0 ) )
 
             meta = {
                 'limit': 50,
