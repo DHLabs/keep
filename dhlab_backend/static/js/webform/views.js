@@ -118,14 +118,30 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         $('#prev_btn').show();
         $('#submit_btn').show();
         $('#next_btn').hide();
+        $('html').keydown (function(e) {
+          if (e.keyCode === 13) {
+            $('#submit_btn').click();
+          }
+        })
+        console.log("Here")
       } else if (question_index === 0) {
         $('#prev_btn').hide();
         $('#submit_btn').hide();
         $('#next_btn').show();
+        $('#xform_view').keydown (function(e) {
+          if (e.keyCode === 13) {
+            $('#next_btn').click();
+          }
+        })
       } else {
         $('#prev_btn').show();
         $('#next_btn').show();
         $('#submit_btn').hide();
+        $('#xform_view').keydown (function(e) {
+          if (e.keyCode == =13) {
+            $('#next_btn').click();
+          }
+        })
       }
       return this;
     };

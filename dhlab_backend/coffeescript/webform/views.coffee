@@ -120,17 +120,23 @@ define( [ 'jquery',
                 $( '#submit_btn' ).show()
 
                 $( '#next_btn' ).hide()
+                $("html").keydown (e) ->
+                    $("#submit_btn").click()  if e.keyCode is 13
+
             else if question_index == 0
                 $( '#prev_btn' ).hide()
                 $( '#submit_btn' ).hide()
 
                 $( '#next_btn' ).show()
+                $("#xform_view").keydown (e) ->
+                    $("#next_btn").click()  if e.keyCode is 13
             else
                 $( '#prev_btn' ).show()
                 $( '#next_btn' ).show()
 
                 $( '#submit_btn' ).hide()
-
+                $("#xform_view").keydown (e) ->
+                    $("#next_btn").click()  if e.keyCode is 13
             @
 
         _active_question: ->
