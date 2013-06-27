@@ -15,18 +15,12 @@
 <script id='user' type='text/plain'>{{ user.username }}</script>
 <script>
 	document.cdn = '{% static "" %}'
+	document.initial_data = {{data|safe}};
 </script>
 <script data-main='{% static "js/viz/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
 
 <!-- Chart viz -->
 <script src='{% static "js/vendor/d3.v3.min.js" %}'></script>
-
-<script type='text/javascript'>
-	$( function() {
-		// Initialize data
-		document.initial_data = {{data|safe }};
-	});
-</script>
 {% endblock %}
 
 {% block content %}
@@ -121,33 +115,82 @@
 	</div>
 	<div class='row viz viz-active' id='raw_viz'>
 		<div class='span12' style='margin-bottom:16px;'>
-	        <div class='pull-right'>
-	        	<label>
-	        		<input id='test' type='checkbox'>
-	        		Has Photos
-	        	</label>
-	        </div>
+			<div class='pull-right'>
+				<label>
+					<input id='test' type='checkbox'>
+					Has Photos
+				</label>
+			</div>
 			View as:&nbsp;
 			<div class='btn-group'>
-	            <button data-type='list' class='btn active'>
-	            	<i class='icon-align-justify'></i>&nbsp;List
-	            </button>
-	            <button data-type='grid' class='btn'>
-	            	<i class='icon-th-large'></i>&nbsp;Grid
-	            </button>
-	        </div>
+				<button data-type='list' class='btn active'>
+					<i class='icon-align-justify'></i>&nbsp;List
+				</button>
+				<button data-type='grid' class='btn'>
+					<i class='icon-th-large'></i>&nbsp;Grid
+				</button>
+			</div>
 		</div>
 		<div class='span12 active' id='raw_list'>
 			<table id="raw_table" class="table table-striped table-bordered">
 				<thead><tr></tr></thead>
-				<tbody></tbody>
+				<tbody>
+					<tr><td>Loading data...</td></tr>
+				</tbody>
 			</table>
 		</div>
 		<div class='span12' id='raw_grid' style='display:none;position:relative;'></div>
 	</div>
 	<div class='row viz' id='map_viz'>
-		<div id='hidden_map'></div>
+		<div class='span12' style='display:none;'>
+			<div id='time_select'>
+				<input type='range' id='fps' min='1' max='10'/>
+				<input type='range' id='playtime' step='10' min='10' max='300'/>
+			</div>
+
+			<div id='cumulative'>
+				<input id='cumulativeCheck' type="checkbox">Cumulative
+				<input id='clusterCheck' type="checkbox">Show Clusters
+			</div>
+
+			<div >
+				Time Constraint: <input type="text" name="tc" id = "tc_input">
+				Day: <input type ="radio"  name="const" value ="day" checked="checked"/>
+				hour: <input type="radio" name="const"  value ="hour"/>
+				minute: <input type="radio" name="const" value ="minute"/>
+				<input type="submit" value="submit" class='btn'id ='time_c'>
+				Date: <input type ="radio" name="time" value = "date" checked="checked"/>
+				Time stamp: <input type ="radio" name="time" value = "timestamp"/>
+  				<a href='#' id='clear' data-type='map' class='btn'>Clear Lines</a>
+			</div>
+		</div>
+
 		<div class='span12' id='map'></div>
+
+		<div class='offset1 span10' style='clear:both;margin-top:16px;'>
+			<div id='current_time' style='text-align:center;'>
+				Playback Paused
+			</div>
+			<div id='progress_bar' class='progress progress-striped'>
+				<div class='bar'></div>
+			</div>
+		</div>
+		<div id='playback-controls'>
+			<div class='span3'>
+				<input type='date' id='start_date'><br>
+				<strong>Start Date</strong>
+			</div>
+			<div class='span6'>
+				<div class="btn-group">
+					<button id='pause' class='btn'><i class='icon-play'></i></button>
+					<button id='reset' class='btn'><i class='icon-stop'></i></button>
+				</div>
+			</div>
+			<div class='span3'>
+				<input type='date' id='end_date'><br>
+				<strong>End Date</strong>
+			</div>
+		</div>
 	</div>
 	<div class='row viz' id='line_viz'>
 		<div class='span2'>
@@ -159,12 +202,12 @@
 	{% if 'delete_repository' in permissions %}
 	<div class='row viz' id='settings_viz'>
 		<div class='span12'>
-            <div class='span3'>
+			<div class='span3'>
 				<strong>Edit this data repository</strong>
 			</div>
 			<div class='span8' style='text-align:right;padding-top:16px;'>
 				<a href='{% url "repo_edit" repo_id=sid %}' class='btn btn-medium'>
-                    Edit Repository
+					Edit Repository
 				</a>
 			</div>
 			<div class='span3'>

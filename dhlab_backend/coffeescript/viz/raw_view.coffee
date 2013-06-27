@@ -94,6 +94,8 @@ define( [ 'jquery',
             for field in @column_headers
                 $( '#raw_table > thead > tr' ).append( "<th>#{field.name}</th>" )
 
+            $( '#raw_table > tbody' ).empty()
+
             # Add data from data models
             for datum in @data.models
                 row_html = '<tr>'
@@ -104,8 +106,6 @@ define( [ 'jquery',
                     if not value?
                         row_html += '<td>&nbsp;</td>'
                         continue
-
-                    console.log( field )
 
                     if field.type in [ 'photo', 'video' ]
                         url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"

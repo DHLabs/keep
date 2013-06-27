@@ -1,4 +1,5 @@
 import json
+import pymongo
 
 from bson import ObjectId
 
@@ -48,11 +49,11 @@ def edit_repo( request, repo_id ):
         Takes user to Form Builder
     '''
     repo = get_object_or_404( Repository, mongo_id=repo_id )
-    
+
     # Check that this user has permission to edit this repo
     if not request.user.has_perm( 'delete_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
-    
+
     if request.method == 'POST':
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
 
@@ -192,10 +193,19 @@ def repo_viz( request, username, repo_name ):
     query = {
         'repo': ObjectId( repo.mongo_id )
     }
+
     for key in request.GET.keys():
         query[ 'data.%s' % ( key ) ] = request.GET.get( key )
 
-    data = dehydrate_survey( db.data.find( query ) )
+    data = db.data.find( query,
+                         { '_id': False,
+                           'survey_label': False,
+                           'repo': False,
+                           'user': False } )
+                .sort( [ ( 'timestamp', pymongo.DESCENDING ) ] )
+                .limit( 50 )
+
+    data = dehydrate_survey( data )
 
     # Is some unknown user looking at this data?
     # TODO: Make the privatizer take into account

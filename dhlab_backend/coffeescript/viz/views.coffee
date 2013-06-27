@@ -99,6 +99,7 @@ define( [ 'jquery',
                 $( @ ).removeClass( 'viz-active' )
 
                 $( '#' + viz_type + '_viz' ).fadeIn( 'fast', ()=>
+
                     # Remember to redraw the map when we switch tabs
                     if viz_type == 'map'
                         document.vizApp.map_view.map.invalidateSize( false )
@@ -113,13 +114,13 @@ define( [ 'jquery',
             if( !@form.attributes.children || !@data )
                 return
 
-            if @raw_view is undefined
+            if not @raw_view?
                 @raw_view = @add_subview( RawView )
 
-            if @chart_view is undefined
+            if not @chart_view?
                 @chart_view = @add_subview( ChartView )
 
-            if @map_view is undefined
+            if not @map_view?
                 @map_view = @add_subview( MapView )
 
     return DataView

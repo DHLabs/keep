@@ -96,6 +96,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
         field = _ref[_i];
         $('#raw_table > thead > tr').append("<th>" + field.name + "</th>");
       }
+      $('#raw_table > tbody').empty();
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         datum = _ref1[_j];
@@ -108,7 +109,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
             row_html += '<td>&nbsp;</td>';
             continue;
           }
-          console.log(field);
           if ((_ref3 = field.type) === 'photo' || _ref3 === 'video') {
             url = this.media_base + ("" + (datum.get('repo')) + "/" + (datum.get('_id')) + "/" + value);
             row_html += "<td><a href='" + url + "'>" + value + "</a></td>";

@@ -31,25 +31,6 @@
   stroke: orange;
   stroke-width: 2px; }
 
-#raw {
-  margin-top: 16px; }
-
-.card {
-  background: white;
-  width: 220px;
-  margin-top: 8px;
-  margin-left: 8px;
-  border: 1px solid #AAA;
-  box-shadow: 0 0 2px #888; }
-  .card > .card-image {
-    border-bottom: 1px solid #AAA; }
-    .card > .card-image > img {
-      width: 220px; }
-  .card > .card-video > video {
-    width: 220px; }
-  .card > .card-data > div {
-    padding: 8px; }
-
 #map {
   height: 512px;
   border: 4px solid #AAA; }
@@ -69,6 +50,28 @@
       border: 0; }
   #map .leaflet-control-layers-list {
     margin: 0; }
+
+#playback-controls > div {
+  text-align: center; }
+
+#raw {
+  margin-top: 16px; }
+
+.card {
+  background: white;
+  width: 220px;
+  margin-top: 8px;
+  margin-left: 8px;
+  border: 1px solid #AAA;
+  box-shadow: 0 0 2px #888; }
+  .card > .card-image {
+    border-bottom: 1px solid #AAA; }
+    .card > .card-image > img {
+      width: 220px; }
+  .card > .card-video > video {
+    width: 220px; }
+  .card > .card-data > div {
+    padding: 8px; }
 
 .dataTables_info {
   padding-top: 4px; }

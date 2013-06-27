@@ -25,10 +25,12 @@ from tastypie.utils.mime import build_content_type
 from backend.db import user_or_organization
 from repos.models import Repository
 
-# from twofactor.api_auth import ApiTokenAuthentication
-
 
 class DataAuthorization( Authorization ):
+    '''
+        DataAuthorization determines whether a specified user can access a set
+        of data from a repository.
+    '''
 
     def read_list( self, object_list, bundle ):
 
@@ -137,7 +139,19 @@ class DataResource( MongoDBResource ):
             # Query the database for the data
             cursor = db.data.find( { 'repo': ObjectId( repo_id ) } )
 
-            data = dehydrate_survey( cursor )
+            offset = int( request.GET.get( 'offset', 1 ) )
+
+            meta = {
+                'limit': 50,
+                'offset': offset,
+                'count': cursor.count(),
+                'pages': cursor.count() / 50
+            }
+
+            data = {
+                'meta': meta,
+                'data': dehydrate_survey(
+                            cursor.skip( offset * 50 ).limit( 50 ) ) }
 
             return self.create_response( request, data )
         except ValueError:
