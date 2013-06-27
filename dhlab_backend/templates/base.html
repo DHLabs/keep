@@ -31,9 +31,9 @@
             <div class='row topbar'>
                 {% if user.is_authenticated %}
                 <div class='span3 user-panel'>
-                    <h4>{{ user.username }}</h4>
+                    <h4><a href='{% url "home" %}'>{{ user.username }}</a></h4>&nbsp;|
                     <a href='{% url "auth_logout" %}'>
-                        <i class='icon-signout'></i>
+                        Logout
                     </a>
                 </div>
                 <div class='offset4 span5'>
