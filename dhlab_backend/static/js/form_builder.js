@@ -14,6 +14,15 @@ $( function() {
      $( '#survey_builder' ).show();
      reloadQuestionListHTML();
      buildSurvey();
+   } else {
+
+   	var jsonvalue = $("#id_survey_json").val();
+   	if( jsonvalue ) {
+   		$( "#build_form" ).hide();
+		$( '#survey_builder' ).show();
+   	  	questionList = JSON.parse( $("#id_survey_json").val() ).children;
+   	  	reloadQuestionListHTML();
+   	}
    }
 });
 
