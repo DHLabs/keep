@@ -2,7 +2,7 @@
 
 define(['vendor/underscore'], function(_) {
   var build_form;
-  build_form = function(child, lang) {
+  build_form = function(child, path, lang) {
     var label, schema_dict, _ref, _ref1,
       _this = this;
     label = '';
@@ -16,11 +16,13 @@ define(['vendor/underscore'], function(_) {
     } else {
       label = child.label;
     }
+
     schema_dict = {
       help: child.hint,
       title: label,
       is_field: true,
-      bind: child.bind
+      bind: child.bind,
+      tree: path
     };
     if ((_ref = child.type) === 'string' || _ref === 'text') {
       if (child.bind.readonly) {
@@ -81,7 +83,7 @@ define(['vendor/underscore'], function(_) {
       });
     } else if (child.type === 'group') {
       _.each(child.children, function(_child) {
-        return _this.recursiveAdd(_child);
+        return _this.recursiveAdd(_child, (schema_dict['tree'] + child.name + "/"));
       });
       return this;
     } else if (child.type === 'select one') {

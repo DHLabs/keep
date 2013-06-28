@@ -65,7 +65,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       };
       this.model.attributes.children.push(submitChild);
       _.each(this.model.attributes.children, function(child) {
-        return _this.recursiveAdd(child, _this.model.attributes.default_language);
+        return _this.recursiveAdd(child, "/", _this.model.attributes.default_language);
       });
       this.renderedForm = new Backbone.Form({
         schema: this.item_dict,
@@ -163,7 +163,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     xFormView.prototype.passes_question_constraints = function() {
       var question;
       question = this._active_question();
-      console.log(question);
       if (question.info.bind && question.info.bind.required === "yes") {
         if (this.renderedForm.getValue()[question.key].length === 0) {
           alert("Answer is required");
@@ -206,6 +205,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         this.switch_question($('.control-group').eq(question_index), forward);
         return;
       }
+      console.log(current_question.info.tree)
+
       current_question = $("#" + current_question.key + "_field");
       switch_question = $("#" + switch_question_key + "_field");
       $('.active').removeClass('active');
