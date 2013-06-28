@@ -23,6 +23,8 @@ function questionTypeChanged() {
   	removeChoices();
   	removeConstraint();
 
+  	$("#groupOptions").hide();
+
 	removeRelevance();//switch to showRelevance when relevances is ready
 
   	if( questionType == "select one" || questionType == "select all that apply" ) {
@@ -40,6 +42,8 @@ function questionTypeChanged() {
 
   	} else if( questionType == "date" || questionType == "dateTime" || questionType == "time") {
   		showConstraint();
+  	} else if( questionType == "group" ) {
+  		$("#groupOptions").show();
   	}
 }
 
@@ -264,6 +268,7 @@ function populateQuestion( questionName ) {
 	$("#questionRequired").checked = false;
 	$("#questionHintUse").checked = false;
 	$("#questionType").val('note');
+	$("#groupOptions").hide();
 	toggleHint();
 
 	if( questionName != null ) {
@@ -277,6 +282,21 @@ function populateQuestion( questionName ) {
 			showChoices();
 			for( var choice in choices ) {
 				addChoice( choices[choice].name, choices[choice].label );
+			}
+		}
+
+		//control
+		console.log(question.type);
+		if( question.type == "group" ) {
+			console.log("question is group");
+			$('#groupOptions').show();
+		}
+		var control = question.control;
+		if( control ) {
+			if( control.appearance == 'field-list' ) {
+				$('#groupFieldList').checked = true;
+			} else {
+				$('#groupFieldList').checked = false;
 			}
 		}
 
@@ -470,9 +490,20 @@ function okClicked() {
 		}
 
 		//alert( JSON.stringify(question) );
-
-        if( question.type == "group" && currentQuestionName == null ) {
-            question.children = new Array();
+        
+        if(question.type == "group") {
+        	console.log($("#groupFieldList").checked);
+        	if( document.getElementById("groupFieldList").checked ) {
+        		console.log("field list checked");
+        		var control = new Object();
+        		control.appearance = "field-list";
+        		question.control = control;
+        	} else {
+        		question.control = null;
+        	}
+        	if( currentQuestionName == null ) {
+            	question.children = new Array();
+        	}
         }
 
         if( currentGroupName ) {
