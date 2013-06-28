@@ -6,6 +6,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
   xFormView = (function(_super) {
     __extends(xFormView, _super);
 
+    var current_tree;
+
     function xFormView() {
       _ref = xFormView.__super__.constructor.apply(this, arguments);
       return _ref;
@@ -82,6 +84,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.control-group').first().show().addClass('active');
       $('.active input').focus();
       this._display_form_buttons(0);
+
+      this.current_tree = (this._active_question().info.tree);
+      console.log(this.current_tree);
       // TODO: Fix edge case of map being first question, 
       // if geopoint is the first question, the map doesn't show
 
@@ -177,7 +182,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     };
 
     xFormView.prototype.switch_question = function(element, forward) {
-      var current_question, form_info, question_index, switch_question, switch_question_key;
+      var current_question, form_info, question_index, switch_question, switch_question_key, current_question_info;
       if (forward) {
         if (!this.passes_question_constraints()) {
           return this;
@@ -191,7 +196,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         return child.name === switch_question_key;
       });
 
-      if (!XFormConstraintChecker.isRelevant(form_info, this.renderedForm.getValue())) {
+      if (!XFormConstraintChecker.isRelevant(form_info, this.renderedForm.getValue()) || (form_info.tree != "/" && form_info.tree === this.current_tree)) {
         if (forward) {
           if (question_index < this.input_fields.length) {
             question_index += 1;
@@ -205,16 +210,38 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         this.switch_question($('.control-group').eq(question_index), forward);
         return;
       }
-      console.log(current_question.info.tree)
 
-      current_question = $("#" + current_question.key + "_field");
-      switch_question = $("#" + switch_question_key + "_field");
+      
+      current_question_info = current_question.info;
+      current_question_idx = current_question.idx;
+
       $('.active').removeClass('active');
-      current_question.fadeOut('fast', function() {
-        switch_question.fadeIn('fast').addClass('active');
+
+      console.log(current_question_info.tree);
+      while (current_question_info.tree === this.current_tree) {
+        current_question = $("#" + $($('.control-group').eq(current_question_idx)[0]).data('key') + "_field");
+        current_question.fadeOut('slow');
+        if ((current_question_idx + 1) < this.input_fields.length) { 
+          current_question_idx += 1;
+          current_question_info = this.input_fields[current_question_idx];
+        }
+        else { break; };
+        if (current_question_info.tree === '/') {
+          break;
+        }
+      };
+
+      this.current_tree = form_info.tree;
+      console.log(switch_question_key)
+      switch_question = $("#" + switch_question_key + "_field");
+      switch_question.fadeIn('slow').addClass('active');
+      $('.active input').focus();
+      
+      //current_question.fadeOut('fast', function() {
+      //  switch_question.fadeIn('fast').addClass('active');
         
-        return $('.active input').focus();
-      });
+      //  return $('.active input').focus();
+      //});
       if(form_info.bind != undefined && form_info.bind.map != undefined){
         _geopointDisplay();
       };
