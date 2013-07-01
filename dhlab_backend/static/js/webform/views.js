@@ -237,51 +237,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         switch_question.fadeIn(1).addClass('active');
       };
 
-      /*
-      current_question_info = current_question.info;
-      current_question_idx = current_question.idx;
-
-      $('.active').removeClass('active');
-
-      while (current_question_info.tree === this.current_tree) {
-        current_question = $("#" + $($('.control-group').eq(current_question_idx)[0]).data('key') + "_field");
-        current_question.fadeOut(1);
-        if ((current_question_idx + 1) < this.input_fields.length) { 
-          current_question_idx += 1;
-          current_question_info = this.input_fields[current_question_idx];
-        }
-        else { break; };
-        if (current_question_info.tree === '/') {
-          break;
-        }
-      };
-
-      this.current_tree = form_info.tree;
-
-      //If the tree is at it's top level (not a group...)
-      if (this.current_tree === '/') { 
-        switch_question = $("#" + switch_question_key + "_field");
-        switch_question.fadeIn(1).addClass('active');
-        $('.active input').focus(); 
-      }
-      //If the tree is not at the top level (in a group...)
-      else {
-        switch_question_info = form_info;
-        switch_question_idx = question_index;
-
-        while (switch_question_info.tree === this.current_tree) {
-          switch_question = $("#" + $($('.control-group').eq(switch_question_idx)[0]).data('key') + "_field");
-          switch_question.fadeIn(1).addClass('active');
-          $('.active input').focus()
-          if ((switch_question_idx + 1) < this.input_fields.length) {
-            switch_question_idx += 1;
-            switch_question_info = this.input_fields[switch_question_idx];
-          }
-          else { break; };
-        }
-      }
-      */
-
       if(form_info.bind != undefined && form_info.bind.map != undefined){
         _geopointDisplay();
       };
