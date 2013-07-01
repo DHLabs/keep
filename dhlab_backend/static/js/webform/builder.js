@@ -86,7 +86,7 @@ define(['vendor/underscore'], function(_) {
       schema_dict['is_field'] = false;
       schema_dict['tree'] = schema_dict['tree'] + (child.name) + "/";
       schema_dict['control'] = child.control;
-      //schema_dict['type'] = 'Group';
+      schema_dict['bind'] = { group_start: true };
       this.item_dict[child.name] = schema_dict;
       this._fieldsets.push(child.name);
       _.each(child.children, function(_child) {

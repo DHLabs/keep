@@ -94,7 +94,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       if(map === undefined) {
         map = L.map('map', {
           center: [36.60, -120.65],
-          zoom: 10});
+          zoom: 5});
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
           maxZoom: 18,
@@ -221,7 +221,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
       // Group controls
       if (form_info.control) {
-        console.log(form_info.control)
         if (form_info.control.appearance && form_info.control.appearance === 'field-list') {
           var current_tree = form_info.tree; // + form_info.name + "/";
 
@@ -240,10 +239,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }
       } else {
-        console.log(this.input_fields[question_index])
-        while (this.input_fields[question_index].title === void 0) {
-          console.log("Here")
-          console.log()
+        if (this.input_fields[question_index].bind.group_start) {
           if (forward) {
             if (question_index < this.input_fields.length) {
               question_index += 1;
