@@ -41,6 +41,7 @@ define(['vendor/underscore'], function(_) {
           <strong></strong>\
           <%= title %><br>\
           <input id="<%= editorId %>" type="hidden" name="<%= editorId %>" >\
+          <input id="geocode_address" type="text" name="geocode_address" placeholder="Enter Address"><button id="geocode_address_submit" class="btn" type="button">Submit!</button>\
           <div id="map" style="width:100%; height: 500px; position: relative;">\
           </div></div>');
       //schema_dict['is_field'] = false;
@@ -85,6 +86,7 @@ define(['vendor/underscore'], function(_) {
       schema_dict['is_field'] = false;
       schema_dict['tree'] = schema_dict['tree'] + (child.name) + "/";
       schema_dict['control'] = child.control;
+      //schema_dict['type'] = 'Group';
       this.item_dict[child.name] = schema_dict;
       this._fieldsets.push(child.name);
       _.each(child.children, function(_child) {

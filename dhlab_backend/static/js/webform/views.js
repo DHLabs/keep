@@ -95,13 +95,12 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         map = L.map('map', {
           center: [36.60, -120.65],
           zoom: 10});
-      }
-      L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18,
-        rehuseTiles: true
-      }).addTo(map);
-
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 18,
+          rehuseTiles: true
+        }).addTo(map);
+      };
       var popup = L.popup();
       function onMapClick(e) {
         popup
@@ -113,6 +112,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       }
       map.on('click', onMapClick);
 
+      /*$('#geocode_address_submit').click(function onGeocodeSubmit() {
+        var address = $('#geocode_address').val();
+        var prepURL = "http://open.mapquestapi.com/geocoding/v1/address?key=Fmjtd%7Cluub2g0yn0%2Crx%3Do5-9ub5d6&location=" + address;
+        temp_latLng = $.get(prepURL);
+        console.log(temp_latLng);
+      });
+      */
       map.invalidateSize(false);
     };
 
@@ -215,6 +221,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
       // Group controls
       if (form_info.control) {
+        console.log(form_info.control)
         if (form_info.control.appearance && form_info.control.appearance === 'field-list') {
           var current_tree = form_info.tree; // + form_info.name + "/";
 
@@ -233,7 +240,21 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }
       } else {
-        switch_question = $('#' + switch_question_key + "_field");
+        console.log(this.input_fields[question_index])
+        while (this.input_fields[question_index].title === void 0) {
+          console.log("Here")
+          console.log()
+          if (forward) {
+            if (question_index < this.input_fields.length) {
+              question_index += 1;
+            }
+          } else {
+            if (question_index > 0) {
+              question_index -= 1;
+            }
+          }
+        }
+        switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
         switch_question.fadeIn(1).addClass('active');
       };
 
