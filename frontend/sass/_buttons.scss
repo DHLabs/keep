@@ -1,0 +1,23 @@
+a {
+	color: $theme;
+}
+
+a:hover {
+	color: $accent;
+	text-decoration: none;
+}
+
+a.flat-btn {
+	background-color: $theme;
+	color:#FFF;
+	padding:8px;
+	border-radius: 2px;
+
+	span.label {
+		background-color: transparent;
+	}
+}
+
+a.flat-btn:hover {
+	background-color: darken( $theme, 50% );
+}

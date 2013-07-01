@@ -1,4 +1,8 @@
-$accent: #111;
+// Import our color scheme
+@import "_colors";
+
+// Import our stylized button css
+@import "_buttons";
 
 .topbar-wrapper {
 	border-top:4px solid $accent;
