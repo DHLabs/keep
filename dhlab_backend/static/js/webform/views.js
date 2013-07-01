@@ -6,8 +6,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
   xFormView = (function(_super) {
     __extends(xFormView, _super);
 
-    var current_tree;
-
     function xFormView() {
       _ref = xFormView.__super__.constructor.apply(this, arguments);
       return _ref;
@@ -85,7 +83,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.active input').focus();
       this._display_form_buttons(0);
 
-      this.current_tree = (this._active_question().info.tree);
       // TODO: Fix edge case of map being first question, 
       // if geopoint is the first question, the map doesn't show
 
@@ -116,7 +113,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       }
       map.on('click', onMapClick);
 
-      document.map.invalidateSize(false);
+      map.invalidateSize(false);
     };
 
     xFormView.prototype._display_form_buttons = function(question_index) {
@@ -197,7 +194,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         return child.name === switch_question_key;
       });
 
-      if (!XFormConstraintChecker.isRelevant(form_info, this.renderedForm.getValue()) || (form_info.tree != "/" && form_info.tree === this.current_tree)) {
+      if (!XFormConstraintChecker.isRelevant(form_info, this.renderedForm.getValue()))  {
         if (forward) {
           if (question_index < this.input_fields.length) {
             question_index += 1;
@@ -211,8 +208,36 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         this.switch_question($('.control-group').eq(question_index), forward);
         return;
       }
-
       
+      $('.active').fadeOut(1);
+
+      $('.active').removeClass('active');
+
+      // Group controls
+      if (form_info.control) {
+        if (form_info.control.appearance && form_info.control.appearance === 'field-list') {
+          var current_tree = form_info.tree; // + form_info.name + "/";
+
+          $('#' + switch_question_key + "_field").addClass('active');
+          switch_question_idx = question_index + 1;
+          switch_question_info = this.input_fields[switch_question_idx];
+
+          while (switch_question_info.tree === current_tree) {
+            switch_question = $("#" + $($('.control-group').eq(switch_question_idx)[0]).data('key') + "_field");
+            switch_question.fadeIn(1).addClass('active');
+            $('.active input').focus()
+            if ((switch_question_idx + 1) < this.input_fields.length) {
+              switch_question_idx += 1;
+              switch_question_info = this.input_fields[switch_question_idx];
+            }
+          }
+        }
+      } else {
+        switch_question = $('#' + switch_question_key + "_field");
+        switch_question.fadeIn(1).addClass('active');
+      };
+
+      /*
       current_question_info = current_question.info;
       current_question_idx = current_question.idx;
 
@@ -239,7 +264,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         switch_question.fadeIn(1).addClass('active');
         $('.active input').focus(); 
       }
-      //If the three is not at the top level (in a group...)
+      //If the tree is not at the top level (in a group...)
       else {
         switch_question_info = form_info;
         switch_question_idx = question_index;
@@ -255,7 +280,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           else { break; };
         }
       }
-
+      */
 
       if(form_info.bind != undefined && form_info.bind.map != undefined){
         _geopointDisplay();
@@ -268,7 +293,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       var question, question_index;
       question = this._active_question();
       question_index = question.idx;
-      if (question_index < this.input_fields.length) {
+      if (question.info.control && question.info.control.appearance === 'field-list') {
+        var current_tree = question.info.tree;
+        question_index += 1;
+        while (this.input_fields[question_index].tree === current_tree) {
+          question_index += 1;
+        }
+      } else if (question_index < this.input_fields.length) {
         question_index += 1;
       }
       this.switch_question($('.control-group').eq(question_index)[0], true);
@@ -282,7 +313,21 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       if (question_index <= 0) {
         return this;
       }
-      question_index -= 1;
+      var current_tree = this.input_fields[question_index - 1].tree;
+      if (current_tree != "/") {
+        var temp_idx = question_index - 1;
+        while (this.input_fields[temp_idx].tree === current_tree) {
+          temp_idx -= 1;
+        }
+        temp_idx += 1;
+        if (this.input_fields[temp_idx].control && this.input_fields[temp_idx].control.appearance === 'field-list') {
+          question_index = temp_idx;
+        } else {
+          question_index -= 1;
+        };
+      } else {
+        question_index -= 1;
+      };
       this.switch_question($('.control-group').eq(question_index)[0], false);
       return this;
     };

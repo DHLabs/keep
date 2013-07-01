@@ -82,8 +82,13 @@ define(['vendor/underscore'], function(_) {
         });
       });
     } else if (child.type === 'group') {
+      schema_dict['is_field'] = false;
+      schema_dict['tree'] = schema_dict['tree'] + (child.name) + "/";
+      schema_dict['control'] = child.control;
+      this.item_dict[child.name] = schema_dict;
+      this._fieldsets.push(child.name);
       _.each(child.children, function(_child) {
-        return _this.recursiveAdd(_child, (schema_dict['tree'] + child.name + "/"));
+        return _this.recursiveAdd(_child, (schema_dict['tree']));
       });
       return this;
     } else if (child.type === 'select one') {
