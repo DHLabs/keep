@@ -239,7 +239,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }
       } else {
-        if (this.input_fields[question_index].bind.group_start) {
+        if (this.input_fields[question_index].bind && this.input_fields[question_index].bind.group_start) {
           if (forward) {
             if (question_index < this.input_fields.length) {
               question_index += 1;

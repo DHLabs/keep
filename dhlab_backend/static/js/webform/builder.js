@@ -25,7 +25,7 @@ define(['vendor/underscore'], function(_) {
       tree: path
     };
     if ((_ref = child.type) === 'string' || _ref === 'text') {
-      if (child.bind.readonly) {
+      if (child.bind && child.bind.readonly) {
         schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
                                                         <strong></strong><%= title %>\
                                                    </div>');
