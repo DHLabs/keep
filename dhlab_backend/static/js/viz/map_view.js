@@ -74,7 +74,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         shadowSize: [41, 41],
         shadowAnchor: [15, 41]
       });
-      console.log(this.selected_header);
       if (this.map_headers.length > 0) {
         this.btn.removeClass('disabled');
         this.render();
@@ -159,6 +158,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       }
       geopoint[0] = parseFloat(geopoint[0]);
       geopoint[1] = parseFloat(geopoint[1]);
+      if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
+        return null;
+      }
       return geopoint;
     };
 

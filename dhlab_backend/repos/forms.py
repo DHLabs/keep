@@ -79,12 +79,10 @@ class NewBatchRepoForm( forms.Form ):
         row_one = csv_file.next()
 
         self.cleaned_data['headers'] = []
+
         for idx, header in enumerate( headers ):
 
             label = header.strip()
-
-            if len( label ) == 0:
-                continue
 
             header_info = {
                 'name': slugify( unicode( label ) ),
@@ -94,10 +92,8 @@ class NewBatchRepoForm( forms.Form ):
 
             self.cleaned_data[ 'headers' ].append( header_info )
 
-
         # Grab all the rows of the CSV file.
-        self.cleaned_data['data'] = []
-
+        self.cleaned_data['new_data'] = []
         datum = {}
         for idx, value in enumerate( row_one ):
 
@@ -105,18 +101,19 @@ class NewBatchRepoForm( forms.Form ):
                 break
 
             datum[ self.cleaned_data[ 'headers' ][ idx ][ 'name' ] ] = value.strip()
-        self.cleaned_data[ 'data' ].append( data )
+
+        self.cleaned_data[ 'new_data' ].append( datum )
 
         for row in csv_file:
             datum = {}
-            for idx, value in enumerate( row ):
 
+            for idx, value in enumerate( row ):
                 if idx >= len( self.cleaned_data[ 'headers' ] ):
                     break
 
                 datum[ self.cleaned_data[ 'headers' ][ idx ][ 'name' ] ] = value.strip()
 
-            self.cleaned_data[ 'data' ].append( datum )
+            self.cleaned_data[ 'new_data' ].append( datum )
 
         return None
 
@@ -138,7 +135,7 @@ class NewBatchRepoForm( forms.Form ):
         new_repo.save( repo=repo )
 
         # Attempt to save the data from the CSV file into the repository
-        for datum in self.cleaned_data[ 'data' ]:
+        for datum in self.cleaned_data[ 'new_data' ]:
             new_repo.add_data( datum, None )
 
 

@@ -66,8 +66,6 @@ define( [ 'jquery',
                         shadowSize: [41, 41]
                         shadowAnchor: [15, 41] )
 
-            console.log( @selected_header )
-
             if @map_headers.length > 0
                 @btn.removeClass( 'disabled' )
                 @render()
@@ -157,6 +155,9 @@ define( [ 'jquery',
 
             geopoint[0] = parseFloat( geopoint[0] )
             geopoint[1] = parseFloat( geopoint[1] )
+
+            if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
+                return null
 
             return geopoint
 
