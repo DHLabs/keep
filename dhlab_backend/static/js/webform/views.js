@@ -67,16 +67,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       _.each(this.model.attributes.children, function(child) {
         return _this.recursiveAdd(child, "/", _this.model.attributes.default_language);
       });
-
-      var altered_item_dict = new Object();
-      for (item in this.item_dict) {
-        if (this.item_dict[item].type !== "Group") {
-          altered_item_dict[item] = this.item_dict[item];
-        }
-      };
-
       this.renderedForm = new Backbone.Form({
-        schema: altered_item_dict,
+        schema: this.item_dict,
         data: this._data,
         fields: this._fieldsets
       }).render();
@@ -86,8 +78,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
         return _this.input_fields.push(child);
       });
-
-      console.log(_this.input_fields)
       $('#formDiv').html(this.renderedForm.el);
       $('.control-group').first().show().addClass('active');
       $('.active input').focus();
@@ -196,7 +186,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     };
 
     xFormView.prototype.switch_question = function(element, forward) {
-      var current_question, form_info, question_index, switch_question, switch_question_key, switch_question_idx, switch_question_info, current_question_idx, current_question_info, new_group;
+      var current_question, form_info, question_index, switch_question, switch_question_key, switch_question_idx, switch_question_info, current_question_idx, current_question_info;
       if (forward) {
         if (!this.passes_question_constraints()) {
           return this;
@@ -229,16 +219,12 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
       $('.active').removeClass('active');
 
-      console.log("In switch_question")
-      // Group controls, first check to see if we are in a group
-      var temp_split = form_info.tree.split('/');
-      new_group = this.item_dict[temp_split[temp_split.length - 2]];
-      console.log(this.input_fields)
-      if (new_group && new_group.control) {
-        if (new_group.control.appearance && new_group.control.appearance === 'field-list') {
-          var current_tree = new_group.tree; // + form_info.name + "/";
+      // Group controls
+      if (form_info.control) {
+        if (form_info.control.appearance && form_info.control.appearance === 'field-list') {
+          var current_tree = form_info.tree; // + form_info.name + "/";
 
-          $('#' + switch_question_key + "_field").fadeIn(1).addClass('active');
+          $('#' + switch_question_key + "_field").addClass('active');
           switch_question_idx = question_index + 1;
           switch_question_info = this.input_fields[switch_question_idx];
 
@@ -253,7 +239,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }
       } else {
-      /*  if (this.input_fields[question_index].bind && this.input_fields[question_index].bind.group_start) {
+        if (this.input_fields[question_index].bind.group_start) {
           if (forward) {
             if (question_index < this.input_fields.length) {
               question_index += 1;
@@ -263,9 +249,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
               question_index -= 1;
             }
           }
-        } */
-        //switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
-        $('#' + switch_question_key + "_field").fadeIn(1).addClass('active');
+        }
+        switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
+        switch_question.fadeIn(1).addClass('active');
       };
 
       if(form_info.bind != undefined && form_info.bind.map != undefined){
@@ -276,12 +262,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     };
 
     xFormView.prototype.next_question = function() {
-      var question, question_index, current_group;
+      var question, question_index;
       question = this._active_question();
       question_index = question.idx;
-      var temp_split = question.info.tree.split('/');
-      current_group = this.item_dict[temp_split[temp_split.length - 2]];
-      if (current_group && current_group.control && current_group.control.appearance === 'field-list') {
+      if (question.info.control && question.info.control.appearance === 'field-list') {
         var current_tree = question.info.tree;
         question_index += 1;
         while (this.input_fields[question_index].tree === current_tree) {
