@@ -19,8 +19,20 @@ from backend.db import db, dehydrate_survey, user_or_organization
 
 #from privacy import privatize_geo
 
-from .forms import NewRepoForm
+from .forms import NewRepoForm, NewBatchRepoForm
 from .models import Repository
+
+
+@login_required
+def batch_repo( request ):
+
+    if request.method == 'POST':
+        form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
+
+        if form.is_valid():
+            form.save()
+
+    return HttpResponseRedirect( '/' )
 
 
 @login_required
@@ -202,8 +214,7 @@ def repo_viz( request, username, repo_name ):
                            'survey_label': False,
                            'repo': False,
                            'user': False } )\
-                .sort( [ ( 'timestamp', pymongo.DESCENDING ) ] )\
-                .limit( 50 )
+                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )
 
     data = dehydrate_survey( data )
 

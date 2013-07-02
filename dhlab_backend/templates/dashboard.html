@@ -83,6 +83,15 @@
 				{% endif %}
 			</div>
 		</div>
+
+		<div>
+			<form action='{% url "repo_batch" %}' method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				<input type='file' name='csv_file'>
+				<button type='submit'>Batch</button>
+			</form>
+		</div>
+
 	</div>
 	<!-- REPOSITORIES -->
 	<div class='span9'>

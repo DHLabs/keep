@@ -97,10 +97,11 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
         $('#raw_table > thead > tr').append("<th>" + field.name + "</th>");
       }
       $('#raw_table > tbody').empty();
+      row_html = '';
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         datum = _ref1[_j];
-        row_html = '<tr>';
+        row_html += '<tr>';
         _ref2 = this.column_headers;
         for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
           field = _ref2[_k];
@@ -117,8 +118,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
           }
         }
         row_html += '</tr>';
-        $('#raw_table > tbody').append(row_html);
       }
+      $('#raw_table > tbody').append(row_html);
       $('#raw_table').dataTable({
         'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
         'sPaginationType': 'bootstrap',
@@ -167,11 +168,11 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
           });
         }
         $('#raw_grid').append(this.card_tmpl(tmpl_options));
-        this.wall = $('#raw_grid').masonry({
-          itemSelector: '.card-active',
-          isAnimated: true
-        });
       }
+      this.wall = $('#raw_grid').masonry({
+        itemSelector: '.card-active',
+        isAnimated: true
+      });
       return this;
     };
 
