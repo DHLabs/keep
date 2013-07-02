@@ -16,7 +16,6 @@ define(['vendor/underscore'], function(_) {
     } else {
       label = child.label;
     }
-
     schema_dict = {
       help: child.hint,
       title: label,
@@ -25,7 +24,7 @@ define(['vendor/underscore'], function(_) {
       tree: path
     };
     if ((_ref = child.type) === 'string' || _ref === 'text') {
-      if (child.bind.readonly) {
+      if (child.bind && child.bind.readonly) {
         schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
                                                         <strong></strong><%= title %>\
                                                    </div>');
@@ -83,12 +82,13 @@ define(['vendor/underscore'], function(_) {
         });
       });
     } else if (child.type === 'group') {
+      schema_dict['type'] = "Group";
       schema_dict['is_field'] = false;
       schema_dict['tree'] = schema_dict['tree'] + (child.name) + "/";
       schema_dict['control'] = child.control;
       schema_dict['bind'] = { group_start: true };
       this.item_dict[child.name] = schema_dict;
-      this._fieldsets.push(child.name);
+      //this._fieldsets.push(child.name);
       _.each(child.children, function(_child) {
         return _this.recursiveAdd(_child, (schema_dict['tree']));
       });

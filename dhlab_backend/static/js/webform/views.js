@@ -67,8 +67,16 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       _.each(this.model.attributes.children, function(child) {
         return _this.recursiveAdd(child, "/", _this.model.attributes.default_language);
       });
+
+      var altered_item_dict = new Object(this.item_dict);
+      for (item in altered_item_dict) {
+        if (altered_item_dict[item].type === "Group") {
+          console.log("DEL")
+          delete altered_item_dict[item];
+        }
+      };
       this.renderedForm = new Backbone.Form({
-        schema: this.item_dict,
+        schema: altered_item_dict,
         data: this._data,
         fields: this._fieldsets
       }).render();
@@ -83,6 +91,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.active input').focus();
       this._display_form_buttons(0);
 
+      console.log(altered_item_dict)
+      console.log(typeof this.item_dict)
       // TODO: Fix edge case of map being first question, 
       // if geopoint is the first question, the map doesn't show
 
@@ -186,7 +196,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     };
 
     xFormView.prototype.switch_question = function(element, forward) {
-      var current_question, form_info, question_index, switch_question, switch_question_key, switch_question_idx, switch_question_info, current_question_idx, current_question_info;
+      var current_question, form_info, question_index, switch_question, switch_question_key, switch_question_idx, switch_question_info, current_question_idx, current_question_info, new_group;
       if (forward) {
         if (!this.passes_question_constraints()) {
           return this;
@@ -219,12 +229,15 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
       $('.active').removeClass('active');
 
-      // Group controls
-      if (form_info.control) {
-        if (form_info.control.appearance && form_info.control.appearance === 'field-list') {
-          var current_tree = form_info.tree; // + form_info.name + "/";
+      console.log("In switch_question")
+      // Group controls, first check to see if we are in a group
+      var temp_split = form_info.tree.split('/');
+      new_group = this.item_dict[temp_split[temp_split.length - 2]];      
+      if (new_group && new_group.control) {
+        if (new_group.control.appearance && new_group.control.appearance === 'field-list') {
+          var current_tree = new_group.tree; // + form_info.name + "/";
 
-          $('#' + switch_question_key + "_field").addClass('active');
+          $('#' + switch_question_key + "_field").fadeIn(1).addClass('active');
           switch_question_idx = question_index + 1;
           switch_question_info = this.input_fields[switch_question_idx];
 
@@ -239,7 +252,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }
       } else {
-        if (this.input_fields[question_index].bind.group_start) {
+      /*  if (this.input_fields[question_index].bind && this.input_fields[question_index].bind.group_start) {
           if (forward) {
             if (question_index < this.input_fields.length) {
               question_index += 1;
@@ -249,20 +262,22 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
               question_index -= 1;
             }
           }
-        }
-        switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
-        switch_question.fadeIn(1).addClass('active');
+        } */
+        //switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
+        $('#' + switch_question_key + "_field").fadeIn(1).addClass('active');
       };
 
       if(form_info.bind != undefined && form_info.bind.map != undefined){
         _geopointDisplay();
       };
       this._display_form_buttons(question_index);
+      console.log("Finish switch_question")
       return this;
     };
 
     xFormView.prototype.next_question = function() {
       var question, question_index;
+      console.log("In next_question")
       question = this._active_question();
       question_index = question.idx;
       if (question.info.control && question.info.control.appearance === 'field-list') {
@@ -274,6 +289,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       } else if (question_index < this.input_fields.length) {
         question_index += 1;
       }
+      console.log("Calling switch_question from next_question " + question_index)
       this.switch_question($('.control-group').eq(question_index)[0], true);
       return this;
     };
