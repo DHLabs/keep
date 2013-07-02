@@ -193,7 +193,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         maxZoom: 18
       }).addTo(this.map);
       this.heatmap = L.TileLayer.heatMap({
-        radius: 42,
+        radius: 24,
         opacity: 0.8
       });
       heatmap_value = 1.0 / this.data.models.length;
@@ -233,10 +233,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         marker.bindPopup(html);
         this.markers.addLayer(marker);
         this.clusters.addLayer(marker);
+        if (datum.get('data').value != null) {
+          heatmap_value = datum.get('data').value;
+        }
         heatmapData.push({
           lat: geopoint[0],
           lon: geopoint[1],
-          count: heatmap_value
+          value: heatmap_value
         });
       }
       this.heatmap.addData(heatmapData);

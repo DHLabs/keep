@@ -193,7 +193,7 @@ define( [ 'jquery',
                             maxZoom: 18 }).addTo( @map )
 
             # Setup heatmap
-            @heatmap = L.TileLayer.heatMap( { radius: 42, opacity: 0.8 } )
+            @heatmap = L.TileLayer.heatMap( { radius: 24, opacity: 0.8 } )
             heatmap_value = 1.0 / @data.models.length
 
             heatmapData = []
@@ -230,10 +230,13 @@ define( [ 'jquery',
                 @markers.addLayer( marker )
                 @clusters.addLayer( marker )
 
+                if datum.get( 'data' ).value?
+                    heatmap_value = datum.get( 'data' ).value
+
                 heatmapData.push(
                     lat: geopoint[0]
                     lon: geopoint[1]
-                    count: heatmap_value )
+                    value: heatmap_value )
 
             # By default we'll have the heatmap layer enabled and everything
             # else disabled
