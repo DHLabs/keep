@@ -109,3 +109,6 @@ table.table thead .sorting_desc_disabled {
 
 .dataTables_filter {
   text-align: right; }
+
+.horizontalBar {
+  overflow: auto; }
