@@ -18,7 +18,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
 
     MapView.prototype.btn = $('#map_btn');
 
-    MapView.prototype.map_headers = void 0;
+    MapView.prototype.map_headers = [];
+
+    MapView.prototype.selected_header = void 0;
 
     MapView.prototype.map = void 0;
 
@@ -72,7 +74,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
         shadowSize: [41, 41],
         shadowAnchor: [15, 41]
       });
-      if (this.map_headers != null) {
+      console.log(this.selected_header);
+      if (this.map_headers.length > 0) {
         this.btn.removeClass('disabled');
         this.render();
         if (this.start_date.val().length > 0) {
@@ -101,17 +104,62 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
     };
 
     MapView.prototype._detect_headers = function(root) {
-      var field, _i, _len, _ref, _ref1;
+      var field, _i, _j, _len, _len1, _ref, _ref1, _ref2, _results;
       for (_i = 0, _len = root.length; _i < _len; _i++) {
         field = root[_i];
         if ((_ref = field.type) === 'group') {
           this._detect_headers(field.children);
         }
         if ((_ref1 = field.type) === 'geopoint') {
-          this.map_headers = field;
-          return;
+          this.map_headers.push(field);
+          if (this.selected_header == null) {
+            this.selected_header = {
+              location: field
+            };
+          }
+          continue;
+        } else if (field.label.search('lat') !== -1) {
+          this.map_headers.push(field);
+        } else if (field.label.search('lng') !== -1) {
+          this.map_headers.push(field);
         }
       }
+      if (this.selected_header == null) {
+        this.selected_header = {};
+        _ref2 = this.map_headers;
+        _results = [];
+        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+          field = _ref2[_j];
+          if (field.label.search('lat') !== -1) {
+            _results.push(this.selected_header.lat = field);
+          } else if (field.label.search('lng') !== -1) {
+            _results.push(this.selected_header.lng = field);
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
+    };
+
+    MapView.prototype._geopoint = function(datum) {
+      var geopoint;
+      geopoint = void 0;
+      if (this.selected_header.location != null) {
+        geopoint = datum.get('data')[this.selected_header.location.name];
+        if (geopoint == null) {
+          return null;
+        }
+        geopoint = geopoint.split(' ').slice(0, 3);
+        if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
+          return null;
+        }
+      } else {
+        geopoint = [datum.get('data')[this.selected_header.lat.name], datum.get('data')[this.selected_header.lng.name]];
+      }
+      geopoint[0] = parseFloat(geopoint[0]);
+      geopoint[1] = parseFloat(geopoint[1]);
+      return geopoint;
     };
 
     MapView.prototype.render = function() {
@@ -121,16 +169,12 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       _ref = this.data.models;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         datum = _ref[_i];
-        geopoint = datum.get('data')[this.map_headers.name];
+        geopoint = this._geopoint(datum);
         if (geopoint == null) {
           continue;
         }
-        geopoint = geopoint.split(' ');
-        if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
-          continue;
-        }
-        center[0] += parseFloat(geopoint[0]);
-        center[1] += parseFloat(geopoint[1]);
+        center[0] += geopoint[0];
+        center[1] += geopoint[1];
         valid_count += 1;
       }
       if (valid_count === 0) {
@@ -159,12 +203,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'leaflet', 'leafle
       _ref1 = this.data.models;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         datum = _ref1[_j];
-        geopoint = datum.get('data')[this.map_headers.name];
+        geopoint = this._geopoint(datum);
         if (geopoint == null) {
-          continue;
-        }
-        geopoint = geopoint.split(' ');
-        if (isNaN(geopoint[0]) || isNaN(geopoint[1])) {
           continue;
         }
         marker = L.marker([geopoint[0], geopoint[1]], {

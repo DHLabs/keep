@@ -14,7 +14,11 @@ define( [ 'jquery',
         el:             $( '#map_viz' )
         btn:            $( '#map_btn' )
 
-        map_headers:    undefined
+        # List of (possible) columns that represents a location.
+        map_headers:     []
+        # Column(s) selected to use as geopoints.
+        selected_header: undefined
+
         map:            undefined
         controls:       undefined
         playback:       undefined
@@ -62,7 +66,9 @@ define( [ 'jquery',
                         shadowSize: [41, 41]
                         shadowAnchor: [15, 41] )
 
-            if @map_headers?
+            console.log( @selected_header )
+
+            if @map_headers.length > 0
                 @btn.removeClass( 'disabled' )
                 @render()
 
@@ -107,25 +113,67 @@ define( [ 'jquery',
 
                 # Detect geopoints
                 if field.type in [ 'geopoint' ]
-                    @map_headers = field
-                    return
+                    @map_headers.push( field )
+
+                    if not @selected_header?
+                        @selected_header = { location: field }
+
+                    continue
+                else if field.label.search( 'lat' ) != -1
+                    @map_headers.push( field )
+                else if field.label.search( 'lng' ) != -1
+                    @map_headers.push( field )
+
+            # This means there were no geopoints... attempt to find an lat/lng
+            # combo between two columns
+            if not @selected_header?
+
+                @selected_header = {}
+                for field in @map_headers
+                    if field.label.search( 'lat' ) != -1
+                        @selected_header.lat = field
+                    else if field.label.search( 'lng' ) != -1
+                        @selected_header.lng = field
+
+        _geopoint: ( datum ) ->
+
+            geopoint = undefined
+
+            if @selected_header.location?
+                
+                geopoint = datum.get( 'data' )[ @selected_header.location.name ]
+                
+                if not geopoint?
+                    return null
+
+                geopoint = geopoint.split( ' ' )[0..2]
+                
+                if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
+                    return null
+
+            else
+                geopoint = [ datum.get( 'data' )[ @selected_header.lat.name ],
+                             datum.get( 'data' )[ @selected_header.lng.name ] ]
+
+            geopoint[0] = parseFloat( geopoint[0] )
+            geopoint[1] = parseFloat( geopoint[1] )
+
+            return geopoint
 
         render: () ->
             # Calculate the center of the data
             center = [ 0, 0 ]
+
             valid_count = 0
             for datum in @data.models
 
-                geopoint = datum.get( 'data' )[ @map_headers.name ]
+                geopoint = @_geopoint( datum )
+
                 if not geopoint?
                     continue
-
-                geopoint = geopoint.split( ' ' )
-                if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
-                    continue
-
-                center[0]   += parseFloat( geopoint[0] )
-                center[1]   += parseFloat( geopoint[1] )
+                
+                center[0] += geopoint[0]
+                center[1] += geopoint[1]
                 valid_count += 1
 
             if valid_count == 0
@@ -154,13 +202,9 @@ define( [ 'jquery',
 
             last_marker = undefined
             for datum in @data.models
-                geopoint = datum.get( 'data' )[ @map_headers.name ]
+                geopoint = @_geopoint( datum )
 
                 if not geopoint?
-                    continue
-
-                geopoint = geopoint.split( ' ' )
-                if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
                     continue
 
                 marker = L.marker( [geopoint[0], geopoint[1]], {icon: @mapIcon})
