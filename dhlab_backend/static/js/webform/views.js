@@ -68,13 +68,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         return _this.recursiveAdd(child, "/", _this.model.attributes.default_language);
       });
 
-      var altered_item_dict = new Object(this.item_dict);
-      for (item in altered_item_dict) {
-        if (altered_item_dict[item].type === "Group") {
-          console.log("DEL")
-          delete altered_item_dict[item];
+      var altered_item_dict = new Object();
+      for (item in this.item_dict) {
+        if (this.item_dict[item].type !== "Group") {
+          altered_item_dict[item] = this.item_dict[item];
         }
       };
+
       this.renderedForm = new Backbone.Form({
         schema: altered_item_dict,
         data: this._data,
@@ -86,13 +86,13 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
         return _this.input_fields.push(child);
       });
+
+      console.log(_this.input_fields)
       $('#formDiv').html(this.renderedForm.el);
       $('.control-group').first().show().addClass('active');
       $('.active input').focus();
       this._display_form_buttons(0);
 
-      console.log(altered_item_dict)
-      console.log(typeof this.item_dict)
       // TODO: Fix edge case of map being first question, 
       // if geopoint is the first question, the map doesn't show
 
@@ -232,7 +232,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       console.log("In switch_question")
       // Group controls, first check to see if we are in a group
       var temp_split = form_info.tree.split('/');
-      new_group = this.item_dict[temp_split[temp_split.length - 2]];      
+      new_group = this.item_dict[temp_split[temp_split.length - 2]];
+      console.log(this.input_fields)
       if (new_group && new_group.control) {
         if (new_group.control.appearance && new_group.control.appearance === 'field-list') {
           var current_tree = new_group.tree; // + form_info.name + "/";
@@ -271,16 +272,16 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         _geopointDisplay();
       };
       this._display_form_buttons(question_index);
-      console.log("Finish switch_question")
       return this;
     };
 
     xFormView.prototype.next_question = function() {
-      var question, question_index;
-      console.log("In next_question")
+      var question, question_index, current_group;
       question = this._active_question();
       question_index = question.idx;
-      if (question.info.control && question.info.control.appearance === 'field-list') {
+      var temp_split = question.info.tree.split('/');
+      current_group = this.item_dict[temp_split[temp_split.length - 2]];
+      if (current_group && current_group.control && current_group.control.appearance === 'field-list') {
         var current_tree = question.info.tree;
         question_index += 1;
         while (this.input_fields[question_index].tree === current_tree) {
@@ -289,7 +290,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       } else if (question_index < this.input_fields.length) {
         question_index += 1;
       }
-      console.log("Calling switch_question from next_question " + question_index)
       this.switch_question($('.control-group').eq(question_index)[0], true);
       return this;
     };
