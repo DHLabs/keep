@@ -18,8 +18,20 @@ from backend.db import db, dehydrate_survey, user_or_organization
 
 #from privacy import privatize_geo
 
-from .forms import NewRepoForm
+from .forms import NewRepoForm, NewBatchRepoForm
 from .models import Repository
+
+
+@login_required
+def batch_repo( request ):
+
+    if request.method == 'POST':
+        form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
+
+        if form.is_valid():
+            form.save()
+
+    return HttpResponseRedirect( '/' )
 
 
 @login_required
