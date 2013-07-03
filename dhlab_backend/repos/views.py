@@ -141,7 +141,7 @@ def webform( request, username, repo_name ):
         # Return to organization/user dashboard based on where the "New Repo"
         # button was clicked.  Send Non-users to thank-you page 
         if not request.user.is_authenticated():
-            return HttpResponseRedirect( 'finish_survey' )
+            return HttpResponseRedirect( '/static/html/finish_survey.html' )
 
         elif isinstance( account, User ):
             return HttpResponseRedirect(

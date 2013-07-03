@@ -32,7 +32,4 @@ urlpatterns = patterns( 'repos.views',
     url(regex=r'^(?P<username>\w+)/(?P<repo_name>\w+)/webform/$',
         view='webform',
         name='repo_webform' ),
-
-    url(regex=r'^webform/finish_survey.html', 'finish_survey')
-
 )
