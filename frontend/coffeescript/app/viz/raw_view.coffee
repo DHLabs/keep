@@ -96,8 +96,10 @@ define( [ 'jquery',
             $( '#raw_table > tbody' ).empty()
 
             # Add data from data models
+            row_html = ''
             for datum in @data.models
-                row_html = '<tr>'
+
+                row_html += '<tr>'
                 for field in @column_headers
 
                     value = datum.get( 'data' )[ field.name ]
@@ -114,7 +116,7 @@ define( [ 'jquery',
 
                 row_html += '</tr>'
 
-                $( '#raw_table > tbody' ).append( row_html )
+            $( '#raw_table > tbody' ).append( row_html )
 
             # Render the table using jQuery's DataTable
             #
@@ -161,9 +163,9 @@ define( [ 'jquery',
 
                 $( '#raw_grid' ).append( @card_tmpl( tmpl_options ) )
 
-                # @wall = $( '#raw_grid' ).masonry(
-                #         itemSelector: '.card-active'
-                #         isAnimated: true )
+            # @wall = $( '#raw_grid' ).masonry(
+            #         itemSelector: '.card-active'
+            #         isAnimated: true )
 
             @
 
