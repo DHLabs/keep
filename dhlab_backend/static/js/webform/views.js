@@ -5,7 +5,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
   var xFormView, _ref;
   xFormView = (function(_super) {
     __extends(xFormView, _super);
-
+ 
     function xFormView() {
       _ref = xFormView.__super__.constructor.apply(this, arguments);
       return _ref;
@@ -89,16 +89,19 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       return this;
     };
 
-    _geopointDisplay = function(map) {
+    _geopointDisplay = function() {
       var map;
-      if(map === undefined) {
-        map = L.map('map', {
+      question = ($('.active').data('key'));
+      var element = document.getElementById(question + "_map");
+      if(!(element.classList.contains('map'))) {
+        element.classList.add('map');
+        map = L.map((question + '_map'), {
           center: [36.60, -120.65],
           zoom: 5});
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
           maxZoom: 18,
-          rehuseTiles: true
+          reuseTiles: true
         }).addTo(map);
       };
       var popup = L.popup();
@@ -107,7 +110,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           .setLatLng(e.latlng)
           .setContent("Latitude and Longitude: " + e.latlng.toString())
           .openOn(map);
-        question = ($('.active').data('key'));
         $("#" + question).val(e.latlng.lat + " " + e.latlng.lng + " 0 0");
       }
       map.on('click', onMapClick);

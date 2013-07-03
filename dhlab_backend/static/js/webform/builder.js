@@ -42,7 +42,7 @@ define(['vendor/underscore'], function(_) {
           <%= title %><br>\
           <input id="<%= editorId %>" type="hidden" name="<%= editorId %>" >\
           <input id="geocode_address" type="text" name="geocode_address" placeholder="Enter Address"><button id="geocode_address_submit" class="btn" type="button">Submit!</button>\
-          <div id="map" style="width:100%; height: 500px; position: relative;">\
+          <div id="<%= editorId %>_map" style="width:100%; height: 500px; position: relative;">\
           </div></div>');
       //schema_dict['is_field'] = false;
       //<input id="<%= editorId %>_lng" type="text" placeholder="Longitude">\
