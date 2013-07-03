@@ -113,14 +113,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         $("#" + question).val(e.latlng.lat + " " + e.latlng.lng + " 0 0");
       }
       map.on('click', onMapClick);
-
-      /*$('#geocode_address_submit').click(function onGeocodeSubmit() {
-        var address = $('#geocode_address').val();
-        var prepURL = "http://open.mapquestapi.com/geocoding/v1/address?key=Fmjtd%7Cluub2g0yn0%2Crx%3Do5-9ub5d6&location=" + address;
-        temp_latLng = $.get(prepURL);
-        console.log(temp_latLng);
-      });
-      */
       map.invalidateSize(false);
     };
 
