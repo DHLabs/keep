@@ -43,8 +43,6 @@ define(['vendor/underscore'], function(_) {
           <input id="<%= editorId %>" type="hidden" name="<%= editorId %>" >\
           <div id="<%= editorId %>_map" style="width:100%; height: 500px; position: relative;">\
           </div></div>');
-      //schema_dict['is_field'] = false;
-      //<input id="<%= editorId %>_lng" type="text" placeholder="Longitude">\
       schema_dict['bind'] = { map: true };
     } else if (child.type === 'today') {
       schema_dict['type'] = 'Date';

@@ -83,9 +83,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.active input').focus();
       this._display_form_buttons(0);
 
-      // TODO: Fix edge case of map being first question, 
-      // if geopoint is the first question, the map doesn't show
-
+      if (this._active_question().info.bind && this._active_question().info.bind.map) {
+        _geopointDisplay();        
+      }
       return this;
     };
 
