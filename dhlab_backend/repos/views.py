@@ -30,7 +30,12 @@ def batch_repo( request ):
         form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
 
         if form.is_valid():
-            form.save()
+            new_repo = form.save()
+
+            return HttpResponseRedirect(
+                        reverse( 'repo_visualize',
+                                 kwargs={ 'username': request.user.username,
+                                          'repo_name': new_repo.name } ) )
 
     return HttpResponseRedirect( '/' )
 

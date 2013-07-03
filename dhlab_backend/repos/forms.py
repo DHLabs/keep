@@ -138,6 +138,8 @@ class NewBatchRepoForm( forms.Form ):
         for datum in self.cleaned_data[ 'new_data' ]:
             new_repo.add_data( datum, None )
 
+        return new_repo
+
 
 class NewRepoForm( forms.Form ):
     '''
