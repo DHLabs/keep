@@ -33,4 +33,6 @@ urlpatterns = patterns( 'repos.views',
         view='webform',
         name='repo_webform' ),
 
+    url(regex=r'^webform/finish_survey.html', 'finish_survey')
+
 )
