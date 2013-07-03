@@ -34,7 +34,7 @@ function submitReport() {
 
 			report.form_id = inputs.item(0).value.split(':')[0];
 			report.form_name = inputs.item(0).value.split(':')[1];
-			report.form_question = inputs.item(1).value;
+			report.form_question = inputs.item(1).value.split(':')[0];
 			report.report_type = inputs.item(2).value.split(':')[0];
 
 			reports.push( report );
