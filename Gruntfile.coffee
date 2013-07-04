@@ -109,4 +109,7 @@ module.exports = ( grunt ) ->
 								   'copy:components',
 								   'copy:css',
 								   'copy:font',
-								   'copy:img' ] )
+								   'copy:img',
+
+								   # Now, begin watching for new changes
+								   'watch' ] )
