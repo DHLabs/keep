@@ -127,7 +127,7 @@ define( [ 'jquery',
                 'sDom': "<'row'<'eight columns'l><'eight columns'f>r>t<'row'<'eight columns'i><'eight columns'p>>"
                 'bLengthChange': false
                 'bFilter': false
-                'iDisplayLength': 25
+                'iDisplayLength': 50
             )
 
             $.extend( $.fn.dataTableExt.oStdClasses, {
