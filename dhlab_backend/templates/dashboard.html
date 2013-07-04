@@ -3,179 +3,168 @@
 
 {% block title %}{{ user.username }}{% endblock %}
 
-{% block css %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
-<style type="text/css">
-	.table td {
-		border-top:none;
-	}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class='row'>
-	<div class='span3 sidebar'>
-		
-		<div style='text-align:center;padding-top:12px;'>
-			<a class='flat-btn' id='new_repo_btn' href='{% url "repo_new" %}'>
-				<span class='label'><i style='icon-plus'></i> New Data Dairy</span>
+<div class='three columns sidebar'>
+	
+	<div class='dairy-dropzone'>
+		Drag a CSV file here or
+		<div>
+			<a class='btn btn-primary btn-small' id='new_repo_btn' href='{% url "repo_new" %}'>
+				<span class='label'>Create From Scratch</span>
 			</a>
 		</div>
-
-		<hr/>
-
-		<div class='section'>
-			<div class='actions'>
-				<div>
-					<a href='#'>Dashboard Overview</a>
-				</div>
-				<div>
-					<a href='#'>Data Diaries</a>
-				</div>
-				<div>
-					<a href='#'>Reports</a>
-				</div>
-			</div>
-		</div>
-
-		<hr/>
-
-		<!-- ORGANIZATIONS -->
-		<div class='section'>
-			<h5>Organizations</h5>
-			<div id='org-list'>
-				{% if not is_other_user %}
-					<div>
-						<a href='{% url "organization_new" %}' id='create_org_btn'>
-							<i class='icon-plus-sign' style='width:20px;text-align:center;'></i>
-							&nbsp;New Organization
-						</a>
-					</div>
-				{% endif %}
-				{% if organizations|length == 0 %}
-					<div style='font-size:0.8em;color:#AAA;'>
-						You are not a part of any organizations =[
-					</div>
-				{% else %}
-					{% for org in organizations %}
-					<div>
-						{% if not org.pending or not is_other_user %}
-							{% if org.pending %}
-							<div class='pull-right'>
-								<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
-								   class='btn btn-small btn-success'>
-									Join
-								</a>
-								<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
-								   class='btn btn-small'>
-								   Ignore
-								</a>
-							</div>
-							{% endif %}
-							<a href='{% url "organization_dashboard" org=org.organization.name %}'>
-								<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
-								&nbsp;{{ org.organization.name }}
-							</a>
-						{% endif %}
-					</div>
-					{% endfor %}
-				{% endif %}
-			</div>
-		</div>
-
-		<div>
-			<form action='{% url "repo_batch" %}' method="POST" enctype="multipart/form-data">
-				{% csrf_token %}
-				<input type='file' name='csv_file'>
-				<button type='submit'>Batch</button>
-			</form>
-		</div>
-
 	</div>
-	<!-- REPOSITORIES -->
-	<div class='span9'>
-		<div style='overflow:auto;margin-bottom:4px;margin-top:8px;'>
-			<h4>Data Diaries</h4>
-		</div>
-		<table id='repo_list' class='table'>
-			<tbody>
-				{% if user_repos|length == 0 %}
-					<tr>
-						<td style='text-align:center;' colspan='4'>
-							You have no data diaries =[
-						</td>
-					</tr>
-				{% endif %}
-				{% for repo in user_repos %}
-					<tr>
-						<td style='width:32px;text-align:center;vertical-align:middle;'>
-							{% if repo.is_public %}
-								<i class='icon-unlock'></i>
-							{% else %}
-								<i class='icon-lock'></i>
-							{% endif %}
-						</td>
-						<td>
-							<a href='{% url "repo_visualize" username=account.username repo_name=repo.name %}'>
-								{{ repo.name }}
-							</a>
-							{% if repo.description %}
-							<span class='help-block'>
-								{{ repo.description|slice:":42" }}...
-							</span>
-							{% endif %}
-						</td>
-						<td style='width:102px;text-align:center;vertical-align:middle;'>
-							<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
-								<i class='icon-pencil'></i> Add Data
-							</a>
-						</td>
-						<td style='width:64px;text-align:right;vertical-align:middle;'>
-							{{ repo.submissions }} <i class='icon-file-alt'></i>
-						</td>
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
 
-		{% if shared_repos|length > 0 %}
-		<div style='overflow:auto;margin-bottom:4px;'>
-			<h4>Shared Data Diaries</h4>
+	<div class='section'>
+		<h4>My Data</h4>
+
+		<ul class='nav'>
+			<li>
+				<a href='#'>Recent Activity</a>
+			</li>
+			<li>
+				<a href='#'>Data Diaries</a>
+			</li>
+			<li>
+				<a href='#'>Reports</a>
+			</li>
+		</ul>
+	</div>
+
+	<!-- ORGANIZATIONS -->
+	<div class='section'>
+		{% if not is_other_user %}		
+		<div style='float:left;'>
+			<a href='{% url "organization_new" %}' class='btn btn-small' id='create_org_btn'>
+				<i class='icon-plus-sign'></i>
+				&nbsp;New
+			</a>
 		</div>
-		<table id='shared_repo_list' class='table'>
-			<tbody>
-				{% for repo in shared_repos %}
+		{% endif %}
+
+		<h4>Organizations</h4>
+
+		<ul id='org-list'>
+			{% if organizations|length == 0 %}
+				<li style='font-size:0.8em;color:#AAA;'>
+					You are not a part of any organizations =[
+				</li>
+			{% else %}
+				{% for org in organizations %}
+				<li>
+					{% if not org.pending or not is_other_user %}
+						{% if org.pending %}
+						<div style='float:right;'>
+							<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
+							   class='btn btn-small btn-success'>
+								Join
+							</a>
+							<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
+							   class='btn btn-small'>
+							   Ignore
+							</a>
+						</div>
+						{% endif %}
+						<a href='{% url "organization_dashboard" org=org.organization.name %}'>
+							<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
+							&nbsp;{{ org.organization.name }}
+						</a>
+					{% endif %}
+				</li>
+				{% endfor %}
+			{% endif %}
+		</ul>
+	</div>
+
+	<div style='display:none;'>
+		<form action='{% url "repo_batch" %}' method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			<input type='file' name='csv_file'>
+			<button type='submit'>Batch</button>
+		</form>
+	</div>
+
+</div>
+<!-- REPOSITORIES -->
+<div class='thirteen columns repos'>
+	<table id='repo_list' class='table'>
+		<tbody>
+			{% if user_repos|length == 0 %}
 				<tr>
-					<td style='width:32px;text-align:center;vertical-align:middle;'>
+					<td style='text-align:center;' colspan='4'>
+						You have no data diaries =[
+					</td>
+				</tr>
+			{% endif %}
+			{% for repo in user_repos %}
+				<tr>
+					<td class='privacy'>
 						{% if repo.is_public %}
 							<i class='icon-unlock'></i>
 						{% else %}
 							<i class='icon-lock'></i>
 						{% endif %}
 					</td>
-					<td>
-						<a href='{% url "repo_visualize" username=repo.owner repo_name=repo.name %}'>
-							{{ repo.owner }} / {{ repo.name }}
-						</a>
-						{% if repo.description %}
-						<span class='help-block'>
-							{{ repo.description|slice:":42" }}...
-						</span>
-						{% endif %}
-					</td>
-					<td style='width:102px;text-align:center;vertical-align:middle;'>
-						<a href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}' class='btn btn-small'>
+					<td class='add-data'>
+						<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
 							<i class='icon-pencil'></i> Add Data
 						</a>
+					</td>					
+					<td>
+						<a href='{% url "repo_visualize" username=account.username repo_name=repo.name %}'>
+							{{ repo.name }}
+							<div class='help-block'>
+								{% if repo.description %}{{ repo.description|slice:":42" }}...
+								{% else %}N/A
+								{% endif %}
+							</div>
+						</a>
 					</td>
-					<td style='width:64px;text-align:right;vertical-align:middle;'>
+					<td class='submission-count'>
 						{{ repo.submissions }} <i class='icon-file-alt'></i>
 					</td>
 				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-		{% endif %}
+			{% endfor %}
+		</tbody>
+	</table>
+
+	{% if shared_repos|length > 0 %}
+	<div style='margin:16px 0;'>
+		<h4>Shared Data Diaries</h4>
 	</div>
+	<table id='shared_repo_list' class='table'>
+		<tbody>
+			{% for repo in shared_repos %}
+			<tr>
+				<td style='width:32px;text-align:center;vertical-align:middle;'>
+					{% if repo.is_public %}
+						<i class='icon-unlock'></i>
+					{% else %}
+						<i class='icon-lock'></i>
+					{% endif %}
+				</td>
+				<td style='width:102px;text-align:center;vertical-align:middle;'>
+					<a href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}' class='btn btn-small'>
+						<i class='icon-pencil'></i> Add Data
+					</a>
+				</td>				
+				<td>
+					<a href='{% url "repo_visualize" username=repo.owner repo_name=repo.name %}'>
+						{{ repo.owner }} / {{ repo.name }}
+					</a>
+					{% if repo.description %}
+					<span class='help-block'>
+						{{ repo.description|slice:":42" }}...
+					</span>
+					{% endif %}
+				</td>
+				<td style='width:64px;text-align:right;vertical-align:middle;'>
+					{{ repo.submissions }} <i class='icon-file-alt'></i>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% endif %}
 </div>
 {% endblock %}

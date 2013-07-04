@@ -4,7 +4,6 @@
 {% block title %}{{ account_name }} / {{ repo.name }}{% endblock %}
 
 {% block css %}
-<link rel="stylesheet" type="text/css" href='{% static "css/viz.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.Default.css" %}'>
@@ -13,14 +12,13 @@
 {% block js %}
 <script id='form_id' type='text/plain'>{{ sid }}</script>
 <script id='user' type='text/plain'>{{ user.username }}</script>
-<script>
-	document.cdn = '{% static "" %}'
+<script type='text/javascript'>
 	document.initial_data = {{data|safe}};
 </script>
 <script src='{% static 'js/vendor/requirejs.js' %}'></script>
 <script type='text/javascript'>
-	require([ '{% static "js/common.js" %}' ], function (common) {
 
+	require([ '{% static "js/common.js" %}' ], function (common) {
 		require.config({
 			baseUrl: '{% static "js/vendor" %}'
 		});
@@ -31,125 +29,103 @@
 {% endblock %}
 
 {% block content %}
-<div class='container'>
-	<div class='row'>
-		<div class='span12'>
-			<div id='privacy'>
-				<div>
-					{% if repo.is_public %}
-						<i class='icon-unlock'></i>&nbsp;PUBLIC
-					{% else %}
-						<i class='icon-lock'></i>&nbsp;PRIVATE
-					{% endif %}
-				</div>
-			</div>
-			<h3>
-				<div class='pull-right'>
-					<a class='btn' href='/api/v1/data/{{ sid }}?format=csv&amp;user={{account.username}}'>
-						<i class='icon-download'></i> Download All Data
-					</a>
-				</div>
-				{% if account.username %}
-					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
-				{% else %}
-					<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a> /
-				{% endif %}
-				<div class='btn-group'>
-					<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>
-						{{ repo.name }}
-						<span class='caret'></span>
-					</a>
-					<ul class='dropdown-menu'>
-						<li>
-							<a href='/api/v1/repos/{{ sid }}?format=json&amp;user={{ account }}'>
-								Download as JSON
-							</a>
-						</li>
-						<li>
-							<a href='/api/v1/repos/{{ sid }}?format=xform&amp;user={{ account }}'>
-								Download as XForm
-							</a>
-						</li>
-					</ul>
-				</div>
-			</h3>
-			{% if repo.description %}
-			<div class='well well-small'>
-				{{ repo.description }}
-			</div>
-			{% endif %}
-		</div>
+<div id='privacy' class='one columns'>
+	<div>
+		{% if repo.is_public %}
+			<i class='icon-unlock'></i>
+		{% else %}
+			<i class='icon-lock'></i>
+		{% endif %}
 	</div>
 </div>
-<div class='container' id='viz'>
-	<div class='row'>
-		<div class='span12'>
-			<ul id='viz_options' class='nav nav-tabs'>
-				<li id='raw_btn' class='active'>
-					<a href='#' data-type='raw'>
-						<div><i class='icon-list'></i></div>
-						<div>Raw</div>
-					</a>
-				</li>
-				<li id='map_btn' class='disabled'>
-					<a href='#' data-type='map'>
-						<div><i class='icon-map-marker'></i></div>
-						<div>Map</div>
-					</a>
-				</li>
-				<li id='line_btn'>
-					<a href='#' data-type='line'>
-						<div><i class='icon-signal'></i></div>
-						<div>Analytics</div>
-					</a>
-				</li>
-				{% if 'delete_repository' in permissions %}
-				<li>
-					<a href='#' data-type='settings'>
-						<div><i class='icon-cog'></i></div>
-						<div>Settings</div>
-					</a>
-				</li>
-				<li>
-					<a href='#' data-type='share'>
-						<div><i class='icon-group'></i></div>
-						<div>Share Data</div>
-					</a>
-				</li>
-				{% endif %}
-			</ul>
-		</div>
+<div class='twelve columns'>
+	<h3>
+		{% if account.username %}
+			<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a> /
+		{% else %}
+			<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a> /
+		{% endif %}
+
+		{{ repo.name }}
+	</h3>
+	<div class='well well-small'>
+		{% if repo.description %}
+			{{ repo.description }}
+		{% else %}
+			No diary description available
+		{% endif %}
 	</div>
-	<div class='row viz viz-active' id='raw_viz'>
-		<div class='span12' style='margin-bottom:16px;'>
-			<div class='pull-right'>
-				<label>
-					<input id='test' type='checkbox'>
-					Has Photos
-				</label>
-			</div>
-			View as:&nbsp;
-			<div class='btn-group'>
-				<button data-type='list' class='btn active'>
-					<i class='icon-align-justify'></i>&nbsp;List
-				</button>
-				<button data-type='grid' class='btn'>
-					<i class='icon-th-large'></i>&nbsp;Grid
-				</button>
-			</div>
+
+</div>
+<div class='three columns' style='text-align:right;'>
+	<div style='margin-top:8px;'>
+		<a class='btn btn-primary' href='/api/v1/data/{{ sid }}?format=csv&amp;user={{account.username}}'>
+			<span class='label'>
+				<i class='icon-download'></i> Download All Data
+			</span>
+		</a>
+	</div>
+</div>
+
+<div id='viz'>
+	<div class='sixteen columns'>
+		<ul id='viz_options' class='nav nav-tabs'>
+			<li id='raw_btn' class='active'>
+				<a href='#' data-type='raw'>
+					<i class='icon-list'></i><br/>
+					Raw
+				</a>
+			</li>
+			<li id='map_btn' class='disabled'>
+				<a href='#' data-type='map'>
+					<i class='icon-map-marker'></i><br/>
+					Map
+				</a>
+			</li>
+			<li id='line_btn'>
+				<a href='#' data-type='line'>
+					<i class='icon-signal'></i><br/>
+					Analytics
+				</a>
+			</li>
+			{% if 'delete_repository' in permissions %}
+			<li>
+				<a href='#' data-type='settings'>
+					<i class='icon-cog'></i><br/>
+					Settings
+				</a>
+			</li>
+			<li>
+				<a href='#' data-type='share'>
+					<i class='icon-group'></i><br/>
+					Share Data
+				</a>
+			</li>
+			{% endif %}
+		</ul>
+	</div>
+	<div class='viz viz-active' id='raw_viz'>
+		<div id='list-type' class='sixteen columns'>
+			<a class='active' href='#' data-type='list'>
+				<i class='icon-align-justify'></i>&nbsp;List
+			</a>&nbsp;|&nbsp;
+			<a href='#' data-type='grid'>
+				<i class='icon-th-large'></i>&nbsp;Grid
+			</a>
 		</div>
 		<div class='span12 active horizontalBar' id='raw_list'>
-			<table id="raw_table" class="table table-striped table-bordered">
+			<table id="raw_table" class="table">
 				<thead><tr></tr></thead>
 				<tbody>
 					<tr><td>Loading data...</td></tr>
 				</tbody>
 			</table>
 		</div>
-		<div class='span12' id='raw_grid' style='display:none;position:relative;'></div>
+		<div class='sixteen columns' id='raw_grid' style='display:none;position:relative;'></div>
 	</div>
-	<div class='row viz' id='map_viz'>
-		<div class='span12' style='display:none;'>
+
+	<div class='viz' id='map_viz'>
+		<div class='sixteen columns' style='display:none;'>
 			<div id='time_select'>
 				<input type='range' id='fps' min='1' max='10'/>
 				<input type='range' id='playtime' step='10' min='10' max='300'/>
@@ -168,11 +144,11 @@
 				<input type="submit" value="submit" class='btn'id ='time_c'>
 				Date: <input type ="radio" name="time" value = "date" checked="checked"/>
 				Time stamp: <input type ="radio" name="time" value = "timestamp"/>
-  				<a href='#' id='clear' data-type='map' class='btn'>Clear Lines</a>
+					<a href='#' id='clear' data-type='map' class='btn'>Clear Lines</a>
 			</div>
 		</div>
 
-		<div class='span12' id='map'></div>
+		<div class='sixteen columns' id='map'></div>
 
 		<div class='offset1 span10' style='clear:both;margin-top:16px;'>
 			<div id='current_time' style='text-align:center;'>
@@ -206,48 +182,76 @@
 		</div>
 		<div class='span10' id='line'></div>
 	</div>
+
 	{% if 'delete_repository' in permissions %}
-	<div class='row viz' id='settings_viz'>
-		<div class='span12'>
-			<div class='span3'>
-				<strong>Edit this data repository</strong>
+	<div class='viz' id='settings_viz'>
+		<div class='sixteen columns'>
+
+			<h4>Administration</h4>
+
+			<div class='row'>
+				<div class='six columns'>
+					<strong>Edit this data repository</strong>
+				</div>
+				<div class='ten columns' style='text-align:right;'>
+					<a href='{% url "repo_edit" repo_id=sid %}' class='btn btn-medium'>
+						Edit Repository
+					</a>
+				</div>
 			</div>
-			<div class='span8' style='text-align:right;padding-top:16px;'>
-				<a href='{% url "repo_edit" repo_id=sid %}' class='btn btn-medium'>
-					Edit Repository
-				</a>
+
+			<div class='row'>
+				<div class='six columns'>
+					<strong>Delete this data repository</strong>
+					<div class='help-block'>
+						Once you delete a repository, <strong>ALL</strong> data will
+						be removed.
+					</div>
+				</div>
+				<div class='ten columns' style='text-align:right;'>
+					<a href='{% url "repo_delete" repo_id=sid %}' class='btn btn-danger'>
+						<i class='icon-trash'></i> Delete Repository
+					</a>
+				</div>
 			</div>
-			<div class='span3'>
-				<strong>Delete this data repository</strong>
-				<span class='help-block'>
-					Once you delete a repository, <strong>ALL</strong> data will
-					be removed.
-				</span>
-			</div>
-			<div class='span8' style='text-align:right;padding-top:16px;'>
-				<a href='{% url "repo_delete" repo_id=sid %}' class='btn btn-danger'>
-					<i class='icon-trash'></i> Delete Repository
-				</a>
+
+			<h4>Dairy Backup</h4>
+
+			<div class='row'>
+				<div class='sixteen columns'>
+					<div>
+						<a class='btn' href='/api/v1/repos/{{ sid }}?format=json&amp;user={{ account }}'>
+							Download Dairy as JSON
+						</a>
+					</div>
+
+					<div style='margin-top:16px;'>
+						<a class='btn' href='/api/v1/repos/{{ sid }}?format=xform&amp;user={{ account }}'>
+							Download Dairy as XForm
+						</a>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 	<div class='row viz' id='share_viz'>
-		<div class='span12'>
+
+		<div class='sixteen columns'>
 			<h4>Data Sharing Settings</h4>
-			<hr>
-		</div>
-		<div class='span12'>
-			<div class='span3'>
-				<strong>Who can see this data?</strong>
-			</div>
-			<div class='span6'>
-				<label class='checkbox'>
-					<input id='sharing_toggle' type='checkbox' {% if repo.public %}checked='checked'{% endif %}>
-					Allow data sharing
-				</label>
-				<span class='help-block'>
-					WARNING: Checking this box will make the data in this repository completely <strong>public</strong>.
-				</span>
+
+			<div class='row'>
+				<div class='seven columns'>
+					<strong>Who can see this data?</strong>
+				</div>
+				<div class='nine columns'>
+					<label class='checkbox'>
+						<input id='sharing_toggle' type='checkbox' {% if repo.public %}checked='checked'{% endif %}>
+						Allow data sharing
+					</label>
+					<span class='help-block'>
+						WARNING: Checking this box will make the data in this repository completely <strong>public</strong>.
+					</span>
+				</div>
 			</div>
 		</div>
 		<div style='display:none;'>

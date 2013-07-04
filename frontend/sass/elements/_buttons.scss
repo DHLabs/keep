@@ -1,0 +1,35 @@
+
+a, a:visited, a:active {
+	color: $theme;
+	text-decoration: none;
+}
+
+a:hover {
+	color: $accent;
+}
+
+a.btn {
+	display:inline !important;
+	background-color: lighten( $accent, 33% );
+	color:#FFF;
+	padding:8px;
+	border-radius: 2px;
+	line-height: 32px;
+
+	span.label {
+		background-color: transparent;
+	}
+}
+
+a.btn:hover {
+	background-color: darken( $theme, 50% );
+}
+
+a.btn-primary {
+	background-color: $theme;
+}
+
+a.btn-small {
+	font-size: 12px;
+	padding: 4px;
+}

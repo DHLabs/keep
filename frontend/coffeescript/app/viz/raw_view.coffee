@@ -10,8 +10,8 @@ define( [ 'jquery',
         el: $( '#raw_viz' )
         events:
             # Change raw viz type from list to grid view
-            "click .btn-group > button":    "change_viz_type"
-            "change #test":                 "toggle_media"
+            "click #list-type > a":    "change_viz_type"
+            "change #test":            "toggle_media"
 
         media_base: '//d2oeqvnrcsteq9.cloudfront.net/'
 
@@ -124,8 +124,7 @@ define( [ 'jquery',
             # Bootstrap, http://www.datatables.net/blog/Twitter_Bootstrap_2
             #
             $( '#raw_table' ).dataTable(
-                'sDom': "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>"
-                'sPaginationType': 'bootstrap'
+                'sDom': "<'row'<'eight columns'l><'eight columns'f>r>t<'row'<'eight columns'i><'eight columns'p>>"
                 'bLengthChange': false
                 'bFilter': false
                 'iDisplayLength': 25

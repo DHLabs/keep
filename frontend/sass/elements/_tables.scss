@@ -1,0 +1,29 @@
+// _tables.scss
+
+.table {
+
+	width:100%;
+
+	tr {
+		border-bottom: 1px solid #EEE;
+	}
+
+	tbody {
+		tr:hover {
+			background-color: #EEE;
+		}
+	}
+
+	th {
+		font-weight: bold;
+		color: $theme;	
+	}
+
+	td {
+		padding: 8px 4px;
+
+		a {
+			display:block;
+		}
+	}
+}

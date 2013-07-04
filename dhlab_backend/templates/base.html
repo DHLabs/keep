@@ -10,7 +10,6 @@
     <link rel='icon' type='image/png' href='{% static "favicon/favicon.128.png" %}'>
 
     <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-    <link href='{% static "css/bootstrap.2.3.1.min.css" %}' rel='stylesheet'>
     <link href='{% static "css/font-awesome.min.css" %}' rel='stylesheet'>
     <link href='{% static "css/layout.css" %}' rel='stylesheet'>
     <!--[if IE 7]>
@@ -28,25 +27,25 @@
                     </a>
                 </div>
             </div>
-            <div class='row topbar'>
+            <div class='topbar'>
+                <div class='six columns search-bar'>
+                    <div style='padding-top:16px;'>
+                        <input type='text' style='margin:0;width:100%;' placeholder='Search Data Diaries'>
+                    </div>
+                </div>            
                 {% if user.is_authenticated %}
-                <div class='span3 user-panel'>
+                <div class='three columns offset-by-seven user-panel'>
                     <h4><a href='{% url "home" %}'>{{ user.username }}</a></h4>&nbsp;|
                     <a href='{% url "auth_logout" %}'>
                         Logout
                     </a>
-                </div>
-                <div class='offset4 span5'>
-                    <div style='padding-top:4px;'>
-                        <input type='text' style='margin:0;width:100%;' placeholder='Search Data Diaries'>
-                    </div>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
     {% block outerspace %}
-    <div class="container">
+    <div class="container" style='padding-top:80px;'>
         {% block content %}
         {% if template %}{% include template %}{% endif %}
         {{ content|safe }}

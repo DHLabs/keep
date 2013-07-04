@@ -1,17 +1,8 @@
-table {
-	.help-block {
-		margin-bottom:0;
-	}
-}
-
 .sidebar {
-	width:218px;
-	height:512px;
-	border-right:2px solid #EEE;
-	padding-top:8px;
+	text-align:right;
 
 	h4, h5 {
-		color:#666;
+		color:#111;
 	}
 
 	h5 {
@@ -21,10 +12,8 @@ table {
 	}
 
 	.actions {
-		> div {
-			height:32px;
-			line-height:32px;
-			padding:4px 8px;
+		> li {
+			padding: 8px 0;
 		}
 	}
 }
@@ -71,5 +60,29 @@ img.account-icon-large {
 
 	.ui-autocomplete > .selected {
 		background-color: #EEE;
+	}
+}
+
+#repo_list {
+
+	td {
+		vertical-align: middle;
+	}
+
+	.privacy {
+		font-size:1.2em;
+		width:32px;
+		text-align:center;
+	}
+
+	.add-data {
+		width:96px;
+		text-align:center;
+	}
+
+	.submission-count {
+		 width:64px;
+		 text-align:right;
+		 padding-right:16px;
 	}
 }

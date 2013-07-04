@@ -1,0 +1,84 @@
+.active {
+	a {
+		color: $accent;
+	}
+}
+
+.disabled {
+	a {
+		color: lighten( $accent, 66% );
+	}
+}
+
+.viz { display: none; }
+
+.viz-active {
+	display: block !important;
+}
+
+.nav {
+	margin-left:0;
+	list-style: none;
+}
+
+.nav-tabs {
+	margin-bottom:16px;
+	border-bottom: 1px solid #ddd;
+
+	li {
+		margin-bottom: -1px;
+		text-align:center;
+		display: inline-block;
+		width:100px;
+		
+		a {
+			display:block;
+			padding:16px 0;
+
+			i {
+				font-size: 24px;
+			}
+		}
+
+		a:hover {
+			border-top:1px solid #ddd !important;
+			border-right:1px solid #ddd !important;
+			border-left:1px solid #ddd !important;
+			border-bottom:1px solid white;
+			border-radius: 8px 8px 0 0;			
+		}
+
+	}
+
+	li.disabled {
+		a:hover {
+			border:none !important;
+		}
+	}
+
+	li.active {
+		a {
+			border-top:1px solid #ddd !important;
+			border-right:1px solid #ddd !important;
+			border-left:1px solid #ddd !important;
+			border-bottom:1px solid white;
+			border-radius: 8px 8px 0 0;
+		}
+	}
+}
+
+#viz_options {
+	margin-top:16px;
+}
+
+#privacy {
+	text-align:right;
+	font-size: 3em;
+	> div {
+		padding:12px;
+	}
+}
+
+@import "viz/_chart_view";
+@import "viz/_map_view";
+@import "viz/_raw_view";

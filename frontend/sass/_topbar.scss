@@ -1,0 +1,56 @@
+// Base topbar styling
+.topbar-wrapper {
+
+	position:		fixed;
+	width:			100%;
+
+	z-index: 100;
+	background-color: #FFF;
+	border-top:		4px solid $accent;
+	border-bottom:	1px solid $accent;
+	margin-bottom:	16px;
+
+ 	.topbar {
+ 		 height:64px;
+ 	}
+
+	.logo {
+		position:absolute;
+
+		width:100px;
+		height:64px;
+		background-color: #EEE;
+
+		left:50%;
+		margin-top:0px;
+		margin-left:-50px;
+
+		background:#FFF;
+		text-align:center;
+
+		border-right: 1px solid $accent;
+		border-left: 1px solid $accent;
+
+		> div {
+			padding-top:8px;
+		}
+	}
+
+	.user-panel {
+		padding-top:16px;
+		h4 {
+			display:inline;
+		}
+	}
+}
+
+@media only screen and (max-width: 767px) {
+
+	.topbar-wrapper {
+		
+		// Hide the search bar on smaller screen sizes.
+		.user-panel, .search-bar {
+			display:none;
+		}
+	}
+}
