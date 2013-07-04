@@ -25,6 +25,46 @@
 
 		require( [ 'app/viz/main' ] )
 	});
+
+	function moveScroller() {
+    	var move = function() {
+
+    		var scrollTop = $( window ).scrollTop();
+    		var scrollLeft = $( window ).scrollLeft();
+
+    		var offsetTop = $( '#raw_table' ).offset().top;
+    		var offsetLeft = $( '#raw_table' ).offset().left;
+
+    		var header = $( '#scroller' );
+
+    		if( scrollTop + 68 > offsetTop ) {
+
+        		$( '#scroller-copy' ).show();
+
+            	header.css({
+                	position: "fixed",
+                	top: "68px",
+                	left: ( 0 - scrollLeft + offsetLeft ) + "px",
+                	"box-shadow": "0px 5px 5px #EEE"
+            	});
+
+        	} else if ( scrollTop <= offsetTop ) {
+
+        		$( '#scroller-copy' ).hide();
+
+            	header.css({
+                	position: "relative",
+                	top: ""
+            	});
+        	}
+    	};
+    	$(window).scroll(move);
+    	move();
+	}
+
+	$( function() {
+		moveScroller();
+	});
 </script>
 {% endblock %}
 
@@ -98,7 +138,7 @@
 			<li>
 				<a href='#' data-type='share'>
 					<i class='icon-group'></i><br/>
-					Share Data
+					Share
 				</a>
 			</li>
 			{% endif %}
@@ -113,9 +153,10 @@
 				<i class='icon-th-large'></i>&nbsp;Grid
 			</a>
 		</div>
-		<div class='span12 active horizontalBar' id='raw_list'>
+		<div class='sixteen columns active' id='raw_list'>
 			<table id="raw_table" class="table">
-				<thead><tr></tr></thead>
+				<thead id='scroller'><tr></tr></thead>
+				<thead id='scroller-copy' style='display:none;'><tr></tr></thead>
 				<tbody>
 					<tr><td>Loading data...</td></tr>
 				</tbody>

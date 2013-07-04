@@ -16,11 +16,18 @@
 
 	th {
 		font-weight: bold;
-		color: $theme;	
+		text-align: left;
+		padding: 8px 16px;
+		color: $theme;
+
+		border: 1px solid $accent;
+		background-color: #FFF !important;
+		white-space: nowrap;
 	}
 
 	td {
-		padding: 8px 4px;
+		padding: 8px 16px;
+		white-space: nowrap;
 
 		a {
 			display:block;
