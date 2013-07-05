@@ -3,15 +3,11 @@
 
 {% block title %}{{ account.name }}{% endblock %}
 
-{% block css %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
-{% endblock %}
-
 {% block js %}
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-<script src='{% static "js/vendor/underscore-1.4.4.js" %}'></script>
+<script src='{% static "js/vendor/underscore.js" %}'></script>
 <script src='{% static "js/vendor/jquery.cookie.js" %}'></script>
-<script src='{% static "js/orgs/dashboard.js" %}' type="text/javascript"></script>
+<script src='{% static "js/app/orgs/dashboard.js" %}' type="text/javascript"></script>
 <script id='member_tmpl' type='text/html'>
 	<div>
 		<div class='pull-right'>
@@ -24,34 +20,59 @@
 
 {% block content %}
 <div class='row'>
-	<div class='span3'>
-		<h3>
-			<img width='40' src='{{ account.icon }}' class='account-icon-large'>
+	<div class='three columns sidebar'>
+		<h3 style='text-align:center;'>
+			<img width='40' src='{{ account.icon }}' class='account-icon account-icon-large'>
 			<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>
 		</h3>
 
-		<div>
-			<h5>Members</h5>
+		{% if is_owner %}
+		<div class='dairy-dropzone'>
+			Drag a CSV file here or
 			<div>
-				{% if is_owner %}
-				<div class='form-search' style='background:#EEE;padding:8px;border:1px solid #DDD;margin-bottom:8px;'>
-					<input id='add_member' type='text' class='input-small search-query'>
-					<button class='btn pull-right'>
-						<i class='icon-plus-sign'></i>&nbsp;Add
-					</button>
+				<a class='btn btn-primary btn-small' id='new_repo_btn' href='{% url "organization_repo_new" org=account.name %}'>
+					Create From Scratch
+				</a>
+			</div>
+		</div>	
+		{% endif %}	
+
+		<div class='section'>
+			{% if is_owner %}
+				<div style='float:left;'>
+					<a href='#' class='btn btn-small btn-primary' id='add-user-btn'>
+						<i class='icon-plus-sign'></i>
+						&nbsp;Add
+					</a>
+				</div>
+				<div class='row' style='display:none;'>
+					<div class='twelve columns'>
+						<input id='add_member' type='text' style='margin:0;'>
+					</div>
+					<div class='four columns'>
+						<div style='padding: 0 8px;'>
+							<a class='btn btn-primary' href='#'>
+								<i class='icon-plus-sign'></i>&nbsp;Add
+							</a>		
+						</div>
+					</div>
 				</div>
 				<div id="user_search_list">
 				</div>
-				{% endif %}
+			{% endif %}
+
+			<h4>Members</h4>
+
+			<div>
 				{% if is_member %}
 				<div>
 					{% if is_owner %}
-					<div class='pull-right'>
-						<span class='label label-inverse'>administrator</span>
+					<div style='float:left;'>
+						<span class='label'>admin</span>
 					</div>
 					{% endif %}
 					{% if is_member.pending %}
-					<div class='pull-right'>
+					<div style='float:left;'>
 						<a href='{% url "organization_member_accept" org=account.name user=user.username %}'
 						   class='btn btn-small btn-success'>
 							Join
@@ -62,23 +83,25 @@
 						</a>
 					</div>
 					{% endif %}
+
 					<a href='{% url "user_dashboard" username=user.username %}'>
 						{{ user.username }}
 					</a>
 				</div>
 				{% endif %}
+
 				<div id='member_list'>
 				{% for member in members %}
 					{% if member.user != user %}
 					<div>
 						{% if member.is_admin %}
-						<div class='pull-right'>
-							<span class='label label-inverse'>administrator</span>
+						<div style='float:left;'>
+							<span class='label'>administrator</span>
 						</div>
 						{% endif %}
 						{% if member.pending %}
-						<div class='pull-right'>
-							<span class='label label-info'>Pending</span>
+						<div style='float:left;'>
+							<span class='label label-pending'>pending</span>
 						</div>
 						{% endif %}
 						<a href='{% url "user_dashboard" username=member.user.username %}'>
@@ -91,21 +114,8 @@
 			</div>
 		</div>
 	</div>
-	<div class='span9'>
-		{% if is_owner %}
-		<div style='height:40px;margin:10px 0;'>
-			<div style='padding:8px;'>
-				<div class='pull-right'>
-					<a id='new_repo_btn'
-					   href='{% url "organization_repo_new" org=account.name %}'
-					   class='btn btn-small'>
-						New Data Diary
-					</a>
-				</div>
-			</div>
-		</div>
-		{% endif %}
-		<table id='repo_list' class='table table-striped table-bordered'>
+	<div class='thirteen columns'>
+		<table id='repo_list' class='table diary-list'>
 			<tbody>
 				<tr><td colspan='4'>Data Diaries</td></tr>
 				{% if repos|length == 0 %}
@@ -117,13 +127,18 @@
 				{% endif %}
 				{% for repo in repos %}
 					<tr>
-						<td style='width:32px;text-align:center;'>
+						<td class='privacy'>
 							{% if repo.public %}
 								<i class='icon-unlock'></i>
 							{% else %}
 								<i class='icon-lock'></i>
 							{% endif %}
 						</td>
+						<td class='add-data'>
+							<a href='{% url "repo_webform" username=account.name repo_name=repo.name %}' class='btn btn-small'>
+								<i class='icon-pencil'></i> Add Data
+							</a>
+						</td>						
 						<td>
 							<a href='{% url "repo_visualize" username=account.name repo_name=repo.name %}'>
 								{{ repo.name }}
@@ -134,13 +149,8 @@
 							</span>
 							{% endif %}
 						</td>
-						<td style='width:102px;text-align:center;'>
-							<a href='{% url "repo_webform" username=account.name repo_name=repo.name %}' class='btn btn-small'>
-								<i class='icon-pencil'></i> Web Form
-							</a>
-						</td>
-						<td style='width:64px;text-align:right;'>
-							{{ repo.submission_count }} <i class='icon-file-alt'></i>
+						<td class='submission-count'>
+							{{ repo.submissions }} <i class='icon-file-alt'></i>
 						</td>
 					</tr>
 				{% endfor %}

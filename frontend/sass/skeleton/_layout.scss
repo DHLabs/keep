@@ -23,6 +23,13 @@
 /* #Media Queries
 ================================================== */
 
+	
+	@media only screen and (max-width: 1280px ) {
+		.widescreen-only {
+			display:none;
+		}
+	}
+
 	/* Smaller than standard 960 (devices and browsers) */
 	@media only screen and (max-width: 959px) {}
 

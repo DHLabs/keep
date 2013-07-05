@@ -61,6 +61,8 @@ define( [ 'jquery',
             @_detect_headers( @form.attributes.children )
 
             @render()
+            
+            @
 
         change_viz_type: ( event ) ->
             viz_type = $( event.currentTarget ).data( 'type' )
@@ -74,6 +76,7 @@ define( [ 'jquery',
                 #if viz_type == 'grid' and @wall?
                 #    @wall.masonry( 'reload' )
             )
+            @
 
         toggle_media: ( event ) ->
             only_photos = $( event.currentTarget ).is( ':checked' )
@@ -86,6 +89,8 @@ define( [ 'jquery',
             )
 
             #@wall.masonry( 'reload' )
+
+            @
 
         _render_list: ->
             # Add column headers
@@ -119,10 +124,6 @@ define( [ 'jquery',
             $( '#raw_table > tbody' ).append( row_html )
 
             # Render the table using jQuery's DataTable
-            #
-            # NOTE: Elements taken from DataTables blog post about using DT with
-            # Bootstrap, http://www.datatables.net/blog/Twitter_Bootstrap_2
-            #
             $( '#raw_table' ).dataTable(
                 'sDom': "<'row'<'eight columns'l><'eight columns'f>r>t<'row'<'eight columns'i><'eight columns'p>>"
                 'bLengthChange': false
@@ -130,9 +131,7 @@ define( [ 'jquery',
                 'iDisplayLength': 50
             )
 
-            $.extend( $.fn.dataTableExt.oStdClasses, {
-                "sWrapper": "dataTables_wrapper form-inline"
-            } )
+            @
 
         _render_grid: ->
             # Add data from data models
@@ -170,9 +169,7 @@ define( [ 'jquery',
 
         render: ->
             @_render_list()
-
-            if @data.models.length > 0
-                @_render_grid()
+            @_render_grid() if @data.models.length > 0
 
             @
 

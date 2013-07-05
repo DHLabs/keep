@@ -16,6 +16,25 @@
 			padding: 8px 0;
 		}
 	}
+
+	.dairy-dropzone {
+		border: 1px dashed $theme;
+		text-align:center;
+		padding: 16px 8px;
+		margin: 16px 8px;
+	}	
+}
+
+span.label {
+	color: $accent;
+	font-variant: small-caps;
+	font-weight: bold;
+	padding: 2px 4px 4px 4px;
+	border-radius: 2px;
+}
+
+span.label-pending {
+	color: lighten( $accent, 66% );
 }
 
 #org-list {
@@ -25,7 +44,8 @@
 }
 
 img.account-icon {
-	 border-radius:4px;
+	border:1px solid lighten( $accent, 66% );
+	border-radius:4px;
 }
 
 img.account-icon-large {
@@ -63,20 +83,21 @@ img.account-icon-large {
 	}
 }
 
-#repo_list {
+.diary-list {
 
 	td {
 		vertical-align: middle;
+		padding:4px 8px;
 	}
 
 	.privacy {
 		font-size:1.2em;
-		width:32px;
+		width:18px;
 		text-align:center;
 	}
 
 	.add-data {
-		width:96px;
+		width:80px;
 		text-align:center;
 	}
 
@@ -85,4 +106,5 @@ img.account-icon-large {
 		 text-align:right;
 		 padding-right:16px;
 	}
+
 }

@@ -10,7 +10,7 @@
 		Drag a CSV file here or
 		<div>
 			<a class='btn btn-primary btn-small' id='new_repo_btn' href='{% url "repo_new" %}'>
-				<span class='label'>Create From Scratch</span>
+				Create From Scratch
 			</a>
 		</div>
 	</div>
@@ -35,14 +35,14 @@
 	<div class='section'>
 		{% if not is_other_user %}		
 		<div style='float:left;'>
-			<a href='{% url "organization_new" %}' class='btn btn-small' id='create_org_btn'>
+			<a href='{% url "organization_new" %}' class='btn btn-primary btn-small' id='create_org_btn'>
 				<i class='icon-plus-sign'></i>
 				&nbsp;New
 			</a>
 		</div>
 		{% endif %}
 
-		<h4>Organizations</h4>
+		<h4>Org<span class='widescreen-only'>anization</span>s</h4>
 
 		<ul id='org-list'>
 			{% if organizations|length == 0 %}
@@ -52,24 +52,22 @@
 			{% else %}
 				{% for org in organizations %}
 				<li>
-					{% if not org.pending or not is_other_user %}
-						{% if org.pending %}
-						<div style='float:right;'>
-							<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
-							   class='btn btn-small btn-success'>
-								Join
-							</a>
-							<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
-							   class='btn btn-small'>
-							   Ignore
-							</a>
-						</div>
-						{% endif %}
-						<a href='{% url "organization_dashboard" org=org.organization.name %}'>
-							<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
-							&nbsp;{{ org.organization.name }}
+					<a href='{% url "organization_dashboard" org=org.organization.name %}'>
+						<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
+						&nbsp;{{ org.organization.name }}
+					</a>
+					{% if org.pending and not is_other_user %}
+					<div style='margin-top:4px;'>
+						<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
+						   class='btn btn-small btn-primary'>
+							Join
+						</a>&nbsp;
+						<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
+						   class='btn btn-small'>
+						   Ignore
 						</a>
-					{% endif %}
+					</div>
+					{% endif %}					
 				</li>
 				{% endfor %}
 			{% endif %}
@@ -87,7 +85,7 @@
 </div>
 <!-- REPOSITORIES -->
 <div class='thirteen columns repos'>
-	<table id='repo_list' class='table'>
+	<table id='repo_list' class='table diary-list'>
 		<tbody>
 			{% if user_repos|length == 0 %}
 				<tr>
@@ -132,18 +130,18 @@
 	<div style='margin:16px 0;'>
 		<h4>Shared Data Diaries</h4>
 	</div>
-	<table id='shared_repo_list' class='table'>
+	<table id='shared_repo_list' class='table diary-list'>
 		<tbody>
 			{% for repo in shared_repos %}
 			<tr>
-				<td style='width:32px;text-align:center;vertical-align:middle;'>
+				<td class='privacy'>
 					{% if repo.is_public %}
 						<i class='icon-unlock'></i>
 					{% else %}
 						<i class='icon-lock'></i>
 					{% endif %}
 				</td>
-				<td style='width:102px;text-align:center;vertical-align:middle;'>
+				<td class='add-data'>
 					<a href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}' class='btn btn-small'>
 						<i class='icon-pencil'></i> Add Data
 					</a>
@@ -158,7 +156,7 @@
 					</span>
 					{% endif %}
 				</td>
-				<td style='width:64px;text-align:right;vertical-align:middle;'>
+				<td class='submission-count'>
 					{{ repo.submissions }} <i class='icon-file-alt'></i>
 				</td>
 			</tr>

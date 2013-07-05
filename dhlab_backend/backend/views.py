@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-from organizations.models import Organization
+from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
 from repos.models import Repository
 from twofactor.models import UserAPIToken
@@ -100,7 +100,7 @@ def user_dashboard( request, username ):
     user = get_object_or_404( User, username=username )
 
     # Find all the organization this user belongs to
-    organizations = Organization.objects.filter( users=user )
+    organizations = OrganizationUser.objects.filter( user=user )
 
     # Grab a list of forms uploaded by the user
     if is_other_user:
