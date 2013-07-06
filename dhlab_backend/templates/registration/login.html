@@ -1,46 +1,35 @@
 {% extends "base.html" %}
-{% load i18n %}
 {% block content %}
 
-<section id="login">
-	<div class="page-header">
-		<h1>{% trans "Log In" %}</h1>
-	</div>
+<div class='section'>
+	<div class="four columns offset-by-six">
+		<h2>Log In</h2>
 
-	<div class="row">
-		<div class="span8">
-			<form class="well" method="post" action=".">
-				<table id='login'>
-					{{ form.as_table }}
-					<tfoot>
-						<tr>
-							<td>&nbsp;</td>
-							<td><input type="submit" id='login_btn' class="btn btn-primary" value="{% trans 'Log In' %}" /></td>
-						</tr>
-					</tfoot>
-				</table>
-				{% csrf_token %}
-				<input type="hidden" name="next" value="/" />
-			</form>
-			<p>
-				{% url "resend_activation" as resend_activation_url %}
-				Missed your activation email? <a id='resend_activation' href='{{ resend_activation_url }}'>Re-send activation email.</a>
-			</p>
-			<p style='display:none;'>
-				{% url "auth_password_reset" as reset_url %}
-				{% blocktrans %}
-				Can't access your account? <a id='reset_password' href="{{ reset_url }}">Reset your password.</a>
-				{% endblocktrans %}
-			</p>
-			<p>
-				{% url "registration_register" as registration_url %}
+		<form class="well" method="post" action=".">
+			{% csrf_token %}
+			{{ form }}
+			<input type="submit" id='login_btn' class="btn btn-primary" value='Log In' />
+			<input type='hidden' name='next' value='/' />
+		</form>
+		
+		<p>
+			{% url "resend_activation" as resend_activation_url %}
+			Missed your activation email? <br>
+			<a id='resend_activation' href='{{ resend_activation_url }}'>Re-send activation email.</a>
+		</p>
 
-				{% blocktrans %}
-				New to DHLab? <a id='register_account' href="{{ registration_url }}">Create an account.</a>
-				{% endblocktrans %}
-			</p>
-		</div>
+		<p style='display:none;'>
+			{% url "auth_password_reset" as reset_url %}
+			Can't access your account? <br>
+			<a id='reset_password' href="{{ reset_url }}">Reset your password.</a>
+		</p>
+		<p>
+			{% url "registration_register" as registration_url %}
+
+			New to DHLab? <br>
+			<a id='register_account' href="{{ registration_url }}">Create an account.</a>
+		</p>
 	</div>
-</section>
+</div>
 
 {% endblock %}
