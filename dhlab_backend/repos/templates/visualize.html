@@ -45,7 +45,7 @@
                 	position: "fixed",
                 	top: "68px",
                 	left: ( 0 - scrollLeft + offsetLeft ) + "px",
-                	"box-shadow": "0px 5px 5px #EEE"
+                	"box-shadow": "0px 0px 5px rgba(0,0,0,0.3)"
             	});
 
         	} else if ( scrollTop <= offsetTop ) {
@@ -100,9 +100,7 @@
 <div class='three columns' style='text-align:right;'>
 	<div style='margin-top:8px;'>
 		<a class='btn btn-primary' href='/api/v1/data/{{ sid }}?format=csv&amp;user={{account.username}}'>
-			<span class='label'>
-				<i class='icon-download'></i> Download All Data
-			</span>
+			<i class='icon-download'></i> Download All Data
 		</a>
 	</div>
 </div>

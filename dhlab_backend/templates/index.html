@@ -1,57 +1,116 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
-{% block css %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/landing.css' %}">
+{% block js %}
+<script type="text/javascript">
+	$( function() {
+		$( '#info-start-btn' ).click( function() {
+			$( 'html, body' ).animate( {
+				scrollTop: $( '#info-start' ).offset().top - 80
+			});
+
+			return false;
+		});
+	});
+</script>
 {% endblock %}
 
 {% block outerspace %}
 <div class='jumbotron'>
 	<div class='container'>
-		<h1>A powerful, secure data repository.</h1>
+		<h1>A powerful, secure data diary for the crowd.</h1>
 		<h4>
-			KEEP provides a <strong>flexible</strong>, <strong>reliable</strong> data repository for scientific and health data<br>
-			which is tightly coupled with a <strong>powerful visualization</strong> and <strong>analytics</strong> framework.
+			KEEP is a <strong><a href='#'>simple, flexible, and reliable</a></strong> data diary for scientific and health data<br>
+			tightly coupled with <strong><a href='#'>powerful visualization</a></strong> and <strong><a href='#'>analytics</a></strong>.
 		</h4>
-		<div style='text-align:center;padding:32px;'>
+		
+		<div>
 			<img src='{% static "img/masthead/dataflow.png" %}' width='640'>
 		</div>
+
+		<div>
+			<a href='{% url "registration_register" %}' class='btn btn-primary btn-large'>Get Started!</a>
+			<a href='{% url "auth_login" %}' class='btn btn-large'>Log In</a>
+		</div>
+
+		<div>
+			<a id='info-start-btn' href='#info-start'>Learn More <i class='icon-double-angle-right'></i></a>
+		</div>
 	</div>
 </div>
-<div class='collab'>
+<div class='banner'>
 	<div class='container'>
-		<a href='{% url "registration_register" %}' class='btn btn-success btn-large'>Get Started!</a>
-		<a href='{% url "auth_login" %}' class='btn btn-large'>Log In</a>
+		<div class='eight columns'>
+			<div class='securedata-banner'></div>
+		</div>
+		<div class='eight columns'>
+			<a name='info-start' id='info-start'><h2>Start Collecting Data Now</h2></a>
+			<div>
+				<strong>Start collecting immediately.</strong> Diaries can be 
+				created using existing spreadsheets or from scratch allowing 
+				you to begin collecting data immediately.
+			</div>
+		</div>		
 	</div>
 </div>
-<div class='container' style='margin-top:16px;'>
-	<div class='row'>
-		<div class='span4'>
-			<h4>Secure Data Storage</h4>
+<div class='banner'>
+	<div class='container'>
+		<div class='eight columns'>
+			<h2>Simple Data Management</h2>
+			<strong>Easily manage your data</strong> in an intuitive spreadsheet-like interface 
+			that was built with little and big data in mind. Add, edit, 
+			and delete data all from a single place.
+		</div>
+		<div class='eight columns'>
 			<div class='securedata-banner'></div>
-			<div style='margin-top:16px;'>
-				Two-factor authentication and 1024-bit SSL encryption used
-				throughout the data collection process allows your data to be
-				safely transmitted and stored.
+		</div>
+	</div>
+</div>
+<div class='banner'>
+	<div class='container'>
+		<div class='eight columns'>
+			<div class='securedata-banner'></div>
+		</div>
+		<div class='eight columns'>
+			<h2>Securely Stored</h2>
+			<div>				
+				<strong>Only share what you want.</strong> Two-factor authentication 
+				and 1024-bit SSL encryption used throughout the data collection 
+				process allows your data to be safely transmitted and stored.
 			</div>
 		</div>
-		<div class='span4'>
-			<h4>Powerful Analytics</h4>
+	</div>
+</div>
+<div class='banner'>
+	<div class='container'>
+		<div class='eight columns'>
+			<h2>Run Powerful Analytics</h2>
+			<div>
+				<strong>Learn more about your data.</strong> Visualizations and
+				analytics are automatically generated to best fit your data. You can
+				also go in and create your own visualizations and analyses, allowing 
+				you to views data in new and powerful ways.
+			</div>			
+		</div>
+		<div class='eight columns'>
 			<div class='analytics-banner'></div>
-			<div style='margin-top:16px;'>
-				Based on your data, we determine the best visualizations and
-				analytics to apply allowing you to view your data in new and
-				powerful ways.
-			</div>
 		</div>
-		<div class='span4'>
-			<h4>Differential Privacy</h4>
+	</div>
+</div>
+<div class='banner'>
+	<div class='container'>
+		<div class='eight columns'>
 			<div class='privacy-banner'></div>
-			<div style='margin-top:16px;'>
-				Differential privacy allows you to share potentially confidential
-				information by fuzzing the data with enough randomness to mask
-				it but still provide statistically useful analytics.
+		</div>
+		<div class='eight columns'>
+			<h2>Privatize Shared Data</h2>
+			<div>
+				<strong>Share data privately.</strong> Differential privacy allows 
+				you to share potentially confidential information by fuzzing the 
+				data with enough randomness to mask it but still provide 
+				statistically useful analytics.
 			</div>
 		</div>
+	</div>
 </div>
 {% endblock %}
