@@ -17,8 +17,8 @@
 	> div {
 		text-align: center;
 
-		> div {
-			padding:8px 0;
+		> div > div {
+			padding:16px 0;
 		}
 	}
 }
@@ -75,7 +75,7 @@
 }
 
 .management-banner {
-	background: url(../img/masthead/managemet.png) no-repeat;
+	background: url(../img/masthead/management.png) no-repeat;
 	background-size: 512px 316px;
 
 	width: 256px;
