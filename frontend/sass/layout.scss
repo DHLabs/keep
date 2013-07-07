@@ -20,6 +20,16 @@ img {
 	vertical-align: middle;
 }
 
+form {
+	> input[type='text'] {
+		width:100% !important;
+	}
+
+	> input[type='password'] {
+		width:100% !important;
+	}
+
+}
 // Miscellaneous CSS that needs to be categorized
 .section {
 	margin:32px 0;
@@ -29,4 +39,9 @@ img {
 div.help-block {
 	font-size: 13px; 
 	color: #AAA;
+}
+
+.error-block {
+	font-size: 13px;
+	color: $theme;
 }
