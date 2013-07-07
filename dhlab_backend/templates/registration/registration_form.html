@@ -1,35 +1,21 @@
 {% extends "base.html" %}
-{% load i18n %}
 
 {% block content %}
-<section id="register">
-  <div class="page-header">
-	<h1>{% trans "Sign Up" %}</h1>
-</div>
-
-<div class="row">
-	<div class="span8">
-		<p>{% trans "Fields marked wth an asterisk (*) are required." %}</p>
-		<form class="well" method="post" action=".">
+<div class='section'>
+	<div class="six columns offset-by-five">
+		<h1>Sign Up</h1>
+		<p>Fields marked wth an asterisk (*) are required.</p>
+		<form method="post" action=".">
 			{% csrf_token %}
 			{% for field in form %}
-				{{ field.label_tag }}
+				<label for='{{ field.name }}'>
+					{% if field.field.required %}*{% endif %}
+					{{ field.label }}
+				</label>
 				{{ field }}
-				{% if field.field.required %}*{% endif %}
-				<span class='help-block'>{{ field.errors }}</span>
+				<span class='error-block'>{{ field.errors }}</span>
 	  		{% endfor %}
-	  		<p>
-	  			{% blocktrans %}
-	  			By clicking the 'Sign Up' button, you acknowledge
-	  			that this is beta software; we make no guarantees about the
-	  			reliability or continuity of our service. We reserve the right
-	  			to pause or terminate your service, or delete your account and
-	  			data, at any time without notice. We will not be liable for any
-	  			losses, either direct or indirect, that such service interruption
-	  			or data loss may cause you. Use the service at your own risk.
-	  			{% endblocktrans %}
-	  		</p>
-	  		<input type="submit" id='register_btn' class="btn large btn-primary" value="{% trans 'Sign Up' %}" />
+	  		<button type='submit' id='register-btn' class='btn btn-primary'>Sign Up</button>
   		</form>
 	</div>
 </div>

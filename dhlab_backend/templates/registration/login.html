@@ -5,7 +5,7 @@
 	<div class="four columns offset-by-six">
 		<h2>Log In</h2>
 
-		<form class="well" method="post" action=".">
+		<form method="post" action=".">
 			{% csrf_token %}
 			{{ form }}
 			<input type="submit" id='login_btn' class="btn btn-primary" value='Log In' />
