@@ -1,0 +1,85 @@
+.jumbotron {
+
+	padding-top: 96px;
+	padding-bottom:32px;
+
+	h1, h4 {
+		text-align: center;
+		font-weight: normal;
+	}
+
+	h4 {
+		color: #666;
+		line-height:200%;
+		font-family: HelveticaNeue, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	}
+
+	> div {
+		text-align: center;
+
+		> div {
+			padding:8px 0;
+		}
+	}
+}
+
+.banner {
+	border-top: 1px solid $theme;
+	padding:32px 0;
+
+	font-size: 1.2em;
+	line-height: 200%;
+
+	.columns {
+		padding-top:32px;
+		padding-bottom:32px;
+	}
+}
+
+.banner:last-of-type {
+	border-bottom: 1px solid $theme;
+}
+
+.analytics-banner {
+	background: url(../img/masthead/analytics.png) no-repeat;
+	background-size: 600px 300px;
+	
+	width:  256px;
+	height: 256px;
+	
+	margin: 0 auto;
+
+	border-radius:100%;
+}
+
+.privacy-banner {
+	background: url(../img/masthead/privacy.png) no-repeat;
+	background-size: 600px 256px;
+
+	width:  256px;
+	height: 256px;
+
+	margin: 0 auto;
+
+	border-radius: 100%;
+}
+
+.data-collection-banner {
+	background: url(../img/masthead/data-collection.png) no-repeat;
+	background-size: 207px 417px;
+
+	width: 207px;
+	height: 417px;
+
+	margin: 0 auto;
+}
+
+.management-banner {
+	background: url(../img/masthead/managemet.png) no-repeat;
+	background-size: 512px 316px;
+
+	width: 256px;
+	height: 316px;
+
+	margin: 0 auto;
+}
