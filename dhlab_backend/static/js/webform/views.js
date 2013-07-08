@@ -217,7 +217,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       // Group controls
       if (form_info.control) {
         if (form_info.control.appearance && form_info.control.appearance === 'field-list') {
-          var current_tree = form_info.tree; // + form_info.name + "/";
+          var current_tree = form_info.tree;
 
           $('#' + switch_question_key + "_field").addClass('active');
           switch_question_idx = question_index + 1;
@@ -246,6 +246,12 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }
         switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
+        var subsequent;
+        if ((subsequent = form_info.title.indexOf("${")) !== -1 ) {
+          var end_subsequent = form_info.title.indexOf("}", subsequent);
+          var subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent);
+          switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val());
+        };
         switch_question.fadeIn(1).addClass('active');
       };
       if(form_info.bind != undefined && form_info.bind.map != undefined){
