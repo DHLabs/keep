@@ -166,14 +166,15 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     xFormView.prototype.passes_question_constraints = function() {
       var question;
       question = this._active_question();
-      if (question.info.bind && question.info.bind.required === true) {
+      
+      if (question.info.bind && (question.info.bind.required === true || question.info.bind.required === 'yes')) {
         if (this.renderedForm.getValue()[question.key].length === 0) {
-          alert("Answer is required");
+          $("#alert-placeholder").html('<div class="alert alert-error"><a class="close" data-dismiss="alert">x</a><span>Answer is required.</span></div>');
           return false;
         }
       }
       if (!XFormConstraintChecker.passesConstraint(question.info, this.renderedForm.getValue())) {
-        alert("Answer doesn't pass constraint:" + question.info.bind.constraint);
+        $("#alert-placeholder").html('<div class="alert alert-error"><a class="close" data-dismiss="alert">x</a><span>Answer doesn\'t pass constraint:' + question.info.bind.constraint + '</span></div>');
         return false;
       }
       return true;
@@ -210,7 +211,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       }
       
       $('.active').fadeOut(1);
-
+      $('.alert').fadeOut(1);
       $('.active').removeClass('active');
 
       // Group controls
@@ -247,7 +248,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
         switch_question.fadeIn(1).addClass('active');
       };
-
       if(form_info.bind != undefined && form_info.bind.map != undefined){
         _geopointDisplay();
       };

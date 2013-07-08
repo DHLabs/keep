@@ -25,6 +25,11 @@
 </script>
 <script src="{% static 'js/vendor/bootstrap.2.3.1.min.js' %}"></script>
 
+<script>
+$("alert_template .close").click(function(e) {
+	$("alert_template span").remove();
+});
+</script>
 {% endblock %}
 
 {% block content %}
@@ -45,6 +50,7 @@
 	  	<div id="xform_view" class="span12">
 	    	<div id="form_fields" class="formbox">
 		  		<div id="formDiv"></div>
+		  		<div id="alert-placeholder"></div>
 	    	</div>
 	    	<div id='form_actions' style='overflow:auto;'>
 	    		<div class='pull-right'>
