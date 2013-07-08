@@ -43,7 +43,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'masonry'], functi
         if ((_ref = field.type) === 'group') {
           this._detect_headers(field.children);
         }
-        if ((_ref1 = field.type) !== 'note') {
+        if (((_ref1 = field.type) !== 'note') && (_ref1 !== 'group')) {
           _results.push(this.column_headers.push(field));
         } else {
           _results.push(void 0);
