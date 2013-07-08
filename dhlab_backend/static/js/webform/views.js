@@ -166,7 +166,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     xFormView.prototype.passes_question_constraints = function() {
       var question;
       question = this._active_question();
-      if (question.info.bind && question.info.bind.required === "yes") {
+      if (question.info.bind && question.info.bind.required === true) {
         if (this.renderedForm.getValue()[question.key].length === 0) {
           alert("Answer is required");
           return false;
