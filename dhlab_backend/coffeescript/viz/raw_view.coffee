@@ -51,7 +51,7 @@ define( [ 'jquery',
                     @_detect_headers( field.children )
 
                 # Don't show notes in the raw data table
-                if field.type not in [ 'note' ]
+                if field.type not in [ 'note' ] and field.type not in [ 'group' ]
                     @column_headers.push( field )
 
         initialize: ( options ) ->

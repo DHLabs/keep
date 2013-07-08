@@ -1,6 +1,6 @@
 define( [ 'vendor/underscore' ], ( _ ) ->
 
-    build_form = ( child, lang ) ->
+    build_form = ( child, path, lang ) ->
 
         label = ''
         if typeof child.label == 'object'
@@ -18,6 +18,7 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             title: label
             is_field: true
             bind: child.bind
+            tree: path
 
         if child.type in [ 'string', 'text' ]
 
@@ -102,9 +103,14 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
         else if child.type is 'group'
 
-            _.each( child.children, ( _child ) =>
-                @recursiveAdd( _child )
-            )
+            schema_dict["is_field"] = false
+            schema_dict["tree"] = schema_dict["tree"] + (child.name) + "/"
+            schema_dict["control"] = child.control
+            schema_dict["bind"] = group_start: true
+            @item_dict[child.name] = schema_dict
+            @_fieldsets.push child.name
+            _.each child.children, (_child) ->
+                _this.recursiveAdd _child, (schema_dict["tree"])
 
             return @
 
