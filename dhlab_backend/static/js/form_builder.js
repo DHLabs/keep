@@ -4,6 +4,7 @@ var currentQuestionName;
 var currentGroupName;
 
 $( function() {
+
    if( repo ) {
      console.log( repo );
      questionList = repo;
@@ -20,7 +21,13 @@ $( function() {
    	if( jsonvalue ) {
    		$( "#build_form" ).hide();
 		$( '#survey_builder' ).show();
-   	  	questionList = JSON.parse( $("#id_survey_json").val() ).children;
+		var survey = JSON.parse( $("#id_survey_json").val() )
+   	  	questionList = survey.children;
+   	  	if( survey.type ) {
+   	  		if( survey.type == 'register' ) {
+   	  			document.getElementById("registrationType").checked = true;
+   	  		}
+   	  	}
    	  	reloadQuestionListHTML();
    	}
    }
@@ -587,6 +594,13 @@ function buildQuestionList( listQuestions, formChildren )  {
 
 function buildSurvey() {
 	var survey = new Object();
+
+	if( document.getElementById("registrationType").checked ) {
+		survey.type = "register";
+	} else {
+		survey.type = "survey";
+	}
+
 	survey.children = questionList;
 	var value = JSON.stringify(survey);
 	console.log( value );
@@ -685,6 +699,70 @@ function sanitizeNameInput(inputElement) {
 	inputElement.value = inputString;
 }
 
+function moveQuestionUp( questionName ) {
+	moveQuestion( questionName, true );
+}
+
+function moveQuestionDown( questionName ) {
+	moveQuestion( questionName, false );
+}
+
+function moveQuestion( questionName, moveUp ) {
+	var question = getQuestionForName( questionName );
+	var arrayToModify;
+	var questionIndex;
+	if( currentGroupName ) {
+		var group = getQuestionForName( currentGroupName );
+		questionIndex = getQuestionIndex(questionName);
+		arrayToModify = group.children;
+	} else {
+		questionIndex = getQuestionIndex(questionName);
+		arrayToModify = questionList;
+	}
+
+	var newIndex;
+
+	if( moveUp ) {
+		newIndex = questionIndex - 1;
+	} else {
+		newIndex = questionIndex + 1;
+	}
+
+	if( questionIndex == -1 ) {
+		console.log( "error: could not find questionIndex" );
+	} else {
+		if( newIndex > (arrayToModify.length - 1) || newIndex < 0 ) {
+			//do nothing
+		} else {
+			//arrayToModify.move( questionIndex, newIndex );
+			arrayToModify.splice(newIndex, 0, arrayToModify.splice(questionIndex, 1)[0]);
+		}
+	}
+
+	buildSurvey();
+	reloadQuestionListHTML();
+}
+
+function getQuestionIndex( questionName ) {
+
+	if( currentGroupName ) {
+		var group = getQuestionForName( currentGroupName );
+		for( var quest in group.children ) {
+			if( group.children[quest].name == questionName ) {
+				return quest;
+			}
+		}
+	} else  {
+		for( var quest in questionList ) {
+			if( questionList[quest].name == questionName ) {
+				return quest;
+			}
+		}
+	}
+	
+	return -1;
+} 
+
 function getHTMLForQuestion(question) {
 
     if( question.type == "group" ) {
@@ -692,6 +770,12 @@ function getHTMLForQuestion(question) {
         "<td colspan='3'><table class='table table-striped table-bordered'>\n"
         + "<thead>\n<tr><td colspan='3' style='background-color:#EEE;'>\n"
         + "<h4>"+ question.name +"<div class='pull-right'>\n"
+        + "<button type='button' onclick=\"moveQuestionUp('"
+        + question.name +"')\""
+        + " class='btn btn-small'>up</button>\n"
+        + "<button type='button' onclick=\"moveQuestionDown('"
+        + question.name +"')\""
+        + " class='btn btn-small'>down</button>\n"
         + "<button type='button' onclick=\"addQuestionToGroup('"
         + question.name +"')\""
         + " id='addQuestionForGroup' class='btn btn-small'>Add Question</button>\n" +
@@ -716,6 +800,14 @@ function getHTMLForQuestion(question) {
         html += '<td>Name:&nbsp;' + question.name +
 		'&nbsp;&nbsp;&nbsp;Label:' + question.label +
 		'&nbsp;&nbsp;&nbsp;Question Type:' + question.type;
+
+		html += "<div class='pull-right'>\n<button type='button' onclick=\"moveQuestionUp('"
+        + question.name +"')\""
+        + " class='btn btn-small'>up</button>\n"
+        + "<button type='button' onclick=\"moveQuestionDown('"
+        + question.name +"')\""
+        + " class='btn btn-small'>down</button>\n</div>";
+
         html += '</td>';
         html += "<td style='width:70px;text-align:center;'>" +
         "<button class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
