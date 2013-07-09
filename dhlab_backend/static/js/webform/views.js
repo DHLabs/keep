@@ -116,6 +116,30 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       map.invalidateSize(false);
     };
 
+
+    // For calculations.  
+    _performCalcluate = function(question) {
+      var equation, evaluation, i;
+      equation = question.bind.calculation;
+      for (i = 0; i < equation.length; i++) {
+        
+      }
+    };
+
+    /** For later use, not working as of now (9 July 2013)
+      _specifiedOther = function(question) {
+      $('#' + question.key).attr('onChange', 'otherCheck(this.value)');
+      function otherCheck(value) {
+        if (value === 'other') {
+          console.log('HERE')
+        }
+      };
+      //if ($('#' + question.key).val === 'other') {
+      //  console.log("Hey")
+      //}
+    };
+    **/
+
     xFormView.prototype._display_form_buttons = function(question_index) {
       if (question_index === this.input_fields.length - 1) {
         $('#prev_btn').show();
@@ -234,7 +258,8 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }
       } else {
-        if (this.input_fields[question_index].bind && this.input_fields[question_index].bind.group_start) {
+        while (this.input_fields[question_index].bind && this.input_fields[question_index].bind.group_start) {
+          console.log(this.input_fields[question_index])
           if (forward) {
             if (question_index < this.input_fields.length) {
               question_index += 1;
@@ -246,6 +271,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
           }
         }
         switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
+        form_info = this.input_fields[question_index];
         var subsequent;
         if ((subsequent = form_info.title.indexOf("${")) !== -1 ) {
           var end_subsequent = form_info.title.indexOf("}", subsequent);
@@ -254,9 +280,25 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         };
         switch_question.fadeIn(1).addClass('active');
       };
-      if(form_info.bind != undefined && form_info.bind.map != undefined){
+      if(form_info.bind && form_info.bind.map){
         _geopointDisplay();
       };
+      if (form_info.bind && form_info.bind.calculation) {
+        _performCalcluate(this._active_question());
+      }
+      //if (this.input_fields[question_index])
+
+      /** For later use, not working as of 9 July 2013
+      if( this.input_fields[question_index].options) {
+        var i;
+        for ( i=0; i < this.input_fields[question_index].options.length; i++ ) {
+          if ( this.input_fields[question_index].options[i].val === 'other' ) {
+            _specifiedOther(this._active_question());
+          } 
+        }
+      }
+      **/
+
       this._display_form_buttons(question_index);
       return this;
     };

@@ -71,7 +71,6 @@ define([], function() {
       notRange = expression.indexOf("not(", 0);
       range = scopeRange;
       rangeLength = 1;
-      console.log(andRange)
       if (andRange !== -1 && andRange > range) {
         range = andRange;
         rangeLength = 5;
