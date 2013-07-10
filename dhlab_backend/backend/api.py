@@ -279,6 +279,10 @@ class RepoResource( ModelResource ):
         '''
         repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
         bundle.data['children'] = repo_fields[ 'fields' ]
+        if 'type' in repo_fields:
+            bundle.data['type'] = repo_fields[ 'type' ]
+        else:
+            bundle.data['type'] = "survey"
         bundle.data['user']     = bundle.obj.user
         return bundle
 

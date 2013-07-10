@@ -250,8 +250,10 @@ class NewRepoForm( forms.Form ):
         repo = {}
         if self.cleaned_data[ 'xform_file' ]:
             repo['fields'] = self.cleaned_data[ 'xform_file' ]['children']
+            repo['type'] = "survey"
         else:
             repo['fields'] = self.cleaned_data[ 'survey_json' ]['children']
+            repo['type'] = self.cleaned_data[ 'survey_json' ]['type']
 
         # Needed for xform formatting
         # repo[ 'title' ]       = self.cleaned_data[ 'name' ]
