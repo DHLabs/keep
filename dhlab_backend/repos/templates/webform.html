@@ -7,6 +7,32 @@
 
 {% block css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/webform.css' %}">
+<style type='text/css'>
+	.autocomplete-list {
+		position:absolute;
+	}
+
+	.ui-helper-hidden-accessible {
+		display:none;
+	}
+	
+	.ui-autocomplete {
+		border-bottom:1px solid #EEE;
+		border-right:1px solid #EEE;
+		border-left:1px solid #EEE;
+		list-style-type: none;
+		background-color: white;
+	}
+
+	.ui-autocomplete > .ui-menu-item {
+		padding: 4px 8px;
+		cursor:pointer;
+	}
+
+	.ui-autocomplete > .selected {
+		background-color: #EEE;
+	}	
+</style>
 {% endblock %}
 
 {% block js %}
@@ -18,6 +44,44 @@
 	document.cdn = '{% static "" %}'
 </script>
 <script src="{% static 'js/vendor/bootstrap.2.3.1.min.js' %}"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script type='text/javascript'>
+	$( function() {
+		console.log( 'loaded' );
+		$(document).on( "focus", ".autofill", function() {
+
+			var repo = $( this ).data( 'repo' );
+			var field = $( this ).data( 'field' );
+
+			if( !$(this).data( 'autocomplete' ) ) {
+
+				$( this ).autocomplete( {
+					appendTo: '#autofill_list',
+					minLength: 2,
+					source: function( request, response ) {
+
+					    $.ajax( {
+					    	url: "/api/v1/data/" + repo,
+					    	data: {
+					    		format: 'json',
+					    		user: $( '#user' ).html()
+					    	},
+							success: function( query ) {
+					    		response( $.map( query.data, function( item ) {
+					        		return { label: item.data[ field ], value: item.data[ field ] }
+					        	}));
+					        }
+					    });
+					},
+	        		select: function( event, ui ) {
+
+	        			console.log( ui.item.value );
+	        		}
+	        	});
+	        }
+		});
+	});
+</script>
 
 {% endblock %}
 
@@ -36,6 +100,7 @@
 		</div>
 	</div>
 	<div class="row">
+		<div id="autofill_list" class='autocomplete-list'></div>
 	  	<div id="xform_view" class="span12">
 	    	<div id="form_fields" class="formbox">
 		  		<div id="formDiv"></div>

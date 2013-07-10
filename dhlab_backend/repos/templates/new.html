@@ -124,13 +124,13 @@
 								<select id="formRelationship" onchange="relationshipFormChanged()">
 									<option>None</option>
 									{% for repo in user_repos %}
-										<option value="{{ repo.name }}">{{ repo.name }}</option>
+										<option value="{{ repo.mongo_id }}">{{ repo.name }}</option>
 									{% endfor %}
 								</select>
 
 								<span id="formRelationshipSelects">
 									{% for repo in user_repos %}
-										<select id='select{{ repo.name }}'>
+										<select id='select{{ repo.mongo_id }}'>
 											{% for question in repo.children %}
 												<option value="{{ question.name }}">{{ question.name }}</option>
 											{% endfor %}

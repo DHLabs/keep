@@ -3,7 +3,7 @@
 define(['vendor/underscore'], function(_) {
   var build_form;
   build_form = function(child, lang) {
-    var label, schema_dict, _ref, _ref1,
+    var label, schema_dict, tmpl, _ref, _ref1,
       _this = this;
     label = '';
     if (typeof child.label === 'object') {
@@ -22,8 +22,12 @@ define(['vendor/underscore'], function(_) {
       is_field: true,
       bind: child.bind
     };
-    if ((_ref = child.type) === 'string' || _ref === 'text') {
-      if (child.bind.readonly) {
+    if (child.relationship != null) {
+      schema_dict['type'] = 'Text';
+      tmpl = '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">' + '<label for="<%= editorId %>""><%= title %></label>' + ("<input data-repo='" + child.relationship.repo + "' data-field='" + child.relationship.field + "'") + 'class="autofill" type="text" name="<%= editorId %>">' + '</div>';
+      schema_dict['template'] = _.template(tmpl);
+    } else if ((_ref = child.type) === 'string' || _ref === 'text') {
+      if ((child.bind != null) && child.bind.readonly) {
         schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
                                                         <strong></strong><%= title %>\
                                                    </div>');
@@ -47,7 +51,7 @@ define(['vendor/underscore'], function(_) {
     } else if (child.type === 'note') {
       schema_dict['type'] = 'Text';
       schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
-                                                        <strong></strong><%= title %>\
+                                                        <%= title %>\
                                                    </div>');
       schema_dict['is_field'] = false;
     } else if (child.type === 'datetime') {
