@@ -19,9 +19,20 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             is_field: true
             bind: child.bind
 
-        if child.type in [ 'string', 'text' ]
+        if child.relationship?
+            schema_dict['type'] = 'Text'
 
-            if child.bind.readonly
+            tmpl = '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">' +
+                        '<label for="<%= editorId %>""><%= title %></label>' +
+                        "<input data-repo='#{child.relationship.repo}' data-field='#{child.relationship.field}'" +
+                            'class="autofill" type="text" name="<%= editorId %>">' +
+                    '</div>'
+
+            schema_dict['template'] = _.template( tmpl )
+
+        else if child.type in [ 'string', 'text' ]
+
+            if child.bind? and child.bind.readonly
                 schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
                                                         <strong></strong><%= title %>
                                                    </div>' )
@@ -59,7 +70,7 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
             schema_dict['type'] = 'Text'
             schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
-                                                        <strong></strong><%= title %>
+                                                        <%= title %>
                                                    </div>' )
             schema_dict['is_field'] = false
 

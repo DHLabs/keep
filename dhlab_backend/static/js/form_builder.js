@@ -306,9 +306,9 @@ function populateQuestion( questionName ) {
 		//relationship
 		var relationship = question.relationship;
 		if( relationship ) {
-			$("#formRelationshipSelects").val( relationship.form_name );
-			$("#select"+relationship.form_name).show();
-			$("#select"+relationship.form_name).val( relationship.form_question_name );
+			$("#formRelationshipSelects").val( relationship.repo );
+			$("#select"+relationship.repo).show();
+			$("#select"+relationship.repo).val( relationship.field );
 		}
 
 		//control
@@ -486,8 +486,8 @@ function okClicked() {
 		if( relationshipForm != 'None' ) {
 
 			var relationship = new Object();
-			relationship.form_name = relationshipForm;
-			relationship.form_question_name = document.getElementById("select"+relationshipForm).value;
+			relationship.repo = relationshipForm;
+			relationship.field = document.getElementById("select"+relationshipForm).value;
 
 			question.relationship = relationship;
 		}
