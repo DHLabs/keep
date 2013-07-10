@@ -75,7 +75,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
       _.each(this.item_dict, function(child, key) {
         child.name = key;
-
         return _this.input_fields.push(child);
       });
       $('#formDiv').html(this.renderedForm.el);
@@ -86,6 +85,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       if (this._active_question().info.bind && this._active_question().info.bind.map) {
         _geopointDisplay();        
       }
+
       return this;
     };
 
@@ -118,48 +118,52 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
 
     // For calculations.  Currently only supporting basic -, +, *, div
-    _performCalcluate = function(question) {
-      var equation, evaluation, i, i2, side1, side2, operation;
-      equation = question.bind.calculation;
-      for (i = 0; i < equation.length; i++) {
-        if (equation[i] === '$') {
-          i2 = equation.indexOf('}', i);
-          side1 = $('#' + (equation.substring(i + 2, i2))).val();
-          operation = equation.substring(i2 + 1, equation.indexOf('$', i2)).replace(/\s+/g, '');
-          i2 = equation.indexOf('$', i2);
-          side2 = $('#' + (equation.substring(i2 + 2, equation.indexOf('}', i2 ) ) ) ).val();
-          if ( operation === '-' ) {
-            return (side1 - side2);
-          }
-          else if ( operation === '+' ) {
-            return (side1 + side2);
-          }
-          else if ( operation === '*' ) {
-            return (side1 * side2);
-          }
-          else if ( operation === 'div' ) {
-            return (side1 / side2);
-          }
-          else {
-            return;
-          }
-        }
-      }
-    };
+    _performCalcluate = function(equation) {
+      var evaluation, i, begin, end, side1, side2, operation, parenCount;
+      parenCount = 0;
 
-    /** For later use, not working as of now (9 July 2013)
-      _specifiedOther = function(question) {
-      $('#' + question.key).attr('onChange', 'otherCheck(this.value)');
-      function otherCheck(value) {
-        if (value === 'other') {
-          console.log('HERE')
-        }
+      // Initial paren finder and recursion to get to the start of the equation
+      for (i = 0; i < equation.length; i++) {
+        if (equation[i] === '(') {
+          if (parenCount === 0) {
+            begin = i;
+          }
+          parenCount++;
+        } else if (equation[i] === ')') {
+          parenCount--;
+          if (parenCount === 0) {
+            end = i;
+            equation = equation.replace( equation.substring(begin, end + 1), _performCalcluate(equation.substring(begin + 1, end)) );
+          }
+        };
       };
-      //if ($('#' + question.key).val === 'other') {
-      //  console.log("Hey")
-      //}
+
+      side1 = equation.slice(0, equation.indexOf(' ') );
+      operation = equation.slice(side1.length + 1, equation.lastIndexOf(' ') );
+      side2 = equation.slice(equation.lastIndexOf(' ') + 1);
+      if ( side1.slice(0, 2) === '${' ) {
+        side1 = $('#' + side1.slice(2, -1)).val();
+      };
+      if ( side2.slice(0, 2) === '${' ) {
+        side2 = $('#' + side2.slice(2, -1)).val();
+      };
+      if ( operation === '-' ) {
+        return (side1 - side2);
+      }
+      else if ( operation === '+' ) {
+        return (side1 + side2);
+      }
+      else if ( operation === '*' ) {
+        return (side1 * side2);
+      }
+      else if ( operation === 'div' ) {
+        return (side1 / side2);
+      }
+      else {
+        return;
+      };
     };
-    **/
+  
 
     xFormView.prototype._display_form_buttons = function(question_index) {
       if (question_index === this.input_fields.length - 1) {
@@ -240,7 +244,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         return child.name === switch_question_key;
       });
 
-      if (!XFormConstraintChecker.isRelevant(form_info, this.renderedForm.getValue()))  {
+      if ((form_info.bind && form_info.bind.calculate) || !XFormConstraintChecker.isRelevant(form_info, this.renderedForm.getValue()))  {
+        if (form_info.bind && form_info.bind.calculate) {
+          $('#' + form_info.name).val(_performCalcluate(form_info.bind.calculate));
+        }
         if (forward) {
           if (question_index < this.input_fields.length) {
             question_index += 1;
@@ -280,7 +287,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         }
       } else {
         while (this.input_fields[question_index].bind && this.input_fields[question_index].bind.group_start) {
-          console.log(this.input_fields[question_index])
           if (forward) {
             if (question_index < this.input_fields.length) {
               question_index += 1;
@@ -304,9 +310,10 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       if(form_info.bind && form_info.bind.map){
         _geopointDisplay();
       };
-      if (form_info.bind && form_info.bind.calculation) {
-        _performCalcluate(this._active_question());
-      }
+      //if (form_info.bind && form_info.bind.calculation) {
+      //  _performCalcluate(this._active_question());
+      //  this.switch_question($('.control-group').eq(question_index), forward);
+      //}
       //if (this.input_fields[question_index])
 
       /** For later use, not working as of 9 July 2013

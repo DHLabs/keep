@@ -40,7 +40,11 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
         else if child.type is 'geopoint'
 
-            schema_dict["template"] = _.template("<div id=\"<%= editorId %>_field\" data-key=\"<%= editorId %>\" class=\"control-group\">          <strong></strong>          <%= title %><br>          <input id=\"<%= editorId %>\" type=\"hidden\" name=\"<%= editorId %>\" >          <div id=\"map\" style=\"width:100%; height: 500px; position: relative;\">          </div></div>")
+            schema_dict["template"] = _.template( "<div id=\"<%= editorId %>_field\" data-key=\"<%= editorId %>\" class=\"control-group\">          
+                                                        <strong></strong><%= title %><br>          
+                                                        <input id=\"<%= editorId %>\" type=\"hidden\" name=\"<%= editorId %>\" >          
+                                                        <div id=\"map\" style=\"width:100%; height: 500px; position: relative;\"></div>
+                                                   </div>")
             schema_dict['bind'] = map: true
 
         else if child.type is 'today'
@@ -130,6 +134,12 @@ define( [ 'vendor/underscore' ], ( _ ) ->
                     label:  choice_label
                 )
             )
+
+        else if child.type is 'calculate'
+
+            schema_dict["template"] = _.template(   "<div id=\"<%= editorId %>_field\" data-key=\"<%= editorId %>\" class=\"control-group\">                                                        
+                                                        <input id=\"<%= editorId %>\" type=\"hidden\" name=<%= editorId %>
+                                                    </div>" )
 
         else
             schema_dict['type']     = 'Text'

@@ -105,10 +105,8 @@ define(['vendor/underscore'], function(_) {
         });
       });
     } else if (child.type === 'calculate') {
-      schema_dict['template'] = _.template('<div id="<%= editorId %>_field data-key="<%= editorID %>" class="control-group">\
-                                                        <input id="<%= editorId %>" type="hidden" name=<%= editorId %>');
-      schema_dict['is_field'] = false;
-      schema_dict['bind'].push({ calculation: true });
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
+                                                        <input id="<%= editorId %>" type="hidden" name=<%= editorId %></div>');
     } else {
       schema_dict['type'] = 'Text';
       schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
