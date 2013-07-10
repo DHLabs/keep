@@ -117,12 +117,33 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
     };
 
 
-    // For calculations.  
+    // For calculations.  Currently only supporting basic -, +, *, div
     _performCalcluate = function(question) {
-      var equation, evaluation, i;
+      var equation, evaluation, i, i2, side1, side2, operation;
       equation = question.bind.calculation;
       for (i = 0; i < equation.length; i++) {
-        
+        if (equation[i] === '$') {
+          i2 = equation.indexOf('}', i);
+          side1 = $('#' + (equation.substring(i + 2, i2))).val();
+          operation = equation.substring(i2 + 1, equation.indexOf('$', i2)).replace(/\s+/g, '');
+          i2 = equation.indexOf('$', i2);
+          side2 = $('#' + (equation.substring(i2 + 2, equation.indexOf('}', i2 ) ) ) ).val();
+          if ( operation === '-' ) {
+            return (side1 - side2);
+          }
+          else if ( operation === '+' ) {
+            return (side1 + side2);
+          }
+          else if ( operation === '*' ) {
+            return (side1 * side2);
+          }
+          else if ( operation === 'div' ) {
+            return (side1 / side2);
+          }
+          else {
+            return;
+          }
+        }
       }
     };
 

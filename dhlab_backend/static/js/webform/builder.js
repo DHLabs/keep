@@ -104,6 +104,11 @@ define(['vendor/underscore'], function(_) {
           label: choice_label
         });
       });
+    } else if (child.type === 'calculate') {
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field data-key="<%= editorID %>" class="control-group">\
+                                                        <input id="<%= editorId %>" type="hidden" name=<%= editorId %>');
+      schema_dict['is_field'] = false;
+      schema_dict['bind'].push({ calculation: true });
     } else {
       schema_dict['type'] = 'Text';
       schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
