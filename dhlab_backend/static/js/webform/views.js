@@ -310,22 +310,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       if(form_info.bind && form_info.bind.map){
         _geopointDisplay();
       };
-      //if (form_info.bind && form_info.bind.calculation) {
-      //  _performCalcluate(this._active_question());
-      //  this.switch_question($('.control-group').eq(question_index), forward);
-      //}
-      //if (this.input_fields[question_index])
-
-      /** For later use, not working as of 9 July 2013
-      if( this.input_fields[question_index].options) {
-        var i;
-        for ( i=0; i < this.input_fields[question_index].options.length; i++ ) {
-          if ( this.input_fields[question_index].options[i].val === 'other' ) {
-            _specifiedOther(this._active_question());
-          } 
-        }
-      }
-      **/
 
       this._display_form_buttons(question_index);
       return this;
