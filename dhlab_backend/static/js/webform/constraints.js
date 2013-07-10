@@ -34,7 +34,7 @@ define([], function() {
     XFormConstraintChecker.evaluateSelectedInExpression = function(expression, answers, currentPath) {
       var answer, components, endRange, keepGoing, leftString, range, replaceString, rightString, selected, string, substring;
       keepGoing = true;
-      string = expression;
+      string = expression.toLowerCase();
       while (keepGoing) {
         range = expression.indexOf("selected(");
         if (range !== -1) {
@@ -64,6 +64,7 @@ define([], function() {
 
     XFormConstraintChecker.evaluateExpression = function(expression, answers, currentPath) {
       var andLocation, andRange, closeRange, leftExpression, leftOverString, newExpression, notRange, orLocation, orRange, parentString, range, rangeLength, rightExpression, scopeRange;
+      expression = expression.toLowerCase();
       scopeRange = expression.indexOf("(");
       andRange = expression.indexOf(" and ");
       orRange = expression.indexOf(" or ");

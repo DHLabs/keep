@@ -156,7 +156,6 @@ def toggle_public( request, repo_id ):
                                        'public': repo.is_public } ),
                          mimetype='application/json' )
 
-
 @csrf_exempt
 def webform( request, username, repo_name ):
     '''
@@ -179,8 +178,11 @@ def webform( request, username, repo_name ):
         repo.add_data( request.POST, request.FILES )
 
         # Return to organization/user dashboard based on where the "New Repo"
-        # button was clicked.
-        if isinstance( account, User ):
+        # button was clicked.  Send Non-users to thank-you page 
+        if not request.user.is_authenticated():
+            return render_to_response( 'finish_survey.html' )
+
+        elif isinstance( account, User ):
             return HttpResponseRedirect(
                         reverse( 'user_dashboard',
                                  kwargs={ 'username': account.username } ) )

@@ -69,7 +69,7 @@ define( [ 'jquery',
 
             # Create the form to render
             _.each( @model.attributes.children, ( child ) =>
-                @recursiveAdd( child, @model.attributes.default_language )
+                @recursiveAdd( child, "/", @model.attributes.default_language )
             )
 
             console.log( @languages )
@@ -93,7 +93,73 @@ define( [ 'jquery',
             $( '.active input' ).focus()
 
             @_display_form_buttons( 0 )
+
+            # Render additional Geopoint if first question is one
+            _geopointDisplay()  if @_active_question().info.bind and @_active_question().info.bind.map
             @
+
+        _geopointDisplay = ->
+          onMapClick = (e) ->
+            popup.setLatLng(e.latlng).setContent("Latitude and Longitude: " + e.latlng.toString()).openOn map
+            $("#" + question).val e.latlng.lat + " " + e.latlng.lng + " 0 0"
+          map = undefined
+          question = ($(".active").data("key"))
+          element = document.getElementById(question + "_map")
+          unless element.classList.contains("map")
+            element.classList.add "map"
+            map = L.map((question + "_map"),
+              center: [36.60, -120.65]
+              zoom: 5
+            )
+            L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png",
+              attribution: "&copy; <a href=\"http://osm.org/copyright\">OpenStreetMap</a> contributors"
+              maxZoom: 18
+              reuseTiles: true
+            ).addTo map
+          popup = L.popup()
+          map.on "click", onMapClick
+          map.invalidateSize false
+
+        # For calculations.  Currently only supporting basic -, +, *, div
+        _performCalcluate = (equation) ->
+          evaluation = undefined
+          i = undefined
+          begin = undefined
+          end = undefined
+          side1 = undefined
+          side2 = undefined
+          operation = undefined
+          parenCount = undefined
+          parenCount = 0
+          
+          # Initial paren finder and recursion to get to the start of the equation
+          i = 0
+          while i < equation.length
+            if equation[i] is "("
+              begin = i  if parenCount is 0
+              parenCount++
+            else if equation[i] is ")"
+              parenCount--
+              if parenCount is 0
+                end = i
+                equation = equation.replace(equation.substring(begin, end + 1), _performCalcluate(equation.substring(begin + 1, end)))
+            i++
+          side1 = equation.slice(0, equation.indexOf(" "))
+          operation = equation.slice(side1.length + 1, equation.lastIndexOf(" "))
+          side2 = equation.slice(equation.lastIndexOf(" ") + 1)
+          side1 = $("#" + side1.slice(2, -1)).val()  if side1.slice(0, 2) is "${"
+          side2 = $("#" + side2.slice(2, -1)).val()  if side2.slice(0, 2) is "${"
+          console.log side1 + ", " + operation + ", " + side2
+          if operation is "-"
+            return (side1 - side2)
+          else if operation is "+"
+            return (side1 + side2)
+          else if operation is "*"
+            return (side1 * side2)
+          else if operation is "div"
+            return (side1 / side2)
+          else
+            return
 
         _display_form_buttons: ( question_index ) ->
 
@@ -102,17 +168,23 @@ define( [ 'jquery',
                 $( '#submit_btn' ).show()
 
                 $( '#next_btn' ).hide()
+                $("html").keydown (e) ->
+                    $("#submit_btn").click()  if e.keyCode is 13
+
             else if question_index == 0
                 $( '#prev_btn' ).hide()
                 $( '#submit_btn' ).hide()
 
                 $( '#next_btn' ).show()
+                $("#xform_view").keydown (e) ->
+                    $("#next_btn").click()  if e.keyCode is 13
             else
                 $( '#prev_btn' ).show()
                 $( '#next_btn' ).show()
 
                 $( '#submit_btn' ).hide()
-
+                $("#xform_view").keydown (e) ->
+                    $("#next_btn").click()  if e.keyCode is 13
             @
 
         _active_question: ->
@@ -125,7 +197,6 @@ define( [ 'jquery',
                 question_index += 1
                 return child.name == question
             )
-
             return { 'key': question, 'idx': question_index, 'info': form_info }
 
         passes_question_constraints: ->
@@ -135,12 +206,12 @@ define( [ 'jquery',
             # Pass required?
             if question.info.bind and question.info.bind.required is "yes"
                 if @renderedForm.getValue()[ question.key ].length == 0
-                    alert "Answer is required"
+                    $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
                     return false
 
             # Pass contraints?
             if not XFormConstraintChecker.passesConstraint( question.info, @renderedForm.getValue() )
-                alert "Answer doesn't pass constraint:" + question.info.bind.constraint
+                $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer doesn't pass constraint:" + question.info.bind.constraint + "</span></div>"
                 return false
 
             return true
@@ -165,8 +236,10 @@ define( [ 'jquery',
                 return child.name == switch_question_key
             )
 
-            # Is this question relevant?
-            if not XFormConstraintChecker.isRelevant( form_info, @renderedForm.getValue() )
+            # Is this question relevant?  Or, is this question an equation?
+            if (form_info.bind and form_info.bind.calculate) or not XFormConstraintChecker.isRelevant( form_info, @renderedForm.getValue() )
+                # If its a calculation, calculate it!
+                $("#" + form_info.name).val _performCalcluate(form_info.bind.calculate)  if form_info.bind and form_info.bind.calculate
 
                 # Switch to the next question!
                 if forward
@@ -179,18 +252,53 @@ define( [ 'jquery',
                 @switch_question( $( '.control-group' ).eq( question_index ), forward )
                 return
 
-            # Find the next question to switch from and to.
-            current_question = $( "##{current_question.key}_field" )
-            switch_question  = $( "##{switch_question_key}_field" )
+            # Animate and remove the current question and any possible alerts
+            $(".active").fadeOut 1
+            $(".alert").fadeOut 1
+            $(".active").removeClass "active"
 
-            # Switch the highlighted tab on the left sidebar
-            $( '.active' ).removeClass( 'active' )
+            # Addition of group controls
+            if form_info.control
 
-            # Animate the switching
-            current_question.fadeOut( 'fast', () ->
-                switch_question.fadeIn( 'fast' ).addClass( 'active' )
-                $( '.active input' ).focus()
-            )
+              #if the group is a field list, display all the group's questions
+              if form_info.control.appearance and form_info.control.appearance is "field-list"
+                current_tree = form_info.tree
+                $("#" + switch_question_key + "_field").addClass "active"
+                switch_question_idx = question_index + 1
+                switch_question_info = @input_fields[switch_question_idx]
+
+                while switch_question_info.tree is current_tree
+                  switch_question = $("#" + $($(".control-group").eq(switch_question_idx)[0]).data("key") + "_field")
+                  switch_question.fadeIn(1).addClass "active"
+                  $(".active input").focus()
+
+                  if (switch_question_idx + 1) < @input_fields.length
+                    switch_question_idx += 1
+                    switch_question_info = @input_fields[switch_question_idx]
+
+            # if the group doesn't have any controls, or if there is no group...
+            else
+
+              # Don't display groups (or nested groups!) as questions!
+              while @input_fields[question_index].bind and @input_fields[question_index].bind.group_start
+                if forward
+                  question_index += 1  if question_index < @input_fields.length
+                else
+                  question_index -= 1  if question_index > 0
+              switch_question = $("#" + $($(".control-group").eq(question_index)[0]).data("key") + "_field")
+              form_info = @input_fields[question_index]
+              
+              # If there is a query to a previous answer, display that answer
+              subsequent = undefined
+              if (subsequent = form_info.title.indexOf("${")) isnt -1
+                end_subsequent = form_info.title.indexOf("}", subsequent)
+                subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent)
+                switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val())
+          
+              switch_question.fadeIn(1).addClass "active"
+            
+            #Start the Geopoint display if geopoint
+            _geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
 
             @_display_form_buttons( question_index )
 
@@ -201,8 +309,14 @@ define( [ 'jquery',
             question = @_active_question()
             question_index = question.idx
 
+            # Set up for field lists
+            if question.info.control and question.info.control.appearance is "field-list"
+                current_tree = question.info.tree
+                question_index += 1
+                question_index += 1  while @input_fields[question_index].tree is current_tree 
+
             # Attempt to switch to the next question
-            if question_index < @input_fields.length
+            else if question_index < @input_fields.length
                 question_index += 1
 
             @switch_question( $( '.control-group' ).eq( question_index )[0], true )
@@ -217,7 +331,20 @@ define( [ 'jquery',
             if question_index <= 0
                 return @
 
-            question_index -= 1
+            current_tree = @input_fields[question_index - 1].tree
+
+            # If we are in a group, check if we are in a field list group
+            unless current_tree is "/"
+              temp_idx = question_index - 1
+              temp_idx -= 1  while @input_fields[temp_idx].tree is current_tree
+              temp_idx += 1
+              if @input_fields[temp_idx].control and @input_fields[temp_idx].control.appearance is "field-list"
+                question_index = temp_idx
+              else
+                question_index -= 1
+            else
+              question_index -= 1
+              
             @switch_question( $( '.control-group' ).eq( question_index )[0], false )
 
             @

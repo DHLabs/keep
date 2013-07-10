@@ -2,8 +2,9 @@
 
 define(['vendor/underscore'], function(_) {
   var build_form;
-  build_form = function(child, lang) {
-    var label, schema_dict, tmpl, _ref, _ref1,
+
+  build_form = function(child, path, lang) {
+    var label, schema_dict, _ref, _ref1,
       _this = this;
     label = '';
     if (typeof child.label === 'object') {
@@ -16,11 +17,13 @@ define(['vendor/underscore'], function(_) {
     } else {
       label = child.label;
     }
+
     schema_dict = {
       help: child.hint,
       title: label,
       is_field: true,
-      bind: child.bind
+      bind: child.bind,
+      tree: path
     };
     if (child.relationship != null) {
       schema_dict['type'] = 'Text';
@@ -39,8 +42,13 @@ define(['vendor/underscore'], function(_) {
     } else if (child.type === 'date') {
       schema_dict['type'] = 'Date';
     } else if (child.type === 'geopoint') {
-      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %></div>');
-      schema_dict['is_field'] = false;
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
+          <strong></strong>\
+          <%= title %><br>\
+          <input id="<%= editorId %>" type="hidden" name="<%= editorId %>" >\
+          <div id="<%= editorId %>_map" style="width:100%; height: 500px; position: relative;">\
+          </div></div>');
+      schema_dict['bind'] = { map: true };
     } else if (child.type === 'today') {
       schema_dict['type'] = 'Date';
       schema_dict['title'] = 'Today';
@@ -77,8 +85,14 @@ define(['vendor/underscore'], function(_) {
         });
       });
     } else if (child.type === 'group') {
+      schema_dict['is_field'] = false;
+      schema_dict['tree'] = schema_dict['tree'] + (child.name) + "/";
+      schema_dict['control'] = child.control;
+      schema_dict['bind'] = { group_start: true };
+      this.item_dict[child.name] = schema_dict;
+      this._fieldsets.push(child.name);
       _.each(child.children, function(_child) {
-        return _this.recursiveAdd(_child);
+        return _this.recursiveAdd(_child, (schema_dict['tree']));
       });
       return this;
     } else if (child.type === 'select one') {
@@ -95,6 +109,9 @@ define(['vendor/underscore'], function(_) {
           label: choice_label
         });
       });
+    } else if (child.type === 'calculate') {
+      schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\
+                                                        <input id="<%= editorId %>" type="hidden" name=<%= editorId %></div>');
     } else {
       schema_dict['type'] = 'Text';
       schema_dict['template'] = _.template('<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">\

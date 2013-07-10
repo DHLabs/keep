@@ -1,6 +1,6 @@
 define( [ 'vendor/underscore' ], ( _ ) ->
 
-    build_form = ( child, lang ) ->
+    build_form = ( child, path, lang ) ->
 
         label = ''
         if typeof child.label == 'object'
@@ -18,6 +18,7 @@ define( [ 'vendor/underscore' ], ( _ ) ->
             title: label
             is_field: true
             bind: child.bind
+            tree: path
 
         if child.relationship?
             schema_dict['type'] = 'Text'
@@ -50,8 +51,12 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
         else if child.type is 'geopoint'
 
-            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group"><strong></strong><%= title %></div>' )
-            schema_dict['is_field'] = false
+            schema_dict["template"] = _.template( "<div id=\"<%= editorId %>_field\" data-key=\"<%= editorId %>\" class=\"control-group\">          
+                                                        <strong></strong><%= title %><br>          
+                                                        <input id=\"<%= editorId %>\" type=\"hidden\" name=\"<%= editorId %>\" >          
+                                                        <div id=\"map\" style=\"width:100%; height: 500px; position: relative;\"></div>
+                                                   </div>")
+            schema_dict['bind'] = map: true
 
         else if child.type is 'today'
 
@@ -113,9 +118,14 @@ define( [ 'vendor/underscore' ], ( _ ) ->
 
         else if child.type is 'group'
 
-            _.each( child.children, ( _child ) =>
-                @recursiveAdd( _child )
-            )
+            schema_dict["is_field"] = false
+            schema_dict["tree"] = schema_dict["tree"] + (child.name) + "/"
+            schema_dict["control"] = child.control
+            schema_dict["bind"] = group_start: true
+            @item_dict[child.name] = schema_dict
+            @_fieldsets.push child.name
+            _.each child.children, (_child) ->
+                _this.recursiveAdd _child, (schema_dict["tree"])
 
             return @
 
@@ -135,6 +145,12 @@ define( [ 'vendor/underscore' ], ( _ ) ->
                     label:  choice_label
                 )
             )
+
+        else if child.type is 'calculate'
+
+            schema_dict["template"] = _.template(   "<div id=\"<%= editorId %>_field\" data-key=\"<%= editorId %>\" class=\"control-group\">                                                        
+                                                        <input id=\"<%= editorId %>\" type=\"hidden\" name=<%= editorId %>
+                                                    </div>" )
 
         else
             schema_dict['type']     = 'Text'

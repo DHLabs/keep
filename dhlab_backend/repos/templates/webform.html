@@ -7,6 +7,7 @@
 
 {% block css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/webform.css' %}">
+
 <style type='text/css'>
 	.autocomplete-list {
 		position:absolute;
@@ -33,11 +34,17 @@
 		background-color: #EEE;
 	}	
 </style>
+
+<!-- For Geopoint option -->
+<link rel="stylesheet" href="/static/css/leaflet.css">
 {% endblock %}
 
 {% block js %}
 <script id='form_id' type='text/html'>{{ repo_id }}</script>
 <script id='user' type='text/html'>{{ user.username }}</script>
+
+<!-- For Geopoint Option -->
+<script src='{% static "js/vendor/leaflet/leaflet.js" %}'></script>
 
 <script data-main='{% static "js/webform/main" %}' src='{% static 'js/vendor/require-jquery.js' %}'></script>
 <script>
@@ -83,6 +90,11 @@
 	});
 </script>
 
+<script>
+$("alert_template .close").click(function(e) {
+	$("alert_template span").remove();
+});
+</script>
 {% endblock %}
 
 {% block content %}
@@ -104,6 +116,7 @@
 	  	<div id="xform_view" class="span12">
 	    	<div id="form_fields" class="formbox">
 		  		<div id="formDiv"></div>
+		  		<div id="alert-placeholder"></div>
 	    	</div>
 	    	<div id='form_actions' style='overflow:auto;'>
 	    		<div class='pull-right'>

@@ -302,7 +302,7 @@ function populateQuestion( questionName ) {
 				addChoice( choices[choice].name, choices[choice].label );
 			}
 		}
-
+		
 		//relationship
 		var relationship = question.relationship;
 		if( relationship ) {
