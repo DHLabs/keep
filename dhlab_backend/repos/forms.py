@@ -211,7 +211,7 @@ class NewRepoForm( forms.Form ):
             return None
 
         # Add a type & default language
-        data[ 'type' ] = 'survey'
+        #data[ 'type' ] = 'survey'
         data[ 'default_language' ] = 'default'
 
         # Go through and remove fields that dont have a valid label

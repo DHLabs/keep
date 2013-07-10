@@ -285,6 +285,8 @@ function populateQuestion( questionName ) {
 	$("#questionHintUse").checked = false;
 	$("#questionType").val('note');
 	$("#groupOptions").hide();
+	$("#formRelationshipSelects").children().hide();
+	$("#formRelationship")[0].selectedIndex = 0;
 	toggleHint();
 
 	if( questionName != null ) {
@@ -299,6 +301,14 @@ function populateQuestion( questionName ) {
 			for( var choice in choices ) {
 				addChoice( choices[choice].name, choices[choice].label );
 			}
+		}
+
+		//relationship
+		var relationship = question.relationship;
+		if( relationship ) {
+			$("#formRelationshipSelects").val( relationship.form_name );
+			$("#select"+relationship.form_name).show();
+			$("#select"+relationship.form_name).val( relationship.form_question_name );
 		}
 
 		//control
@@ -427,6 +437,24 @@ function getIndivRelevanceString( relevanceNum ) {
 	return relevanceString;
 }
 
+function relationshipFormChanged() {
+	var selectForm = document.getElementById("formRelationship").value;
+
+	if( selectForm != "None" ) {
+		var selectFormId = "select" + selectForm;
+		console.log(selectFormId);
+		var selects = document.getElementById("formRelationshipSelects").getElementsByTagName("select");
+		for( var i=0; i<selects.length; i++ ) {
+			console.log( selects.item(i).id );
+			if( selects.item(i).id == selectFormId ) {
+				$( "#" + selects.item(i).id ).show();
+			} else {
+				$( "#" + selects.item(i).id ).hide();
+			}
+		}
+	}
+}
+
 function okClicked() {
 
 	if( validateQuestion() ) {
@@ -451,6 +479,17 @@ function okClicked() {
 		if( document.getElementById("questionRequired").checked ) {
 			bind.required = true;
 			useBind = true;
+		}
+
+		//relationship
+		var relationshipForm = document.getElementById("formRelationship").value;
+		if( relationshipForm != 'None' ) {
+
+			var relationship = new Object();
+			relationship.form_name = relationshipForm;
+			relationship.form_question_name = document.getElementById("select"+relationshipForm).value;
+
+			question.relationship = relationship;
 		}
 
 		//constraint

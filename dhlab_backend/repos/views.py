@@ -42,7 +42,7 @@ def batch_repo( request ):
 @login_required
 def new_repo( request ):
     '''
-        Creates a new user under the currently logged in user.
+        Creates a new repo under the currently logged in user.
     '''
     # Handle XForm upload
     if request.method == 'POST':
@@ -54,7 +54,19 @@ def new_repo( request ):
     else:
         form = NewRepoForm()
 
-    return render_to_response( 'new.html', { 'form': form },
+    user_repos = Repository.objects.filter( user=request.user, org=None )
+
+    repos = []
+    for repo in user_repos:
+        #I want a flat list of repo fields
+        repo_info = {
+            'name': repo.name,
+            'mongo_id': repo.mongo_id,
+            'children': repo.fields() }
+        repos.append( repo_info )
+
+    return render_to_response( 'new.html', { 'form': form, 
+                                            'user_repos': repos },
                                context_instance=RequestContext(request) )
 
 
@@ -89,7 +101,17 @@ def edit_repo( request, repo_id ):
         form.initial["name"] = repo.name
         form.initial["desc"] = repo.description
 
-    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(repo.fields()) },
+    user_repos = Repository.objects.filter( user=request.user, org=None )
+    repos = []
+    for repo in user_repos:
+        #I want a flat list of repo fields
+        repo_info = {
+            'name': repo.name,
+            'mongo_id': repo.mongo_id,
+            'children': repo.fields() }
+        repos.append( repo_info )
+
+    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(repo.fields()),'user_repos':repos },
                           context_instance=RequestContext(request) )
 
 @login_required
