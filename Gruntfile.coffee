@@ -14,6 +14,10 @@ module.exports = ( grunt ) ->
 				files: [ 'frontend/sass/**/*.scss' ]
 				tasks: [ 'compass:dist' ]
 
+			images:
+				files: [ 'frontend/img/**/*' ]
+				tasks: [ 'copy:img' ]
+
 		# Copy the appropriate bower components to our <vendor> folder
 		bower:
 			dev:
@@ -62,7 +66,7 @@ module.exports = ( grunt ) ->
 			img:
 				expand: true
 				cwd: 'frontend/img'
-				src: [ '**/*.png', '**/*.jpg', ]
+				src: [ '**/*.png', '**/*.jpg' ]
 				dest: '<%= pkg.static_dir %>/img'
 
 		requirejs:
