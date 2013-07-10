@@ -56,6 +56,8 @@
 							<td colspan='3' style='background-color:#EEE;'>
 								<h4>
 									<div class='pull-right'>
+										<input id='registrationType' type="checkbox">
+										<label for='registrationType'>Registration Form</label>
 										<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn btn btn-medium">Add Question</button>
 									</div>
 									Survey Questions
@@ -88,22 +90,6 @@
 							</div>
 
 							<div>
-								<input id='questionRequired' type="checkbox">
-								<label for='questionRequired'>Required Question</label>
-							</div>
-								<input id='questionHintUse' type="checkbox" onclick='toggleHint()'>
-								<label for='questionHintUse'>Use Question Hint</label>
-								<div id='questionHintDiv'></div>
-							<div>
-
-							</div>
-
-							<div id="groupOptions">
-								<input id='groupFieldList' type="checkbox">
-								<label for="groupFieldList">Field List</label>
-							</div>
-
-							<div>
 							Type:
 							<select id='questionType' onchange='questionTypeChanged()'>
 								<option value='note'>Note</option>
@@ -124,17 +110,44 @@
 							</select>
 							</div>
 
-							<div id="choices">
+							<div>
+								<input id='questionRequired' type="checkbox">
+								<label for='questionRequired'>Required Question</label>
+							</div>
+								
+								<input id='questionHintUse' type="checkbox" onclick='toggleHint()'>
+								<label for='questionHintUse'>Use Question Hint</label>
+								<div id='questionHintDiv'></div>
+							{% if user_repos|length > 0 %}
+							<div>
+								Relationship:&nbsp;
+								<select id="formRelationship" onchange="relationshipFormChanged()">
+									<option>None</option>
+									{% for repo in user_repos %}
+										<option value="{{ repo.mongo_id }}">{{ repo.name }}</option>
+									{% endfor %}
+								</select>
 
+								<span id="formRelationshipSelects">
+									{% for repo in user_repos %}
+										<select id='select{{ repo.mongo_id }}'>
+											{% for question in repo.children %}
+												<option value="{{ question.name }}">{{ question.name }}</option>
+											{% endfor %}
+										</select>
+									{% endfor %}
+								</span>
+							</div>
+							{% endif %}
+
+							<div id="groupOptions">
+								<input id='groupFieldList' type="checkbox">
+								<label for="groupFieldList">Field List</label>
 							</div>
 
-							<div id="constraints">
-
-							</div>
-
-							<div id="relevances">
-
-							</div>
+							<div id="choices"></div>
+							<div id="constraints"></div>
+							<div id="relevances"></div>
 
 						</div>
 						<div class="modal-footer">
