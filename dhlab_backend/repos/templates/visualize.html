@@ -235,7 +235,7 @@
 			</div>
 			<div class='span6'>
 				<label class='checkbox'>
-					<input id='sharing_toggle' type='checkbox' {% if repo.public %}checked='checked'{% endif %}>
+					<input id='sharing_toggle' type='checkbox' {% if repo.is_public %}checked='checked'{% endif %}>
 					Allow data sharing
 				</label>
 				<span class='help-block'>

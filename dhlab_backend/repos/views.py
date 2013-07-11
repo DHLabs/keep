@@ -84,7 +84,6 @@ def edit_repo( request, repo_id ):
 
     if request.method == 'POST':
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
-
         repo.name = request.POST['name']
         repo.description = request.POST['desc']
         repo.save()
@@ -103,12 +102,12 @@ def edit_repo( request, repo_id ):
 
     user_repos = Repository.objects.filter( user=request.user, org=None )
     repos = []
-    for repo in user_repos:
+    for temp_repo in user_repos:
         #I want a flat list of repo fields
         repo_info = {
-            'name': repo.name,
-            'mongo_id': repo.mongo_id,
-            'children': repo.fields() }
+            'name': temp_repo.name,
+            'mongo_id': temp_repo.mongo_id,
+            'children': temp_repo.fields() }
         repos.append( repo_info )
 
     return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(repo.fields()),'user_repos':repos },
