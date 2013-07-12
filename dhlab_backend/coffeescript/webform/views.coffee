@@ -89,8 +89,11 @@ define( [ 'jquery',
             # Render it on the page!
             $('#formDiv').html( @renderedForm.el )
 
-            $( '.control-group' ).first().show().addClass( 'active' )
-            $( '.active input' ).focus()
+            if @input_fields[0].bind and @input_fields[0].bind.group_start
+              _groupOperations(@input_fields[0], true)
+            else 
+              $( '.control-group' ).first().show().addClass( 'active' )
+              $( '.active input' ).focus()
 
             @_display_form_buttons( 0 )
 
@@ -160,6 +163,40 @@ define( [ 'jquery',
             return (side1 / side2)
           else
             return
+
+        # Group Operations moved here, to hopefully better handle groups being a first question
+        _groupOperations = (question, forward) ->
+          # First, group controls
+          if @input_fields[question].control
+
+            # Field-list controls
+            if @input_fields[question].control.appearance is "field-list"
+              current_tree = @input_fields[question].tree
+              $('#' + @input_fields[question] + '_field').addClass('active')
+              question ++
+              question_info = @input_fields[question]
+
+              while question_info.tree is current_tree
+                switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
+                switch_question.fadeIn(1).addClass('active')
+                $('.active input').focus()
+                question ++
+                question_info = @input_fields[question]
+
+          # Assumption of a group without controls
+          else
+            while @input_fields[question].bind and @input_fields[question].bind.group_start
+              if forward
+                if question < @input_fields.length
+                  question ++
+              else
+                if question > 0
+                  question ++
+            switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
+            switch_question.fadeIn(1).addClass('active')
+          @
+
+
 
         _display_form_buttons: ( question_index ) ->
 
@@ -257,37 +294,13 @@ define( [ 'jquery',
             $(".alert").fadeOut 1
             $(".active").removeClass "active"
 
-            # Addition of group controls
-            if form_info.control
+            if form_info.bind and form_info.bind.group_start
+              _groupOperations(question_index, forward)
 
-              #if the group is a field list, display all the group's questions
-              if form_info.control.appearance and form_info.control.appearance is "field-list"
-                current_tree = form_info.tree
-                $("#" + switch_question_key + "_field").addClass "active"
-                switch_question_idx = question_index + 1
-                switch_question_info = @input_fields[switch_question_idx]
-
-                while switch_question_info.tree is current_tree
-                  switch_question = $("#" + $($(".control-group").eq(switch_question_idx)[0]).data("key") + "_field")
-                  switch_question.fadeIn(1).addClass "active"
-                  $(".active input").focus()
-
-                  if (switch_question_idx + 1) < @input_fields.length
-                    switch_question_idx += 1
-                    switch_question_info = @input_fields[switch_question_idx]
-
-            # if the group doesn't have any controls, or if there is no group...
             else
-
-              # Don't display groups (or nested groups!) as questions!
-              while @input_fields[question_index].bind and @input_fields[question_index].bind.group_start
-                if forward
-                  question_index += 1  if question_index < @input_fields.length
-                else
-                  question_index -= 1  if question_index > 0
               switch_question = $("#" + $($(".control-group").eq(question_index)[0]).data("key") + "_field")
               form_info = @input_fields[question_index]
-              
+
               # If there is a query to a previous answer, display that answer
               subsequent = undefined
               if (subsequent = form_info.title.indexOf("${")) isnt -1

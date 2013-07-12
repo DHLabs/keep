@@ -268,36 +268,9 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       $('.active').removeClass('active');
 
       // Group controls
-      if (form_info.control) {
-        if (form_info.control.appearance && form_info.control.appearance === 'field-list') {
-          var current_tree = form_info.tree;
-
-          $('#' + switch_question_key + "_field").addClass('active');
-          switch_question_idx = question_index + 1;
-          switch_question_info = this.input_fields[switch_question_idx];
-
-          while (switch_question_info.tree === current_tree) {
-            switch_question = $("#" + $($('.control-group').eq(switch_question_idx)[0]).data('key') + "_field");
-            switch_question.fadeIn(1).addClass('active');
-            $('.active input').focus()
-            if ((switch_question_idx + 1) < this.input_fields.length) {
-              switch_question_idx += 1;
-              switch_question_info = this.input_fields[switch_question_idx];
-            }
-          }
-        }
+      if (form_info.bind && form_info.bind.group_start) {
+        _groupOperations(question_index, forward);
       } else {
-        while (this.input_fields[question_index].bind && this.input_fields[question_index].bind.group_start) {
-          if (forward) {
-            if (question_index < this.input_fields.length) {
-              question_index += 1;
-            }
-          } else {
-            if (question_index > 0) {
-              question_index -= 1;
-            }
-          }
-        }
         switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
         form_info = this.input_fields[question_index];
         var subsequent;
