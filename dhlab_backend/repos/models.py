@@ -136,9 +136,9 @@ class Repository( models.Model ):
         verbose_name_plural = 'repositories'
 
         permissions = (
-            # ( 'add_repository', 'Add Repo' ),
-            # ( 'delete_repository', 'Delete Repo' ),
-            # ( 'change_repository', 'Edit Repo' ),
+            ( 'add_repository', 'Add Repo' ),
+            ( 'delete_repository', 'Delete Repo' ),
+            ( 'change_repository', 'Edit Repo' ),
             ( 'view_repository', 'View Repo' ),
             ( 'share_repository', 'Share Repo' ),
 
