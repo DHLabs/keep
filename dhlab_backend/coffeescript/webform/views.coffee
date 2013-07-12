@@ -90,7 +90,7 @@ define( [ 'jquery',
             $('#formDiv').html( @renderedForm.el )
 
             if @input_fields[0].bind and @input_fields[0].bind.group_start
-              _groupOperations(@input_fields[0], true)
+              _groupOperations.apply(@, [@input_fields[0], true])
             else 
               $( '.control-group' ).first().show().addClass( 'active' )
               $( '.active input' ).focus()
@@ -173,14 +173,14 @@ define( [ 'jquery',
             if @input_fields[question].control.appearance is "field-list"
               current_tree = @input_fields[question].tree
               $('#' + @input_fields[question] + '_field').addClass('active')
-              question ++
+              question++
               question_info = @input_fields[question]
 
               while question_info.tree is current_tree
                 switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
                 switch_question.fadeIn(1).addClass('active')
                 $('.active input').focus()
-                question ++
+                question++
                 question_info = @input_fields[question]
 
           # Assumption of a group without controls
@@ -188,10 +188,10 @@ define( [ 'jquery',
             while @input_fields[question].bind and @input_fields[question].bind.group_start
               if forward
                 if question < @input_fields.length
-                  question ++
+                  question++
               else
                 if question > 0
-                  question ++
+                  question++
             switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
             switch_question.fadeIn(1).addClass('active')
           @
@@ -295,7 +295,7 @@ define( [ 'jquery',
             $(".active").removeClass "active"
 
             if form_info.bind and form_info.bind.group_start
-              _groupOperations(question_index, forward)
+              _groupOperations.apply(@, [question_index, forward])
 
             else
               switch_question = $("#" + $($(".control-group").eq(question_index)[0]).data("key") + "_field")
@@ -303,7 +303,7 @@ define( [ 'jquery',
 
               # If there is a query to a previous answer, display that answer
               subsequent = undefined
-              if (subsequent = form_info.title.indexOf("${")) isnt -1
+              if (form_info.title and subsequent = form_info.title.indexOf("${")) isnt -1
                 end_subsequent = form_info.title.indexOf("}", subsequent)
                 subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent)
                 switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val())
@@ -349,7 +349,7 @@ define( [ 'jquery',
             # If we are in a group, check if we are in a field list group
             unless current_tree is "/"
               temp_idx = question_index - 1
-              temp_idx -= 1  while @input_fields[temp_idx].tree is current_tree
+              temp_idx -= 1  while temp_idx >= 0 and @input_fields[temp_idx].tree is current_tree
               temp_idx += 1
               if @input_fields[temp_idx].control and @input_fields[temp_idx].control.appearance is "field-list"
                 question_index = temp_idx

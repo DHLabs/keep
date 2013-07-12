@@ -79,8 +79,12 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         return _this.input_fields.push(child);
       });
       $('#formDiv').html(this.renderedForm.el);
-      $('.control-group').first().show().addClass('active');
-      $('.active input').focus();
+      if (this.input_fields[0].bind && this.input_fields[0].bind.group_start) {
+        _groupOperations.apply(this, [0, true]);
+      } else {
+        $('.control-group').first().show().addClass('active');
+        $('.active input').focus();
+      }
       this._display_form_buttons(0);
 
       if (this._active_question().info.bind && this._active_question().info.bind.map) {
@@ -165,6 +169,40 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       };
     };
   
+    _groupOperations = function(question, forward) {
+      var current_tree, question_info, switch_question;
+      if (this.input_fields[question].control) {
+        if (this.input_fields[question].control.appearance === "field-list") {
+          current_tree = this.input_fields[question].tree;
+          $('#' + this.input_fields[question].name + '_field').addClass('active');
+          question++;
+          question_info = this.input_fields[question];
+          while (question_info.tree === current_tree) {
+            switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field");
+            switch_question.fadeIn(1).addClass('active');
+            $('.active input').focus();
+            question++;
+            question_info = this.input_fields[question];
+          }
+        }
+      } else {
+        while (this.input_fields[question].bind && this.input_fields[question].bind.group_start) {
+          if (forward) {
+            if (question < this.input_fields.length) {
+              question++;
+            }
+          } else {
+            if (question > 0) {
+              question++;
+            }
+          }
+        }
+        switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field");
+        switch_question.fadeIn(1).addClass('active');
+      }
+      return this;
+    };
+
 
     xFormView.prototype._display_form_buttons = function(question_index) {
       if (question_index === this.input_fields.length - 1) {
@@ -269,12 +307,14 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
 
       // Group controls
       if (form_info.bind && form_info.bind.group_start) {
-        _groupOperations(question_index, forward);
+        _groupOperations.apply(this, [question_index, forward]);
+
       } else {
         switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
         form_info = this.input_fields[question_index];
         var subsequent;
-        if ((subsequent = form_info.title.indexOf("${")) !== -1 ) {
+        console.log(form_info)
+        if (form_info.title && (subsequent = form_info.title.indexOf("${")) !== -1 ) {
           var end_subsequent = form_info.title.indexOf("}", subsequent);
           var subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent);
           switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val());
@@ -316,7 +356,7 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
       var current_tree = this.input_fields[question_index - 1].tree;
       if (current_tree != "/") {
         var temp_idx = question_index - 1;
-        while (this.input_fields[temp_idx].tree === current_tree) {
+        while (temp_idx >= 0 && this.input_fields[temp_idx].tree === current_tree) {
           temp_idx -= 1;
         }
         temp_idx += 1;
