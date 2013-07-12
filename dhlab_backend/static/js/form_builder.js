@@ -723,7 +723,8 @@ function deleteQuestion(questionName) {
 	//questionList.splice(questionNum, 1);
 
     //remove the question from the interface
-	$(questionId).remove();
+	buildSurvey();
+	reloadQuestionListHTML();
 }
 
 function editQuestion(questionName) {
