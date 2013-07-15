@@ -1,6 +1,6 @@
 import pymongo
 
-from backend.db import MongoDBResource
+from backend.db import db, MongoDBResource
 
 from tastypie import fields
 from tastypie.resources import ModelResource
@@ -15,12 +15,13 @@ class VocabResource( MongoDBResource ):
 	data 	= fields.CharField( attribute='data', null=True )
 
 	class Meta:
-		queryset = Vocab.objects.all()
 
 		collection = 'vocab'
 		resource_name = 'vocab'
 
 		list_allowed_methods = [ 'get' ]
+
+		#queryset = Vocab.objects.all()
 
 		filtering = {
 			'data' : ( 'icontains', )
