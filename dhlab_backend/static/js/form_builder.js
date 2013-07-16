@@ -41,7 +41,8 @@ function questionTypeChanged() {
 
   	$("#groupOptions").hide();
 
-	removeRelevance();//switch to showRelevance when relevances is ready
+	//removeRelevance();//switch to showRelevance when relevances is ready
+	
 
   	if( questionType == "select one" || questionType == "select all that apply" ) {
   		showChoices();
@@ -69,7 +70,7 @@ function closeDialog() {
 
 function getValueInputForType(questionType, tagId) {
 
-	var html = "<input id='" + tagId + "";
+	var html = "<input id='" + tagId + "' ";
 	var inputType = "text";
 	if( questionType == "decimal" || questionType == "integer" ) {
 		inputType = 'number';
@@ -82,7 +83,9 @@ function getValueInputForType(questionType, tagId) {
 	} else if( questionType == "select one" || questionType == "select all that apply" ) {
 		inputType = 'number';
 	}
-	html += "";
+	html += "type='" + inputType + "'";
+	html += " />";
+	return html;
 }
 
 function getCompareSelectForType(questionType, tagId) {
@@ -109,55 +112,81 @@ function getCompareSelectForType(questionType, tagId) {
 	}
 
 	html += "</select>\n";
+
 	return html;
 }
 
 function addRelevance(questionName,relevantType,relevantValue) {
 	var relevantNum = $("#relevanceList tr").length;
 
-	var html = "<tr id='relevance" + relevantNum + "'>\n<td>\n";
-	html += "<select id='relevantQuestion" + relevantNum + " onchange='>\n";
+	console.log( "name, type, value" + questionName + "," + relevantType + "," + relevantValue );
 
-    //TODO: fix this with flat questionList
-	for( var questionIndex=0; questionIndex<currentQuestion; questionIndex++ ) {
-		html+= "<option value='" + questionIndex + "'>" +
-		questionList[questionIndex].name + "</option>\n"
+	console.log( "relevants: " + relevantNum );
+
+	var html = "<tr id='relevance" + relevantNum + "'>\n<td>\n";
+	html += "<select id='relevanceQuestion" + relevantNum + 
+		"' onchange='relevanceQuestionChanged(" + relevantNum + ")'>\n";
+
+    var flatQuestionList = buildFlatQuestionList();
+
+    var endIndex = flatQuestionList.length - 1;
+    if( currentQuestionName != null ) {
+    	for( var thequest in flatQuestionList ) {
+    		if( flatQuestionList[thequest].name == questionName ) {
+    			endIndex = thequest;
+    			break;
+    		}
+    	}
+    }
+
+	for( var questionIndex=0; questionIndex<=endIndex; questionIndex++ ) {
+		html+= "<option value='" + flatQuestionList[questionIndex].name + "'>" +
+		flatQuestionList[questionIndex].name + "</option>\n";
 	}
 
 	html += "</select>\n</td>\n";
-	html += "<td id='relevantType"+ relevantNum +"''></td>\n";//relevantType selection
+	html += "<td id='relevantType"+ relevantNum +"'></td>\n";//relevantType selection
 	html += "<td id='relevantValue"+ relevantNum +"'></td>\n";//relevantValue
 
 	html += "<td style='width:40px;text-align:center;'>"+
-        "<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'"
+        "<button type='button' onclick='deleteConstraint(\"relevance" + relevantNum + "\")'"
         + " class='btn btn-danger'>" +
         "   <i class='icon-trash'></i>"+
         "</button>"+
 		"</td>\n</tr>\n";
 
+	$("#relevanceList").append( html );
+
+	if( endIndex > -1 ) {
+		relevanceQuestionChanged( relevantNum );
+	}
+
 	if( questionName ) {
 		$("#relevantQuestion" + relevantNum).val( questionName );
-
-		if( relevantType ) {
-			relevanceQuestionChanged( relevantNum, questionName );
-			if(  relevantValue ) {
-				$("#relevanceValue"+relevanceNum).val( relevantValue );
-			}
+	}
+	
+	if( relevantType ) {
+		$("#relevanceType"+relevantNum).val( relevantType );
+		if( relevantValue ) {
+			$("#relevanceValue"+relevantNum).val( relevantValue );
 		}
 	}
 }
 
-function relevanceQuestionChanged( relevanceNum, questionName ) {
+function relevanceQuestionChanged( relevanceNum ) {
+
+	var questionName = document.getElementById("relevanceQuestion"+relevanceNum).value;
 
 	var typeTag = 'relevanceType' + relevanceNum;
 	var valueTag = 'relevanceValue' + relevanceNum;
-	var html = getCompareSelectForType( questionList[questionNum].type, typeTag );
+
+	var question = getQuestionForName(questionName);
+
+	var html = getCompareSelectForType( question.type, typeTag );
 	$("#relevantType"+relevanceNum).html( html );
 
-    var question = getQuestionForName(questionName);
-
 	$("#relevantValue"+relevanceNum).html( getValueInputForType(
-		getValueInputForType( question.type ), valueTag ) );
+		 question.type, valueTag ) );
 }
 
 function showRelevance() {
@@ -168,7 +197,7 @@ function showRelevance() {
 	+ "<option value='AND'>AND Relevances</option>\n"
 	+ "<option value='OR'>OR Relevances</option>\n"
 	+ "</select>\n"
-	+ "<button type='button' onclick='addRelevance(-1,null,null)'"
+	+ "<button type='button' onclick='addRelevance(null,null,null)'"
 	+ " id='addrelevance' class='btn btn-small'>Add Relevance</button>"
 	+ "</div>Relevances</h4></td></tr></thead><tbody id='relevanceList'></tbody></table>";
 
@@ -277,7 +306,8 @@ function showChoices() {
 function populateQuestion( questionName ) {
 	removeChoices();
 	removeConstraint();
-	removeRelevance();
+	//removeRelevance();
+	showRelevance();
 
     $("#questionName").val( "" );
 	$("#questionLabel").val( "" );
@@ -346,10 +376,10 @@ function populateQuestion( questionName ) {
 				var theConstraints;
 				if( constraintStr.indexOf( "AND" ) != -1 ) {
 					$("#constraintType").val("AND");
-					theConstraints = constraintStr.split("AND");
+					theConstraints = constraintStr.split(" AND ");
 				} else {
 					$("#constraintType").val("OR");
-					theConstraints = constraintStr.split("OR");
+					theConstraints = constraintStr.split(" OR ");
 				}
 
 				for( var constraint in theConstraints ) {
@@ -374,6 +404,44 @@ function populateQuestion( questionName ) {
 
 			var relevantStr = bind.relevant;
 			//TODO: finish relevance
+			if( relevantStr ) {
+
+				var theRelevances;
+				if( relevantStr.indexOf( "AND" ) != -1 ) {
+					$("#relevanceType").val("AND");
+					theRelevances = relevantStr.split(" AND ");
+				} else {
+					$("#relevanceType").val("OR");
+					theRelevances = relevantStr.split(" OR ");
+				}
+
+				for( var relevance in theRelevances ) {
+					var relevantType;
+					if( theRelevances[relevance].indexOf(">=") != -1 ) {
+						relevantType = ">=";
+					} else if( theRelevances[relevance].indexOf("<=") != -1 ) {
+						relevantType = "<=";
+					} else if( theRelevances[relevance].indexOf("<") != -1 ) {
+						relevantType = "<";
+					} else if( theRelevances[relevance].indexOf(">") != -1 ) {
+						relevantType = ">";
+					} else if( theRelevances[relevance].indexOf("!=") != -1 ) {
+						relevantType = "!=";
+					} else if( theRelevances[relevance].indexOf("=") != -1 ) {
+						relevantType = "=";
+					}
+
+					var strComps = theRelevances[relevance].split( " " + relevantType + " " )
+
+					var relevantQuestionName = strComps[0].split('$').join('');
+					relevantQuestionName = relevantQuestionName.split('$').join('');
+					relevantQuestionName = relevantQuestionName.split('{').join('');
+					relevantQuestionName = relevantQuestionName.split('}').join('');
+					var relevantValue = strComps[1];
+
+					addRelevance(relevantQuestionName, relevantType, relevantValue);
+				}
+			}
 		}
 	}
 }
@@ -425,7 +493,10 @@ function getIndivConstraintString(constraintNum) {
 }
 
 function getIndivRelevanceString( relevanceNum ) {
-	var relevanceQuestionName = $("#relevanceQuestion" + relevanceNum).val();
+	var relevanceQuestionName = document.getElementById("relevanceQuestion" + relevanceNum).value;
+
+	console.log( "relevant name: " + relevanceQuestionName );
+
 	var relevanceQuestion = getQuestionForName(relevanceQuestionName);
 
 	var relevanceType =  $("#relevanceType" + relevanceNum).val();
@@ -433,6 +504,8 @@ function getIndivRelevanceString( relevanceNum ) {
 
 	var relevanceString = "${" + relevanceQuestion.name + "}";
 	relevanceString += " " + relevanceType + " " + relevanceValue;
+
+	console.log( "rel string: " + relevanceString );
 
 	return relevanceString;
 }
@@ -498,10 +571,10 @@ function okClicked() {
 			var numConstraints = constraintList.getElementsByTagName("tr").length;
 			if( numConstraints > 0 ) {
 				useBind = true;
-				var constraintString = getIndivConstraintString( 0 );
+				var constraintString = getIndivConstraintString( 1 );
 				var constraintType = $("#constraintType").val();
 
-				for( var index=1; index<numConstraints; index++ ) {
+				for( var index=2; index<=numConstraints; index++ ) {
 					constraintString += " " + constraintType + " " + getIndivConstraintString( index )
 				}
 
@@ -626,7 +699,7 @@ function buildQuestionList( listQuestions, formChildren )  {
 		} else if( question.type == 'note' ) {
 
 		} else {
-			questionList.push( question );
+			listQuestions.push( question );
 		}
 	}
 }
@@ -682,9 +755,6 @@ function validateQuestion() {
 }
 
 function deleteQuestion(questionName) {
-    //TODO: fix this
-
-	var questionId = "#question" + questionName;
 
     var question = getQuestionForName(questionName);
 
@@ -720,9 +790,6 @@ function deleteQuestion(questionName) {
         }
     }
 
-	//questionList.splice(questionNum, 1);
-
-    //remove the question from the interface
 	buildSurvey();
 	reloadQuestionListHTML();
 }
@@ -774,7 +841,6 @@ function moveQuestion( questionName, moveUp ) {
 		if( newIndex > (arrayToModify.length - 1) || newIndex < 0 ) {
 			//do nothing
 		} else {
-			//arrayToModify.move( questionIndex, newIndex );
 			arrayToModify.splice(newIndex, 0, arrayToModify.splice(questionIndex, 1)[0]);
 		}
 	}
