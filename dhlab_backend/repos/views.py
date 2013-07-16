@@ -88,12 +88,12 @@ def edit_repo( request, repo_id ):
         repo.description = request.POST['desc']
         repo.save()
         data_repo = db.repo.find_one( ObjectId( repo_id ) )
-        #print "updating repo:"
-        #print data_repo
-        newfields = json.loads( request.POST['survey_json'].strip() )['children']
-        #print "with fields"
-        #print newfields
-        db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields}} )
+        newJSON = json.loads( request.POST['survey_json'].strip() )
+        newfields = newJSON['children']
+        formType = newJSON['type']
+        print "with fields"
+        print formType
+        db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields, 'type': formType}} )
         return HttpResponseRedirect( '/' )
     else:
         form = NewRepoForm()
@@ -110,7 +110,12 @@ def edit_repo( request, repo_id ):
             'children': temp_repo.fields() }
         repos.append( repo_info )
 
-    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(repo.fields()),'user_repos':repos },
+    data_repo = db.repo.find_one( ObjectId( repo_id ) )
+    temp_dict = {}
+    temp_dict['children'] = data_repo['fields']
+    temp_dict['type'] = data_repo['type']
+
+    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(temp_dict),'user_repos':repos },
                           context_instance=RequestContext(request) )
 
 @login_required

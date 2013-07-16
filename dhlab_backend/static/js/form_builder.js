@@ -6,9 +6,13 @@ var currentGroupName;
 $( function() {
 
    if( repo ) {
-     console.log( repo );
-     questionList = repo;
+     questionList = repo.children;
 
+     if( repo.type ) {
+   	  	if( repo.type == 'register' ) {
+   	  		document.getElementById("registrationType").checked = true;
+   	  	}
+   	  }
      //hide xls upload
      $( '#build_form' ).hide();
      $( '#xform_file_upload').hide();
@@ -23,6 +27,7 @@ $( function() {
 		$( '#survey_builder' ).show();
 		var survey = JSON.parse( $("#id_survey_json").val() )
    	  	questionList = survey.children;
+
    	  	if( survey.type ) {
    	  		if( survey.type == 'register' ) {
    	  			document.getElementById("registrationType").checked = true;
@@ -403,7 +408,6 @@ function populateQuestion( questionName ) {
 			}
 
 			var relevantStr = bind.relevant;
-			//TODO: finish relevance
 			if( relevantStr ) {
 
 				var theRelevances;
