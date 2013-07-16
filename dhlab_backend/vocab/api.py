@@ -21,8 +21,6 @@ class VocabResource( MongoDBResource ):
 
 		list_allowed_methods = [ 'get' ]
 
-		#queryset = Vocab.objects.all()
-
 		filtering = {
 			'data' : ( 'icontains', )
 		}
