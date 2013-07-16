@@ -59,7 +59,7 @@ with open(filepath, 'r') as infile:
 				print "\nCurrent first line: ", line[:len(line) - shiftMod - 1]
 				yn = raw_input("Last character of the first line is non-alphanumeric. "
 								"If this is a CSV file, a character might have been added "
-								"to the end of every line.  Would you like us to remove the"
+								"to the end of every line.  Would you like to remove the"
 								" last character from every line? (y/n)\n")
 				if yn is 'y':
 					shiftMod += 1
@@ -69,8 +69,6 @@ with open(filepath, 'r') as infile:
 
 
 		# Insert the lines into the vocab database!
-		#collection.update( { '_id': lineID }, { "$set": {'data': line[:len(line) - shiftMod - 1] } }, upsert=False )
 		prepLine = line[:len(line) - shiftMod - 1]
-		collection.save( { '_id': lineID, 'data': prepLine } )
-		lineID += 1
+		collection.save( { 'data': prepLine } )
 
