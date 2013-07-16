@@ -70,5 +70,5 @@ with open(filepath, 'r') as infile:
 
 		# Insert the lines into the vocab database!
 		prepLine = line[:len(line) - shiftMod - 1]
-		collection.save( { 'data': prepLine } )
+		collection.save( { 'term': prepLine } )
 

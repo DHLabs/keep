@@ -1,6 +1,7 @@
 import pymongo
 
 from backend.db import db, MongoDBResource, Document
+from backend.serializers import CSVSerializer
 
 from django.http import HttpResponse
 
@@ -17,22 +18,28 @@ class VocabResource( MongoDBResource ):
 	'''
 
 	id		= fields.CharField( attribute='_id' )
-	data 	= fields.CharField( attribute='data' )
+	term 	= fields.CharField( attribute='term' )
 
 	class Meta:
 		collection = 'vocab'
 		resource_name = 'vocab'
 		#authorization = Authorization()
 		object_class = Document
+		serializer = CSVSerializer()
 
 		list_allowed_methods = [ 'get' ]
 
 		include_resource_uri = False
 
 		filtering = {
-			'data' : 'istartswith',
+			'term' : ( 'istartswith', )
 		}
 
-	#def build_filters ( self, filters=None ):
-	#	if 'data__icontains' in filters:
-	#		return super( VocabResource, self ).build_filters( filters )
+	def build_filters ( self, filters=None ):
+		'''
+			This API will only be used to get terms that start with
+			requested string.  Require filter to be in API call.
+		'''
+		if 'term__istartswith' not in filters:
+			return BadRequest
+		return super( VocabResource, self ).build_filters( filters )
