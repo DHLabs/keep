@@ -91,8 +91,6 @@ def edit_repo( request, repo_id ):
         newJSON = json.loads( request.POST['survey_json'].strip() )
         newfields = newJSON['children']
         formType = newJSON['type']
-        print "with fields"
-        print formType
         db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields, 'type': formType}} )
         return HttpResponseRedirect( '/' )
     else:
@@ -113,7 +111,11 @@ def edit_repo( request, repo_id ):
     data_repo = db.repo.find_one( ObjectId( repo_id ) )
     temp_dict = {}
     temp_dict['children'] = data_repo['fields']
-    temp_dict['type'] = data_repo['type']
+    if 'type' in data_repo:
+        temp_dict['type'] = data_repo['type']
+    else:
+        temp_dict['type'] = "survey"
+    
 
     return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(temp_dict),'user_repos':repos },
                           context_instance=RequestContext(request) )
