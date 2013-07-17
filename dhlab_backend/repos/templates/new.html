@@ -1,6 +1,36 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
+{% block css %}
+<style type='text/css'>
+	.autocomplete-list {
+		position:absolute;
+	}
+
+	.ui-helper-hidden-accessible {
+		display:none;
+	}
+	
+	.ui-autocomplete {
+		border-bottom:1px solid #EEE;
+		border-right:1px solid #EEE;
+		border-left:1px solid #EEE;
+		list-style-type: none;
+		background-color: white;
+	}
+
+	.ui-autocomplete > .ui-menu-item {
+		padding: 4px 8px;
+		cursor:pointer;
+	}
+
+	.ui-autocomplete > .selected {
+		background-color: #EEE;
+	}	
+</style>
+{% endblock %}
+
+
 {% block js %}
 <script src="{% static 'js/form_builder.js' %}"></script>
 {% if repo_json %}
@@ -8,11 +38,35 @@
 {% else %}
 <script id='form_id' type='text/javascript'>var repo = null;</script>
 {% endif %}
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script type='text/javascript'>
 	$( function() {
 		$( '#build_form' ).click( function() {
 			$( this ).hide();
 			$( '#survey_builder' ).show();
+		});
+	});
+</script>
+<script type='text/javascript'>
+	$( function() {
+		$( '#questionName' ).autocomplete( {
+			appendTo: '#autofill_list',
+			minLength: 2,
+			//source: "api/v1/vocab/"
+			source: function( request, response ) {
+				$.ajax( {
+					url: "/api/v1/vocab/",
+					data: {
+						term__istartswith: request.term,
+						format: 'json'
+					},
+					success: function( query ) {
+						response ( $.map( query, function( item ){
+							return { label: item.term, value: item.term }
+						}));
+					}
+				});
+			}
 		});
 	});
 </script>
@@ -81,6 +135,7 @@
 
 							<div>
 								Name:
+								<div id="autofill_list" class='autocomplete-list'></div>
 								<input id="questionName" name="questionName" onKeyUp="sanitizeNameInput(this)" type="text" />
 							</div>
 

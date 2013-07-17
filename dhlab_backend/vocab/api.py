@@ -70,5 +70,5 @@ class VocabResource( MongoDBResource ):
 		startRegex = re.compile( ('^' + startWith), re.IGNORECASE)
 		cursor = db.vocab.find( { 'term': startRegex } )\
 						 .limit( 10 )\
-						 .sort( 'term', pymongo.DESCENDING )
+						 .sort( 'term', pymongo.ASCENDING )
 		return self.create_response( request, dehydrate_survey( cursor ) )
