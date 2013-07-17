@@ -1,7 +1,11 @@
 import pymongo
+import re
 
 from backend.db import db, MongoDBResource, Document
+from backend.db import dehydrate_survey
 from backend.serializers import CSVSerializer
+
+from bson import ObjectId
 
 from django.http import HttpResponse
 
@@ -10,6 +14,7 @@ from tastypie.authorization import Authorization
 from tastypie.exceptions import BadRequest
 from tastypie.http import HttpNotFound, HttpUnauthorized
 from tastypie.resources import ModelResource
+from tastypie.utils.mime import build_content_type
 
 class VocabResource( MongoDBResource ):
 	'''
@@ -43,3 +48,27 @@ class VocabResource( MongoDBResource ):
 		if 'term__istartswith' not in filters:
 			return BadRequest
 		return super( VocabResource, self ).build_filters( filters )
+
+	def create_response ( self, request, data, response_class=HttpResponse,
+						  **response_kwargs ):
+		'''
+			This is templated from backend.api.RepoResource create_response.
+		'''
+
+		desired_format = self.determine_format(request)
+
+		serialized = self.serialize(request, data, desired_format)
+		response = response_class( content=serialized,
+								   content_type=build_content_type(desired_format),
+								   **response_kwargs )
+
+		return response
+
+	def get_list ( self, request, **kwargs ):
+
+		startWith = request.GET['term__istartswith']
+		startRegex = re.compile( ('^' + startWith), re.IGNORECASE)
+		cursor = db.vocab.find( { 'term': startRegex } )\
+						 .limit( 10 )\
+						 .sort( 'term', pymongo.DESCENDING )
+		return self.create_response( request, dehydrate_survey( cursor ) )
