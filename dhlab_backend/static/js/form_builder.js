@@ -807,6 +807,8 @@ function editQuestion(questionName) {
 function sanitizeNameInput(inputElement) {
 	var inputString = inputElement.value;
 	inputString = inputString.split(' ').join('_')
+	inputString = inputString.split(')').join('-')
+	inputString = inputString.split('(').join('-')
 	inputElement.value = inputString;
 }
 

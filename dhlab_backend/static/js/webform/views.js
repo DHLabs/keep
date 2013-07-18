@@ -313,7 +313,6 @@ define(['jquery', 'vendor/underscore', 'vendor/backbone-min', 'vendor/forms/back
         switch_question = $('#' + $($('.control-group').eq(question_index)[0]).data('key') + "_field");
         form_info = this.input_fields[question_index];
         var subsequent;
-        console.log(form_info)
         if (form_info.title && (subsequent = form_info.title.indexOf("${")) !== -1 ) {
           var end_subsequent = form_info.title.indexOf("}", subsequent);
           var subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent);
