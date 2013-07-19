@@ -321,7 +321,11 @@ function populateQuestion( questionName ) {
 	$("#questionType").val('note');
 	$("#groupOptions").hide();
 	$("#formRelationshipSelects").children().hide();
-	$("#formRelationship")[0].selectedIndex = 0;
+
+	if( document.getElementById("formRelationship").length > 0 ) {
+		$("#formRelationship")[0].selectedIndex = 0;
+	}
+
 	toggleHint();
 
 	if( questionName != null ) {
@@ -893,10 +897,10 @@ function getHTMLForQuestion(question) {
         + "<button type='button' onclick=\"addQuestionToGroup('"
         + question.name +"')\""
         + " id='addQuestionForGroup' class='btn btn-small'>Add Question</button>\n" +
-        "<button class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
+        "<button type='button' class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
         "	<i class='icon-pencil'></i> Edit"+
         "</button>"+
-        "<button onclick=\"deleteQuestion('" + question.name
+        "<button type='button' onclick=\"deleteQuestion('" + question.name
         +"')\" class='btn btn-danger'>"+
         "   <i class='icon-trash'></i> Delete"+
         "</button></div></h4></td></tr>\n</thead>\n<tbody>";
@@ -924,12 +928,12 @@ function getHTMLForQuestion(question) {
 
         html += '</td>';
         html += "<td style='width:70px;text-align:center;'>" +
-        "<button class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
+        "<button type='button' class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
         "	<i class='icon-pencil'></i> Edit"+
         "</button>"+
         "</td>"+
         "<td style='width:90px;text-align:center;'>"+
-        "<button onclick=\"deleteQuestion('" + question.name
+        "<button type='button' onclick=\"deleteQuestion('" + question.name
         +"')\" class='btn btn-danger'>"+
         "   <i class='icon-trash'></i> Delete"+
         "</button>"+
