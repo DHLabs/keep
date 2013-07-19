@@ -84,17 +84,14 @@ def edit_repo( request, repo_id ):
 
     if request.method == 'POST':
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
-
         repo.name = request.POST['name']
         repo.description = request.POST['desc']
         repo.save()
         data_repo = db.repo.find_one( ObjectId( repo_id ) )
-        #print "updating repo:"
-        #print data_repo
-        newfields = json.loads( request.POST['survey_json'].strip() )['children']
-        #print "with fields"
-        #print newfields
-        db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields}} )
+        newJSON = json.loads( request.POST['survey_json'].strip() )
+        newfields = newJSON['children']
+        formType = newJSON['type']
+        db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields, 'type': formType}} )
         return HttpResponseRedirect( '/' )
     else:
         form = NewRepoForm()
@@ -103,15 +100,24 @@ def edit_repo( request, repo_id ):
 
     user_repos = Repository.objects.filter( user=request.user, org=None )
     repos = []
-    for repo in user_repos:
+    for temp_repo in user_repos:
         #I want a flat list of repo fields
         repo_info = {
-            'name': repo.name,
-            'mongo_id': repo.mongo_id,
-            'children': repo.fields() }
+            'name': temp_repo.name,
+            'mongo_id': temp_repo.mongo_id,
+            'children': temp_repo.fields() }
         repos.append( repo_info )
 
-    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(repo.fields()),'user_repos':repos },
+    data_repo = db.repo.find_one( ObjectId( repo_id ) )
+    temp_dict = {}
+    temp_dict['children'] = data_repo['fields']
+    if 'type' in data_repo:
+        temp_dict['type'] = data_repo['type']
+    else:
+        temp_dict['type'] = "survey"
+    
+
+    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(temp_dict),'user_repos':repos },
                           context_instance=RequestContext(request) )
 
 @login_required
@@ -156,7 +162,6 @@ def toggle_public( request, repo_id ):
                                        'public': repo.is_public } ),
                          mimetype='application/json' )
 
-
 @csrf_exempt
 def webform( request, username, repo_name ):
     '''
@@ -179,8 +184,11 @@ def webform( request, username, repo_name ):
         repo.add_data( request.POST, request.FILES )
 
         # Return to organization/user dashboard based on where the "New Repo"
-        # button was clicked.
-        if isinstance( account, User ):
+        # button was clicked.  Send Non-users to thank-you page 
+        if not request.user.is_authenticated():
+            return render_to_response( 'finish_survey.html' )
+
+        elif isinstance( account, User ):
             return HttpResponseRedirect(
                         reverse( 'user_dashboard',
                                  kwargs={ 'username': account.username } ) )

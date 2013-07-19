@@ -70,6 +70,10 @@ class XFormSerializer( Serializer ):
                 name.text = xform[ 'name' ]
                 element.append( name )
 
+                formType = etree.Element( 'type' )
+                formType.text = xform[ 'type' ]
+                element.append( formType )
+
                 owner = xform['user']
 
                 downloadUrl = etree.Element( 'downloadUrl' )

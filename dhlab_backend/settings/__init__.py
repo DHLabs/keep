@@ -27,6 +27,7 @@ INSTALLED_APPS = (
     'openrosa',
     'repos',
     'organizations',
+    'vocab',
 
     # Third party modules
     'guardian',                 # Per-object permissions

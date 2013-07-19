@@ -7,6 +7,7 @@
 
 {% block css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/webform.css' %}">
+
 <style type='text/css'>
 	.autocomplete-list {
 		position:absolute;
@@ -15,7 +16,7 @@
 	.ui-helper-hidden-accessible {
 		display:none;
 	}
-	
+
 	.ui-autocomplete {
 		border-bottom:1px solid #EEE;
 		border-right:1px solid #EEE;
@@ -31,8 +32,11 @@
 
 	.ui-autocomplete > .selected {
 		background-color: #EEE;
-	}	
+	}
 </style>
+
+<!-- For Geopoint option -->
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
 {% endblock %}
 
 {% block js %}
@@ -89,6 +93,11 @@
 		});
 	});
 </script>
+<script>
+$("alert_template .close").click(function(e) {
+	$("alert_template span").remove();
+});
+</script>
 {% endblock %}
 
 {% block content %}
@@ -110,6 +119,7 @@
 	  	<div id="xform_view" class="span12">
 	    	<div id="form_fields" class="formbox">
 		  		<div id="formDiv"></div>
+		  		<div id="alert-placeholder"></div>
 	    	</div>
 	    	<div id='form_actions' style='overflow:auto;'>
 	    		<div class='pull-right'>

@@ -26,7 +26,7 @@ define( [], ->
         @evaluateSelectedInExpression: (expression, answers, currentPath) ->
 
             keepGoing = true
-            string = expression
+            string = expression.toLowerCase()
 
             while keepGoing
                 range = expression.indexOf "selected("
@@ -62,6 +62,7 @@ define( [], ->
         # function recursively breaks down logical expression for individual
         # evaluation and then reconstruction back up the tree
         @evaluateExpression: (expression, answers, currentPath) ->
+            expression = expression.toLowerCase()
             # evaluate all selected
             scopeRange = expression.indexOf "("
             andRange = expression.indexOf " and "
