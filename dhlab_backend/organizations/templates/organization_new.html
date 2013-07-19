@@ -4,30 +4,30 @@
 {% block title %}Create an organization{% endblock %}
 
 {% block content %}
-<div class='container'>
-	<div class='row'>
-		<div class='span12'>
-			<h3>Create an Organization</h3>
-			<form action='{% url "organization_new" %}' method='post'>
-				{% csrf_token %}
-				<label {% if form.name.errors %}style='color:red'{%endif%}>
-					<strong>Organization Name</strong>
-				</label>
-				{{ form.name }}
-				{{ form.name.errors }}
-
-				<label {% if form.gravatar.errors %}style='color:red'{%endif%}>
-					<strong>Gravatar Email</strong> (Optional)
-				</label>
-				{{ form.gravatar }}
-				{{ form.gravatar.errors }}
-
-				<div style='clear:both;'>
-					<hr/>
-					<button type='submit' class='btn btn-success'>Create Organization</button>
-				</div>
-			</form>
+<div class='six columns offset-by-five'>
+	<h3>Create an Organization</h3>
+	<form action='{% url "organization_new" %}' method='post'>
+		{% csrf_token %}
+		<label {% if form.name.errors %}style='color:red'{%endif%}>
+			Organization Name
+			{{ form.name }}
+		</label>
+		<div class='error-block'>
+			{{ form.name.errors }}
 		</div>
-	</div>
+
+		<label {% if form.gravatar.errors %}style='color:red'{%endif%}>
+			Gravatar Email (Optional)
+			{{ form.gravatar }}
+		</label>
+		<div class='error-block'>
+			{{ form.gravatar.errors }}
+		</div>
+
+		<div style='clear:both;'>
+			<hr/>
+			<button type='submit' id='submit-btn' class='btn btn-success'>Create Organization</button>
+		</div>
+	</form>
 </div>
 {% endblock %}

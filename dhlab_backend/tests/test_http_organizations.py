@@ -45,13 +45,12 @@ class OrganizationHttpTests( HttpTestCase ):
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
 
-        submit = '/html/body/div[2]/div/div/div/form/div/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit-btn' ).click()
 
         # Check that the new org was created
-        org_list = '//*[@id="org-list"]/div/a'
+        org_list = '//*[@id="org-list"]/li/a'
         orgs = self.selenium.find_elements_by_xpath( org_list )
-        assert any( [ x.text == org_name for x in orgs ] )
+        assert any( [ org_name in x.text for x in orgs ] )
 
     def test_create_organization_with_gravatar( self ):
         self.test_login()
@@ -64,83 +63,76 @@ class OrganizationHttpTests( HttpTestCase ):
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
-
-        submit = '/html/body/div[2]/div/div/div/form/div/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit-btn' ).click()
 
         # Check that the new repo was created
-        org_list = '//*[@id="org-list"]/div/a'
+        org_list = '//*[@id="org-list"]/li/a'
         orgs = self.selenium.find_elements_by_xpath( org_list )
-        assert any( [ x.text == org_name for x in orgs ] )
+        assert any( [ org_name in x.text for x in orgs ] )
 
     def test_create_organization_fail_invalid_name( self ):
+
+        error_msg   = 'Organization name cannot have spaces or special characters'
+        org_name    = '1Q##$U ala2'
+
         self.test_login()
-
-        org_name = '1Q##$U ala2'
-
         self.selenium.find_element_by_id( 'create_org_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
-
-        submit = '/html/body/div[2]/div/div/div/form/div/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit-btn' ).click()
 
         # Check that we correctly report an error
-        error = '/html/body/div[2]/div/div/div/form/ul/li'
-        elem = self.selenium.find_element_by_xpath( error )
-        assert elem.text == 'Organization name cannot have spaces or special characters'
+        elem = self.selenium.find_elements_by_xpath( '//*[@class="errorlist"]/li' )
+        assert any( [ x.text == error_msg for x in elem ] )
 
     def test_create_organization_fail_reserved_name( self ):
+
+        error_msg   = 'Organization already exists with this name!'
+        org_name    = 'new'
+
         self.test_login()
-
-        org_name = 'new'
-
         self.selenium.find_element_by_id( 'create_org_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
-
-        submit = '/html/body/div[2]/div/div/div/form/div/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit-btn' ).click()
 
         # Check that we correctly report an error
-        error = '/html/body/div[2]/div/div/div/form/ul/li'
-        elem = self.selenium.find_element_by_xpath( error )
-        assert elem.text == 'Organization already exists with this name!'
+        elem = self.selenium.find_elements_by_xpath( '//*[@class="errorlist"]/li' )
+        assert any( [ x.text == error_msg for x in elem ] )
 
     def test_create_organization_fail_existing( self ):
+
+        error_msg   = 'Organization already exists with this name!'
+        org_name    = 'test_user'
+
         self.test_login()
-
-        org_name = 'test_user'
-
         self.selenium.find_element_by_id( 'create_org_btn' ).click()
 
         # Fill out form
         self.selenium.find_element_by_id( 'id_name' ).send_keys( org_name )
-
-        submit = '/html/body/div[2]/div/div/div/form/div/button'
-        self.selenium.find_element_by_xpath( submit ).click()
+        self.selenium.find_element_by_id( 'submit-btn' ).click()
 
         # Check that we correctly report an error
-        error = '/html/body/div[2]/div/div/div/form/ul/li'
-        elem = self.selenium.find_element_by_xpath( error )
-        assert elem.text == 'Organization already exists with this name!'
+        elem = self.selenium.find_elements_by_xpath( '//*[@class="errorlist"]/li' )
+        assert any( [ x.text == error_msg for x in elem ] )
 
     def test_organization_dashboard( self ):
         self.test_login()
 
         # Find the list of orgs on the page
-        org_list = '//*[@id="org-list"]/div/a'
-        elems = self.selenium.find_elements_by_xpath( org_list )
+        org_list = '//*[@id="org-list"]/li/a'
+        org_list = self.selenium.find_elements_by_xpath( org_list )
 
-        assert len( elems ) > 0
+        assert len( org_list ) > 0
+
         # Click on the first one
-        first_org = elems[0]
-        first_org_name = first_org.text
+        first_org = org_list[0]
+        first_org_name = first_org.text.strip()
         first_org.click()
 
-        assert self.selenium.title == first_org_name
+        assert first_org_name in self.selenium.title
 
     def test_org_repo_new( self ):
         self.test_organization_dashboard()

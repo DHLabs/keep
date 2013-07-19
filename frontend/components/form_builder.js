@@ -5,11 +5,11 @@ var currentGroupName;
 
 $( function() {
 
-   if( repo ) {
-     questionList = repo.children;
+   if( document.repo ) {
+     questionList = document.repo.children;
 
-     if( repo.type ) {
-   	  	if( repo.type == 'register' ) {
+     if( document.repo.type ) {
+   	  	if( document.repo.type == 'register' ) {
    	  		document.getElementById("registrationType").checked = true;
    	  	}
    	  }
@@ -47,7 +47,7 @@ function questionTypeChanged() {
   	$("#groupOptions").hide();
 
 	//removeRelevance();//switch to showRelevance when relevances is ready
-	
+
 
   	if( questionType == "select one" || questionType == "select all that apply" ) {
   		showChoices();
@@ -70,7 +70,7 @@ function questionTypeChanged() {
 }
 
 function closeDialog() {
-	$('#questionEditWindow').modal('hide');
+	$('#questionEditWindow').dialog( 'close' );
 }
 
 function getValueInputForType(questionType, tagId) {
@@ -129,7 +129,7 @@ function addRelevance(questionName,relevantType,relevantValue) {
 	console.log( "relevants: " + relevantNum );
 
 	var html = "<tr id='relevance" + relevantNum + "'>\n<td>\n";
-	html += "<select id='relevanceQuestion" + relevantNum + 
+	html += "<select id='relevanceQuestion" + relevantNum +
 		"' onchange='relevanceQuestionChanged(" + relevantNum + ")'>\n";
 
     var flatQuestionList = buildFlatQuestionList();
@@ -169,7 +169,7 @@ function addRelevance(questionName,relevantType,relevantValue) {
 	if( questionName ) {
 		$("#relevantQuestion" + relevantNum).val( questionName );
 	}
-	
+
 	if( relevantType ) {
 		$("#relevanceType"+relevantNum).val( relevantType );
 		if( relevantValue ) {
@@ -195,16 +195,16 @@ function relevanceQuestionChanged( relevanceNum ) {
 }
 
 function showRelevance() {
-	var relevanceHTML = "<table class='table table-striped table-bordered'>"
+	var relevanceHTML = "<table class='table'>"
 	+ "<thead><tr><td colspan='4' style='background-color:#EEE;'>"
-	+ "<h4><div class='pull-right'>"
+	+ "<div style='float:right;'>"
 	+ "<select id='relevanceType'>\n"
 	+ "<option value='AND'>AND Relevances</option>\n"
 	+ "<option value='OR'>OR Relevances</option>\n"
 	+ "</select>\n"
 	+ "<button type='button' onclick='addRelevance(null,null,null)'"
 	+ " id='addrelevance' class='btn btn-small'>Add Relevance</button>"
-	+ "</div>Relevances</h4></td></tr></thead><tbody id='relevanceList'></tbody></table>";
+	+ "</div>Relevances</td></tr></thead><tbody id='relevanceList'></tbody></table>";
 
 	$("#relevances").html(relevanceHTML);
 }
@@ -287,7 +287,7 @@ function showConstraint() {
 	+ "<option value='OR'>OR Constraints</option>\n"
 	+ "</select>\n"
 	+ "<button type='button' onclick='addConstraint(\"\",\"\")'"
-	+ " id='addconstraint' class='btn btn-small'>Add Constraint</button>\n"
+	+ " id='addconstraint' class='btn'>Add Constraint</button>\n"
 	+ "</div>Contraints</h4></td></tr>\n</thead>\n<tbody id='constraintList'></tbody>\n</table>\n";
 
 	$("#constraints").html(constraintHTML);
@@ -302,7 +302,7 @@ function showChoices() {
 	+ "<thead><tr><td colspan='3' style='background-color:#EEE;'>"
 	+ "<h4><div class='pull-right'>"
 	+ "<button type='button' onclick='addChoice(\"\",\"\")'"
-	+ " id='addchoice' class='btn btn-small'>Add Choice</button>"
+	+ " id='addchoice' class='btn'>Add Choice</button>"
 	+ "</div>Choices</h4></td></tr></thead><tbody id='choiceList'></tbody></table>";
 
 	$("#choices").html(choiceHTML);
@@ -337,7 +337,7 @@ function populateQuestion( questionName ) {
 				addChoice( choices[choice].name, choices[choice].label );
 			}
 		}
-		
+
 		//relationship
 		var relationship = question.relationship;
 		if( relationship ) {
@@ -622,7 +622,7 @@ function okClicked() {
 		}
 
 		//alert( JSON.stringify(question) );
-        
+
         if(question.type == "group") {
         	console.log($("#groupFieldList").checked);
         	if( document.getElementById("groupFieldList").checked ) {
@@ -801,7 +801,9 @@ function deleteQuestion(questionName) {
 function editQuestion(questionName) {
     populateQuestion(questionName);
 	currentQuestionName = questionName;
-	$('#questionEditWindow').modal('show');
+	$( '#questionEditWindow' ).dialog({
+		'width': 640
+	});
 }
 
 function sanitizeNameInput(inputElement) {
@@ -871,9 +873,9 @@ function getQuestionIndex( questionName ) {
 			}
 		}
 	}
-	
+
 	return -1;
-} 
+}
 
 function getHTMLForQuestion(question) {
 
