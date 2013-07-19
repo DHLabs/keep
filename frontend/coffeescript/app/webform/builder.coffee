@@ -1,4 +1,4 @@
-define( [ 'vendor/underscore' ], ( _ ) ->
+define( [ 'underscore' ], ( _ ) ->
 
     build_form = ( child, path, lang ) ->
 
