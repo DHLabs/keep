@@ -6,6 +6,10 @@ module.exports = ( grunt ) ->
 		# Watch files and run the appropriate task on that file when it is
 		# changed.
 		watch:
+			components:
+				files: [ 'frontend/components/**/*.js' ]
+				tasks: [ 'copy:components', 'coffee:requirejs', 'requirejs' ]
+
 			scripts:
 				files: [ 'frontend/coffeescript/**/*.coffee' ]
 				tasks: [ 'bower', 'copy:components', 'coffee:requirejs', 'requirejs' ]
