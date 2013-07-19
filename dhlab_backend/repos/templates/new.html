@@ -55,12 +55,11 @@
 		$( '#questionName' ).autocomplete( {
 			appendTo: '#autofill_list',
 			minLength: 2,
-			//source: "api/v1/vocab/"
 			source: function( request, response ) {
 				$.ajax( {
 					url: "/api/v1/vocab/",
 					data: {
-						term__istartswith: request.term,
+						term__istartswith: request.term.split('_').join(' '),
 						format: 'json'
 					},
 					success: function( query ) {
