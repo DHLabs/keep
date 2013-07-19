@@ -31,7 +31,8 @@ accessible globally. You may need admin access to install globally.
     
 ### Build Front-End
 Finally, we used the tools we have just installed to build our javascript/css
-files.
+files. When the build task is completed, grunt will watch for changes in the
+frontend directory and rebuild when necessary.
 
     grunt build
 
