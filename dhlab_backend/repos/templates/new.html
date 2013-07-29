@@ -30,12 +30,37 @@
 	.ui-autocomplete > .selected {
 		background-color: #EEE;
 	}
+
+	#builder_gui {
+		height: 600px;
+		border:2px solid #000;
+	}
+
+	.window {
+		height: 5em;
+		width: 5em;
+		border: 2px solid #000;
+		position: absolute;
+	}
+
+	#window1 {
+		top:7em;
+		left:20em;
+	}
+
+	#window2 {
+		top: 18em;
+		left: 10em;
+	}
 </style>
 {% endblock %}
 
 {% block js %}
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="{% static 'js/vendor/jquery.ui.touch-punch.min.js' %}"></script>
 <script src="{% static 'js/vendor/form_builder.js' %}"></script>
+<script src="{% static 'js/vendor/jquery.jsPlumb-1.4.1-all-min.js' %}"></script>
+<!--><script src="{% static 'js/vendor/requirejs.js' %}"></script> <!-->
 <script id='form_id' type='text/javascript'>
 	{% if repo_json %}
 	document.repo = {{ repo_json | safe }};
@@ -50,6 +75,56 @@
 		$( '#build_form' ).click( function() {
 			$( this ).hide();
 			$( '#survey_builder' ).show();
+			//FormGUI.initialize();
+
+			jsPlumb.ready( function() { 
+				jsPlumb.importDefaults({					
+					Connector: [ "Bezier" ],
+					Container: $('#builder_gui'),
+					DragOptions: { cursor: 'pointer', zIndex: 2000 },
+					PaintStyle: {
+						strokeStyle: '#000',
+						lineWidth:3
+					},
+					Overlays:[
+						["Arrow", { width:10, 
+									length:10,
+									foldback:0.5, 
+									location:1, 
+									id:'arrow' 
+						}]
+					]
+				})
+
+				var sourceEndpoint = {
+					endpoint: ["Dot", {radius: 12}],
+					paintStyle: {fillStyle: "#000"},
+					isSource: true,
+					isTarget: false
+				}
+
+				var targetEndpoint = {
+					endpoint: ["Dot", {radius: 5}],
+					paintStyle: {fillStyle: "#F00"},
+					isSource: false,
+					isTarget: true
+				}
+
+				jsPlumb.addEndpoints($("#window1"), 
+					[{anchor: "TopCenter"}, {anchor: "BottomCenter"}], 
+					sourceEndpoint );
+				jsPlumb.addEndpoints($("#window2"), 
+					[{anchor: "LeftMiddle"}, {anchor: "RightMiddle"}], 
+					targetEndpoint );
+
+				jsPlumb.draggable($(".window"), { 
+					grid: [80,80],
+					containment: "parent" } );
+				jsPlumb.bind("connectionDrag", function(connection) {
+					console.log("connection " + connection.id + " is being dragged. suspendedElement is ", connection.suspendedElement, " of type ", connection.suspendedElementType);
+				})
+			});
+
 		});
 
 		$( '#questionName' ).autocomplete( {
@@ -182,6 +257,10 @@
 			</div>
 		</div>
 		<div id='survey_builder' style='display:none;'>
+			<div id='builder_gui'>
+				<div class="window" id="window1"></div>
+				<div class="window" id="window2"></div>
+			</div>
 			<!--  Table for Survey Questions  -->
 			<table class='table table-striped table-bordered'>
 				<thead>
