@@ -683,6 +683,7 @@ function okClicked() {
             }
         }
 
+        jsGUIAddWindow(question);
 		buildSurvey();
 		reloadQuestionListHTML();
 		closeDialog();
