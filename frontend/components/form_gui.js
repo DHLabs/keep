@@ -1,3 +1,15 @@
+/*
+================
+FORM BUILDER GUI
+This javascript file is strictly for building
+the GUI used on the create new form page.  There
+is significant use of JSPlumb and JQuery UI, so if
+you are having problems understanding what is being
+done, check those documentations for additional
+reference.
+================
+*/
+
 var sourceEndpoint = {
 	anchor: ["Right"],
 	endpoint: ["Dot", {radius: 5}],
@@ -14,8 +26,16 @@ var targetEndpoint = {
 	isTarget: true
 }
 
+/*
+	This function is used to create and prepare the jsGUI
+	for form creation.  It is called when the user clicks
+	"Create New Survey" on the new form page.
+*/
 function jsGUIReady() {
 	jsPlumb.ready( function() { 
+
+		// JSPlumb Modified Defaults for us.  Flowchart has better
+		// Connectors than the default Bezier.
 		jsPlumb.importDefaults({					
 			Connector: [ "Flowchart", { stub:10 } ],
 			Container: $('#builder_gui'),
@@ -35,53 +55,81 @@ function jsGUIReady() {
 			]
 		})
 
-		jsPlumb.addEndpoint($("#window0"), 
-			sourceEndpoint );
-
-		jsPlumb.addEndpoint($("#window2"), 
-			targetEndpoint);
-
-		jsPlumb.draggable($(".window"), { 
-			grid: [20,20],
-			containment: "parent" } );
+		// Debugging message, tells what is being connected.
 		jsPlumb.bind("connectionDrag", function(connection) {
 			console.log("connection " + connection.id + " is being dragged. suspendedElement is ", connection.suspendedElement, " of type ", connection.suspendedElementType);
 		})
 	});
 };
 
-function jsGUIAddWindow(question) {
-	var tempID = "dynWindow_" + $(".window").length;
-	/**
-	$('<div class="window" id="' + id + '">').appendTo('body').html($(("#window0"))[0].innerHTML);
-	console.log($("#" + id))
+/*
+	This function is used to create a new screen in the form
+	GUI.  It is automatically called if no screens exist on
+	creation of a question.
+*/
+function jsGUIAddWindow() {
+	var windowID = "screen" + $(".window").length;
+	var sortID = "sort" + $(".window").length;
 
-	jsPlumb.draggable($("#" + id), {
+	$('<div>', { id: windowID },
+			   { class: 'window ui-draggable' } )
+	.css({
+		left: '10em',
+		top: '2em',
+	}).appendTo('#builder_gui');
+
+	$('<ul>', { id: sortID },
+			  { class: 'sortable' }
+	 ).appendTo('#' + windowID);
+
+	//make the list sortable!
+	$('#' + sortID).sortable();
+
+	//make the screen draggable!
+	$('#' + windowID).draggable({ 
 		grid: [20,20],
-		containment: "parent"
+		containment: "parent" });
+
+	//make the screen a window again...
+	$('#' + windowID).addClass('window');
+
+	//add the sortable css class back in to the list...
+	$('#' + sortID).addClass('sortable');
+
+	//center the list in the screen
+	$('#' + sortID).center({
+		vertical: false
 	});
-**/
-	// Create the window first.
-	var div = $('<div>', { id: tempID },
-						 { class: 'window ui-draggable' } )
-			  .css({
-			  	left: '10em',
-			  	top: '30em',
-			  }).appendTo('#builder_gui');
-  	jsPlumb.addEndpoint($(div), sourceEndpoint);
-  	jsPlumb.addEndpoint($(div), targetEndpoint);
-  	jsPlumb.draggable($(div), {
-  		grid:[20,20],
-  		containment: "parent"
-  	});
+
+	//add endpoints to the screen
+	jsPlumb.addEndpoint($('#' + windowID), sourceEndpoint);
+	jsPlumb.addEndpoint($('#' + windowID), targetEndpoint);
+}
+
+/*
+	This function adds a question to the form GUI.
+	It is called in form_builder.js, before building
+	the JSON.
+*/
+function jsGUIAddQuestion(question) {
+	var tempID = "dynQuestion_" + $(".question").length;
+	
+	// Create the window first, if none exists
+	if ($(".window").length < 1) {
+		jsGUIAddWindow();
+	}
+
+	var recentSort = "sort" + ($(".sortable").length - 1);
+
+	//Create the question
+	var div = $('<li>', { id: tempID },
+						 { class: 'question ui-state-default' } )
+			  .appendTo('#' + recentSort);
 
   	// Start adding Text to the window
+  	console.log($(".sortable").length - 1);
   	$('<div>', {
-  		html: 'Name: ' + question.name,
-  		id: tempID + '_name'
-  	}).appendTo(div);
-  	$('<div>', {
-  		html: 'Title: ' + question.label,
+  		html: 'Question: ' + question.label,
   		id: tempID + '_label'
   	}).appendTo(div);
   	$('<div>', {
@@ -89,10 +137,6 @@ function jsGUIAddWindow(question) {
   		id: tempID + '_type'
   	}).appendTo(div);
 
-  	//$(div).append('<div id="' + tempID +'_name>Name: ' + question.name + '</div>');
-  	//$(div).append('<div id="' + tempID +'_title>Label: ' + question.label + '</div>');
-  	//$(div).append('<div id="' + tempID +'_type>Type: ' + question.type + '</div>');
-
-  	$(div).addClass('window');
+  	$(div).addClass('question');
 }
 
