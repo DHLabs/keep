@@ -82,8 +82,10 @@ function jsGUIAddWindow() {
 			  { class: 'sortable' }
 	 ).appendTo('#' + windowID);
 
-	//make the list sortable!
-	$('#' + sortID).sortable();
+	//make the list sortable and add a placeholder!
+	$('#' + sortID).sortable({
+		placeholder: "ui-state-highlight"
+	});
 
 	//make the screen draggable!
 	$('#' + windowID).draggable({ 
@@ -123,7 +125,7 @@ function jsGUIAddQuestion(question) {
 
 	//Create the question
 	var div = $('<li>', { id: tempID },
-						 { class: 'question ui-state-default' } )
+						 { class: 'question' } )
 			  .appendTo('#' + recentSort);
 
   	// Start adding Text to the window
@@ -138,5 +140,6 @@ function jsGUIAddQuestion(question) {
   	}).appendTo(div);
 
   	$(div).addClass('question');
+  	$(div).addClass('ui-state-default');
 }
 
