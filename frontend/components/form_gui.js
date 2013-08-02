@@ -71,12 +71,12 @@ function jsGUIAddWindow() {
 	var windowID = "screen" + $(".window").length;
 	var sortID = "sort" + $(".window").length;
 
-	$('<div>', { id: windowID },
-			   { class: 'window ui-draggable' } )
+	$('<div>', { id: windowID } )
 	.css({
 		left: '10em',
 		top: '2em',
-	}).appendTo('#builder_gui');
+		position: 'absolute',
+	}).addClass('window').appendTo('#builder_gui');
 
 	$('<ul>', { id: sortID },
 			  { class: 'sortable' }
@@ -85,27 +85,37 @@ function jsGUIAddWindow() {
 	//make the list sortable and add a placeholder!
 	$('#' + sortID).sortable({
 		placeholder: "ui-state-highlight"
-	});
+	}).addClass('sortable');
 
 	//make the screen draggable!
 	$('#' + windowID).draggable({ 
 		grid: [20,20],
 		containment: "parent" });
 
-	//make the screen a window again...
-	$('#' + windowID).addClass('window');
-
-	//add the sortable css class back in to the list...
-	$('#' + sortID).addClass('sortable');
-
-	//center the list in the screen
-	$('#' + sortID).center({
-		vertical: false
-	});
+	//add a delete button in the lower right corner
+	$('<button>', {
+		onclick: "jsGUIDeleteWindow('" + windowID + "')",
+		type: 'button',
+		html: "<i class='icon-trash'></i> Delete"
+	}).addClass( 'delete-icon' ).appendTo('#' + windowID);
 
 	//add endpoints to the screen
 	jsPlumb.addEndpoint($('#' + windowID), sourceEndpoint);
 	jsPlumb.addEndpoint($('#' + windowID), targetEndpoint);
+}
+
+/* 
+	Delete each element in a window, then delete
+	the window.
+*/
+function jsGUIDeleteWindow(window) {
+	$('#' + window + ' ul > li').each(
+		function() {
+			var questionID = $(this).attr('id');
+			jsGUIDeleteQuestion(questionID);
+		}
+	);
+	$('#' + window).remove();
 }
 
 /*
@@ -125,11 +135,10 @@ function jsGUIAddQuestion(question) {
 
 	//Create the question
 	var div = $('<li>', { id: tempID },
-						 { class: 'question' } )
+						{ class: 'question' } )
 			  .appendTo('#' + recentSort);
 
-  	// Start adding Text to the window
-  	console.log($(".sortable").length - 1);
+  	// Start adding Text to the question
   	$('<div>', {
   		html: 'Question: ' + question.label,
   		id: tempID + '_label'
@@ -139,7 +148,44 @@ function jsGUIAddQuestion(question) {
   		id: tempID + '_type'
   	}).appendTo(div);
 
+  	// add the original name, but hide it!
+  	$('<div>', {
+  		html: question.name,
+  		id: tempID + '_name',
+  		style: 'display:none'
+  	} ).appendTo(div);
+
+  	//add an edit button in the lower left corner
+	$('<button>', {
+		onclick: "jsGUIEditQuestion('" + tempID + "')",
+		type: 'button',
+		html: "<i class='icon-edit'></i> Edit"
+	}).addClass('edit-icon').appendTo(div);
+
+
+	//add a delete button in the lower right corner
+	$('<button>', {
+		onclick: "jsGUIDeleteQuestion('" + tempID + "')",
+		type: 'button',
+		html: "<i class='icon-trash'></i> Delete"
+	}).addClass( 'delete-icon' ).appendTo(div);
+
   	$(div).addClass('question');
   	$(div).addClass('ui-state-default');
 }
 
+function jsGUIEditQuestion(question) {
+	tempID = $('#' + question + '_name').html();
+	editQuestion(tempID);
+}
+
+
+/*
+	This function deletes the question from both the JSON
+	and the GUI whenever the user clicks a question's 'delete'
+*/
+function jsGUIDeleteQuestion(question) {
+	tempID = $('#' + question + '_name').html();
+	deleteQuestion(tempID);
+	$('#' + question).remove();
+}
