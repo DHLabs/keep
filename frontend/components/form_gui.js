@@ -123,55 +123,68 @@ function jsGUIDeleteWindow(window) {
 	It is called in form_builder.js, before building
 	the JSON.
 */
-function jsGUIAddQuestion(question) {
-	var tempID = "dynQuestion_" + $(".question").length;
-	
-	// Create the window first, if none exists
-	if ($(".window").length < 1) {
-		jsGUIAddWindow();
+function jsGUIAddQuestion(question, currentQuestionName) {
+	if (currentQuestionName == null) {
+		var tempID = "dynQuestion_" + $(".question").length;
+		
+		// Create the window first, if none exists
+		if ($(".window").length < 1) {
+			jsGUIAddWindow();
+		}
+
+		var recentSort = "sort" + ($(".sortable").length - 1);
+
+		//Create the question
+		var div = $('<li>', { id: tempID },
+							{ class: 'question' } )
+				  .appendTo('#' + recentSort);
+
+	  	// Start adding Text to the question
+	  	$('<div>', {
+	  		html: 'Question: ' + question.label,
+	  		id: tempID + '_label'
+	  	}).appendTo(div);
+	  	$('<div>', {
+	  		html: 'Type: ' + question.type,
+	  		id: tempID + '_type'
+	  	}).appendTo(div);
+
+	  	// add the original name, but hide it!
+	  	$('<div>', {
+	  		html: question.name,
+	  		id: tempID + '_name',
+	  		style: 'display:none'
+	  	} ).addClass('true-name').appendTo(div);
+
+	  	//add an edit button in the lower left corner
+		$('<button>', {
+			onclick: "jsGUIEditQuestion('" + tempID + "')",
+			type: 'button',
+			html: "<i class='icon-edit'></i> Edit"
+		}).addClass('edit-icon').appendTo(div);
+
+
+		//add a delete button in the lower right corner
+		$('<button>', {
+			onclick: "jsGUIDeleteQuestion('" + tempID + "')",
+			type: 'button',
+			html: "<i class='icon-trash'></i> Delete"
+		}).addClass( 'delete-icon' ).appendTo(div);
+
+	  	$(div).addClass('question');
+	  	$(div).addClass('ui-state-default');
 	}
 
-	var recentSort = "sort" + ($(".sortable").length - 1);
+	else {
+		jsGUIUpdateQuestion(question, currentQuestionName);
+	}
+}
 
-	//Create the question
-	var div = $('<li>', { id: tempID },
-						{ class: 'question' } )
-			  .appendTo('#' + recentSort);
-
-  	// Start adding Text to the question
-  	$('<div>', {
-  		html: 'Question: ' + question.label,
-  		id: tempID + '_label'
-  	}).appendTo(div);
-  	$('<div>', {
-  		html: 'Type: ' + question.type,
-  		id: tempID + '_type'
-  	}).appendTo(div);
-
-  	// add the original name, but hide it!
-  	$('<div>', {
-  		html: question.name,
-  		id: tempID + '_name',
-  		style: 'display:none'
-  	} ).appendTo(div);
-
-  	//add an edit button in the lower left corner
-	$('<button>', {
-		onclick: "jsGUIEditQuestion('" + tempID + "')",
-		type: 'button',
-		html: "<i class='icon-edit'></i> Edit"
-	}).addClass('edit-icon').appendTo(div);
-
-
-	//add a delete button in the lower right corner
-	$('<button>', {
-		onclick: "jsGUIDeleteQuestion('" + tempID + "')",
-		type: 'button',
-		html: "<i class='icon-trash'></i> Delete"
-	}).addClass( 'delete-icon' ).appendTo(div);
-
-  	$(div).addClass('question');
-  	$(div).addClass('ui-state-default');
+function jsGUIUpdateQuestion(question, currentQuestionName) {
+	var updateQ = $('.true-name:contains(' + currentQuestionName + ')').closest('li').attr('id');
+	$('#' + updateQ + '_label').text('Question: ' + question.label);
+	$('#' + updateQ + '_type').text('Type: ' + question.type);
+	$('#' + updateQ + '_name').text(question.name);
 }
 
 function jsGUIEditQuestion(question) {
