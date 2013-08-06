@@ -73,8 +73,9 @@ function closeDialog() {
 	$('#questionEditWindow').dialog( 'close' );
 }
 
-function getValueInputForType(questionType, tagId) {
+function getValueInputForQuestion(question, tagId) {
 
+	var questionType = question.type;
 	var html = "<input id='" + tagId + "' ";
 	var inputType = "text";
 	if( questionType == "decimal" || questionType == "integer" ) {
@@ -86,7 +87,17 @@ function getValueInputForType(questionType, tagId) {
 	} else if(questionType == "time") {
 		inputType = 'time';
 	} else if( questionType == "select one" || questionType == "select all that apply" ) {
-		inputType = 'number';
+		html = "<select id='" + tagId + "'>";
+
+		for( var choice in question.choices ) {
+			html += "<option value='" + question.choices[choice].name + "'>";
+			html += question.choices[choice].name;
+			html += "</option>"
+		}
+
+		html += "</select>";
+
+		return html;
 	}
 	html += "type='" + inputType + "'";
 	html += " />";
@@ -124,7 +135,7 @@ function getCompareSelectForType(questionType, tagId) {
 function addRelevance(questionName,relevantType,relevantValue) {
 	var relevantNum = $("#relevanceList tr").length;
 
-	console.log( "name, type, value" + questionName + "," + relevantType + "," + relevantValue );
+	console.log( "name, type, value:" + questionName + "," + relevantType + "," + relevantValue );
 
 	console.log( "relevants: " + relevantNum );
 
@@ -162,13 +173,11 @@ function addRelevance(questionName,relevantType,relevantValue) {
 
 	$("#relevanceList").append( html );
 
-	if( endIndex > -1 ) {
-		relevanceQuestionChanged( relevantNum );
+	if( questionName ) {
+		$("#relevanceQuestion" + relevantNum).val( questionName );
 	}
 
-	if( questionName ) {
-		$("#relevantQuestion" + relevantNum).val( questionName );
-	}
+	relevanceQuestionChanged( relevantNum );
 
 	if( relevantType ) {
 		$("#relevanceType"+relevantNum).val( relevantType );
@@ -190,8 +199,8 @@ function relevanceQuestionChanged( relevanceNum ) {
 	var html = getCompareSelectForType( question.type, typeTag );
 	$("#relevantType"+relevanceNum).html( html );
 
-	$("#relevantValue"+relevanceNum).html( getValueInputForType(
-		 question.type, valueTag ) );
+	$("#relevantValue"+relevanceNum).html( getValueInputForQuestion(
+		 question, valueTag ) );
 }
 
 function showRelevance() {
@@ -445,7 +454,7 @@ function populateQuestion( questionName ) {
 					relevantQuestionName = relevantQuestionName.split('$').join('');
 					relevantQuestionName = relevantQuestionName.split('{').join('');
 					relevantQuestionName = relevantQuestionName.split('}').join('');
-					var relevantValue = strComps[1];
+					var relevantValue = strComps[1].split("'").join("");
 
 					addRelevance(relevantQuestionName, relevantType, relevantValue);
 				}
@@ -503,17 +512,13 @@ function getIndivConstraintString(constraintNum) {
 function getIndivRelevanceString( relevanceNum ) {
 	var relevanceQuestionName = document.getElementById("relevanceQuestion" + relevanceNum).value;
 
-	console.log( "relevant name: " + relevanceQuestionName );
-
 	var relevanceQuestion = getQuestionForName(relevanceQuestionName);
 
 	var relevanceType =  $("#relevanceType" + relevanceNum).val();
 	var relevanceValue = $("#relevanceValue" + relevanceNum).val();
 
 	var relevanceString = "${" + relevanceQuestion.name + "}";
-	relevanceString += " " + relevanceType + " " + relevanceValue;
-
-	console.log( "rel string: " + relevanceString );
+	relevanceString += " " + relevanceType + " '" + relevanceValue + "'";
 
 	return relevanceString;
 }
@@ -634,8 +639,6 @@ function okClicked() {
         		var control = new Object();
         		control.appearance = "field-list";
         		question.control = control;
-        	} else {
-        		question.control = null;
         	}
         	if( currentQuestionName == null ) {
             	question.children = new Array();
@@ -832,10 +835,10 @@ function moveQuestion( questionName, moveUp ) {
 	var questionIndex;
 	if( currentGroupName ) {
 		var group = getQuestionForName( currentGroupName );
-		questionIndex = getQuestionIndex(questionName);
+		questionIndex = getQuestionIndex(questionName, group);
 		arrayToModify = group.children;
 	} else {
-		questionIndex = getQuestionIndex(questionName);
+		questionIndex = getQuestionIndex(questionName, null);
 		arrayToModify = questionList;
 	}
 
@@ -861,10 +864,9 @@ function moveQuestion( questionName, moveUp ) {
 	reloadQuestionListHTML();
 }
 
-function getQuestionIndex( questionName ) {
+function getQuestionIndex( questionName, group ) {
 
-	if( currentGroupName ) {
-		var group = getQuestionForName( currentGroupName );
+	if( group ) {
 		for( var quest in group.children ) {
 			if( group.children[quest].name == questionName ) {
 				return quest;
