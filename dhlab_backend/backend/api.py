@@ -136,8 +136,16 @@ class DataResource( MongoDBResource ):
             if not self.authorized_read_detail( repo, basic_bundle ):
                 return HttpUnauthorized()
 
+            query_parameters = {}
+            query_parameters['repo'] = ObjectId( repo_id )
+
+            for get_parameter in request.GET:
+                if "data_attr" in get_parameter:
+                    the_param = get_parameter.replace("data_attr__", "")
+                    query_parameters[ 'data.' + the_param ] = request.GET[ get_parameter ]
+
             # Query the database for the data
-            cursor = db.data.find( { 'repo': ObjectId( repo_id ) } )
+            cursor = db.data.find( query_parameters )
 
             offset = int( request.GET.get( 'offset', 0 ) )
 
