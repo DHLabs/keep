@@ -169,14 +169,33 @@ define( [ 'jquery',
             # Field-list controls
             if @input_fields[question].control.appearance is "field-list"
               current_tree = @input_fields[question].tree
-              console.log(@input_fields[question])
               $('#' + @input_fields[question].name + '_field').addClass('active')
-              console.log("Here")
               question++
               question_info = @input_fields[question]
 
               while question_info.tree is current_tree
                 switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
+                switch_question.fadeIn(1).addClass('active')
+                $('.active input').focus()
+                question++
+                question_info = @input_fields[question]
+
+            # Grid-list controls
+            else if @input_fields[question].control.appearance is "grid-list"
+              current_tree = @input_fields[question].tree
+              $('#' + @input_fields[question].name + '_field').addClass('active')
+              question++
+              question_info = @input_fields[question]
+
+              while question_info.tree is current_tree
+                switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
+
+                attrs = { }
+                $.each($('#' + switch_question[0].id + ' select')[0].attributes, (idx, attr) ->
+                  attrs[attr.nodeName] = attr.nodeValue
+                )
+                $('#' + switch_question[0].id + ' select').replaceWith( () ->
+                  return $("<input type='radio' />", attrs).append($(@).contents()) )
                 switch_question.fadeIn(1).addClass('active')
                 $('.active input').focus()
                 question++
