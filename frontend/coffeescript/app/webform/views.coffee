@@ -183,6 +183,8 @@ define( [ 'jquery',
             # Grid-list controls
             else if @input_fields[question].control.appearance is "grid-list"
               current_tree = @input_fields[question].tree
+
+              # Create the table/grid!
               table_name = @input_fields[question].name + '_table'
               $('#' + @input_fields[question].name + '_field')
                 .fadeIn(1)
@@ -191,6 +193,12 @@ define( [ 'jquery',
 
               question++
               question_info = @input_fields[question]
+              # Add the First row to the table
+              $('#' + table_name).append('<tr><td></td></tr>')
+              $('#' + question_info.name + ' option').each( () ->
+                console.log($(@))
+                $('#' + table_name + ' tr').append('<td>' + $(@)[0].innerHTML + '</td>')
+              )
 
               while question_info.tree is current_tree
                 switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
@@ -201,10 +209,9 @@ define( [ 'jquery',
                   attrs[attr.nodeName] = attr.nodeValue
                 )
                 $('#' + switch_question[0].id + ' select').replaceWith( () ->
-                  return $("<ul />", attrs).append($(@).contents()) )
+                  return $("<tr />", attrs).append($(@).contents()) )
 
                 $('#' + switch_question[0].id + ' option').each( (index) ->
-                  console.log(switch_question)
                   attrs = { }
                   $.each($(@)[0].attributes, (idx, attr) ->
                     attrs[attr.nodeName] = attr.nodeValue
@@ -213,6 +220,8 @@ define( [ 'jquery',
                   attrs.name = switch_question.data('key')
                   $(@).replaceWith( () ->
                     return $("<input />", attrs) ) #.append($(@).contents()) )
+                  $(@).parent().wrap('<td />')#.parent()
+                  #$(@).appendTo($('#' + table_name)).wrap('<td></td>')
                 )
 
                 switch_question.fadeIn(1).addClass('active')
