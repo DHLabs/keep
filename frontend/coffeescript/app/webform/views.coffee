@@ -183,19 +183,38 @@ define( [ 'jquery',
             # Grid-list controls
             else if @input_fields[question].control.appearance is "grid-list"
               current_tree = @input_fields[question].tree
-              $('#' + @input_fields[question].name + '_field').addClass('active')
+              table_name = @input_fields[question].name + '_table'
+              $('#' + @input_fields[question].name + '_field')
+                .fadeIn(1)
+                .append($('<table id="' + table_name + '"></table>'))
+                .addClass('active')
+
               question++
               question_info = @input_fields[question]
 
               while question_info.tree is current_tree
                 switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
 
+                # First, change the select to a list, then change the options to radio buttons
                 attrs = { }
                 $.each($('#' + switch_question[0].id + ' select')[0].attributes, (idx, attr) ->
                   attrs[attr.nodeName] = attr.nodeValue
                 )
                 $('#' + switch_question[0].id + ' select').replaceWith( () ->
-                  return $("<input type='radio' />", attrs).append($(@).contents()) )
+                  return $("<ul />", attrs).append($(@).contents()) )
+
+                $('#' + switch_question[0].id + ' option').each( (index) ->
+                  console.log(switch_question)
+                  attrs = { }
+                  $.each($(@)[0].attributes, (idx, attr) ->
+                    attrs[attr.nodeName] = attr.nodeValue
+                  )
+                  attrs.type = 'radio'
+                  attrs.name = switch_question.data('key')
+                  $(@).replaceWith( () ->
+                    return $("<input />", attrs) ) #.append($(@).contents()) )
+                )
+
                 switch_question.fadeIn(1).addClass('active')
                 $('.active input').focus()
                 question++
