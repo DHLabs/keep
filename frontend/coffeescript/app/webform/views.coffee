@@ -169,7 +169,9 @@ define( [ 'jquery',
             # Field-list controls
             if @input_fields[question].control.appearance is "field-list"
               current_tree = @input_fields[question].tree
-              $('#' + @input_fields[question] + '_field').addClass('active')
+              console.log(@input_fields[question])
+              $('#' + @input_fields[question].name + '_field').addClass('active')
+              console.log("Here")
               question++
               question_info = @input_fields[question]
 
