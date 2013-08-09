@@ -73,7 +73,7 @@ function jsGUIAddWindow() {
 
 	$('<div>', { id: windowID } )
 	.css({
-		left: '10em',
+		left: '2em',
 		top: '2em',
 		position: 'absolute',
 	}).addClass('window').appendTo('#builder_gui');

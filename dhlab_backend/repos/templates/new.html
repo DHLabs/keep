@@ -34,8 +34,11 @@
 
 /* CSS for the Builder GUI */
 	#builder_gui {
-		height: 600px;
+		/*height: 600px;
 		border:2px solid #000;
+		*/
+		height:100%;
+		margin: 0;
 	}
 
 	.delete-icon {
@@ -127,28 +130,51 @@
 	<form action='.' method='post' enctype='multipart/form-data'>
 		{% csrf_token %}
 
-		<label {% if form.name.errors %}style='color:red'{%endif%}>
-			<strong>Repository name</strong>
-		</label>
-		{{ form.name }}
-		{{ form.name.errors }}
+		<div id='repositoryDefaultsWindow' title='New Repository' style='display:none;'>
+			<label {% if form.name.errors %}style='color:red'{%endif%}>
+				<strong>Repository name</strong>
+			</label>
+			{{ form.name }}
+			{{ form.name.errors }}
 
-		<label>
-			<strong>Description (optional)</strong>
-		</label>
-        {{ form.desc }}
-		<!--textarea rows='5' name='desc' class='input-xxlarge'></textarea-->
-		{{ form.desc.errors }}
+			<label>
+				<strong>Description (optional)</strong>
+			</label>
+	        {{ form.desc }}
+			<!--textarea rows='5' name='desc' class='input-xxlarge'></textarea-->
+			{{ form.desc.errors }}
 
-		<hr/>
-
+			<hr />
+			Privacy Settings:
+			<label class='radio'>
+				<input type='radio' name='privacy' value='public' style='margin-top:16px;'>
+				<i class='icon-unlock'></i>
+				<strong>Public</strong>
+				<div class='help-block'>
+					Anyone can see this repository and the data associated
+					with it.
+				</div>
+			</label>
+			<label class='radio' style='clear:both;'>
+				<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
+				<i class='icon-lock'></i>
+				<strong>Private</strong>
+				<div class='help-block'>
+					You choose who can see this repository and the data
+					associated with it.
+				</div>
+			</label>
+			<hr />
+			<a href="#" data-toggle="modal" class="btn" onclick="closeNameDialog();">Close</a>
+		</div>
+<!--
 		<div class='section'>
 			<a href='javascript:void;' id='build_form' class='btn btn-medium'>
 				Build XForm Manually
 			</a>
 			{{ form.survey_json }}
 		</div>
-
+-->
 		<!-- Modal View For Editing Question-->
 		<div id='questionEditWindow' title='New Question' style='display:none;'>
 			<div>
@@ -225,20 +251,39 @@
 			<div id="relevances"></div>
 
 			<div style='margin-top:16px;'>
-				<a href="#" data-toggle="modal" class="btn" onclick="closeDialog();">Cancel</a>
+				<a href="#" data-toggle="modal" class="btn" onclick="closeEditDialog();">Cancel</a>
 				<a href="#" class="btn btn-primary" onclick="okClicked();">OK</a>
 			</div>
 		</div>
+
+		<div id='builder_gui'>
+			<a href="#" class="btn btn-primary" onclick="jsGUIAddWindow();">Add Screen</a>
+			<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn">
+				Add Question
+			</button>
+			<button type='button' id='repositoryname' onclick='editRepository()' class="btn btn-primary">
+				Survey Settings
+			</button>
+			<!-- <div style='clear:both;'> -->
+                {% if repo_json %}
+	            	<button id='submit_btn' type='submit' class='btn btn-success'>Save Repository</button>
+                {% else %}
+					<button id='submit_btn' type='submit' class='btn btn-success'>Create Repository</button>
+                {% endif %}
+			
+		</div>
+
+		<!--
 		<div id='survey_builder' style='display:none;'>
 			<div id='builder_gui'>
 				<a href="#" class="btn btn-primary" onclick="jsGUIAddWindow();">Add Screen</a>
-				<!-- <div class="window" id="window0" >
+				 <div class="window" id="window0" >
 					<div class="window_label">Start</div>
 					<div class="window_type"></div>
 				</div>
-				<div class="window" id="window2">End</div> -->
-			</div>
-			<!--  Table for Survey Questions  -->
+				<div class="window" id="window2">End</div>
+			</div> -->
+			<!--  Table for Survey Questions  --> <!--
 			<table class='table table-striped table-bordered'>
 				<thead>
 					<tr>
@@ -259,6 +304,7 @@
 				<tbody id='questionList'></tbody>
 			</table>
 		</div>
+		-->
 
         <div id="xform_file_upload">
 			<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
@@ -274,32 +320,8 @@
 		{{ form.survey_json.errors }}
 		<hr/>
 
-		<label class='radio'>
-			<input type='radio' name='privacy' value='public' style='margin-top:16px;'>
-			<i class='icon-unlock'></i>
-			<strong>Public</strong>
-			<div class='help-block'>
-				Anyone can see this repository and the data associated
-				with it.
-			</div>
-		</label>
-		<label class='radio' style='clear:both;'>
-			<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
-			<i class='icon-lock'></i>
-			<strong>Private</strong>
-			<div class='help-block'>
-				You choose who can see this repository and the data
-				associated with it.
-			</div>
-		</label>
-		<div style='clear:both;'>
-			<hr/>
-                {% if repo_json %}
-            <button id='submit_btn' type='submit' class='btn btn-success'>Save Repository</button>
-                {% else %}
-			<button id='submit_btn' type='submit' class='btn btn-success'>Create Repository</button>
-                {% endif %}
-		</div>
+		
+
 	</form>
 </div>
 {% endblock %}
