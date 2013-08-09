@@ -187,30 +187,41 @@ define( [ 'jquery',
               # Create the table/grid!
               table_name = @input_fields[question].name + '_table'
               $('#' + @input_fields[question].name + '_field')
-                .fadeIn(1)
+                #.fadeIn(1)
                 .append($('<table id="' + table_name + '"></table>'))
-                .addClass('active')
+                #.addClass('active')
+
+              # Keep track of the parent question, it will be needed later
+              parent_question = @input_fields[question]
 
               question++
               question_info = @input_fields[question]
               # Add the First row to the table
               $('#' + table_name).append('<tr><td></td></tr>')
               $('#' + question_info.name + ' option').each( () ->
-                console.log($(@))
                 $('#' + table_name + ' tr').append('<td>' + $(@)[0].innerHTML + '</td>')
               )
 
               while question_info.tree is current_tree
                 switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
 
-                # First, change the select to a list, then change the options to radio buttons
+                # First, change the start of the field to a table row
                 attrs = { }
-                $.each($('#' + switch_question[0].id + ' select')[0].attributes, (idx, attr) ->
+                $.each($('#' + switch_question[0].id)[0].attributes, (idx, attr) -> # + ' select'
                   attrs[attr.nodeName] = attr.nodeValue
                 )
-                $('#' + switch_question[0].id + ' select').replaceWith( () ->
+                $('#' + switch_question[0].id).replaceWith( () -> # + ' select'
                   return $("<tr />", attrs).append($(@).contents()) )
 
+                # Remove select (But not children!), since we don't want a select list
+                selCont = $('#' + switch_question[0].id + ' select').contents()
+                $('#' + switch_question[0].id + ' select').replaceWith(selCont)
+
+                # Append the question to the table, then add the label as a cell
+                $('#' + switch_question[0].id).appendTo($('#' + table_name + ' tbody'))
+                $('#' + switch_question[0].id + ' label').wrap('<td />')
+
+                # then change the options to radio buttons
                 $('#' + switch_question[0].id + ' option').each( (index) ->
                   attrs = { }
                   $.each($(@)[0].attributes, (idx, attr) ->
@@ -220,14 +231,20 @@ define( [ 'jquery',
                   attrs.name = switch_question.data('key')
                   $(@).replaceWith( () ->
                     return $("<input />", attrs) ) #.append($(@).contents()) )
-                  $(@).parent().wrap('<td />')#.parent()
-                  #$(@).appendTo($('#' + table_name)).wrap('<td></td>')
+                  $(@).wrap('<td />').parent()
+                  #$(@).appendTo($('#' + table_name + ' tbody')).wrap('<tr />')
                 )
 
-                switch_question.fadeIn(1).addClass('active')
-                $('.active input').focus()
+                console.log(switch_question)
+                #switch_question.fadeIn(1).addClass('active')
+                #$('.active input').focus()
                 question++
                 question_info = @input_fields[question]
+
+              # Finally, show the question and table
+              $('#' + parent_question.name + '_field').addClass('active').fadeIn(1)
+              #$('#' + table_name).addClass('active').fadeIn(1)
+              $('.active input').focus()
 
           # Assumption of a group without controls
           else
