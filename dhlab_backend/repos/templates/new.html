@@ -31,6 +31,11 @@
 		background-color: #EEE;
 	}
 
+	input[type=checkbox] {
+		float: left;
+		margin-right: : 0.4em;
+	}
+
 
 /* CSS for the Builder GUI */
 	#builder_gui {
@@ -97,11 +102,7 @@
 <script type='text/javascript'>
 	$( function() {
 
-		$( '#build_form' ).click( function() {
-			$( this ).hide();
-			$( '#survey_builder' ).show();
-			jsGUIReady();
-		});
+		jsGUIReady();
 
 		$( '#questionName' ).autocomplete( {
 			appendTo: '#autofill_list',
@@ -143,7 +144,8 @@
 	        {{ form.desc }}
 			<!--textarea rows='5' name='desc' class='input-xxlarge'></textarea-->
 			{{ form.desc.errors }}
-
+			<input id='registrationType' onchange="buildSurvey()" type="checkbox">
+			<label for='registrationType'>Registration Form</label>
 			<hr />
 			Privacy Settings:
 			<label class='radio'>
@@ -165,6 +167,7 @@
 				</div>
 			</label>
 			<hr />
+
 			<a href="#" data-toggle="modal" class="btn" onclick="closeNameDialog();">Close</a>
 		</div>
 <!--
@@ -256,7 +259,7 @@
 			</div>
 		</div>
 
-		<div id='builder_gui'>
+		<div id='builder_gui' onchange='buildSurvey()'>
 			<a href="#" class="btn btn-primary" onclick="jsGUIAddWindow();">Add Screen</a>
 			<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn">
 				Add Question
@@ -305,7 +308,7 @@
 			</table>
 		</div>
 		-->
-
+<!--
         <div id="xform_file_upload">
 			<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
 				<strong>XForm File</strong>
@@ -319,9 +322,11 @@
 		{{ form.xform_file.errors }}
 		{{ form.survey_json.errors }}
 		<hr/>
-
+-->
 		
 
 	</form>
 </div>
+
+
 {% endblock %}

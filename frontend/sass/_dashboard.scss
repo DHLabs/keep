@@ -22,6 +22,11 @@
 		text-align:center;
 		padding: 16px 8px;
 		margin: 16px 8px;
+		&:hover {
+			color: #f00;
+			border-color: #585858;
+			border-style: solid;
+		}
 	}	
 }
 

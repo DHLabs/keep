@@ -690,7 +690,7 @@ function okClicked() {
         jsGUIAddQuestion(question, currentQuestionName);
 		buildSurvey();
 		reloadQuestionListHTML();
-		closeDialog();
+		closeEditDialog();
         currentGroupName = null;
 	}
 }
