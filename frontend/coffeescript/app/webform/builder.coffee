@@ -119,12 +119,13 @@ define( [ 'underscore' ], ( _ ) ->
         else if child.type is 'group'
 
             schema_dict["is_field"] = false
+            schema_dict["type"] = 'Text'
             schema_dict["tree"] = schema_dict["tree"] + (child.name) + "/"
             schema_dict["control"] = child.control
             schema_dict["bind"] = group_start: true
-            #schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
-            #                                <%= title %>
-            #                           </div>' )
+            schema_dict['template'] = _.template( '<div id="<%= editorId %>_field" data-key="<%= editorId %>" class="control-group">
+                                            <%= title %>
+                                       </div>' )
             @item_dict[child.name] = schema_dict
             @_fieldsets.push child.name
             _.each child.children, (_child) ->

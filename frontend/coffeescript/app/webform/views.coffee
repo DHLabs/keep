@@ -170,7 +170,7 @@ define( [ 'jquery',
             if @input_fields[question].control.appearance is "field-list" or (@input_fields[question].control.appearance is "grid-list" and $('#' + @input_fields[question].name + '_field').hasClass('grid-list'))
               current_tree = @input_fields[question].tree
               $('#' + @input_fields[question].name + '_field')
-              #  .fadeIn(1)
+                .fadeIn(1)
                 .addClass('active')
               question++
               question_info = @input_fields[question]

@@ -21,16 +21,17 @@ def validate_and_format( fields, data, files ):
         etype = element[ 'type' ]
         ename = element[ 'name' ]
 
+        # Flatten groups by making a recursive call
+        if 'group' in etype:
+            temp_data = validate_and_format( element[ 'children' ], data, files )
+            valid_data.update(temp_data[0])
+            valid_files.update(temp_data[1])
+
         # Do type conversions
         if ename in data:
             # Convert to integer
             if etype is 'integer':
                 valid_data[ ename ] = int( data[ ename ] )
-            # Flatten groups by making a recursive call
-            elif 'group' in etype:
-                temp_data = validate_and_format( element[ 'children' ], data, files )
-                valid_data.update(temp_data[0])
-                valid_files.update(temp_data[1])
             elif 'select all' in etype:
                 if isinstance( data, QueryDict ):
                     valid_data[ ename ] = data.getlist( ename, [] )
