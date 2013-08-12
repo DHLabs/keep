@@ -190,32 +190,32 @@ define( [ 'jquery',
               table_name = @input_fields[question].name + '_table'
               $('#' + @input_fields[question].name + '_field')
                 .fadeIn(1)
-                .append($('<div id="' + table_name + '" class="grid-list"></div>'))
+                .append($('<table id="' + table_name + '" class="grid-list"></div>'))
                 .addClass('active grid-list')
 
               question++
               question_info = @input_fields[question]
 
               grid_row = 0
-              # Add the First row to the table
-              $('#' + table_name).append('<div id="' + table_name + '-' + grid_row + '" class="grid-list-row"></div>')
+              # Add the First row to the table, first add blank cell
+              $('#' + table_name).append('<tr id="' + table_name + '-' + grid_row + '" class="grid-list-row"></td>')
+              $('#' + table_name + '-' + grid_row).append('<td />')
               $('#' + question_info.name + ' option').each( (idx) ->
-                $('#' + table_name + '-' + grid_row).append('<div id="' + table_name + '-' + grid_row + '-' + idx +
-                                                            '" class="grid-list-cell">' + $(@)[0].innerHTML + '</div>')
+                $('#' + table_name + '-' + grid_row).append('<td id="' + table_name + '-' + grid_row + '-' + idx +
+                                                            '" class="grid-list-cell">' + $(@)[0].innerHTML + '</td>')
               )
 
               while question_info.tree is current_tree
                 grid_row+=1
-                switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
+                switch_question = $('#' + question_info.name + "_field")
 
                 # First, change the select to a list, then change the options to radio buttons
                 attrs = { }
-                $.each($('#' + switch_question[0].id + ' select')[0].attributes, (idx, attr) ->
-                  attrs[attr.nodeName] = attr.value
-                )
-                console.log(attrs)
-                $('#' + switch_question[0].id + ' select').replaceWith( () ->
-                  return $("<div />", attrs).append($(@).contents()) )
+                #$.each($('#' + switch_question[0].id + ' select')[0].attributes, (idx, attr) ->
+                #  attrs[attr.nodeName] = attr.value
+                #)
+                #$('#' + switch_question[0].id + ' select').replaceWith( () ->
+                #  return $("<div />", attrs).append($(@).contents()) )
 
                 $('#' + switch_question[0].id + ' option').each( (index) ->
                   attrs = { }
@@ -226,24 +226,29 @@ define( [ 'jquery',
                   attrs.name = switch_question.data('key')
                   attrs.id = switch_question.data('key') + '-' + index
                   $(@).replaceWith( () ->
-                    return $("<input />", attrs) ) #.append($(@).contents()) )
+                    return $("<input />", attrs) ) 
                   $('#' + attrs.id)
                     .appendTo($(switch_question))
-                    .wrap('<div class="grid-list-cell" />')#.parent()
-                  #$(@).appendTo($('#' + table_name)).wrap('<td></td>')
+                    .wrap('<td class="grid-list-cell" />')
                 )
 
-                $('#' + switch_question[0].id + ' label').wrap('<div class="grid-list-cell" />')
+                $('#' + switch_question[0].id + ' label').wrap('<td class="grid-list-cell" />')
 
                 $('#' + switch_question[0].id + ' .controls').remove()#.attr('display', 'inline-block')
 
                 # Then, move the question into the grid-list as a grid-row
-                $(switch_question)
-                  .appendTo($('#' + table_name))
-                  .wrap('<div id="' + table_name + '-' + grid_row + '" class="grid-list-row" />')
+                switch_question.appendTo($('#' + table_name + ' tbody'))
+                attrs = { }
+                $.each(switch_question[0].attributes, (idx, attr) ->
+                  attrs[attr.nodeName] = attr.value
+                )
+                attrs.class = "active"
 
+                switch_question
+                  .fadeIn(1)
+                  .replaceWith( () ->
+                    return $("<tr />", attrs).append($(@).contents()) )              
 
-                switch_question.fadeIn(1).addClass('active')
                 $('.active input').focus()
                 question++
                 question_info = @input_fields[question]
@@ -260,6 +265,7 @@ define( [ 'jquery',
             switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
             switch_question.fadeIn(1).addClass('active')
 
+          console.log(@)
           @
 
 
@@ -380,6 +386,8 @@ define( [ 'jquery',
             _geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
 
             @_display_form_buttons( question_index )
+
+            console.log(@)
 
             @
 
