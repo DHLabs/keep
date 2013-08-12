@@ -149,7 +149,6 @@ define( [ 'jquery',
           side2 = equation.slice(equation.lastIndexOf(" ") + 1)
           side1 = $("#" + side1.slice(2, -1)).val()  if side1.slice(0, 2) is "${"
           side2 = $("#" + side2.slice(2, -1)).val()  if side2.slice(0, 2) is "${"
-          console.log side1 + ", " + operation + ", " + side2
           if operation is "-"
             return (side1 - side2)
           else if operation is "+"
@@ -167,7 +166,7 @@ define( [ 'jquery',
           if @input_fields[question].control
 
             # Field-list controls
-            if @input_fields[question].control.appearance is "field-list" or (@input_fields[question].control.appearance is "grid-list" and $('#' + @input_fields[question].name + '_field').hasClass('grid-list'))
+            if @input_fields[question].control.appearance is "field-list"
               current_tree = @input_fields[question].tree
               $('#' + @input_fields[question].name + '_field')
                 .fadeIn(1)
@@ -176,16 +175,16 @@ define( [ 'jquery',
               question_info = @input_fields[question]
 
               while question_info.tree is current_tree
-                switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
-                switch_question.fadeIn(1).addClass('active')
+                question_change = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
+                question_change.fadeIn(1).addClass('active')
                 $('.active input').focus()
                 question++
                 question_info = @input_fields[question]
 
-            # Grid-list controls
-            else if @input_fields[question].control.appearance is "grid-list"
+            # Grid-list controls (Not already a grid list)
+            else if @input_fields[question].control.appearance is "grid-list" and !($('#' + @input_fields[question].name + '_field').hasClass('grid-list'))
               current_tree = @input_fields[question].tree
-              console.log(@input_fields[question])
+
               # Create the table/grid (as divs)!
               table_name = @input_fields[question].name + '_table'
               $('#' + @input_fields[question].name + '_field')
@@ -207,44 +206,38 @@ define( [ 'jquery',
 
               while question_info.tree is current_tree
                 grid_row+=1
-                switch_question = $('#' + question_info.name + "_field")
+                question_change = $('#' + question_info.name + "_field")
 
                 # First, change the select to a list, then change the options to radio buttons
                 attrs = { }
-                #$.each($('#' + switch_question[0].id + ' select')[0].attributes, (idx, attr) ->
-                #  attrs[attr.nodeName] = attr.value
-                #)
-                #$('#' + switch_question[0].id + ' select').replaceWith( () ->
-                #  return $("<div />", attrs).append($(@).contents()) )
 
-                $('#' + switch_question[0].id + ' option').each( (index) ->
+                $('#' + question_change[0].id + ' option').each( (index) ->
                   attrs = { }
                   $.each($(@)[0].attributes, (idx, attr) ->
                     attrs[attr.nodeName] = attr.value
                   )
                   attrs.type = 'radio'
-                  attrs.name = switch_question.data('key')
-                  attrs.id = switch_question.data('key') + '-' + index
+                  attrs.name = question_change.data('key')
+                  attrs.id = question_change.data('key') + '-' + index
                   $(@).replaceWith( () ->
                     return $("<input />", attrs) ) 
                   $('#' + attrs.id)
-                    .appendTo($(switch_question))
+                    .appendTo($(question_change))
                     .wrap('<td class="grid-list-cell" />')
                 )
 
-                $('#' + switch_question[0].id + ' label').wrap('<td class="grid-list-cell" />')
-
-                $('#' + switch_question[0].id + ' .controls').remove()#.attr('display', 'inline-block')
+                $('#' + question_change[0].id + ' label').wrap('<td class="grid-list-cell" />')
+                $('#' + question_change[0].id + ' .controls').remove()
 
                 # Then, move the question into the grid-list as a grid-row
-                switch_question.appendTo($('#' + table_name + ' tbody'))
+                question_change.appendTo($('#' + table_name + ' tbody'))
                 attrs = { }
-                $.each(switch_question[0].attributes, (idx, attr) ->
+                $.each(question_change[0].attributes, (idx, attr) ->
                   attrs[attr.nodeName] = attr.value
                 )
                 attrs.class = "active"
 
-                switch_question
+                question_change
                   .fadeIn(1)
                   .replaceWith( () ->
                     return $("<tr />", attrs).append($(@).contents()) )              
@@ -252,6 +245,15 @@ define( [ 'jquery',
                 $('.active input').focus()
                 question++
                 question_info = @input_fields[question]
+
+            # Grid-List controls (already processed to a grid-list)
+            else if $('#' + @input_fields[question].name + '_field').hasClass('grid-list')
+              question_change = '#' + @input_fields[question].name + "_field"
+              $(question_change).fadeIn(1).addClass('active')
+              $(question_change + ' tr').each( () ->
+                $(@).fadeIn(1).addClass('active')
+              )
+              #question_change.children().fadeIn(1).addClass('active')
 
           # Assumption of a group without controls
           else
@@ -262,10 +264,9 @@ define( [ 'jquery',
               else
                 if question > 0
                   question++
-            switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
-            switch_question.fadeIn(1).addClass('active')
+            question_change = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
+            question_change.fadeIn(1).addClass('active')
 
-          console.log(@)
           @
 
 
@@ -387,8 +388,6 @@ define( [ 'jquery',
 
             @_display_form_buttons( question_index )
 
-            console.log(@)
-
             @
 
         next_question: () ->
@@ -406,7 +405,7 @@ define( [ 'jquery',
             else if question_index < @input_fields.length
                 question_index += 1
 
-            @switch_question( $( '.control-group' ).eq( question_index )[0], true )
+            @switch_question( $( '#' + @input_fields[question_index].name + '_field' ), true )
 
             @
 
@@ -432,7 +431,7 @@ define( [ 'jquery',
             else
               question_index -= 1
               
-            @switch_question( $( '.control-group' ).eq( question_index )[0], false )
+            @switch_question( $( '#' + @input_fields[question_index].name + '_field' ), false )
 
             @
 
