@@ -201,10 +201,11 @@ define( [ 'jquery',
               $('#' + table_name).append('<div id="' + table_name + '-' + grid_row + '" class="grid-list-row"></div>')
               $('#' + question_info.name + ' option').each( (idx) ->
                 $('#' + table_name + '-' + grid_row).append('<div id="' + table_name + '-' + grid_row + '-' + idx +
-                                                            '" class="grid-list-header">' + $(@)[0].innerHTML + '</div>')
+                                                            '" class="grid-list-cell">' + $(@)[0].innerHTML + '</div>')
               )
 
               while question_info.tree is current_tree
+                grid_row+=1
                 switch_question = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
 
                 # First, change the select to a list, then change the options to radio buttons
@@ -216,11 +217,6 @@ define( [ 'jquery',
                 $('#' + switch_question[0].id + ' select').replaceWith( () ->
                   return $("<div />", attrs).append($(@).contents()) )
 
-                
-
-                #selConts = $('#' + switch_question[0].id + ' select').contents()
-                #$('#' + switch_question[0].id + ' select').replaceWith(selConts)
-
                 $('#' + switch_question[0].id + ' option').each( (index) ->
                   attrs = { }
                   $.each($(@)[0].attributes, (idx, attr) ->
@@ -231,9 +227,21 @@ define( [ 'jquery',
                   attrs.id = switch_question.data('key') + '-' + index
                   $(@).replaceWith( () ->
                     return $("<input />", attrs) ) #.append($(@).contents()) )
-                  #$('#' + attrs.id).wrap('<li />')#.parent()
+                  $('#' + attrs.id)
+                    .appendTo($(switch_question))
+                    .wrap('<div class="grid-list-cell" />')#.parent()
                   #$(@).appendTo($('#' + table_name)).wrap('<td></td>')
                 )
+
+                $('#' + switch_question[0].id + ' label').wrap('<div class="grid-list-cell" />')
+
+                $('#' + switch_question[0].id + ' .controls').remove()#.attr('display', 'inline-block')
+
+                # Then, move the question into the grid-list as a grid-row
+                $(switch_question)
+                  .appendTo($('#' + table_name))
+                  .wrap('<div id="' + table_name + '-' + grid_row + '" class="grid-list-row" />')
+
 
                 switch_question.fadeIn(1).addClass('active')
                 $('.active input').focus()
