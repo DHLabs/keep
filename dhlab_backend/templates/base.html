@@ -17,6 +17,7 @@
     {% block css %}{% endblock %}
 </head>
 <body>
+    {% block topbar %}
     <div class='topbar-wrapper'>
         <div class='container'>
             <div class='logo'>
@@ -43,6 +44,7 @@
             </div>
         </div>
     </div>
+    {% endblock %}
     {% block outerspace %}
     <div class="container" style='padding-top:80px;'>
         {% block content %}

@@ -382,7 +382,7 @@ define( [ 'jquery',
                 subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent)
                 switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val())
           
-              switch_question.fadeIn(1).addClass "active"
+              element.fadeIn(1).addClass "active"
             
             #Start the Geopoint display if geopoint
             _geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
