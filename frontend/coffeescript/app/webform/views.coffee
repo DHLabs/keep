@@ -86,8 +86,8 @@ define( [ 'jquery',
             # Render it on the page!
             $('#formDiv').html( @renderedForm.el )
 
-            if @input_fields[0].bind and @input_fields[0].bind.group_start
-              _groupOperations.apply(@, [@input_fields[0], true])
+            if (@input_fields[0].bind and @input_fields[0].bind.group_start) or (@input_fields[0].control and @input_fields[0].control.appearance)
+              _groupOperations.apply(@, [0, true])
             else 
               $( '.control-group' ).first().show().addClass( 'active' )
               $( '.active input' ).focus()
@@ -162,6 +162,8 @@ define( [ 'jquery',
 
         # Group Operations moved here, to hopefully better handle groups being a first question
         _groupOperations = (question, forward) ->
+          console.log(question)
+
           # First, group controls
           if @input_fields[question].control
 
@@ -227,7 +229,7 @@ define( [ 'jquery',
                     .wrap('<td class="grid-list-cell" />')
                 )
 
-                $('#' + question_change[0].id + ' label').wrap('<td class="grid-list-cell" />')
+                $('#' + question_change[0].id + ' label').wrap('<td class="grid-list-cell grid-list-label" />')
                 $('#' + question_change[0].id + ' .controls').remove()
 
                 # Then, move the question into the grid-list as a grid-row
@@ -236,7 +238,7 @@ define( [ 'jquery',
                 $.each(question_change[0].attributes, (idx, attr) ->
                   attrs[attr.nodeName] = attr.value
                 )
-                attrs.class = "active"
+                attrs.class = "active grid-list-row"
 
                 question_change
                   .fadeIn(1)
@@ -254,7 +256,6 @@ define( [ 'jquery',
               $(question_change + ' tr').each( () ->
                 $(@).fadeIn(1).addClass('active')
               )
-              #question_change.children().fadeIn(1).addClass('active')
 
           # Assumption of a group without controls
           else
