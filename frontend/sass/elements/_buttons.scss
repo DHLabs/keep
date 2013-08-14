@@ -8,8 +8,8 @@ a:hover {
 	color: $accent;
 }
 
-a.btn {
-	display:inline !important;
+.btn {
+	display:inline;
 	background-color: lighten( $accent, 33% );
 	color:#FFF;
 	padding:8px;
@@ -21,20 +21,20 @@ a.btn {
 	}
 }
 
-a.btn:hover {
+.btn:hover {
 	background-color: darken( $theme, 50% );
 }
 
-a.btn-primary {
+.btn-primary {
 	background-color: $theme;
 }
 
-a.btn-small {
+.btn-small {
 	font-size: 12px;
 	padding: 4px;
 }
 
-a.btn-large {
+.btn-large {
 	font-size: 2em;
 	padding: 8px 16px;
 	line-height: 50px;
