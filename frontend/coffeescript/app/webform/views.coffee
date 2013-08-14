@@ -162,7 +162,6 @@ define( [ 'jquery',
 
         # Group Operations moved here, to hopefully better handle groups being a first question
         _groupOperations = (question, forward) ->
-          console.log(question)
 
           # First, group controls
           if @input_fields[question].control
@@ -208,10 +207,9 @@ define( [ 'jquery',
 
               while question_info.tree is current_tree
                 grid_row+=1
+
+                # Remove the HTML of the old question
                 $('#' + question_info.name + "_field").remove()
-                console.log(question_info)
-                # First, change the select to a list, then change the options to radio buttons
-                attrs = { }
 
                 question_change = question_info.name + '_field'
 
