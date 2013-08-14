@@ -236,9 +236,7 @@ def repo_viz( request, username, repo_name ):
 
     # Grab the data for this repository
     data = db.data.find( { 'repo': ObjectId( repo.mongo_id ) },
-                         { '_id': False,
-                           'survey_label': False,
-                           'repo': False,
+                         { 'survey_label': False,
                            'user': False } )\
                   .sort( [ ('timestamp', pymongo.DESCENDING ) ] )
 

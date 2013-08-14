@@ -114,7 +114,7 @@ define( [ 'jquery',
                         continue
 
                     if field.type in [ 'photo', 'video' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
+                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
                         row_html += "<td><a href='#{url}'>#{value}</a></td>"
                     else
                         row_html += "<td>#{value}</td>"
@@ -148,10 +148,10 @@ define( [ 'jquery',
                         continue
 
                     if field.type in [ 'photo' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
+                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
                         tmpl_options.card_image = @card_img_tmpl( { url: url } )
                     else if field.type in [ 'video' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('_id')}/#{value}"
+                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
                         tmpl_options.card_image = @card_video_tmpl( { url: url } )
                     else
                         tmpl_options.card_data += "<div><strong>#{field.name}:</strong> #{value}</div>"
