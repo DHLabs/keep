@@ -19,7 +19,7 @@ class CSVSerializer( Serializer ):
         raw_data = StringIO.StringIO()
 
         writer = None
-        for item in data:
+        for item in data['data']:
 
             sub_data = item[ 'data' ]
 
