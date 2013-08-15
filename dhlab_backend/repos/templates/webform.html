@@ -122,12 +122,15 @@ $("alert_template .close").click(function(e) {
 	<div class='row'>
 		<div class='span12'>
 			<h2>
-				{% if account.username %}
-					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>
+				{% if account.username and user.is_authenticated %}
+					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>/
+				{% elif user.is_authenticated %}
+					<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>/
+
 				{% else %}
-					<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>
+
 				{% endif %}
-				/&nbsp;{{ repo.name }}
+				&nbsp;{{ repo.name }}
 			</h2>
 		</div>
 	</div>
