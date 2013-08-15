@@ -134,8 +134,10 @@ define( [ 'underscore' ], ( _ ) ->
             return @
 
         else if child.type is 'select one'
-
-            schema_dict['type'] = 'Select'
+            if child.control and child.control.appearance is 'minimal'
+                schema_dict['type'] = 'Select'
+            else
+                schema_dict['type'] = 'Radio'
             schema_dict['options'] = []
 
             _.each( child.choices, ( option ) ->

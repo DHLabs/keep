@@ -162,7 +162,6 @@ define( [ 'jquery',
 
         # Group Operations moved here, to hopefully better handle groups being a first question
         _groupOperations = (question, forward) ->
-          console.log(question)
 
           # First, group controls
           if @input_fields[question].control
@@ -202,48 +201,33 @@ define( [ 'jquery',
               # Add the First row to the table, first add blank cell
               $('#' + table_name).append('<tr id="' + table_name + '-' + grid_row + '" class="grid-list-row"></td>')
               $('#' + table_name + '-' + grid_row).append('<td />')
-              $('#' + question_info.name + ' option').each( (idx) ->
+              for element, idx in question_info.options
                 $('#' + table_name + '-' + grid_row).append('<td id="' + table_name + '-' + grid_row + '-' + idx +
-                                                            '" class="grid-list-cell">' + $(@)[0].innerHTML + '</td>')
-              )
+                                                            '" class="grid-list-cell">' + element.label + '</td>')
 
               while question_info.tree is current_tree
                 grid_row+=1
-                question_change = $('#' + question_info.name + "_field")
 
-                # First, change the select to a list, then change the options to radio buttons
-                attrs = { }
+                # Remove the HTML of the old question
+                $('#' + question_info.name + "_field").remove()
 
-                $('#' + question_change[0].id + ' option').each( (index) ->
-                  attrs = { }
-                  $.each($(@)[0].attributes, (idx, attr) ->
-                    attrs[attr.nodeName] = attr.value
-                  )
-                  attrs.type = 'radio'
-                  attrs.name = question_change.data('key')
-                  attrs.id = question_change.data('key') + '-' + index
-                  $(@).replaceWith( () ->
-                    return $("<input />", attrs) ) 
-                  $('#' + attrs.id)
-                    .appendTo($(question_change))
-                    .wrap('<td class="grid-list-cell" />')
-                )
+                question_change = question_info.name + '_field'
 
-                $('#' + question_change[0].id + ' label').wrap('<td class="grid-list-cell grid-list-label" />')
-                $('#' + question_change[0].id + ' .controls').remove()
+                # Create new row
+                $('#' + table_name + ' tbody')
+                  .append('<tr id ="' + question_change + '" data-key="' + question_info.name + '" class="active grid-list-row">')
 
-                # Then, move the question into the grid-list as a grid-row
-                question_change.appendTo($('#' + table_name + ' tbody'))
-                attrs = { }
-                $.each(question_change[0].attributes, (idx, attr) ->
-                  attrs[attr.nodeName] = attr.value
-                )
-                attrs.class = "active grid-list-row"
+                # Create label cell
+                $('#' + question_change )
+                  .append('<td class="grid-list-cell grid-list-label">
+                            <label class="control-label" for="' + question_info.name + '"> ' + question_info.title + '</label></td>')
 
-                question_change
-                  .fadeIn(1)
-                  .replaceWith( () ->
-                    return $("<tr />", attrs).append($(@).contents()) )              
+                # Create Radio cells
+                for element, index in question_info.options
+                  $('#' + question_change)
+                    .append('<td class="grid-list-cell">
+                              <input value="' + element.label + '" type="radio" name="' + question_info.name + '" id="' + question_info.name + '-' + index + '">
+                            </td>')
 
                 $('.active input').focus()
                 question++
