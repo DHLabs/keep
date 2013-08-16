@@ -88,9 +88,8 @@ function jsGUIAddWindow() {
 	}).addClass('sortable');
 
 	//make the screen draggable!
-	$('#' + windowID).draggable({ 
-		grid: [20,20],
-		containment: "parent" });
+	jsPlumb.draggable($('#' + windowID), { 
+		grid: [20,20] });
 
 	//add a delete button in the lower right corner
 	$('<button>', {
@@ -115,6 +114,8 @@ function jsGUIDeleteWindow(window) {
 			jsGUIDeleteQuestion(questionID);
 		}
 	);
+	jsPlumb.remove($('#' + window));
+
 	$('#' + window).remove();
 }
 
