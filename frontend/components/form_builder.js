@@ -125,6 +125,9 @@ function getCompareSelectForType(questionType, tagId) {
 	} else if( questionType == "select one" || questionType == "select all that apply" ) {
 		html += "<option value='='>Selected</option>" +
 	   "<option value='!='>Not Selected</option>";
+	} else if( questionType == 'text' ) {
+		html += "<option value='!='>Not Equal To</option>" +
+	     "<option value='='>Equal To</option>";
 	}
 
 	html += "</select>\n";
