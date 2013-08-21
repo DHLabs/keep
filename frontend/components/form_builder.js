@@ -73,10 +73,6 @@ function closeEditDialog() {
 	$('#questionEditWindow').dialog( 'close' );
 }
 
-function closeNameDialog() {
-	$('#repositoryDefaultsWindow').dialog( 'close' );
-}
-
 function getValueInputForType(questionType, tagId) {
 
 	var html = "<input id='" + tagId + "' ";

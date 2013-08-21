@@ -78,12 +78,13 @@ function jsGUIAddWindow() {
 		position: 'absolute',
 	}).addClass('window').appendTo('#builder_gui');
 
-	$('<ul>', { id: sortID },
-			  { class: 'sortable' }
+	$('<ul>', { id: sortID }//,
+			  //{ class: 'sortable' }
 	 ).appendTo('#' + windowID);
 
 	//make the list sortable and add a placeholder!
 	$('#' + sortID).sortable({
+		connectWith: ".sortable",
 		placeholder: "ui-state-highlight"
 	}).addClass('sortable');
 
@@ -179,6 +180,8 @@ function jsGUIAddQuestion(question, currentQuestionName) {
 	else {
 		jsGUIUpdateQuestion(question, currentQuestionName);
 	}
+
+	jsGUIDFS();
 }
 
 function jsGUIUpdateQuestion(question, currentQuestionName) {
@@ -193,7 +196,6 @@ function jsGUIEditQuestion(question) {
 	editQuestion(tempID);
 }
 
-
 /*
 	This function deletes the question from both the JSON
 	and the GUI whenever the user clicks a question's 'delete'
@@ -202,4 +204,26 @@ function jsGUIDeleteQuestion(question) {
 	tempID = $('#' + question + '_name').html();
 	deleteQuestion(tempID);
 	$('#' + question).remove();
+}
+
+function closeNameDialog() {
+	$('#repositoryDefaultsWindow').dialog( 'close' );
+}
+
+function jsGUIDFS() {
+	currentDiv = $('#screen0');
+	if ($(currentDiv ' ul li').length == 0) {
+
+	}
+
+	else if ($(currentDiv ' ul li').length == 1) {
+
+	}
+	
+	else {
+		$(currentDiv ' ul li').each(
+
+		)
+	}
+
 }
