@@ -1,15 +1,16 @@
 import pymongo
 import re
 
-from backend.db import db, MongoDBResource, Document
-from backend.db import dehydrate_survey
-from api.serializers import CSVSerializer
-
 from django.http import HttpResponse
 
 from tastypie import fields
 from tastypie.exceptions import BadRequest
 from tastypie.utils.mime import build_content_type
+
+from backend.db import db, MongoDBResource, Document
+from backend.db import dehydrate_survey
+
+from .serializers import CSVSerializer
 
 
 class VocabResource( MongoDBResource ):

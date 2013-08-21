@@ -2,8 +2,10 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
-from api.resources import RepoResource, DataResource, UserResource
-from vocab.api import VocabResource
+from api.data import DataResource
+from api.repo import RepoResource
+from api.user import UserResource
+from api.vocab import VocabResource
 
 # Register resources to make API available
 from tastypie.api import Api

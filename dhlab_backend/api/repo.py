@@ -1,87 +1,21 @@
-from backend.db import db, MongoDBResource, Document
-from backend.db import dehydrate_survey
-from backend.serializers import CSVSerializer
-
-from openrosa.serializer import XFormSerializer
+from backend.db import db
+from backend.db import user_or_organization
 
 from bson import ObjectId
 
 from django.conf.urls import url
-from django.contrib.auth.models import User
 from django.http import HttpResponse
 
-from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
-from tastypie.exceptions import BadRequest
 from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
-from backend.db import user_or_organization
 from repos.models import Repository
+from openrosa.serializer import XFormSerializer
 
-from api.authentication import ApiTokenAuthentication
-from api.authorization import DataAuthorization, RepoAuthorization
-
-
-class DataResource( MongoDBResource ):
-    id           = fields.CharField( attribute='_id' )
-    repo_id      = fields.CharField( attribute='repo' )
-    survey_label = fields.CharField( attribute='survey_label', null=True )
-    timestamp    = fields.DateTimeField( attribute='timestamp' )
-    data         = fields.DictField( attribute='data', null=True )
-
-    class Meta:
-        collection = 'data'
-        resource_name = 'data'
-        object_class = Document
-        serializer = CSVSerializer()
-
-        list_allowed_methos     = []
-        detail_allowed_methods  = [ 'get', 'list' ]
-
-        authorization = DataAuthorization()
-
-    def get_detail( self, request, **kwargs ):
-
-        # Grab the survey that we're querying survey data for
-        repo_id = kwargs[ 'pk' ]
-
-        try:
-            basic_bundle = self.build_bundle( request=request )
-            repo = Repository.objects.get( mongo_id=repo_id )
-
-            if not self.authorized_read_detail( repo, basic_bundle ):
-                return HttpUnauthorized()
-
-            query_parameters = {}
-            query_parameters['repo'] = ObjectId( repo_id )
-
-            for get_parameter in request.GET:
-                if "data_attr" in get_parameter:
-                    the_param = get_parameter.replace("data_attr__", "")
-                    query_parameters[ 'data.' + the_param ] = request.GET[ get_parameter ]
-
-            # Query the database for the data
-            cursor = db.data.find( query_parameters )
-
-            offset = int( request.GET.get( 'offset', 0 ) )
-
-            meta = {
-                'limit': 50,
-                'offset': offset,
-                'count': cursor.count(),
-                'pages': cursor.count() / 50
-            }
-
-            data = {
-                'meta': meta,
-                'data': dehydrate_survey(
-                            cursor.skip( offset * 50 ).limit( 50 ) ) }
-
-            return self.create_response( request, data )
-        except ValueError:
-            return HttpUnauthorized()
+from .authentication import ApiTokenAuthentication
+from .authorization import RepoAuthorization
 
 
 class RepoResource( ModelResource ):
@@ -124,8 +58,7 @@ class RepoResource( ModelResource ):
                  name="api_get_resource"),
         ]
 
-    def create_response( self, request, data, response_class=HttpResponse,
-                         **response_kwargs):
+    def create_response( self, request, data, response_class=HttpResponse, **response_kwargs):
         """
         Extracts the common "which-format/serialize/return-response" cycle.
 
@@ -176,7 +109,7 @@ class RepoResource( ModelResource ):
 
     def post_detail( self, request, **kwargs ):
 
-        basic_bundle = self.build_bundle( request=request )
+        #basic_bundle = self.build_bundle( request=request )
 
         user_accessing = request.GET.get( 'user', None )
         user = user_or_organization( user_accessing )
@@ -205,11 +138,14 @@ class RepoResource( ModelResource ):
         '''
         repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
         bundle.data['children'] = repo_fields[ 'fields' ]
+
         if 'type' in repo_fields:
             bundle.data['type'] = repo_fields[ 'type' ]
         else:
             bundle.data['type'] = "survey"
-        bundle.data['user']     = bundle.obj.user
+
+        bundle.data['user'] = bundle.obj.user
+
         return bundle
 
     def dehydrate_id( self, bundle ):
@@ -227,35 +163,3 @@ class RepoResource( ModelResource ):
             Convert organization ids into the more informative org name.
         '''
         return bundle.obj.org.name if bundle.obj.org else None
-
-
-class UserResource( ModelResource ):
-    class Meta:
-        queryset = User.objects.all()
-        resource_name = 'user'
-
-        list_allowed_methods = [ 'get' ]
-        detail_allowed_methods = []
-
-        excludes = [ 'email',
-                     'password',
-                     'is_superuser',
-                     'is_staff',
-                     'is_active',
-                     'date_joined',
-                     'first_name',
-                     'last_name',
-                     'last_login' ]
-
-        filtering = {
-            'username': ( 'icontains', )
-        }
-
-    def build_filters( self, filters=None ):
-        '''
-            Since we're only using this API to search for users, require that
-            a filter be in the API call.
-        '''
-        if 'username__icontains' not in filters:
-            raise BadRequest
-        return super( UserResource, self ).build_filters( filters )
