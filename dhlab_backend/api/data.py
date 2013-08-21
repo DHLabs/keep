@@ -30,6 +30,9 @@ class DataResource( MongoDBResource ):
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get', 'list' ]
 
+        authentication = MultiAuthentication( SessionAuthentication(),
+                                              ApiTokenAuthentication() )
+
         authorization = DataAuthorization()
 
     def get_detail( self, request, **kwargs ):
@@ -66,8 +69,7 @@ class DataResource( MongoDBResource ):
 
             data = {
                 'meta': meta,
-                'data': dehydrate_survey(
-                            cursor.skip( offset * 50 ).limit( 50 ) ) }
+                'data': dehydrate_survey( cursor.skip(offset * 50).limit(50)) }
 
             return self.create_response( request, data )
         except ValueError:
