@@ -7,6 +7,32 @@
 <link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.Default.css" %}'>
+<style type='text/css'>
+	.autocomplete-list {
+		position:absolute;
+	}
+
+	.ui-helper-hidden-accessible {
+		display:none;
+	}
+
+	.ui-autocomplete {
+		border-bottom:1px solid #EEE;
+		border-right:1px solid #EEE;
+		border-left:1px solid #EEE;
+		list-style-type: none;
+		background-color: white;
+	}
+
+	.ui-autocomplete > .ui-menu-item {
+		padding: 4px 8px;
+		cursor:pointer;
+	}
+
+	.ui-autocomplete > .selected {
+		background-color: #EEE;
+	}
+</style>
 {% endblock %}
 
 {% block js %}
@@ -15,6 +41,8 @@
 <script type='text/javascript'>
 	document.initial_data = {{data|safe}};
 </script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <script src='{% static 'js/vendor/requirejs.js' %}'></script>
 <script type='text/javascript'>
 
@@ -64,6 +92,30 @@
 
 	$( function() {
 		moveScroller();
+	});
+</script>
+
+<script type='text/javascript'>
+	$( function() {
+
+		$( '#share_username' ).autocomplete( {
+			appendTo: '#autofill_list',
+			minLength: 1,
+			source: function( request, response ) {
+				$.ajax( {
+					url: "/api/v1/user/",
+					data: {
+						username__icontains: $( '#share_username' ).val(),
+						format: 'json'
+					},
+					success: function( query ) {
+						response ( $.map( query.objects, function( item ){
+							return { label: item.username, value: item.username }
+						}));
+					}
+				});
+			}
+		});
 	});
 </script>
 {% endblock %}
@@ -289,9 +341,53 @@
 					<span class='help-block'>
 						WARNING: Checking this box will make the data in this repository completely <strong>public</strong>.
 					</span>
+				</div>	
+			</div>		
+		</div>
+		<div class='sixteen columns'>
+
+			<h4>Users with data diary permissions</h4>
+
+			<div id='user_permission_list'>
+			{% for theuser, value in users_perms.items %}
+
+			<div class='row'>
+				<div class='seven columns'>
+					<p>{{ theuser }}</p>
 				</div>
 
+				{% for permission in value %}
+					<p>{{ permission }}</p>
+				{% endfor %}
+				
+				<div class='three columns'>
+					<button type='button' onclick="remove_permissions(this,'{{ theuser }}')">Delete <i class='icon-trash'></i></button>
+				</div>
 			</div>
+
+			{% endfor %}
+
+		</div>
+
+			<div class='row'>
+				
+				<div class='seven columns'>
+					<input id="share_username" name="share_username" type="text" />
+					<span id="autofill_list" class='autocomplete-list'></span>
+				</div>
+				<div class="three columns">
+					<select id='permission_select'>
+						<option value='view_repository'>See Repo</option>
+						<option value='add_data,view_repository'>Add Data</option>
+						<option value='view_data,add_data,view_repository'>View Data</option>
+						<option value='change_repository,view_data,add_data,view_repository'>Edit Repo</option>
+					</select>
+				</div>
+				<div class='three columns'>
+					<button type='button' id="addPermButton">Add Permission</button>
+				</div>
+			</div>
+
 		</div>
 		<div style='display:none;'>
 			<div class='span12'><hr></div>

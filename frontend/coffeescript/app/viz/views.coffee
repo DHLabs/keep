@@ -8,6 +8,7 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Forms, RawView, MapView, ChartView ) ->
 
+
     class DataModel extends Backbone.Model
         defaults:
             data: []
@@ -41,6 +42,7 @@ define( [ 'jquery',
         events:
             "click #viz_options a":         "switch_viz"
             "change #sharing_toggle":       "toggle_public"
+            "click #addPermButton":         "add_permissions"
 
         # Current list of survey data
         data: new DataCollection()
@@ -82,6 +84,32 @@ define( [ 'jquery',
                         $( '#privacy > div' ).html( '<i class=\'icon-lock\'></i>&nbsp;PRIVATE' )
             )
             @
+
+        add_permissions: (event) ->
+
+            console.log $('#share_username').val()
+            console.log $('#permission_select').val()
+
+            $.post( "/repo/user_share/#{@form.form_id}/", { username:$('#share_username').val(), permissions:$('#permission_select').val() }, ( response ) =>
+                if response.success
+                    html = "<div class='row'>"
+                    html+= "<div class='seven columns'>" + $('#share_username').val() + "</div>"
+                    html+= "<p>" +$('#permission_select').val() + "</p>"
+                    html+= "<div class='three columns'>"
+                    html+= "<button type='button' onclick='remove_permissions"
+                    html += "(this, \"" + $('#share_username').val() + "\")'>"
+                    html += "Delete <i class='icon-trash'></i></button></div></div>"
+                    console.log html
+                    $( '#user_permission_list' ).append( html )
+                    console.log 'success'
+                else
+                    console.log response
+
+
+            )
+            @
+
+
 
         switch_viz: (event) ->
 
@@ -125,3 +153,14 @@ define( [ 'jquery',
 
     return DataView
 )
+
+remove_permissions= (div,username) ->
+    $.ajax({
+        type: "DELETE",
+        url: "/repo/user_share/"+$( '#form_id' ).html()+"/?username=" + username,
+        data: "username=" + username,
+        success: () ->
+            div.parentNode.parentNode.innerHTML = ""
+
+    })
+    @

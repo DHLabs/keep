@@ -12,7 +12,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
-from guardian.shortcuts import get_perms
+from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm
 
 from backend.db import db, dehydrate_survey, user_or_organization
 
@@ -163,6 +163,43 @@ def toggle_public( request, repo_id ):
                          mimetype='application/json' )
 
 @csrf_exempt
+@login_required
+def share_repo( request, repo_id ):
+    '''
+        Modifies sharing permissions for specific users
+    '''
+
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
+
+    if not request.user.has_perm( 'share_repository', repo ):
+        return HttpResponse( 'Unauthorized', status=401 )
+    
+    if request.method == 'POST':
+        username = request.POST.get( 'username', None )
+    else:
+        username = request.GET.get( 'username', None )
+
+    # Grab the user/organization based on the username
+    account = user_or_organization( username )
+    if account is None:
+        return HttpResponse( status=404 )
+
+    if account == request.user:
+        return HttpResponse( status=401 )
+
+    if request.method == 'DELETE':
+        old_permissions = get_perms( account, repo )
+        for old_permission in old_permissions:
+            remove_perm( old_permission, account, repo )
+        return HttpResponse( 'success', status=204 )
+    else:
+        new_permissions = request.POST.get( 'permissions', '' ).split(',')
+        for new_permission in new_permissions:
+            assign_perm( new_permission, account, repo )
+        return HttpResponse( 'success', status=200 )
+    
+
+@csrf_exempt
 def webform( request, username, repo_name ):
     '''
         Simply grab the survey data and send it on the webform. The webform
@@ -248,6 +285,9 @@ def repo_viz( request, username, repo_name ):
     # if 'view_raw' not in permissions:
     #     data = privatize_geo( repo, data )
 
+    usePerms = get_users_with_perms( repo, attach_perms=True )
+    usePerms.pop( account, None )    
+
     if isinstance( account, User ):
         account_name = account.username
     else:
@@ -259,5 +299,6 @@ def repo_viz( request, username, repo_name ):
                                  'data': json.dumps( data ),
                                  'permissions': permissions,
                                  'account': account,
-                                 'account_name': account_name },
+                                 'account_name': account_name,
+                                 'users_perms': usePerms },
                                context_instance=RequestContext(request) )
