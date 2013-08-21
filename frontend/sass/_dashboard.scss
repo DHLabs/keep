@@ -33,7 +33,7 @@
 
 	#filedrag.hover {
 		border: 1px solid $theme;
-	}	
+	}
 }
 
 span.label {
@@ -110,6 +110,10 @@ img.account-icon-large {
 	.add-data {
 		width:80px;
 		text-align:center;
+
+		a {
+			display: inline;
+		}
 	}
 
 	.submission-count {
