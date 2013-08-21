@@ -13,20 +13,19 @@
 
 	<form id="newform" action='/repo/new/' method='post' enctype='multipart/form-data'>
 		{% csrf_token %}
-	<input type="hidden" id="MAX_FILE_SIZE" name="MAX_FILE_SIZE" value="300000" />
-	<input type="hidden" name="name" />
-	<input type="hidden" name="privacy" value="private" />
-	<input type="file" id="fileselect" name="xform_file" multiple="multiple" style="display: none"/>
-	<div id="filedrag">
-		Drag a File(CSV/JSON/XLS) here to make a repo
-		<div>
-		<a class='btn btn-primary btn-small' id='new_repo_btn' href='{% url "repo_new" %}'>
+		<input type="hidden" id="MAX_FILE_SIZE" name="MAX_FILE_SIZE" value="300000" />
+		<input type="hidden" name="name" />
+		<input type="hidden" name="privacy" value="private" />
+		<input type="file" id="fileselect" name="xform_file" multiple="multiple" style="display: none"/>
+		<div id="filedrag">
+			Drag a File(CSV/JSON/XLS) here to make a repo
+			<div>
+			<a class='btn btn-primary btn-small' id='new_repo_btn' href='{% url "repo_new" %}'>
 				Create From Scratch
-		</a>
-	</div>
-	</div>
-
-	<input type="submit" name="submission" style="display: none">
+			</a>
+			</div>
+		</div>
+		<input type="submit" name="submission" style="display: none">
 	</form>
 
 
