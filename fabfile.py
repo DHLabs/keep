@@ -3,16 +3,16 @@ from __future__ import with_statement
 from fabric.api import local, cd, env, run
 from fabric.colors import green
 
-PRODUCTION_DIR  = 'backend'
+PRODUCTION_DIR = 'keep'
 PRODUCTION_SETTINGS = 'settings.production'
 
 SUPERVISOR_NAME = 'keep'
 
-MONGODB_NAME    = 'dhlab'
+MONGODB_NAME = 'dhlab'
 
 env.use_ssh_config = True
 env.user = 'ubuntu'
-env.hosts = [ 'dhlab-backend' ]
+env.hosts = [ 'keep-dev' ]
 
 
 def backup_db():

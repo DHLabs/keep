@@ -2,8 +2,10 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
-from backend.api import RepoResource, DataResource, UserResource
-from vocab.api import VocabResource
+from api.data import DataResource
+from api.repo import RepoResource
+from api.user import UserResource
+from api.vocab import VocabResource
 
 # Register resources to make API available
 from tastypie.api import Api
@@ -17,13 +19,19 @@ v1_api.register( VocabResource() )
 urlpatterns = patterns( 'backend.views',
 
     # Basic index page
-    url( r'^$', 'home', name='home' ),
+    url( regex=r'^$',
+    	 view='home',
+    	 name='home' ),
 
     # User settings
-    url( r'^settings/$', 'settings', name='settings' ),
+    url( regex=r'^settings/$',
+    	 view='settings',
+    	 name='settings' ),
 
     # User dashboard
-    url( r'^(?P<username>\w+)/$', 'user_dashboard', name='user_dashboard' ),
+    url( regex=r'^(?P<username>\w+)/$',
+    	 view='user_dashboard',
+    	 name='user_dashboard' ),
 
 )
 
