@@ -210,20 +210,51 @@ function closeNameDialog() {
 	$('#repositoryDefaultsWindow').dialog( 'close' );
 }
 
+/*
+	This function runs a Depth-first search to build the question
+	list and group list appropriately.  No JSON formatting here
+*/
+
 function jsGUIDFS() {
-	currentDiv = $('#screen0');
-	if ($(currentDiv ' ul li').length == 0) {
+	var windowList = ['screen0'];
+	var questionList = [];
+	var i = 0;
 
+	$(".window").removeClass("visited-DFS")
+
+	while (windowList.length > 0) {
+		currentDiv = $('#' + windowList.pop());
+
+		if (currentDiv.hasClass("visited-DFS")) {
+			continue;
+		}
+		else {
+			currentDiv.addClass("visited-DFS");
+		}
+
+		if ($('#' + currentDiv.attr('id') + ' ul li').length == 0) {
+
+		}
+		else if ($('#' + currentDiv.attr('id') + ' ul li').length == 1) {
+			questionList.push($('#' + currentDiv.attr('id') + ' ul li')[0]);
+			console.log($(currentDiv.attr('id') + ' ul li'));
+		}
+		else {
+			$('#' + currentDiv.attr('id') + ' ul li').each( function() {
+				console.log(this);
+			});
+		}
+
+		if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
+			continue;
+		}
+		else {
+			for (i = 1; i < jsPlumb.getConnections(currentDiv)[0].endpoints.length; i++) {
+				windowList.push(jsPlumb.getConnections(currentDiv)[0].endpoints[i].elementId);
+			}
+		}
 	}
 
-	else if ($(currentDiv ' ul li').length == 1) {
-
-	}
-	
-	else {
-		$(currentDiv ' ul li').each(
-
-		)
-	}
+	console.log(questionList)
 
 }
