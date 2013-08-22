@@ -12,36 +12,6 @@ from django.core.files.storage import default_storage as storage
 from . import validate_and_format
 
 
-class Notebook( models.Model ):
-    '''
-        Represents a group of repositories
-    '''
-    name        = models.CharField( max_length=256,
-                                    blank=False )
-
-    user         = models.ForeignKey( 'auth.User',
-                                      related_name='studies',
-                                      null=True )
-
-    org          = models.ForeignKey( 'organizations.Organization',
-                                      related_name='studies',
-                                      null=True )
-
-    description  = models.CharField( max_length=1024,
-                                     blank=True )
-
-    date_created = models.DateTimeField( auto_now_add=True )
-    date_updated = models.DateTimeField( auto_now_add=True )
-
-    class Meta:
-        ordering = [ 'name' ]
-        verbose_name = 'notebook'
-        verbose_name_plural = 'notebooks'
-
-    def __unicode__( self ):
-        return self.name
-
-
 class RepositoryManager( models.Manager ):
     def list_by_username( self, username ):
         return self.filter(Q(user__username=username) | Q(org__name=username))
