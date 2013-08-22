@@ -28,14 +28,17 @@
                 </div>
             </div>
             <div class='topbar'>
-                {% if user.is_authenticated %}            
+                {% if user.is_authenticated %}
                 <div class='six columns search-bar'>
                     <div style='padding-top:16px;'>
                         <input type='text' style='margin:0;width:100%;' placeholder='Search Data Diaries'>
                     </div>
-                </div>            
+                </div>
                 <div class='three columns offset-by-seven user-panel'>
                     <h4><a href='{% url "home" %}'>{{ user.username }}</a></h4>&nbsp;|
+                    <a href='{% url "settings" %}'>
+                        Settings
+                    </a>|
                     <a href='{% url "auth_logout" %}'>
                         Logout
                     </a>

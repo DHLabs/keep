@@ -4,7 +4,7 @@
 <div class='row'>
 	<div class='span12'>
 		<h3>API Keys</h3>
-		<table class='table table-bordered table-striped'>
+		<table class='table'>
 			<thead>
 				<tr>
 					<th>Key Name</th>
@@ -16,9 +16,9 @@
 			<tbody>
 				<tr>
 					<form class='form' action='/accounts/generate_key' method='GET'>
-					<td><input type='text' name='name' placeholder='iODK Key'></td>
+					<td><input type='text' style='margin:0;' name='name' placeholder='iODK Key'></td>
 					<td colspan='3'>
-						<button type='submit' class='btn btn-primary'>
+						<button type='submit' class='btn' style='margin:0;'>
 							Generate Key
 						</button>
 					</td>
@@ -30,8 +30,8 @@
 						<td>{{ token.key }}</td>
 						<td>{{ token.created }}</td>
 						<td>
-							<a href='/accounts/delete_key/{{ token.id }}' class='btn btn-danger btn-small'>
-								<i class='icon-trash'></i>
+							<a href='/accounts/delete_key/{{ token.id }}' class='btn' style='display:inline;'>
+								<i class='icon-trash'></i> Delete
 							</a>
 						</td>
 					</tr>
