@@ -348,22 +348,35 @@
 
 			<h4>Users with data diary permissions</h4>
 
+			<hr />
+
 			<div id='user_permission_list'>
 			{% for theuser, value in users_perms.items %}
 
 			<div class='row'>
-				<div class='seven columns'>
+				<div class='two columns'>
 					<p>{{ theuser }}</p>
 				</div>
 
-				{% for permission in value %}
-					<p>{{ permission }}</p>
-				{% endfor %}
+				<div class='two columns'>
+				{% if 'change_repository' in value %}
+					<p>Can Edit Repo</p>
+				{% elif 'view_data' in value %}
+					<p>Can View Data</p>
+				{% elif 'add_data' in value %}
+					<p>Can Add Data</p>
+				{% else %}
+					<p>Can See Repo</p>
+				{% endif %}	
+				</div>			
 				
-				<div class='three columns'>
+				<div class='two columns'>
 					<button type='button' onclick="remove_permissions(this,'{{ theuser }}')">Delete <i class='icon-trash'></i></button>
 				</div>
+				<hr />
 			</div>
+
+			
 
 			{% endfor %}
 
@@ -371,11 +384,14 @@
 
 			<div class='row'>
 				
-				<div class='seven columns'>
+				<div class='one columns'>
+					<strong>Username:&nbsp;</strong>
+				</div>
+				<div class='four columns'>
 					<input id="share_username" name="share_username" type="text" />
 					<span id="autofill_list" class='autocomplete-list'></span>
 				</div>
-				<div class="three columns">
+				<div class="two columns">
 					<select id='permission_select'>
 						<option value='view_repository'>See Repo</option>
 						<option value='add_data,view_repository'>Add Data</option>
@@ -383,7 +399,7 @@
 						<option value='change_repository,view_data,add_data,view_repository'>Edit Repo</option>
 					</select>
 				</div>
-				<div class='three columns'>
+				<div class='two columns'>
 					<button type='button' id="addPermButton">Add Permission</button>
 				</div>
 			</div>

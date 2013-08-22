@@ -87,28 +87,23 @@ define( [ 'jquery',
 
         add_permissions: (event) ->
 
-            console.log $('#share_username').val()
-            console.log $('#permission_select').val()
-
             $.post( "/repo/user_share/#{@form.form_id}/", { username:$('#share_username').val(), permissions:$('#permission_select').val() }, ( response ) =>
-                if response.success
-                    html = "<div class='row'>"
-                    html+= "<div class='seven columns'>" + $('#share_username').val() + "</div>"
-                    html+= "<p>" +$('#permission_select').val() + "</p>"
-                    html+= "<div class='three columns'>"
-                    html+= "<button type='button' onclick='remove_permissions"
-                    html += "(this, \"" + $('#share_username').val() + "\")'>"
-                    html += "Delete <i class='icon-trash'></i></button></div></div>"
-                    console.log html
-                    $( '#user_permission_list' ).append( html )
-                    console.log 'success'
+                if response == 'success'
+                    bobby = "<div class='row'>"
+                    bobby += "<div class='two columns'>" + $('#share_username').val() + "</div>"
+                    el = document.getElementById('permission_select')
+                    bobby += "<div class='two columns'><p>" + el.options[el.selectedIndex].innerHTML + "</p></div>"
+                    bobby += "<div class='two columns'>"
+                    bobby += "<button type='button' onclick='remove_permissions"
+                    bobby += "(this, \"" + $('#share_username').val() + "\")'>"
+                    bobby += "Delete <i class='icon-trash'></i></button></div></div><hr />"
+                    $( '#user_permission_list' ).append( bobby )
+
+                    $('#share_username').val( '' )
                 else
                     console.log response
-
-
             )
             @
-
 
 
         switch_viz: (event) ->
