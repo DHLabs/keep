@@ -1,4 +1,4 @@
-from backend.db import db, MongoDBResource, Document
+from backend.db import db
 from backend.db import dehydrate_survey
 
 from bson import ObjectId
@@ -11,7 +11,12 @@ from repos.models import Repository
 
 from .authentication import ApiTokenAuthentication
 from .authorization import DataAuthorization
+from .resources import MongoDBResource, Document
 from .serializers import CSVSerializer
+
+FILTER_PREFIX = 'filter'
+DATA_FILTER_PREFIX = 'data'
+PREFIXES = [ FILTER_PREFIX, DATA_FILTER_PREFIX ]
 
 
 class DataResource( MongoDBResource ):
@@ -28,12 +33,59 @@ class DataResource( MongoDBResource ):
         serializer = CSVSerializer()
 
         list_allowed_methos     = []
-        detail_allowed_methods  = [ 'get', 'list' ]
+        detail_allowed_methods  = [ 'get' ]
 
         authentication = MultiAuthentication( SessionAuthentication(),
                                               ApiTokenAuthentication() )
 
         authorization = DataAuthorization()
+
+    def _build_filters( self, request ):
+        '''
+            Build filters based on request parameters. Filters are formatted as
+            follows:
+
+            PREFIX __ KEY = VALUE or
+            PREFIX __ KEY __ RELATION = VALUE
+
+            For the data resource, the prefix can either be 'filter' or 'data'.
+            A basic 'filter' prefix only looks at the top level meta-data for
+            a piece of survey data. The 'data' prefix looks into the actual
+            survey data itself.
+
+            Params
+            ------
+            request : HttpRequest
+        '''
+
+        filters = {}
+        for param in request.GET:
+
+            # Split the parameter into the possible PREFIX/KEY/RELATION tokens.
+            values = param.split( '__' )
+
+            # Not a filter param? Skip to the next parameter
+            if values[0] not in PREFIXES:
+                continue
+
+            key = values[1]
+            value = request.GET[ param ]
+
+            # Ensure we go a level deeper for the 'data' prefix
+            if DATA_FILTER_PREFIX == values[0]:
+                key = 'data.%s' % ( key )
+
+            # Handle relations. No relation token is assumed to mean we want
+            # an exact match.
+            if len( values ) == 2:
+                filters[ key ] = value
+            else:
+                if values[2] == 'gt':
+                    filters[ key ] = { '$gt': value }
+                elif value[2] == 'lt':
+                    filters[ key ] = { '$lt': value }
+
+        return filters
 
     def get_detail( self, request, **kwargs ):
 
@@ -47,18 +99,13 @@ class DataResource( MongoDBResource ):
             if not self.authorized_read_detail( repo, basic_bundle ):
                 return HttpUnauthorized()
 
-            query_parameters = {}
+            query_parameters = self._build_filters( request )
             query_parameters['repo'] = ObjectId( repo_id )
-
-            for get_parameter in request.GET:
-                if "data_attr" in get_parameter:
-                    the_param = get_parameter.replace("data_attr__", "")
-                    query_parameters[ 'data.' + the_param ] = request.GET[ get_parameter ]
 
             # Query the database for the data
             cursor = db.data.find( query_parameters )
 
-            offset = int( request.GET.get( 'offset', 0 ) )
+            offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
 
             meta = {
                 'limit': 50,
