@@ -149,7 +149,7 @@ class Repository( models.Model ):
 
     def save( self, *args, **kwargs ):
         # Only add repo object to MongoDB on a object creation
-        if self.pk is None:
+        if self.pk is None and self.mongo_id is None:
             repo = kwargs.pop( 'repo', None )
             # Save repo field data to MongoDB and save repo metadata to a
             # relational database
