@@ -91,7 +91,7 @@
 	}
 
 	.relevanceList {
-		position: absolute;
+		position: relative;
 		right: 0;
 		bottom: 0;
 		padding: 2px;
@@ -100,7 +100,7 @@
 	}
 
 	.relevance {
-		position: absolute;
+		position: relative;
 		height: 2em;
 		width: 100%;
 		border: 1px solid #F00;
@@ -208,14 +208,16 @@
 
 			<a href="#" data-toggle="modal" class="btn" onclick="closeNameDialog();">Close</a>
 		</div>
-<!--
-		<div class='section'>
-			<a href='javascript:void;' id='build_form' class='btn btn-medium'>
-				Build XForm Manually
-			</a>
-			{{ form.survey_json }}
+
+		<!-- Modal View for editing Relevances -->
+		<div id='relevanceEditWindow' title="Relevance Settings" style='display:none;'>
+			<div>
+				Relevance for Question:
+				<select id="relevanceQuestions" name="relevanceQuestions"></select>
+			</div>
 		</div>
--->
+
+
 		<!-- Modal View For Editing Question-->
 		<div id='questionEditWindow' title='New Question' style='display:none;'>
 			<div>
@@ -313,56 +315,6 @@
                 {% endif %}
 			
 		</div>
-
-		<!--
-		<div id='survey_builder' style='display:none;'>
-			<div id='builder_gui'>
-				<a href="#" class="btn btn-primary" onclick="jsGUIAddWindow();">Add Screen</a>
-				 <div class="window" id="window0" >
-					<div class="window_label">Start</div>
-					<div class="window_type"></div>
-				</div>
-				<div class="window" id="window2">End</div>
-			</div> -->
-			<!--  Table for Survey Questions  --> <!--
-			<table class='table table-striped table-bordered'>
-				<thead>
-					<tr>
-						<td colspan='3' style='background-color:#EEE;'>
-							<h4>
-								<div style='float:right;'>
-									<input id='registrationType' onchange="buildSurvey()" type="checkbox">
-									<label for='registrationType'>Registration Form</label>
-									<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn">
-										Add Question
-									</button>
-								</div>
-								Survey Questions
-							</h4>
-						</td>
-					</tr>
-				</thead>
-				<tbody id='questionList'></tbody>
-			</table>
-		</div>
-		-->
-<!--
-        <div id="xform_file_upload">
-			<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
-				<strong>XForm File</strong>
-			</label>
-			{{ form.xform_file }}
-			<div class='help-block'>
-				Learn more about XForms <a href='http://en.wikipedia.org/wiki/XForms'>here</a>
-			</div>
-        </div>
-		{{ form.non_field_errors }}
-		{{ form.xform_file.errors }}
-		{{ form.survey_json.errors }}
-		<hr/>
--->
-		
-
 	</form>
 </div>
 

@@ -15,6 +15,13 @@ reference.
 ================
 JSPlumb Specific code
 Variables and Operations
+Editing the source/target Endpoint variables
+will change all source/target Endpoints on the 
+page.
+Note: Any element that takes an Endpoint MUST have the
+'position:absolute' if it is to be moved around!  Without
+the absolute position, the endpoints do not lock to the
+element.
 ================
 */
 var sourceEndpoint = {
@@ -30,7 +37,8 @@ var targetEndpoint = {
 	endpoint: ["Dot", {radius: 5}],
 	paintStyle: {fillStyle: "#F00"},
 	isSource: false,
-	isTarget: true
+	isTarget: true,
+	maxConnections:-1
 }
 
 /*
@@ -75,9 +83,7 @@ function jsGUIReady() {
 GUI Windows (Screens) specific code
 Window operations
 ================
-*/
 
-/*
 	This function is used to create a new screen in the form
 	GUI.  It is automatically called if no screens exist on
 	creation of a question.
@@ -149,9 +155,7 @@ function jsGUIDeleteWindow(window) {
 GUI Question specific code
 Question operations
 ================
-*/
 
-/*
 	This function adds a question to the form GUI.
 	It is called in form_builder.js, before building
 	the JSON.
@@ -247,14 +251,11 @@ function jsGUIDeleteQuestion(question) {
 GUI Relevances specific code
 Relevance operations
 ================
-*/
 
-/*
 	This function adds a relevance to the window.
 	It also adds a node to the relevance, so it can be
 	connected to other windows/screens.
 */
-
 function jsGUIAddRelevance(window) {
 	//first, see if there is a relevance list, if not, create one
 	if ($('#' + window + ' .relevanceList').length < 1) {
@@ -297,9 +298,19 @@ function jsGUIEditRelevance(relevance) {
 
 }
 
+/*
+	This function deletes the relevance from the GUI,
+	and then repaints the Endpoints (Endpoints are annoying!)
+*/
 function jsGUIDeleteRelevance(relevance) {
-	jsPlumb.remove('#' + relevance);
+	releParent = $('#' + relevance).parent();
+	
+	jsPlumb.remove($('#' + relevance));
 	$('#' + relevance).remove();
+
+	releParent.children('li').each(function(){
+		jsPlumb.repaint(this);
+	});
 }
 
 
