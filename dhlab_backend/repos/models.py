@@ -104,6 +104,7 @@ class Repository( models.Model ):
                                       null=True )
 
     is_public   = models.BooleanField( default=False )
+    is_form_public = models.BooleanField( default=False )
 
     description = models.CharField( max_length=1024,
                                     blank=True )

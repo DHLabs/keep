@@ -29,6 +29,11 @@ urlpatterns = patterns( 'repos.views',
         view='toggle_public',
         name='repo_toggle_public' ),
 
+    # Toggle form access
+    url(regex=r'^repo/form_share/(?P<repo_id>[-\w]+)/$',
+        view='toggle_form_access',
+        name='toggle_form_access' ),
+
     # Modify Permissions of specific users
     url(regex=r'^repo/user_share/(?P<repo_id>[-\w]+)/$',
         view='share_repo',

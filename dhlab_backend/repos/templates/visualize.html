@@ -335,11 +335,19 @@
 				</div>
 				<div class='nine columns'>
 					<label class='checkbox'>
-						<input id='sharing_toggle' type='checkbox' {% if repo.public %}checked='checked'{% endif %}>
+						<input id='sharing_toggle' type='checkbox' {% if repo.is_public %}checked='checked'{% endif %}>
 						Allow data sharing
 					</label>
 					<span class='help-block'>
 						WARNING: Checking this box will make the data in this repository completely <strong>public</strong>.
+					</span>
+
+					<label class='checkbox'>
+						<input id='form_access_toggle' type='checkbox' {% if repo.is_form_public %}checked='checked'{% endif %}>
+						Allow Public Form Access
+					</label>
+					<span class='help-block'>
+						WARNING: Checking this box will allow anyone to view the form and submit data for it.
 					</span>
 				</div>	
 			</div>		
