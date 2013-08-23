@@ -42,7 +42,7 @@ define( [ 'jquery',
         events:
             "click #viz_options a":         "switch_viz"
             "change #sharing_toggle":       "toggle_public"
-            "change #form_access_toggle":   "toggle_form_access"
+            "change #form_access_toggle":   "toggle_form_public"
             "click #addPermButton":         "add_permissions"
 
         # Current list of survey data
