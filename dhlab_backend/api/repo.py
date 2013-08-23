@@ -6,7 +6,7 @@ from bson import ObjectId
 from django.conf.urls import url
 from django.http import HttpResponse
 
-from tastypie.authentication import MultiAuthentication, SessionAuthentication
+from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
 
 from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
@@ -36,7 +36,8 @@ class RepoResource( ModelResource ):
         # Ensure we have an API token before returning any data.
         # TODO: Make sure this API token concept works with public/private
         # data.
-        authentication = MultiAuthentication( SessionAuthentication(), ApiTokenAuthentication() )
+        #authentication = MultiAuthentication( SessionAuthentication(), ApiTokenAuthentication() )
+        authenication = Authentication()
 
         # TODO: Authorize based on sharing preferences.
         authorization = RepoAuthorization()
