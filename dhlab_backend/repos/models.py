@@ -11,6 +11,19 @@ from django.core.files.storage import default_storage as storage
 
 from . import validate_and_format
 
+ALL_REPO_PERMISSIONS = [
+    ( 'add_repository', 'Add Repo' ),
+    ( 'delete_repository', 'Delete Repo' ),
+    ( 'change_repository', 'Edit Repo' ),
+
+    ( 'view_repository', 'View Repo' ),
+    ( 'share_repository', 'Share Repo' ),
+
+    ( 'view_data', 'View data in Repo' ),
+    ( 'add_data', 'Add data to Repo' ),
+    ( 'edit_data', 'Edit data in Repo' ),
+    ( 'delete_data', 'Delete data from Repo' ), ]
+
 
 class RepositoryManager( models.Manager ):
     def list_by_username( self, username ):
@@ -117,11 +130,9 @@ class Repository( models.Model ):
         verbose_name = 'repository'
         verbose_name_plural = 'repositories'
 
+        # Additional permissions on top of the original add, delete, change
+        # repo permissions
         permissions = (
-            # ( 'add_repository', 'Add Repo' ),
-            # ( 'delete_repository', 'Delete Repo' ),
-            # ( 'change_repository', 'Edit Repo' ),
-
             ( 'view_repository', 'View Repo' ),
             ( 'share_repository', 'Share Repo' ),
 
@@ -129,13 +140,6 @@ class Repository( models.Model ):
             ( 'add_data', 'Add data to Repo' ),
             ( 'edit_data', 'Edit data in Repo' ),
             ( 'delete_data', 'Delete data from Repo' ), )
-
-        ###def update(self, fields):
-        # repo = db.repo.find_one( ObjectId( self.mongo_id ) )
-        # print "updating repo:"
-        # print repo
-        #repo[fields] = fields
-    #db.repo.update( {"_id",ObjectId( self.mongo_id )},{"$set": {'fields': fields}} )
 
     def delete( self ):
         '''
@@ -150,16 +154,18 @@ class Repository( models.Model ):
 
     def save( self, *args, **kwargs ):
         # Only add repo object to MongoDB on a object creation
-        if self.pk is None and self.mongo_id is None:
-            repo = kwargs.pop( 'repo', None )
-            # Save repo field data to MongoDB and save repo metadata to a
-            # relational database
-            self.mongo_id = db.repo.insert( repo )
+        if self.pk is None:
+
+            if self.mongo_id is None:
+                repo = kwargs.pop( 'repo', None )
+                # Save repo field data to MongoDB and save repo metadata to a
+                # relational database
+                self.mongo_id = db.repo.insert( repo )
 
             super( Repository, self ).save( *args, **kwargs )
 
             # As the owner of this repo we have full permissions!
-            for perm in self._meta.permissions:
+            for perm in ALL_REPO_PERMISSIONS:
                 assign_perm( perm[0], self.user, self )
 
                 if self.org:
