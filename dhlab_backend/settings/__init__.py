@@ -26,6 +26,7 @@ INSTALLED_APPS = (
     'backend',
     'openrosa',
     'repos',
+    'studies',
     'organizations',
     'vocab',
 
@@ -35,7 +36,8 @@ INSTALLED_APPS = (
     'registration',             # Needed for user signup
     'tastypie',                 # Needed for our RESTful API
     'storages',                 # Needed for S3 file storage
-    'django_mailgun'            # Easy email API
+    'django_mailgun',           # Easy email API
+    'south',                    # Database migrations
 )
 
 ANONYMOUS_USER_ID = -1

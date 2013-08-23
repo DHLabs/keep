@@ -58,22 +58,29 @@ class Repository( models.Model ):
 
         Fields
         -------
-        mongo_id - required
+        mongo_id : string : required
             Reference to the MongoDB ID
 
-        name - required
+        name : string : required
             Name only has to be unique for a user's list of repositories.
 
-        user - required
+        study : id : optional
+            Study this repository belongs too.
+
+        user : id : required
             User in which this repository belongs too
 
-        is_public - required, default=False
+        org : id : required
+            Organization in which this repository belongs too
+
+        is_public : boolean : required, default=False
             Whether this repository is public/private
 
-        description - optional
+        description : string : optional
             Description of the repository
 
-        date_uploaded - auto
+        date_created : timestamp : auto
+        date_uploaded : timestamp : auto
             Datetime that the repository was created
     '''
     objects     = RepositoryManager()
@@ -83,6 +90,10 @@ class Repository( models.Model ):
 
     name        = models.CharField( max_length=256,
                                     blank=False )
+
+    study       = models.ForeignKey( 'studies.Study',
+                                     related_name='repositories',
+                                     null=True )
 
     user         = models.ForeignKey( 'auth.User',
                                       related_name='repositories',
@@ -106,9 +117,10 @@ class Repository( models.Model ):
         verbose_name_plural = 'repositories'
 
         permissions = (
-            ( 'add_repository', 'Add Repo' ),
-            ( 'delete_repository', 'Delete Repo' ),
-            ( 'change_repository', 'Edit Repo' ),
+            # ( 'add_repository', 'Add Repo' ),
+            # ( 'delete_repository', 'Delete Repo' ),
+            # ( 'change_repository', 'Edit Repo' ),
+
             ( 'view_repository', 'View Repo' ),
             ( 'share_repository', 'Share Repo' ),
 
