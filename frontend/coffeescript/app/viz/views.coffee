@@ -80,9 +80,9 @@ define( [ 'jquery',
                     $( event.currentTarget ).attr( 'checked', response.public )
 
                     if response.public
-                        $( '#privacy > div' ).html( '<i class=\'icon-unlock\'></i>&nbsp;PUBLIC' )
+                        $( '#privacy > div' ).html( '<i class=\'icon-unlock\'></i>' )
                     else
-                        $( '#privacy > div' ).html( '<i class=\'icon-lock\'></i>&nbsp;PRIVATE' )
+                        $( '#privacy > div' ).html( '<i class=\'icon-lock\'></i>' )
             )
             @
 
