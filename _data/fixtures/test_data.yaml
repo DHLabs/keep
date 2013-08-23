@@ -1,0 +1,72 @@
+- fields:
+    date_joined: 2013-06-08 19:38:13.375088+00:00
+    email: ''
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: false
+    is_superuser: false
+    last_login: 2013-06-08 19:38:13.375028+00:00
+    last_name: ''
+    password: ''
+    user_permissions: []
+    username: AnonymousUser
+  model: auth.user
+  pk: -1
+- fields:
+    date_joined: 2011-09-28 06:42:34+00:00
+    email: info@distributedhealth.org
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: false
+    is_superuser: true
+    last_login: 2013-06-09 20:57:24.230822+00:00
+    last_name: ''
+    password: pbkdf2_sha256$10000$YdIxE7Mmclfb$pDAS0cwaRfGnOAYZB7vxlvq0CoChhkzTcm6URsWNVzs=
+    user_permissions: []
+    username: admin
+  model: auth.user
+  pk: 1
+- fields:
+    date_joined: 2011-09-28 06:42:34+00:00
+    email: info@distributedhealth.org
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: false
+    is_superuser: false
+    last_login: 2013-06-08 19:38:29.993837+00:00
+    last_name: ''
+    password: pbkdf2_sha256$10000$YdIxE7Mmclfb$pDAS0cwaRfGnOAYZB7vxlvq0CoChhkzTcm6URsWNVzs=
+    user_permissions: []
+    username: test_user
+  model: auth.user
+  pk: 3
+- fields:
+    date_joined: 2011-09-28 06:42:34+00:00
+    email: mikepreziosi@gmail.com
+    first_name: Michael
+    groups: []
+    is_active: true
+    is_staff: false
+    is_superuser: false
+    last_login: 2013-06-08 19:38:29.993837+00:00
+    last_name: Preziosi
+    password: pbkdf2_sha256$10000$YdIxE7Mmclfb$pDAS0cwaRfGnOAYZB7vxlvq0CoChhkzTcm6URsWNVzs=
+    user_permissions: []
+    username: mikepreziosi
+  model: auth.user
+  pk: 4
+- fields: {created_datetime: !!timestamp '2012-01-31 19:04:54.015000+00:00', encrypted_seed: 0E7InBuUfUUmiScZ$f26843e37555961309583993222af9da,
+    updated_datetime: !!timestamp '2012-01-31 19:04:54.016000+00:00', user: 1}
+  model: twofactor.userauthtoken
+  pk: 1
+- fields: {created_datetime: !!timestamp '2012-01-31 19:04:54.015000+00:00', encrypted_seed: 0E7InBuUfUUmiScZ$f26843e37555961309583993222af9da,
+    updated_datetime: !!timestamp '2012-01-31 19:04:54.016000+00:00', user: 3}
+  model: twofactor.userauthtoken
+  pk: 3
+- fields: {created_datetime: !!timestamp '2012-01-31 19:04:54.015000+00:00', encrypted_seed: 0E7InBuUfUUmiScZ$f26843e37555961309583993222af9da,
+    updated_datetime: !!timestamp '2012-01-31 19:04:54.016000+00:00', user: 4}
+  model: twofactor.userauthtoken
+  pk: 4
