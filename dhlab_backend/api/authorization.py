@@ -37,7 +37,7 @@ class RepoAuthorization( Authorization ):
         # Check permissions against the currently logged in user.
         filtered = []
         for repo in all_repos:
-            if bundle.request.user.has_perm( 'view_repository', repo ):
+            if repo.is_public or repo.is_form_public or bundle.request.user.has_perm( 'view_repository', repo ):
                 filtered.append( repo )
 
         return filtered

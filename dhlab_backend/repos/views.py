@@ -163,6 +163,28 @@ def toggle_public( request, repo_id ):
                          mimetype='application/json' )
 
 @csrf_exempt
+@require_POST
+@login_required
+def toggle_form_access( request, repo_id ):
+    '''
+        Toggle's a form's access(Whether someone can view the form and submit data). 
+        Only the person who owns the form
+        is allowed to make such changes to the form settings.
+    '''
+
+    repo = get_object_or_404( Repository, mongo_id=repo_id )
+
+    if not request.user.has_perm( 'share_repository', repo ):
+        return HttpResponse( 'Unauthorized', status=401 )
+
+    repo.is_form_public = not repo.is_form_public
+    repo.save()
+
+    return HttpResponse( json.dumps( { 'success': True,
+                                       'public': repo.is_form_public } ),
+                         mimetype='application/json' )
+
+@csrf_exempt
 @login_required
 def share_repo( request, repo_id ):
     '''

@@ -42,6 +42,7 @@ define( [ 'jquery',
         events:
             "click #viz_options a":         "switch_viz"
             "change #sharing_toggle":       "toggle_public"
+            "change #form_access_toggle":   "toggle_form_access"
             "click #addPermButton":         "add_permissions"
 
         # Current list of survey data
@@ -82,6 +83,13 @@ define( [ 'jquery',
                         $( '#privacy > div' ).html( '<i class=\'icon-unlock\'></i>&nbsp;PUBLIC' )
                     else
                         $( '#privacy > div' ).html( '<i class=\'icon-lock\'></i>&nbsp;PRIVATE' )
+            )
+            @
+
+        toggle_form_public: (event) ->
+            $.post( "/repo/form_share/#{@form.form_id}/", {}, ( response ) =>
+                if response.success
+                    $( event.currentTarget ).attr( 'checked', response.public )
             )
             @
 
