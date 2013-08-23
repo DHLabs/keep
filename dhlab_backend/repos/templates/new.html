@@ -33,7 +33,7 @@
 
 	input[type=checkbox] {
 		float: left;
-		margin-right: : 0.4em;
+		margin-right: 0.4em;
 	}
 
 
@@ -49,15 +49,30 @@
 	.delete-icon {
 		position: relative;
 		padding:2px;
-		right: 0;
+		right: 2px;
+		float: right;
 		bottom: 0;
 	}
 
 	.edit-icon {
 		position: relative;
 		padding:2px;
-		left: 0;
+		left: 2px;
+		float: left;
 		bottom: 0;
+	}
+
+	.relevance-icon {
+		position: relative;
+		padding: 2px;
+		left: 2px;
+		float: left;
+		bottom: 0;
+	}
+
+	.windowButtons {
+		position: relative;
+
 	}
 
 	.window {
@@ -69,8 +84,26 @@
 
 	.question {
 		height: 5em;
-		width: 13em;
+		width: 95%;
+		margin-left: auto;
+		margin-right: auto;
 		border: 2px solid #0F0;
+	}
+
+	.relevanceList {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		padding: 2px;
+		width: 98%;
+		overflow: hidden;
+	}
+
+	.relevance {
+		position: absolute;
+		height: 2em;
+		width: 100%;
+		border: 1px solid #F00;
 	}
 
 	.sortable {

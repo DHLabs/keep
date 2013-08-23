@@ -10,6 +10,13 @@ reference.
 ================
 */
 
+
+/*
+================
+JSPlumb Specific code
+Variables and Operations
+================
+*/
 var sourceEndpoint = {
 	anchor: ["Right"],
 	endpoint: ["Dot", {radius: 5}],
@@ -62,6 +69,14 @@ function jsGUIReady() {
 	});
 };
 
+
+/*
+================
+GUI Windows (Screens) specific code
+Window operations
+================
+*/
+
 /*
 	This function is used to create a new screen in the form
 	GUI.  It is automatically called if no screens exist on
@@ -78,9 +93,7 @@ function jsGUIAddWindow() {
 		position: 'absolute',
 	}).addClass('window').appendTo('#builder_gui');
 
-	$('<ul>', { id: sortID }//,
-			  //{ class: 'sortable' }
-	 ).appendTo('#' + windowID);
+	$('<ul>', { id: sortID }).appendTo('#' + windowID);
 
 	//make the list sortable and add a placeholder!
 	$('#' + sortID).sortable({
@@ -91,13 +104,23 @@ function jsGUIAddWindow() {
 	//make the screen draggable!
 	jsPlumb.draggable($('#' + windowID), { 
 		grid: [20,20] });
+	
+	//add a div to hold the buttons
+	$('<div>').addClass('windowButtons').appendTo('#' + windowID);
+
+	//add a 'Add Relevances' button in the lower left corner
+	$('<button>', {
+		onclick: "jsGUIAddRelevance('" + windowID +"')",
+		type: 'button',
+		html: "<i class='icon-filter'></i> Add Relevance"
+	}).addClass( 'relevance-icon' ).appendTo('#' + windowID + ' .windowButtons');
 
 	//add a delete button in the lower right corner
 	$('<button>', {
 		onclick: "jsGUIDeleteWindow('" + windowID + "')",
 		type: 'button',
 		html: "<i class='icon-trash'></i> Delete"
-	}).addClass( 'delete-icon' ).appendTo('#' + windowID);
+	}).addClass( 'delete-icon' ).appendTo('#' + windowID + ' .windowButtons');
 
 	//add endpoints to the screen
 	jsPlumb.addEndpoint($('#' + windowID), sourceEndpoint);
@@ -119,6 +142,14 @@ function jsGUIDeleteWindow(window) {
 
 	$('#' + window).remove();
 }
+
+
+/*
+================
+GUI Question specific code
+Question operations
+================
+*/
 
 /*
 	This function adds a question to the form GUI.
@@ -181,9 +212,13 @@ function jsGUIAddQuestion(question, currentQuestionName) {
 		jsGUIUpdateQuestion(question, currentQuestionName);
 	}
 
-	jsGUIDFS();
+	//jsGUIDFS();
 }
 
+/*
+	This is called on an edit question operation, it is 
+	used to update the question visuals.
+*/
 function jsGUIUpdateQuestion(question, currentQuestionName) {
 	var updateQ = $('.true-name:contains(' + currentQuestionName + ')').closest('li').attr('id');
 	$('#' + updateQ + '_label').text('Question: ' + question.label);
@@ -206,6 +241,74 @@ function jsGUIDeleteQuestion(question) {
 	$('#' + question).remove();
 }
 
+
+/*
+================
+GUI Relevances specific code
+Relevance operations
+================
+*/
+
+/*
+	This function adds a relevance to the window.
+	It also adds a node to the relevance, so it can be
+	connected to other windows/screens.
+*/
+
+function jsGUIAddRelevance(window) {
+	//first, see if there is a relevance list, if not, create one
+	if ($('#' + window + ' .relevanceList').length < 1) {
+		$('<ul>')
+		  .addClass('relevanceList')
+		  .appendTo('#' + window);
+	}
+	
+	var tempID = "relevance_" + $('.relevanceList').length + $('#' + window + ' .relevanceList li').length;
+	//trying to keep the unique number, scramble (Randomize) it if it exists
+	while ($('#' + tempID).length > 0) {
+		tempID = "relevance_" + Math.floor(Math.random() * 10000000);
+	}
+
+	//add a blank relevance to the relevance list!
+	$('<li>', {
+		id: tempID
+	}).addClass('relevance')
+	  .appendTo('#' + window + ' .relevanceList');
+
+	//add relevance edit and delete buttons
+	$('<button>', {
+		onclick: "jsGUIEditRelevance('" + tempID + "')",
+		type: 'button',
+		html: "<i class='icon-edit'></i>"
+	}).addClass('edit-icon').appendTo('#' + tempID);
+
+	$('<button>', {
+		onclick: "jsGUIDeleteRelevance('" + tempID + "')",
+		type: 'button',
+		html: "<i class='icon-trash'></i>"
+	}).addClass('delete-icon').appendTo('#' + tempID);
+
+	// Add endpoint to the relevance
+	jsPlumb.addEndpoint($('#' + tempID), sourceEndpoint);
+
+}
+
+function jsGUIEditRelevance(relevance) {
+
+}
+
+function jsGUIDeleteRelevance(relevance) {
+	jsPlumb.remove('#' + relevance);
+	$('#' + relevance).remove();
+}
+
+
+/*
+================
+Miscellaneous code
+================
+*/
+
 function closeNameDialog() {
 	$('#repositoryDefaultsWindow').dialog( 'close' );
 }
@@ -213,7 +316,7 @@ function closeNameDialog() {
 /*
 	This function runs a Depth-first search to build the question
 	list and group list appropriately.  No JSON formatting here
-*/
+
 
 function jsGUIDFS() {
 	var windowList = ['screen0'];
@@ -257,4 +360,4 @@ function jsGUIDFS() {
 
 	console.log(questionList)
 
-}
+}*/
