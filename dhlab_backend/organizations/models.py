@@ -1,6 +1,6 @@
 import hashlib
 
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
 from django.db import models
 
 USER_MODEL = 'auth.User'

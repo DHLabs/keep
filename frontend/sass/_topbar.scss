@@ -9,7 +9,7 @@
 	border-top:		4px solid $accent;
 	border-bottom:	1px solid $accent;
 	margin-bottom:	16px;
-	
+
 	box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
 
  	.topbar {
@@ -39,7 +39,9 @@
 	}
 
 	.user-panel {
+		text-align:right;
 		padding-top:16px;
+
 		h4 {
 			display:inline;
 		}
@@ -49,7 +51,7 @@
 @media only screen and (max-width: 767px) {
 
 	.topbar-wrapper {
-		
+
 		// Hide the search bar on smaller screen sizes.
 		.user-panel, .search-bar {
 			display:none;

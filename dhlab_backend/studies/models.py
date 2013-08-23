@@ -23,19 +23,18 @@ class Study( models.Model ):
         date_created : timestamp : auto
         date_updated : timestamp : auto
     '''
-    name        = models.CharField( max_length=256,
-                                    blank=False )
 
-    user         = models.ForeignKey( 'auth.User',
-                                      related_name='studies',
-                                      null=True )
+    name        = models.CharField( max_length=256, blank=False )
 
-    org          = models.ForeignKey( 'organizations.Organization',
-                                      related_name='studies',
-                                      null=True )
+    user        = models.ForeignKey( 'auth.User',
+                                     related_name='studies',
+                                     null=True )
 
-    description = models.CharField( max_length=1024,
-                                    blank=True )
+    org         = models.ForeignKey( 'organizations.Organization',
+                                     related_name='studies',
+                                     null=True )
+
+    description = models.CharField( max_length=1024, blank=True )
 
     date_created = models.DateTimeField( auto_now_add=True )
     date_updated = models.DateTimeField( auto_now_add=True )
