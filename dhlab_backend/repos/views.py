@@ -40,6 +40,19 @@ def batch_repo( request ):
 
 
 @login_required
+@require_POST
+def move_repo( request ):
+
+    move_user = User.objects.get( username=request.POST[ 'move_username' ] )
+    repository = Repository.objects.get( mongo_id=request.POST[ 'repo' ] )
+
+    repository.move_to( move_user )
+    repository.save()
+
+    return HttpResponseRedirect( '/' )
+
+
+@login_required
 def new_repo( request ):
     '''
         Creates a new repo under the currently logged in user.
@@ -65,7 +78,7 @@ def new_repo( request ):
             'children': repo.fields() }
         repos.append( repo_info )
 
-    return render_to_response( 'new.html', { 'form': form, 
+    return render_to_response( 'new.html', { 'form': form,
                                             'user_repos': repos },
                                context_instance=RequestContext(request) )
 
@@ -115,7 +128,7 @@ def edit_repo( request, repo_id ):
         temp_dict['type'] = data_repo['type']
     else:
         temp_dict['type'] = "survey"
-    
+
 
     return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(temp_dict),'user_repos':repos },
                           context_instance=RequestContext(request) )
@@ -167,7 +180,7 @@ def toggle_public( request, repo_id ):
 @login_required
 def toggle_form_access( request, repo_id ):
     '''
-        Toggle's a form's access(Whether someone can view the form and submit data). 
+        Toggle's a form's access(Whether someone can view the form and submit data).
         Only the person who owns the form
         is allowed to make such changes to the form settings.
     '''
@@ -195,7 +208,7 @@ def share_repo( request, repo_id ):
 
     if not request.user.has_perm( 'share_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
-    
+
     if request.method == 'POST':
         username = request.POST.get( 'username', None )
     else:
@@ -219,7 +232,7 @@ def share_repo( request, repo_id ):
         for new_permission in new_permissions:
             assign_perm( new_permission, account, repo )
         return HttpResponse( 'success', status=200 )
-    
+
 
 @csrf_exempt
 def webform( request, username, repo_name ):
@@ -243,7 +256,7 @@ def webform( request, username, repo_name ):
         repo.add_data( request.POST, request.FILES )
 
         # Return to organization/user dashboard based on where the "New Repo"
-        # button was clicked.  Send Non-users to thank-you page 
+        # button was clicked.  Send Non-users to thank-you page
         if not request.user.is_authenticated():
             return render_to_response( 'finish_survey.html' )
 
@@ -308,7 +321,7 @@ def repo_viz( request, username, repo_name ):
     #     data = privatize_geo( repo, data )
 
     usePerms = get_users_with_perms( repo, attach_perms=True )
-    usePerms.pop( account, None )    
+    usePerms.pop( account, None )
 
     if isinstance( account, User ):
         account_name = account.username

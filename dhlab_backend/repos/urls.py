@@ -3,7 +3,7 @@ from django.conf.urls import patterns, url
 ## Webform/Data submission ##
 urlpatterns = patterns( 'repos.views',
 
-    # Batch create a repo and import data into it from a 
+    # Batch create a repo and import data into it from a
     # CSV file.
     url(regex=r'^repo/batch/$',
         view='batch_repo',
@@ -23,6 +23,10 @@ urlpatterns = patterns( 'repos.views',
     url(regex=r'^repo/delete/(?P<repo_id>[-\w]+)/$',
         view='delete_repo',
         name='repo_delete'),
+
+    url(regex=r'^repo/move/$',
+        view='move_repo',
+        name='repo_move'),
 
     # Toggle form publicness
     url(regex=r'^repo/share/(?P<repo_id>[-\w]+)/$',

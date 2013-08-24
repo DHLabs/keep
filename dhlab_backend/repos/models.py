@@ -4,7 +4,7 @@ from datetime import datetime
 from django.db import models
 from django.db.models import Q
 
-from guardian.shortcuts import assign_perm
+from guardian.shortcuts import assign_perm, remove_perm
 
 from backend.db import db
 from django.core.files.storage import default_storage as storage
@@ -151,6 +151,22 @@ class Repository( models.Model ):
 
         # Finally remove the repo metadata ifself
         super( Repository, self ).delete()
+
+    def move_to( self, new_user, new_org=None ):
+        # Remove all permissions from the current user and assign it to the new
+        # user.
+        for perm in ALL_REPO_PERMISSIONS:
+            remove_perm( perm[0], self.user, self )
+            assign_perm( perm[0], new_user, self )
+
+            if self.org:
+                remove_perm( perm[0], self.org, self )
+
+            if new_org is not None:
+                assign_perm( perm[0], new_org, self )
+
+        self.user = new_user
+        self.org  = new_org
 
     def save( self, *args, **kwargs ):
         # Only add repo object to MongoDB on a object creation

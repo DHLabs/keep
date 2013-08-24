@@ -116,6 +116,26 @@
 				});
 			}
 		});
+
+		$( '#move_username' ).autocomplete( {
+			appendTo: '#move_autofill_list',
+			minLength: 1,
+			source: function( request, response ) {
+				$.ajax( {
+					url: "/api/v1/user/",
+					data: {
+						username__icontains: $( '#move_username' ).val(),
+						format: 'json'
+					},
+					success: function( query ) {
+						response ( $.map( query.objects, function( item ){
+							return { label: item.username, value: item.username }
+						}));
+					}
+				});
+			}
+		});
+
 	});
 </script>
 {% endblock %}
@@ -349,8 +369,8 @@
 					<span class='help-block'>
 						WARNING: Checking this box will allow anyone to view the form and submit data for it.
 					</span>
-				</div>	
-			</div>		
+				</div>
+			</div>
 		</div>
 		<div class='sixteen columns'>
 
@@ -360,38 +380,33 @@
 
 			<div id='user_permission_list'>
 			{% for theuser, value in users_perms.items %}
+				<div class='row'>
+					<div class='two columns'>
+						<p>{{ theuser }}</p>
+					</div>
 
-			<div class='row'>
-				<div class='two columns'>
-					<p>{{ theuser }}</p>
+					<div class='two columns'>
+					{% if 'change_repository' in value %}
+						<p>Can Edit Repo</p>
+					{% elif 'view_data' in value %}
+						<p>Can View Data</p>
+					{% elif 'add_data' in value %}
+						<p>Can Add Data</p>
+					{% else %}
+						<p>Can See Repo</p>
+					{% endif %}
+					</div>
+
+					<div class='two columns'>
+						<button type='button' onclick="remove_permissions(this,'{{ theuser }}')">Delete <i class='icon-trash'></i></button>
+					</div>
+					<hr />
 				</div>
-
-				<div class='two columns'>
-				{% if 'change_repository' in value %}
-					<p>Can Edit Repo</p>
-				{% elif 'view_data' in value %}
-					<p>Can View Data</p>
-				{% elif 'add_data' in value %}
-					<p>Can Add Data</p>
-				{% else %}
-					<p>Can See Repo</p>
-				{% endif %}	
-				</div>			
-				
-				<div class='two columns'>
-					<button type='button' onclick="remove_permissions(this,'{{ theuser }}')">Delete <i class='icon-trash'></i></button>
-				</div>
-				<hr />
-			</div>
-
-			
-
 			{% endfor %}
 
-		</div>
+			</div>
 
 			<div class='row'>
-				
 				<div class='one columns'>
 					<strong>Username:&nbsp;</strong>
 				</div>
@@ -411,45 +426,27 @@
 					<button type='button' id="addPermButton">Add Permission</button>
 				</div>
 			</div>
-
 		</div>
-		<div style='display:none;'>
-			<div class='span12'><hr></div>
-			<div class='span12'>
-				<div class='span3'>
-					<strong>How is my data shown?</strong>
-				</div>
-				<div class='span6'>
-					<div>
-						<label class='checkbox'>
-							<input type='checkbox'>
-							Preserve Data Privacy
-						</label>
-						<span class='help-block'>
-							If you allow data sharing, by default we will ensure that
-							the data shown will also preserve the privacy of any
-							individuals who entered data.
-						</span>
+		<div class='sixteen columns'>
+
+			<h4>Move data dairy to User</h4>
+			<hr/>
+
+			<div class='row'>
+				<form action='{% url "repo_move" %}' method='POST'>
+					{% csrf_token %}
+					<input type='hidden' name='repo' value='{{ sid }}'>
+					<div class='one columns'>
+						<strong>Username:&nbsp;</strong>
 					</div>
-					<div>
-						<label class='checkbox'>
-							<input type='checkbox'>
-							Show Raw Data
-						</label>
+					<div class='four columns'>
+						<input id="move_username" name="move_username" type="text" />
+						<span id="move_autofill_list" class='autocomplete-list'></span>
 					</div>
-					<div>
-						<label class='checkbox'>
-							<input type='checkbox'>
-							Show Map Data
-						</label>
+					<div class='two columns'>
+						<button type='submit'>Move Dairy to User</button>
 					</div>
-					<div>
-						<label class='checkbox'>
-							<input type='checkbox'>
-							Show Line Data
-						</label>
-					</div>
-				</div>
+				</form>
 			</div>
 		</div>
 	</div>
