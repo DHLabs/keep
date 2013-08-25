@@ -50,4 +50,4 @@ class Study( models.Model ):
         return self.user.name
 
     def __unicode__( self ):
-        return '<Study %s>' % ( self.name )
+        return self.name

@@ -4,14 +4,18 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from api.data import DataResource
 from api.repo import RepoResource
+from api.study import StudyResource
 from api.user import UserResource
 from api.vocab import VocabResource
 
 # Register resources to make API available
 from tastypie.api import Api
 v1_api = Api( api_name='v1' )
-v1_api.register( RepoResource() )
+
 v1_api.register( DataResource() )
+v1_api.register( RepoResource() )
+v1_api.register( StudyResource() )
+
 v1_api.register( UserResource() )
 v1_api.register( VocabResource() )
 
