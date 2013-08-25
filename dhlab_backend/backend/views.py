@@ -17,6 +17,7 @@ from django.template import RequestContext
 from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
 from repos.models import Repository
+from studies.models import Study
 from twofactor.models import UserAPIToken
 
 
@@ -108,16 +109,19 @@ def user_dashboard( request, username ):
         shared_repos = Repository.objects.filter( org__in=organizations,
                                                   is_public=True )
     else:
+        user_studies = Study.objects.filter( user=user )
         user_repos = Repository.objects.filter( user=user, org=None )
         shared_repos = Repository.objects.filter( org__in=organizations )
 
     return render_to_response( 'dashboard.html',
-                               {'user_repos': user_repos,
-                                'shared_repos': shared_repos,
-                                'is_other_user': is_other_user,
-                                'account': user,
-                                'organizations': organizations },
+                               { 'user_studies': user_studies,
+                                 'user_repos': user_repos,
+                                 'shared_repos': shared_repos,
+                                 'is_other_user': is_other_user,
+                                 'account': user,
+                                 'organizations': organizations },
                                context_instance=RequestContext(request) )
+
 
 @login_required
 def generate_api_key( request ):

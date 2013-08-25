@@ -3,112 +3,204 @@
 
 {% block title %}{{ user.username }}{% endblock %}
 
-
 {% block js %}
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script src='{% static "js/vendor/dashboard.js" %}'></script>
+<script src='{% static "js/vendor/requirejs.js" %}'></script>
+<script type="text/javascript">
+	require([ '{% static "js/common.js" %}' ], function (common) {
+		require.config({
+			baseUrl: '{% static "js/vendor" %}'
+		});
+		require( [ 'app/dashboard/main' ] )
+	});
+
+	$( function() {
+    	$( "#repo_list tr" ).draggable({
+    			helper: 'clone',
+    			revert: true,
+    			opacity: 0.7,
+    		});
+
+    	$( "#studies li" ).droppable({
+    		hoverClass: 'drop-hover',
+      		drop: function( event, ui ) {
+      			console.log( 'dropped' );
+      		}
+      	});
+	});
+</script>
 {% endblock %}
 
 {% block content %}
-<div class='three columns sidebar'>
+<div id='dashboard'>
+	<div class='three columns sidebar'>
 
-	<form id="newform" action='/repo/new/' method='post' enctype='multipart/form-data'>
-		{% csrf_token %}
-		<input type="hidden" id="MAX_FILE_SIZE" name="MAX_FILE_SIZE" value="300000" />
-		<input type="hidden" name="name" />
-		<input type="hidden" name="privacy" value="private" />
-		<input type="file" id="fileselect" name="xform_file" multiple="multiple" style="display: none"/>
-		<div id="filedrag">
-			Drag a File(CSV/JSON/XLS) here to make a repo
-			<div>
-			<a class='btn btn-primary btn-small' id='new_repo_btn' href='{% url "repo_new" %}'>
-				Create From Scratch
-			</a>
+		<form id="newform" action='/repo/new/' method='post' enctype='multipart/form-data'>
+			{% csrf_token %}
+			<input type="hidden" id="MAX_FILE_SIZE" name="MAX_FILE_SIZE" value="300000" />
+			<input type="hidden" name="name" />
+			<input type="hidden" name="privacy" value="private" />
+			<input type="file" id="fileselect" name="xform_file" multiple="multiple" style="display: none"/>
+			<div id="filedrag">
+				Drag a File(CSV/JSON/XLS) here to make a repo
+				<div>
+				<a class='btn btn-primary btn-small' id='new_repo_btn' href='{% url "repo_new" %}'>
+					Create From Scratch
+				</a>
+				</div>
 			</div>
-		</div>
-		<input type="submit" name="submission" style="display: none">
-	</form>
+			<input type="submit" name="submission" style="display: none">
+		</form>
 
 
-	<div class='section'>
-		<h4>My Data</h4>
+		<!-- STUDIES & DATA DIARIES -->
+		<div id='studies' class='section'>
 
-		<ul class='nav'>
-			<li>
-				<a href='#'>Recent Activity</a>
-			</li>
-			<li>
-				<a href='#'>Data Diaries</a>
-			</li>
-			<li>
-				<a href='#'>Reports</a>
-			</li>
-		</ul>
-	</div>
+			{% if not is_other_user %}
+			<div style='float:left;'>
+				<a href='#' class='btn btn-primary btn-small'>
+					<i class='icon-plus-sign'></i>
+					&nbsp;New
+				</a>
+			</div>
+			{% endif %}
 
-	<!-- ORGANIZATIONS -->
-	<div class='section'>
-		{% if not is_other_user %}
-		<div style='float:left;'>
-			<a href='{% url "organization_new" %}' class='btn btn-primary btn-small' id='create_org_btn'>
-				<i class='icon-plus-sign'></i>
-				&nbsp;New
-			</a>
-		</div>
-		{% endif %}
+			<h4>Studies</h4>
 
-		<h4>Org<span class='widescreen-only'>anization</span>s</h4>
-
-		<ul id='org-list'>
-			{% if organizations|length == 0 %}
-				<li style='font-size:0.8em;color:#AAA;'>
-					You are not a part of any organizations =[
+			<ul class='nav-list'>
+				<li class='selected'>
+					<a href='#'>All Diaries</a>
 				</li>
-			{% else %}
-				{% for org in organizations %}
+				{% for study in user_studies %}
 				<li>
-					<a href='{% url "organization_dashboard" org=org.organization.name %}'>
-						<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
-						&nbsp;{{ org.organization.name }}
-					</a>
-					{% if org.pending and not is_other_user %}
-					<div style='margin-top:4px;'>
-						<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
-						   class='btn btn-small btn-primary'>
-							Join
-						</a>&nbsp;
-						<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
-						   class='btn btn-small'>
-						   Ignore
-						</a>
-					</div>
-					{% endif %}
+					<a href='#' data-study='{{ study.id }}'>{{ study }}</a>
 				</li>
 				{% endfor %}
+			</ul>
+		</div>
+
+		<!-- ORGANIZATIONS -->
+		<div class='section'>
+			{% if not is_other_user %}
+			<div style='float:left;'>
+				<a href='{% url "organization_new" %}' class='btn btn-primary btn-small' id='create_org_btn'>
+					<i class='icon-plus-sign'></i>
+					&nbsp;New
+				</a>
+			</div>
 			{% endif %}
-		</ul>
+
+			<h4>Org<span class='widescreen-only'>anization</span>s</h4>
+
+			<ul id='org-list'>
+				{% if organizations|length == 0 %}
+					<li style='font-size:0.8em;color:#AAA;'>
+						You are not a part of any organizations =[
+					</li>
+				{% else %}
+					{% for org in organizations %}
+					<li>
+						<a href='{% url "organization_dashboard" org=org.organization.name %}'>
+							<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
+							&nbsp;{{ org.organization.name }}
+						</a>
+						{% if org.pending and not is_other_user %}
+						<div style='margin-top:4px;'>
+							<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
+							   class='btn btn-small btn-primary'>
+								Join
+							</a>&nbsp;
+							<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
+							   class='btn btn-small'>
+							   Ignore
+							</a>
+						</div>
+						{% endif %}
+					</li>
+					{% endfor %}
+				{% endif %}
+			</ul>
+		</div>
+
+		<div style='display:none;'>
+			<form action='{% url "repo_batch" %}' method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				<input type='file' name='csv_file'>
+				<button type='submit'>Batch</button>
+			</form>
+		</div>
 	</div>
 
-	<div style='display:none;'>
-		<form action='{% url "repo_batch" %}' method="POST" enctype="multipart/form-data">
-			{% csrf_token %}
-			<input type='file' name='csv_file'>
-			<button type='submit'>Batch</button>
-		</form>
-	</div>
+	<!-- REPOSITORIES -->
+	<div id='repos' class='thirteen columns repos'>
 
-</div>
-<!-- REPOSITORIES -->
-<div class='thirteen columns repos'>
-	<table id='repo_list' class='table diary-list'>
-		<tbody>
-			{% if user_repos|length == 0 %}
-				<tr>
-					<td style='text-align:center;' colspan='4'>
-						You have no data diaries =[
-					</td>
-				</tr>
-			{% endif %}
-			{% for repo in user_repos %}
+		<div>
+			<ul id='filters' class='nav-list nav-inline'>
+				<li>
+					<h4 id='study_name' style='display:inline;'>All Diaries</h4>
+				</li>
+				<li class='selected'>
+					<a href='#' data-filter='all' style='font-size: 85%;'>All</a>
+				</li>
+				<li>
+					<a href='#' data-filter='public' style='font-size: 85%;'>Public</a>
+				</li>
+				<li>
+					<a href='#' data-filter='private' style='font-size: 85%;'>Private</a>
+				</li>
+				<li>
+					<a href='#' data-filter='shared' style='font-size: 85%;'>Shared with me</a>
+				</li>
+			</ul>
+		</div>
+
+		<table id='repo_list' class='table diary-list'>
+			<tbody>
+				{% if user_repos|length == 0 %}
+					<tr>
+						<td style='text-align:center;' colspan='4'>
+							You have no data diaries =[
+						</td>
+					</tr>
+				{% endif %}
+				{% for repo in user_repos %}
+					<tr>
+						<td class='privacy'>
+							{% if repo.is_public %}
+								<i class='icon-unlock'></i>
+							{% else %}
+								<i class='icon-lock'></i>
+							{% endif %}
+						</td>
+						<td class='add-data'>
+							<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
+								<i class='icon-pencil'></i> Add Data
+							</a>
+						</td>
+						<td>
+							<a href='{% url "repo_visualize" username=account.username repo_name=repo.name %}'>
+								{{ repo.name }}
+								<div class='help-block'>
+									{% if repo.description %}{{ repo.description|slice:":42" }}...{% endif %}
+								</div>
+							</a>
+						</td>
+						<td class='submission-count'>
+							{{ repo.submissions }} <i class='icon-file-alt'></i>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		{% if shared_repos|length > 0 %}
+		<div style='margin:16px 0;'>
+			<h4>Shared Data Diaries</h4>
+		</div>
+		<table id='shared_repo_list' class='table diary-list'>
+			<tbody>
+				{% for repo in shared_repos %}
 				<tr>
 					<td class='privacy'>
 						{% if repo.is_public %}
@@ -118,65 +210,28 @@
 						{% endif %}
 					</td>
 					<td class='add-data'>
-						<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
+						<a href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}' class='btn btn-small'>
 							<i class='icon-pencil'></i> Add Data
 						</a>
 					</td>
 					<td>
-						<a href='{% url "repo_visualize" username=account.username repo_name=repo.name %}'>
-							{{ repo.name }}
-							<div class='help-block'>
-								{% if repo.description %}{{ repo.description|slice:":42" }}...
-								{% else %}N/A
-								{% endif %}
-							</div>
+						<a href='{% url "repo_visualize" username=repo.owner repo_name=repo.name %}'>
+							{{ repo.owner }} / {{ repo.name }}
 						</a>
+						{% if repo.description %}
+						<span class='help-block'>
+							{{ repo.description|slice:":42" }}...
+						</span>
+						{% endif %}
 					</td>
 					<td class='submission-count'>
 						{{ repo.submissions }} <i class='icon-file-alt'></i>
 					</td>
 				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-
-	{% if shared_repos|length > 0 %}
-	<div style='margin:16px 0;'>
-		<h4>Shared Data Diaries</h4>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
 	</div>
-	<table id='shared_repo_list' class='table diary-list'>
-		<tbody>
-			{% for repo in shared_repos %}
-			<tr>
-				<td class='privacy'>
-					{% if repo.is_public %}
-						<i class='icon-unlock'></i>
-					{% else %}
-						<i class='icon-lock'></i>
-					{% endif %}
-				</td>
-				<td class='add-data'>
-					<a href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}' class='btn btn-small'>
-						<i class='icon-pencil'></i> Add Data
-					</a>
-				</td>
-				<td>
-					<a href='{% url "repo_visualize" username=repo.owner repo_name=repo.name %}'>
-						{{ repo.owner }} / {{ repo.name }}
-					</a>
-					{% if repo.description %}
-					<span class='help-block'>
-						{{ repo.description|slice:":42" }}...
-					</span>
-					{% endif %}
-				</td>
-				<td class='submission-count'>
-					{{ repo.submissions }} <i class='icon-file-alt'></i>
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-	{% endif %}
 </div>
 {% endblock %}

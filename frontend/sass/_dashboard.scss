@@ -36,6 +36,42 @@
 	}
 }
 
+ul.nav-list {
+	li {
+		padding: 4px 0;
+		margin-bottom: 1px;
+
+		a, a:visited, a:active { color: #999; }
+		a:hover { color: $theme; }
+	}
+
+	li.selected {
+		a {
+			color: $theme;
+			font-weight: bold;
+		}
+	}
+
+	li.drop-hover {
+		background: $theme;
+		color: #FFF;
+		a {
+			color: inherit;
+		}
+	}
+}
+
+ul.nav-inline {
+	margin: 0;
+
+	li {
+		padding: 0;
+		margin:0;
+		display:inline;
+		margin-right: 8px;
+	}
+}
+
 span.label {
 	color: $accent;
 	font-variant: small-caps;
@@ -95,6 +131,9 @@ img.account-icon-large {
 }
 
 .diary-list {
+	tr {
+		background: #FFF;
+	}
 
 	td {
 		vertical-align: middle;

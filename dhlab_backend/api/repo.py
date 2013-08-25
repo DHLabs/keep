@@ -7,7 +7,7 @@ from django.conf.urls import url
 from django.http import HttpResponse
 
 from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
-
+from tastypie.exceptions import BadRequest
 from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
@@ -45,6 +45,10 @@ class RepoResource( ModelResource ):
         # Don't include resource uri
         include_resource_uri = False
 
+        filtering = {
+            'study': ( 'exact', )
+        }
+
     def prepend_urls(self):
 
         base_url = '^(?P<resource_name>%s)/' % ( self._meta.resource_name )
@@ -59,6 +63,17 @@ class RepoResource( ModelResource ):
                  view=self.wrap_view('get_manifest'),
                  name="api_get_resource"),
         ]
+
+    def build_filters( self, filters=None ):
+        orm_filters = super( RepoResource, self ).build_filters( filters )
+
+        if filters is None:
+            return orm_filters
+
+        if 'study' in filters:
+            orm_filters[ 'study' ] = None
+
+        return orm_filters
 
     def create_response( self, request, data, response_class=HttpResponse, **response_kwargs):
         """
@@ -146,11 +161,15 @@ class RepoResource( ModelResource ):
             bundle.data['type'] = "survey"
 
         bundle.data['user'] = bundle.obj.user
+        bundle.data['study'] = bundle.obj.study
 
         return bundle
 
     def dehydrate_id( self, bundle ):
         return bundle.obj.mongo_id
+
+    def dehydrate_study( self, bundle ):
+        return bundle.obj.study.name if bundle.obj.study else None
 
     def dehydrate_user( self, bundle ):
         '''
