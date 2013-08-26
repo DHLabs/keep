@@ -97,7 +97,7 @@ def edit_repo( request, repo_id ):
 
     if request.method == 'POST':
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
-        repo.name = request.POST['name']
+        repo.name = request.POST['name'].replace( ' ','_' )
         repo.description = request.POST['desc']
         repo.save()
         data_repo = db.repo.find_one( ObjectId( repo_id ) )
