@@ -1,3 +1,5 @@
+import json
+
 from backend.db import db
 from backend.db import user_or_organization
 
@@ -26,7 +28,7 @@ class RepoResource( ModelResource ):
         resource_name = 'repos'
 
         list_allowed_methods = [ 'get' ]
-        detail_allowed_methods = [ 'get', 'post' ]
+        detail_allowed_methods = [ 'get', 'post', 'patch' ]
 
         excludes = [ 'mongo_id' ]
 
@@ -70,8 +72,8 @@ class RepoResource( ModelResource ):
         if filters is None:
             return orm_filters
 
-        if 'study' in filters:
-            orm_filters[ 'study' ] = None
+        if 'study' in filters and len( filters.get( 'study' ) ) > 0:
+            orm_filters[ 'study' ] = filters.get( 'study' )[0]
 
         return orm_filters
 
@@ -122,6 +124,29 @@ class RepoResource( ModelResource ):
 
         response = { 'repo': obj.mongo_id, 'manifest': media }
         return self.create_response( request, response )
+
+    def patch_detail( self, request, **kwargs ):
+        '''
+            API call to edit a repo. This API call is (at the moment) only
+            allowed to change repo details such as name/description/study etc.
+        '''
+
+        fields_to_update = json.loads( request.body )
+
+        bundle = self.build_bundle( request=request )
+        repo = self.obj_get( bundle, **self.remove_api_resource_names( kwargs ) )
+
+        try:
+            if 'study' in fields_to_update:
+                repo.study_id = fields_to_update[ 'study' ]
+
+            repo.save()
+        except Exception as e:
+            response_data = { 'success': False, 'error': str( e ) }
+            return self.create_response( request, response_data )
+
+        response_data = { 'success': True, 'patched': repo.id }
+        return self.create_response( request, response_data )
 
     def post_detail( self, request, **kwargs ):
 

@@ -49,10 +49,14 @@ define( [ 'jquery',
             filter = $( event.currentTarget ).data( 'filter' )
 
             if filter == 'all'
-                $( 'tr', @repo_list ).fadeIn()
+                $( 'tr', @repo_list ).fadeIn( 'fast' )
             else
-                $( "tr:not([class='#{filter}'])", @repo_list ).fadeOut()
-                $( "tr[class='#{filter}']", @repo_list ).fadeIn()
+                $( 'tr', @repo_list ).each( ()->
+                    if $( @ ).hasClass( filter )
+                        $( @ ).fadeIn( 'fast' )
+                    else
+                        $( @ ).fadeOut( 'fast' )
+                )
 
             $( '#filters .selected' ).removeClass( 'selected' )
             $( event.currentTarget ).parent().addClass( 'selected' )
