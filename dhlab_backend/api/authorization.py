@@ -1,11 +1,5 @@
-import pymongo
-
-from django.contrib.auth.models import User
 from django.db.models import Q
 from tastypie.authorization import Authorization
-from guardian.shortcuts import get_perms
-
-from backend.db import user_or_organization
 
 
 class DataAuthorization( Authorization ):
