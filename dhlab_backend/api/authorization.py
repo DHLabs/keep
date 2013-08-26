@@ -44,7 +44,7 @@ class RepoAuthorization( Authorization ):
 
     def read_detail( self, object_detail, bundle ):
 
-        if bundle.obj.is_public:
+        if bundle.obj.is_public or bundle.obj.is_form_public:
             return True
 
         logged_in_user = bundle.request.user
