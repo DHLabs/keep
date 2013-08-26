@@ -31,20 +31,20 @@ define( [ 'jquery',
                     <%= privacy_icon %>
                 </td>
                 <td class='add-data'>
-                    <a href='<%= webform %>' class='btn btn-small'>
+                    <a href='<%= webform_uri %>' class='btn btn-small'>
                         <i class='icon-pencil'></i> Add Data
                     </a>
                 </td>
                 <td>
-                    <a href='<%= repo_url %>'>
-                        <%= repo_name %>
+                    <a href='<%= uri %>'>
+                        <%= name %>
                         <div class='help-block'>
-                            <%= repo_description %>
+                            <%= description %>
                         </div>
                     </a>
                 </td>
                 <td class='submission-count'>
-                    <%= repo_submissions %>&nbsp;<i class='icon-file-alt'></i>
+                    <%= submissions %>&nbsp;<i class='icon-file-alt'></i>
                 </td>
             </tr>''' )
 
@@ -119,45 +119,45 @@ define( [ 'jquery',
                 if repo.get( 'org' )
                     filters.push( 'shared' )
 
-                repo_el = repo_tmpl(
-                            id: repo.get( 'id' )
-                            filters: filters.join( ' ' )
-                            privacy_icon: privacy_icon
-                            webform: repo.get( 'webform_uri' )
-                            repo_url: repo.get( 'uri' )
-                            repo_name: repo.get( 'name' )
-                            repo_description: repo.get( 'description' )
-                            repo_submissions: repo.get( 'submissions' ) )
+                # Copy the repo metadata into a new object
+                repo_attrs = $.extend( true, {}, repo.attributes )
+                # Add the additional bits of metadata we need to do filters and
+                # show off the fancy privacy icon
+                repo_attrs[ 'filters' ] = filters.join( ' ' )
+                repo_attrs[ 'privacy_icon' ] = privacy_icon
 
+                # Create the repo HTML and add it to the DOM
+                repo_el = repo_tmpl( repo_attrs )
                 @repo_list.append( repo_el )
 
-                $( "#repo_list tr" ).draggable(
-                    helper: 'clone'
-                    opacity: 0.7
-                )
+            # Apply draggable/droppable attributes to the new repo rows.
+            $( "#repo_list tr" ).draggable(
+                helper: 'clone'
+                opacity: 0.7
+            )
 
-                $( "#studies li" ).droppable(
-                    hoverClass: 'drop-hover'
-                    drop: ( event, ui ) ->
-                        study_id = $( 'a', @ ).data( 'study' )
-                        if not study_id?
-                            study_id = null
+            $( "#studies li" ).droppable(
+                hoverClass: 'drop-hover'
+                drop: ( event, ui ) ->
+                    study_id = $( 'a', @ ).data( 'study' )
+                    if not study_id?
+                        study_id = null
 
-                        repo_id = $( ui.draggable ).data( 'repo' )
+                    repo_id = $( ui.draggable ).data( 'repo' )
 
-                        console.log( "Moving #{repo_id} to #{study_id}" )
+                    console.log( "Moving #{repo_id} to #{study_id}" )
 
-                        $.ajax(
-                            headers:
-                                'Accept' : 'application/json'
-                                'Content-Type' : 'application/json'
-                            url: "/api/v1/repos/#{repo_id}"
-                            type: 'PATCH',
-                            data: JSON.stringify( { 'study': study_id } )
-                            success: ( response, textStatus, jqXhr ) ->
-                                console.log( response )
-                        )
+                    $.ajax(
+                        headers:
+                            'Accept' : 'application/json'
+                            'Content-Type' : 'application/json'
+                        url: "/api/v1/repos/#{repo_id}"
+                        type: 'PATCH',
+                        data: JSON.stringify( { 'study': study_id } )
+                        success: ( response, textStatus, jqXhr ) ->
+                            console.log( response )
                     )
+                )
 
             @_apply_filters()
 
