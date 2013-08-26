@@ -14,7 +14,7 @@ from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
-from repos.models import Repository
+from repos.models import Repository, RepoSerializer
 from openrosa.serializer import XFormSerializer
 
 from .authentication import ApiTokenAuthentication
@@ -177,6 +177,11 @@ class RepoResource( ModelResource ):
                 Fields are grabbed from MongoDB and appended to the bundle
                 dictionary.
         '''
+        # First serialize the repo metadata.
+        serializer = RepoSerializer()
+        bundle.data = serializer.serialize( [bundle.obj] )[0]
+
+        # Then serialize the repo fields.
         repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
         bundle.data['children'] = repo_fields[ 'fields' ]
 
@@ -184,9 +189,6 @@ class RepoResource( ModelResource ):
             bundle.data['type'] = repo_fields[ 'type' ]
         else:
             bundle.data['type'] = "survey"
-
-        bundle.data['user'] = bundle.obj.user
-        bundle.data['study'] = bundle.obj.study
 
         return bundle
 

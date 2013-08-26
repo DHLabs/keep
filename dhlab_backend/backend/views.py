@@ -1,10 +1,7 @@
-from backend.db import db
+import json
+
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
-from backend.forms import ReportForm
-
-import json
-from bson import json_util, ObjectId
 
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import RequestSite
@@ -16,7 +13,7 @@ from django.template import RequestContext
 
 from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
-from repos.models import Repository
+from repos.models import Repository, RepoSerializer
 from studies.models import Study
 from twofactor.models import UserAPIToken
 
@@ -28,6 +25,7 @@ def home( request ):
                              kwargs={ 'username': request.user.username } ) )
 
     return render_to_response( 'index.html' )
+
 
 def register( request ):
     if request.method == 'POST':
@@ -105,18 +103,21 @@ def user_dashboard( request, username ):
 
     # Grab a list of forms uploaded by the user
     if is_other_user:
-        user_repos = Repository.objects.filter( user=user, org=None, is_public=True )
-        shared_repos = Repository.objects.filter( org__in=organizations,
-                                                  is_public=True )
+        user_repos = Repository.objects.list_by_user( user=user,
+                                                      organizations=organizations,
+                                                      public=True )
     else:
+        user_repos = Repository.objects.list_by_user( user=user,
+                                                      organizations=organizations )
         user_studies = Study.objects.filter( user=user )
-        user_repos = Repository.objects.filter( user=user, org=None )
-        shared_repos = Repository.objects.filter( org__in=organizations )
+
+    serializer = RepoSerializer()
+
+    repo_json = json.dumps( serializer.serialize( user_repos ) )
 
     return render_to_response( 'dashboard.html',
                                { 'user_studies': user_studies,
-                                 'user_repos': user_repos,
-                                 'shared_repos': shared_repos,
+                                 'user_repos': repo_json,
                                  'is_other_user': is_other_user,
                                  'account': user,
                                  'organizations': organizations },

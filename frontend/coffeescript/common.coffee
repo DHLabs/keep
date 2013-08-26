@@ -8,10 +8,14 @@ requirejs.config(
 		leaflet_heatmap: 'heatmap-leaflet'
 		leaflet_cluster: 'leaflet.markerclusterer'
 
+		jqueryui: 'jquery-ui'
 		dataTables: 'jquery.dataTables.min'
 		bootstrapTables: 'bootstrap.dataTables'
 
 	shim:
+		jqueryui:
+			deps: [ 'jquery' ]
+
 		backbone:
 			deps: [ 'jquery', 'underscore' ]
 			exports: 'Backbone'

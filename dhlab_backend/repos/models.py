@@ -1,6 +1,8 @@
 from bson import ObjectId
 from datetime import datetime
 
+from django.core.serializers.python import Serializer
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
@@ -8,6 +10,8 @@ from guardian.shortcuts import assign_perm, remove_perm
 
 from backend.db import db
 from django.core.files.storage import default_storage as storage
+
+from organizations.models import OrganizationUser
 
 from . import validate_and_format
 
@@ -25,9 +29,53 @@ ALL_REPO_PERMISSIONS = [
     ( 'delete_data', 'Delete data from Repo' ), ]
 
 
+class RepoSerializer( Serializer ):
+    '''
+        Converts a QuerySet of Repository objects into a specific JSON format.
+    '''
+    def end_object( self, obj ):
+        # We want to refer to repos externally according to their mongo_id
+        self._current[ 'id' ] = obj.mongo_id
+        self._current.pop( 'mongo_id' )
+
+        # Convert timestamps into JSON timestamps
+        self._current[ 'date_updated' ] = obj.date_updated.strftime( '%Y-%m-%dT%X' )
+        self._current[ 'date_created' ] = obj.date_created.strftime( '%Y-%m-%dT%X' )
+
+        # Include the number of submissions for this repo
+        self._current[ 'submissions' ]  = obj.submissions()
+
+        # Add references to webform/visualization urls
+        kwargs = { 'repo_name': obj.name }
+        if obj.org:
+            kwargs[ 'username' ] = obj.org.name
+        else:
+            kwargs[ 'username' ] = obj.user.username
+
+        self._current[ 'webform_uri' ] = reverse( 'repo_webform', kwargs=kwargs )
+        self._current[ 'uri' ] = reverse( 'repo_visualize', kwargs=kwargs)
+
+        # Remove references to user/org for now.
+        self._current.pop( 'user' )
+        self._current.pop( 'org' )
+
+        self.objects.append( self._current )
+
+
 class RepositoryManager( models.Manager ):
-    def list_by_username( self, username ):
-        return self.filter(Q(user__username=username) | Q(org__name=username))
+    def list_by_user( self, user, organizations=None, public=False ):
+
+        if organizations is None:
+            organizations = OrganizationUser.objects.filter( user=user )
+
+        if not public:
+            private_repos = Q( user=user, org=None )
+            shared_repos  = Q( org__in=organizations )
+        else:
+            private_repos = Q( user=user, org=None, is_public=True )
+            shared_repos  = Q( org__in=organizations, is_public=True )
+
+        return self.filter( private_repos | shared_repos )
 
     def get_by_username( self, repo_name, username ):
         user_repo_q = Q( name=repo_name )

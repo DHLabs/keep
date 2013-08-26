@@ -4,48 +4,17 @@
 {% block title %}{{ user.username }}{% endblock %}
 
 {% block js %}
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script src='{% static "js/vendor/dashboard.js" %}'></script>
 <script src='{% static "js/vendor/requirejs.js" %}'></script>
+<script type='text/javascript'>
+	document.initial_data = {{user_repos|safe}};
+</script>
 <script type="text/javascript">
 	require([ '{% static "js/common.js" %}' ], function (common) {
 		require.config({
 			baseUrl: '{% static "js/vendor" %}'
 		});
-		require( [ 'app/dashboard/main' ] )
-	});
-
-	$( function() {
-    	$( "#repo_list tr" ).draggable({
-    			helper: 'clone',
-    			opacity: 0.7,
-    		});
-
-    	$( "#studies li" ).droppable({
-    		hoverClass: 'drop-hover',
-      		drop: function( event, ui ) {
-      			var study_id = $( 'a', this ).data( 'study' );
-      			var repo_id = $( ui.draggable ).data( 'repo' );
-
-      			if( study_id == undefined ) {
-      				return
-      			}
-
-      			console.log( "Moving " + repo_id + " to " + study_id );
-      			$.ajax({
-           			headers : {
-                		'Accept' : 'application/json',
-                		'Content-Type' : 'application/json'
-            		},
-            		url: '/api/v1/repos/' + repo_id,
-            		type: 'PATCH',
-            		data: JSON.stringify( { 'study': study_id } ),
-            		success: function( response, textStatus, jqXhr ) {
-            			console.log( response );
-            		},
-      			});
-      		}
-      	});
+		require( [ 'app/dashboard/main' ] );
 	});
 </script>
 {% endblock %}
@@ -155,9 +124,9 @@
 
 		<div>
 			<ul id='filters' class='nav-list nav-inline'>
-				<li>
-					<h4 id='study_name' style='display:inline;'>All Diaries</h4>
-				</li>
+
+				<li><h4 id='study_name' style='display:inline;'>All Diaries</h4></li>
+
 				<li class='selected'>
 					<a href='#' data-filter='all' style='font-size: 85%;'>All</a>
 				</li>
@@ -175,40 +144,7 @@
 
 		<table id='repo_list' class='table diary-list'>
 			<tbody>
-				{% if user_repos|length == 0 %}
-					<tr>
-						<td style='text-align:center;' colspan='4'>
-							You have no data diaries =[
-						</td>
-					</tr>
-				{% endif %}
-				{% for repo in user_repos %}
-					<tr class='{% if repo.is_public %}public{% else %}private{% endif %}' data-repo='{{ repo.mongo_id }}'>
-						<td class='privacy'>
-							{% if repo.is_public %}
-								<i class='icon-unlock'></i>
-							{% else %}
-								<i class='icon-lock'></i>
-							{% endif %}
-						</td>
-						<td class='add-data'>
-							<a href='{% url "repo_webform" username=account.username repo_name=repo.name %}' class='btn btn-small'>
-								<i class='icon-pencil'></i> Add Data
-							</a>
-						</td>
-						<td>
-							<a href='{% url "repo_visualize" username=account.username repo_name=repo.name %}'>
-								{{ repo.name }}
-								<div class='help-block'>
-									{% if repo.description %}{{ repo.description|slice:":42" }}...{% endif %}
-								</div>
-							</a>
-						</td>
-						<td class='submission-count'>
-							{{ repo.submissions }} <i class='icon-file-alt'></i>
-						</td>
-					</tr>
-				{% endfor %}
+				<tr><td></td></tr>
 			</tbody>
 		</table>
 	</div>
