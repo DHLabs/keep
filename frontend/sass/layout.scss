@@ -18,6 +18,20 @@
 @import "_dashboard";
 @import "_viz";
 
+.footer {
+	width: 100%;
+	position:absolute;
+	bottom: 0;
+	background: black;
+	color: white;
+	font-size: 75%;
+
+	.row {
+		margin: 0;
+		padding: 4px 0;
+	}
+}
+
 img {
 	vertical-align: middle;
 }
