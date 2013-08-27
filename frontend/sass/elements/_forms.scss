@@ -1,0 +1,24 @@
+form {
+	input[type='text'] {
+		width:100% !important;
+		margin-bottom:8px;
+	}
+
+	input[type='password'] {
+		width:100% !important;
+	}
+
+	input.large {
+		padding: 12px;
+		font-size: 24px;
+	}
+
+	div.control-group {
+		margin-bottom:20px;
+	}
+
+	span.error {
+		color: $theme;
+		font-weight: bold;
+	}
+}
