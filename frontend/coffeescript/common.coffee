@@ -9,11 +9,17 @@ requirejs.config(
 		leaflet_cluster: 'leaflet.markerclusterer'
 
 		jqueryui: 'jquery-ui'
+		jquery_cookie: 'jquery.cookie'
+
 		dataTables: 'jquery.dataTables.min'
 		bootstrapTables: 'bootstrap.dataTables'
 
+		backbone_modal: 'backbone.modal.min'
 	shim:
 		jqueryui:
+			deps: [ 'jquery' ]
+
+		jquery_cookie:
 			deps: [ 'jquery' ]
 
 		backbone:
@@ -21,6 +27,9 @@ requirejs.config(
 			exports: 'Backbone'
 		underscore:
 			exports: '_'
+
+		backbone_modal:
+			deps: [ 'backbone' ]
 
 		'd3':
 			exports: 'd3'

@@ -38,7 +38,7 @@
                     <h4><a href='{% url "home" %}'>{{ user.username }}</a></h4>&nbsp;|
                     <a href='{% url "settings" %}'>
                         Settings
-                    </a>|
+                    </a>
                     <a href='{% url "auth_logout" %}'>
                         Logout
                     </a>
@@ -48,6 +48,9 @@
         </div>
     </div>
     {% endblock %}
+
+    <div class='modal'></div>
+
     {% block outerspace %}
     <div class="container" style='padding-top:80px;'>
         {% block content %}

@@ -1,16 +1,47 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
-          'jqueryui' ],
+          'backbone_modal',
+          'jqueryui',
+          'jquery_cookie' ],
 
 ( $, _, Backbone ) ->
 
     class RepoCollection extends Backbone.Collection
         initialize: ->
-            @url = '/api/v1/repos'
+            @url = '/api/v1/repos/'
 
         parse: ( response ) ->
             return response.objects
+
+
+    class StudyModel extends Backbone.Model
+        initialize: ->
+            @url = '/api/v1/studies/'
+
+    class NewStudyModal extends Backbone.Modal
+        template: _.template( $( '#new-study-template' ).html() )
+        submitEl: '.btn-primary'
+        cancelEl: '.btn-cancel'
+
+        clean: () ->
+            values =
+                name: $( '#study-name' ).val().replace( /^\s+|\s+$/g, "" )
+                description: $( '#study-description' ).val().replace( /^\s+|\s+$/g, "" )
+
+            return values
+
+        beforeSubmit: () ->
+
+            @cleaned_data = @clean()
+
+            if @cleaned_data[ 'name' ].length == 0
+                $( '.error', $( '#study-name' ).parent() ).html( 'Please used a valid study name' )
+                return false
+
+        submit: () ->
+            study = new StudyModel()
+            study.save( @cleaned_data, {headers: {'X-CSRFToken': $.cookie( 'csrftoken' )}} )
 
 
     class DashboardView extends Backbone.View
@@ -22,8 +53,10 @@ define( [ 'jquery',
         repo_list: $( '#repo_list > tbody' )
 
         events:
-            "click #studies ul li a":   "refresh_event"
-            "click #filters li a":      "filter_event"
+            "click #studies ul li a":           "refresh_event"
+            "click #studies .create-new a":     "new_study_event"
+
+            "click #filters li a":              "filter_event"
 
         repo_tmpl  = _.template( '''
             <tr class="<%= filters %>" data-repo="<%= id %>">
@@ -70,6 +103,11 @@ define( [ 'jquery',
         filter_event: (event) ->
             @filter = $( event.currentTarget ).data( 'filter' )
             @_apply_filters( event.currentTarget )
+
+        new_study_event: (event) ->
+            @modalView = new NewStudyModal()
+            $('.modal').html( @modalView.render().el )
+            $( '#study-name' ).focus()
 
         initialize: ->
             @listenTo( @repos, 'reset', @render )

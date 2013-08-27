@@ -3,6 +3,11 @@
 
 {% block title %}{{ user.username }}{% endblock %}
 
+{% block css %}
+<link rel="stylesheet" type="text/css" href='{% static "css/backbone.modal.css" %}'>
+<link rel="stylesheet" type="text/css" href='{% static "css/backbone.modal.theme.css" %}'>
+{% endblock %}
+
 {% block js %}
 <script src='{% static "js/vendor/dashboard.js" %}'></script>
 <script src='{% static "js/vendor/requirejs.js" %}'></script>
@@ -17,6 +22,27 @@
 		require( [ 'app/dashboard/main' ] );
 	});
 </script>
+<script type="text/template" id="new-study-template">
+	<div class="bbm-modal__topbar">
+		<h3 class="bbm-modal__title">New Study</h3>
+	</div>
+
+	<div class="bbm-modal__section">
+		<form>
+			<div class='control-group'>
+				<input type='text' id='study-name' class='input large' placeholder='Study name'>
+				<span class='error'></span>
+			</div>
+			<div class='control-group'>
+				<input type='text' id='study-description' class='input large' placeholder='What is this for?'>
+			</div>
+		</form>
+    </div>
+    <div class="bbm-modal__bottombar">
+    	<a href="#" class="btn btn-cancel">Cancel</a>
+    	<a href="#" class="btn btn-primary">Create</a>
+    </div>
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -45,10 +71,9 @@
 		<div id='studies' class='section'>
 
 			{% if not is_other_user %}
-			<div style='float:left;'>
+			<div class='create-new'>
 				<a href='#' class='btn btn-primary btn-small'>
-					<i class='icon-plus-sign'></i>
-					&nbsp;New
+					<i class='icon-plus-sign'></i>&nbsp;New
 				</a>
 			</div>
 			{% endif %}

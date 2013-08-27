@@ -9,8 +9,10 @@
 // Import our stylized elements css
 @import "elements/_buttons";
 @import "elements/_tables";
+@import "elements/_forms";
 
 // import sheets for specific locations
+@import "_modal";
 @import "_topbar";
 @import "_landing";
 @import "_dashboard";
@@ -20,16 +22,6 @@ img {
 	vertical-align: middle;
 }
 
-form {
-	> input[type='text'] {
-		width:100% !important;
-	}
-
-	> input[type='password'] {
-		width:100% !important;
-	}
-
-}
 // Miscellaneous CSS that needs to be categorized
 .section {
 	margin:32px 0;
@@ -37,7 +29,7 @@ form {
 }
 
 div.help-block {
-	font-size: 13px; 
+	font-size: 13px;
 	color: #AAA;
 }
 
