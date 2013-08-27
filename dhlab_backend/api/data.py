@@ -3,6 +3,8 @@ from backend.db import dehydrate_survey
 
 from bson import ObjectId
 
+import pymongo
+
 from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.http import HttpUnauthorized
@@ -104,6 +106,14 @@ class DataResource( MongoDBResource ):
 
             # Query the database for the data
             cursor = db.data.find( query_parameters )
+
+            if 'sort' in request.GET:
+                sort_parameter = 'data.%s' % ( request.GET['sort'] )
+                sort_type = pymongo.DESCENDING
+                if 'sort_type' in request.GET:
+                    if request.GET['sort_type'] == 'ascending':
+                        sort_type = pymongo.ASCENDING
+                cursor = cursor.sort( sort_parameter, sort_type )
 
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
 
