@@ -1,5 +1,7 @@
 import json
 
+from guardian.shortcuts import get_perms
+
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.authorization import Authorization
 from tastypie.http import HttpUnauthorized
@@ -13,30 +15,22 @@ from .authentication import ApiTokenAuthentication
 class StudyAuthorization( Authorization ):
 
     def create_list( self, object_list, bundle ):
-        print 'create list'
+        '''
+            By default, a user has the ability to add studies for themselves.
+        '''
         return True
 
-    def create_detail( self, object_list, bundle ):
-        print 'create_detail'
-        return True
+    def delete_detail( self, object_list, bundle ):
+        '''
+            Does a user have the ability to delete the selected study?
+        '''
+        return bundle.request.user.has_perm( 'delete_study', bundle.obj )
 
     def update_detail( self, object_list, bundle ):
-        print 'update_detail'
-        return True
-
-    def update_list( self, object_list, bundle ):
-        print 'CALLED'
-
-        print object_list
-
-        allowed = []
-
-        # Since they may not all be saved, iterate over them.
-        for obj in object_list:
-            if obj.user == bundle.request.user:
-                allowed.append(obj)
-
-        return True
+        '''
+            Does a user have the ability to edit the selected study?
+        '''
+        return bundle.request.user.has_perm( 'change_study', bundle.obj )
 
 
 class StudyResource( ModelResource ):
@@ -45,7 +39,7 @@ class StudyResource( ModelResource ):
         resource_name = 'studies'
 
         list_allowed_methods = [ 'get', 'post' ]
-        detail_allowed_methods = [ 'get' ]
+        detail_allowed_methods = [ 'get', 'delete' ]
 
         authentication = MultiAuthentication( SessionAuthentication(), ApiTokenAuthentication() )
         authorization = StudyAuthorization()
@@ -73,6 +67,11 @@ class StudyResource( ModelResource ):
                            description=params[ 'description' ],
                            user=logged_in_user,
                            org=None )
-        new_study_id = new_study.save()
+        #new_study_id = new_study.save()
+
+        # If the user wants a way to track things using this study, we'll create
+        # a special "registration" type repository.
+
+        new_study_id = 1
         response_data = { 'success': True, 'id': new_study_id }
         return self.create_response( request, response_data )
