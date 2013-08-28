@@ -1,10 +1,12 @@
-define( [ 'backbone' ],
+define( [
+    'backbone',
+    'app/models/repo' ],
 
-( Backbone ) ->
+( Backbone, RepoModel ) ->
 
     class RepoCollection extends Backbone.Collection
-        initialize: ->
-            @url = '/api/v1/repos/'
+        model: RepoModel
+        url: '/api/v1/repos/'
 
         parse: ( response ) ->
             return response.objects

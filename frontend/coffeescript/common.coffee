@@ -38,8 +38,9 @@ requirejs.config(
 		backbone_modal:
 			deps: [ 'backbone' ]
 
-		backbone_marionette:
-			deps: [ 'backbone' ]
+		marionette:
+			deps: [ 'jquery', 'underscore', 'backbone' ]
+			exports: 'Marionette'
 
 		'd3':
 			exports: 'd3'
