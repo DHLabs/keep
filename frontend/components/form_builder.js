@@ -705,8 +705,6 @@ function buildQuestionList( listQuestions, formChildren )  {
 			buildQuestionList( listQuestions, question.children );
 		} else if( question.type == 'note' ) {
 			//don't add note
-		} else if( question.type == 'note' ) {
-
 		} else {
 			listQuestions.push( question );
 		}

@@ -104,6 +104,7 @@
 		height: 2em;
 		width: 100%;
 		border: 1px solid #F00;
+		background-color: #FFF;
 	}
 
 	.sortable {
@@ -214,6 +215,13 @@
 			<div>
 				Relevance for Question:
 				<select id="relevanceQuestions" name="relevanceQuestions"></select>
+			</div>
+			<div>
+				Relevance Bounds: <input type="text" name="relevanceBounds" id="relevanceBounds">
+			</div>
+			<div id="windowNameTracker" style="display:none;"></div>
+			<div>
+				<a href="#" class="btn btn-primary" onclick="jsGUIEditRelevance()">OK</a>
 			</div>
 		</div>
 

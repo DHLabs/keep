@@ -10,6 +10,7 @@ reference.
 ================
 */
 
+var relevanceList = new Array();
 
 /*
 ================
@@ -25,9 +26,9 @@ element.
 ================
 */
 var sourceEndpoint = {
-	anchor: ["Right"],
+	anchor: ["TopRight"],
 	endpoint: ["Dot", {radius: 5}],
-	paintStyle: {fillStyle: "#000"},
+	paintStyle: {fillStyle: "#00F"},
 	isSource: true,
 	isTarget: false
 }
@@ -97,6 +98,7 @@ function jsGUIAddWindow() {
 		left: '10em',
 		top: '10em',
 		position: 'absolute',
+		backgroundColor: '#555555'
 	}).addClass('window').appendTo('#builder_gui');
 
 	$('<ul>', { id: sortID }).appendTo('#' + windowID);
@@ -116,7 +118,7 @@ function jsGUIAddWindow() {
 
 	//add a 'Add Relevances' button in the lower left corner
 	$('<button>', {
-		onclick: "jsGUIAddRelevance('" + windowID +"')",
+		onclick: "jsGUIViewRelevance('" + windowID + "')",
 		type: 'button',
 		html: "<i class='icon-filter'></i> Add Relevance"
 	}).addClass( 'relevance-icon' ).appendTo('#' + windowID + ' .windowButtons');
@@ -256,7 +258,8 @@ Relevance operations
 	It also adds a node to the relevance, so it can be
 	connected to other windows/screens.
 */
-function jsGUIAddRelevance(window) {
+
+function jsGUIAddRelevance(window, relevance) {
 	//first, see if there is a relevance list, if not, create one
 	if ($('#' + window + ' .relevanceList').length < 1) {
 		$('<ul>')
@@ -265,7 +268,7 @@ function jsGUIAddRelevance(window) {
 	}
 	
 	var tempID = "relevance_" + $('.relevanceList').length + $('#' + window + ' .relevanceList li').length;
-	//trying to keep the unique number, scramble (Randomize) it if it exists
+	//trying to keep the unique number, scramble (Randomize) it if it exists (sometimes occurs after deletion of relevances)
 	while ($('#' + tempID).length > 0) {
 		tempID = "relevance_" + Math.floor(Math.random() * 10000000);
 	}
@@ -275,6 +278,12 @@ function jsGUIAddRelevance(window) {
 		id: tempID
 	}).addClass('relevance')
 	  .appendTo('#' + window + ' .relevanceList');
+
+  	//add relevance text div to relevance item
+  	$('<div>', {
+  		id: tempID + "_text",
+  		html: relevance.name + ': ' + relevance.conditions,
+  	}).appendTo('#' + tempID);
 
 	//add relevance edit and delete buttons
 	$('<button>', {
@@ -291,11 +300,26 @@ function jsGUIAddRelevance(window) {
 
 	// Add endpoint to the relevance
 	jsPlumb.addEndpoint($('#' + tempID), sourceEndpoint);
-
 }
 
-function jsGUIEditRelevance(relevance) {
+function jsGUIEditRelevance(intakeRelevance) {
 
+	
+	if (intakeRelevance != null) {
+		console.log("TODO: FIX RELEVANCE EDIT");
+		return;
+	}
+
+	var relevance = new (function() {
+		this.name = $("#relevanceQuestions").find(":selected").text();
+		this.conditions = $("#relevanceBounds").val();
+	});
+
+	relevanceList.push(relevance);
+
+	jsGUIAddRelevance($("#windowNameTracker")[0].innerHTML, relevance);
+
+	jsGUICloseRelevance();
 }
 
 /*
@@ -313,7 +337,29 @@ function jsGUIDeleteRelevance(relevance) {
 	});
 }
 
+function jsGUIViewRelevance(window) {
 
+	var flatQuestionList = buildFlatQuestionList();
+
+	var selector = $('#relevanceQuestions')[0];
+	$('#relevanceQuestions > option').remove();
+	for (var i = 0; i < flatQuestionList.length; i++) {
+		var relevanceOption = document.createElement('option');
+		relevanceOption.innerHTML = flatQuestionList[i].label;
+		relevanceOption.value = flatQuestionList[i].label + "_value";
+		selector.appendChild(relevanceOption);
+	}
+
+	$('#windowNameTracker')[0].innerHTML = window;
+
+	$( '#relevanceEditWindow' ).dialog({
+		'width': 640
+	});
+}
+
+function jsGUICloseRelevance() {
+	$('#relevanceEditWindow').dialog( 'close' );
+}
 /*
 ================
 Miscellaneous code
