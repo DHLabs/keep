@@ -35,11 +35,11 @@ class NewBatchRepoForm( forms.Form ):
             A really stupid and bare-bones approach to data type detection.
         '''
         if self.FLOAT_TYPE.match( val ):
-            return 'Decimal'
+            return 'decimal'
         elif self.INT_TYPE.match( val ):
-            return 'Integer'
+            return 'int'
         else:
-            return 'Text'
+            return 'text'
 
     def clean( self ):
         '''
