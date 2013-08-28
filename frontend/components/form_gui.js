@@ -262,6 +262,7 @@ Relevance operations
 function jsGUIAddRelevance(window, relevance) {
 	//first, see if there is a relevance list, if not, create one
 	if ($('#' + window + ' .relevanceList').length < 1) {
+		$('<h5 style="color:#FFF">Relevances:</h5>').appendTo('#' + window);
 		$('<ul>')
 		  .addClass('relevanceList')
 		  .appendTo('#' + window);
@@ -332,9 +333,18 @@ function jsGUIDeleteRelevance(relevance) {
 	jsPlumb.remove($('#' + relevance));
 	$('#' + relevance).remove();
 
-	releParent.children('li').each(function(){
-		jsPlumb.repaint(this);
-	});
+	console.log(releParent);
+
+	if (releParent.children('li').length < 1) {
+		releParent.parent().find('h5').remove();
+		releParent.remove();
+	}
+
+	else {
+		releParent.children('li').each(function(){
+			jsPlumb.repaint(this);
+		});
+	}
 }
 
 function jsGUIViewRelevance(window) {
@@ -353,7 +363,7 @@ function jsGUIViewRelevance(window) {
 	$('#windowNameTracker')[0].innerHTML = window;
 
 	$( '#relevanceEditWindow' ).dialog({
-		'width': 640
+		'width': 300
 	});
 }
 
