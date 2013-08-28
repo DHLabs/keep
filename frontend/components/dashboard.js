@@ -14,8 +14,22 @@ function FileDragHover(e) {
     var files = e.target.files || e.dataTransfer.files;
 
     var fileseelct = document.getElementById( "fileselect" );
-    $("input[name=name]").val( files[0].name.split(".")[0] );
+
+    var fileNameSplit = files[0].name.split(".");
+
+    var fileName = fileNameSplit[0];
+    var fileExtension = fileNameSplit[1];
+
+    $("input[name=name]").val( fileName );
     fileseelct.files = files;
+
+    if( fileExtension == 'xml' ) {
+
+    } else if( fileExtension == 'csv' ) {
+      $("#newform").attr("action", "/repo/batch/" );
+      $("#fileselect").attr( "name", "csv_file" );
+    }
+
     $("#newform").submit();
 
   }
