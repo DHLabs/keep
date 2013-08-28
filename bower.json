@@ -14,6 +14,7 @@
     "leaflet": "~0.5.1",
     "leaflet.markerclusterer": "latest",
     "moment": "~2.0.0",
-    "requirejs": "~2.1.6"
+    "requirejs": "~2.1.6",
+    "marionette": "~1.1.0"
   }
 }
