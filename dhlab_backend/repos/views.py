@@ -78,8 +78,9 @@ def new_repo( request ):
             'children': repo.fields() }
         repos.append( repo_info )
 
-    return render_to_response( 'new.html', { 'form': form,
-                                            'user_repos': repos },
+    return render_to_response( 'new.html',
+                               { 'form': form,
+                                 'user_repos': repos },
                                context_instance=RequestContext(request) )
 
 
@@ -129,9 +130,12 @@ def edit_repo( request, repo_id ):
     else:
         temp_dict['type'] = "survey"
 
+    return render_to_response( 'new.html',
+                               {'form': form,
+                                'repo_json': json.dumps(temp_dict),
+                                'user_repos': repos },
+                               context_instance=RequestContext(request) )
 
-    return render_to_response( 'new.html', { 'form': form, 'repo_json': json.dumps(temp_dict),'user_repos':repos },
-                          context_instance=RequestContext(request) )
 
 @login_required
 def delete_repo( request, repo_id ):
@@ -174,6 +178,7 @@ def toggle_public( request, repo_id ):
     return HttpResponse( json.dumps( { 'success': True,
                                        'public': repo.is_public } ),
                          mimetype='application/json' )
+
 
 @csrf_exempt
 @require_POST

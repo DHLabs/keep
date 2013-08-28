@@ -3,6 +3,7 @@ import json
 from backend.forms import RegistrationFormUserProfile
 from backend.forms import ResendActivationForm
 
+from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import RequestSite
 from django.contrib.auth.decorators import login_required
@@ -14,7 +15,7 @@ from django.template import RequestContext
 from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
 from repos.models import Repository, RepoSerializer
-from studies.models import Study
+from studies.models import Study, StudySerializer
 from twofactor.models import UserAPIToken
 
 
@@ -111,12 +112,15 @@ def user_dashboard( request, username ):
                                                       organizations=organizations )
         user_studies = Study.objects.filter( user=user )
 
-    serializer = RepoSerializer()
 
+    serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( user_repos ) )
 
+    serializer = StudySerializer()
+    study_json = json.dumps( serializer.serialize( user_studies ) )
+
     return render_to_response( 'dashboard.html',
-                               { 'user_studies': user_studies,
+                               { 'user_studies': study_json,
                                  'user_repos': repo_json,
                                  'is_other_user': is_other_user,
                                  'account': user,

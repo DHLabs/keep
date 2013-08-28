@@ -5,16 +5,21 @@ requirejs.config(
 	paths:
 		app: '../app'
 
+		# Leaflet plugins
 		leaflet_heatmap: 'heatmap-leaflet'
 		leaflet_cluster: 'leaflet.markerclusterer'
 
+		# jQuery plugins
 		jqueryui: 'jquery-ui'
 		jquery_cookie: 'jquery.cookie'
 
 		dataTables: 'jquery.dataTables.min'
 		bootstrapTables: 'bootstrap.dataTables'
 
+		# Backbone plugins
 		backbone_modal: 'backbone.modal.min'
+		marionette: 'marionette'
+
 	shim:
 		jqueryui:
 			deps: [ 'jquery' ]
@@ -22,13 +27,18 @@ requirejs.config(
 		jquery_cookie:
 			deps: [ 'jquery' ]
 
+		# Backbone & associated plugins
 		backbone:
 			deps: [ 'jquery', 'underscore' ]
 			exports: 'Backbone'
+
 		underscore:
 			exports: '_'
 
 		backbone_modal:
+			deps: [ 'backbone' ]
+
+		backbone_marionette:
 			deps: [ 'backbone' ]
 
 		'd3':

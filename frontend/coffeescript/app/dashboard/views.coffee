@@ -1,23 +1,33 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
+
+          # Model stuff
+          'app/collections/repo'
+          'app/collections/study'
+          'app/models/study'
+
+          # Plugins, etc.
           'backbone_modal',
           'jqueryui',
           'jquery_cookie' ],
 
-( $, _, Backbone ) ->
+( $, _, Backbone, RepoCollection, StudyCollection, StudyModel ) ->
 
-    class RepoCollection extends Backbone.Collection
-        initialize: ->
-            @url = '/api/v1/repos/'
+    class StudySettingsModal extends Backbone.Modal
+        template: _.template( $( '#study-settings-template' ).html() )
+        cancelEl: '.btn-primary'
 
-        parse: ( response ) ->
-            return response.objects
+        initialize: ( study )->
+            @study = study
 
+        delete_event: ( event ) =>
+            @study.destroy()
 
-    class StudyModel extends Backbone.Model
-        initialize: ->
-            @url = '/api/v1/studies/'
+        onRender: ()->
+            $( '.study-name', @el ).html( @study.get( 'name' ) )
+            $( '.study-delete', @el ).click( @delete_event )
+
 
     class NewStudyModal extends Backbone.Modal
         template: _.template( $( '#new-study-template' ).html() )
@@ -28,6 +38,7 @@ define( [ 'jquery',
             values =
                 name: $( '#study-name' ).val().replace( /^\s+|\s+$/g, "" )
                 description: $( '#study-description' ).val().replace( /^\s+|\s+$/g, "" )
+                tracker: $( '#study-tracker' ).is( ':checked' )
 
             return values
 
@@ -50,13 +61,25 @@ define( [ 'jquery',
         filter: 'all'
 
         repos: new RepoCollection()
+        studies: new StudyCollection()
+
         repo_list: $( '#repo_list > tbody' )
+        study_list: $( '#study_list' )
 
         events:
-            "click #studies ul li a":           "refresh_event"
             "click #studies .create-new a":     "new_study_event"
+            "click .study-settings a":          "study_settings_event"
 
-            "click #filters li a":              "filter_event"
+            "click #filters li a":              "filter_repos_event"
+            "click #studies ul li a":           "refresh_repos_event"
+
+        study_templ = _.template( '''
+                <li>
+                    <div class='study-settings'>
+                        <a href='#' data-name='<%= name %>' data-id='<%= id %>'><i class='icon-cog'></i></a>
+                    </div>
+                    <a href='#' data-study='<%= id %>'><%= name %></a>
+                </li>''' )
 
         repo_tmpl  = _.template( '''
             <tr class="<%= filters %>" data-repo="<%= id %>">
@@ -100,7 +123,7 @@ define( [ 'jquery',
                 $( '#filters .selected' ).removeClass( 'selected' )
                 $( target).parent().addClass( 'selected' )
 
-        filter_event: (event) ->
+        filter_repos_event: (event) ->
             @filter = $( event.currentTarget ).data( 'filter' )
             @_apply_filters( event.currentTarget )
 
@@ -109,15 +132,25 @@ define( [ 'jquery',
             $('.modal').html( @modalView.render().el )
             $( '#study-name' ).focus()
 
+        study_settings_event: (event) ->
+            study =
+                id: $( event.currentTarget ).data( 'id' )
+                name: $( event.currentTarget ).data( 'name' )
+
+            @modalView = new StudySettingsModal( new StudyModel( study ) )
+            $('.modal').html( @modalView.render().el )
+            event.stopImmediatePropagation()
+
         initialize: ->
             @listenTo( @repos, 'reset', @render )
 
-            @repos = new RepoCollection()
-            @repos.reset( document.initial_data )
+            # Initialize our collections!
+            @repos.reset( document.repo_list )
+            @studies.reset( document.study_list )
 
             @render()
 
-        refresh_event: (event) ->
+        refresh_repos_event: (event) ->
             # Fetch repositories for a given study.
             # If "All Diaries" is selected, fetch repositories
 
@@ -133,12 +166,22 @@ define( [ 'jquery',
 
             $( '#study_name' ).html( $( event.currentTarget ).html()  )
 
+            if study_id?
+                $( '#study-settings' ).show()
+            else
+                $( '#study-settings' ).hide()
+
             $( '#studies .selected' ).removeClass( 'selected' )
             $( event.currentTarget ).parent().addClass( 'selected' )
 
             @
 
         render: =>
+
+            for study in @studies.models
+                study_el = study_templ( study.attributes )
+                console.log( study )
+                @study_list.append( study_el )
 
             # Clear the repo table.
             $( @repo_list ).empty()

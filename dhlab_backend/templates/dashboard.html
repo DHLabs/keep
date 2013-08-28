@@ -7,7 +7,8 @@
 <script src='{% static "js/vendor/dashboard.js" %}'></script>
 <script src='{% static "js/vendor/requirejs.js" %}'></script>
 <script type='text/javascript'>
-	document.initial_data = {{user_repos|safe}};
+	document.repo_list = {{user_repos|safe}};
+	document.study_list = {{user_studies|safe}};
 </script>
 <script type="text/javascript">
 	require([ '{% static "js/common.js" %}' ], function (common) {
@@ -16,6 +17,20 @@
 		});
 		require( [ 'app/dashboard/main' ] );
 	});
+</script>
+<script type='text/template' id='study-settings-template'>
+	<div class="bbm-modal__topbar">
+		<h3 class="bbm-modal__title"><span class='study-name'></span> Settings</h3>
+	</div>
+
+	<div class="bbm-modal__section">
+		<div>
+			<div><a href='#' class='btn study-delete'><i class='icon-trash'></i> Delete Study</a></div>
+		</div>
+    </div>
+    <div class="bbm-modal__bottombar">
+    	<a href="#" class="btn btn-primary">Done</a>
+    </div>
 </script>
 <script type="text/template" id="new-study-template">
 	<div class="bbm-modal__topbar">
@@ -30,6 +45,12 @@
 			</div>
 			<div class='control-group'>
 				<input type='text' id='study-description' class='input large' placeholder='What is this for?'>
+			</div>
+			<div class='control-group'>
+				<label>
+					<input type='checkbox' id='study-tracker' class='input large'>
+					Include a way to keep track of things inside this study.
+				</label>
 			</div>
 		</form>
     </div>
@@ -75,15 +96,10 @@
 
 			<h4>Studies</h4>
 
-			<ul class='nav-list'>
+			<ul class='nav-list' id='study_list'>
 				<li class='selected'>
 					<a href='#'>All Diaries</a>
 				</li>
-				{% for study in user_studies %}
-				<li>
-					<a href='#' data-study='{{ study.id }}'>{{ study }}</a>
-				</li>
-				{% endfor %}
 			</ul>
 		</div>
 
@@ -144,8 +160,9 @@
 
 		<div>
 			<ul id='filters' class='nav-list nav-inline'>
-
-				<li><h4 id='study_name' style='display:inline;'>All Diaries</h4></li>
+				<li>
+					<h4 id='study_name' style='display:inline;'>All Diaries</h4>
+				</li>
 
 				<li class='selected'>
 					<a href='#' data-filter='all' style='font-size: 85%;'>All</a>
