@@ -16,9 +16,6 @@ define( [ 'backbone', 'jquery_cookie' ],
             else
                 options.url = @url
 
-            console.log( @url )
-            console.log( options )
-
             return Backbone.sync( method, model, options )
 
 )
