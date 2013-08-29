@@ -40,7 +40,6 @@ define( [ 'jquery',
             )
 
             # Add filter categories to the row
-            console.log( @model )
             if @model.get( 'is_public' )
                 $( @el ).addClass( 'public' )
             else
