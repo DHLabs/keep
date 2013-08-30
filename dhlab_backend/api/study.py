@@ -1,12 +1,11 @@
 import json
 
-from guardian.shortcuts import get_perms
-
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.authorization import Authorization
-from tastypie.http import HttpUnauthorized
+from tastypie.http import HttpUnauthorized, HttpBadRequest
 from tastypie.resources import ModelResource
 
+from studies.forms import NewStudyForm
 from studies.models import Study
 
 from .authentication import ApiTokenAuthentication
@@ -50,28 +49,25 @@ class StudyResource( ModelResource ):
 
     def post_list( self, request, **kwargs ):
 
-        params = json.loads( request.body )
-
-        params[ 'name' ] = params.get( 'name', '' ).strip()
-        params[ 'description' ] = params.get( 'description', '' ).strip()
-
-        if len( params[ 'name' ] ) == 0:
-            return HttpUnauthorized()
-
+        # First and foremost, ensure that the user is logged in and valid.
         logged_in_user = request.user
 
         if logged_in_user.is_anonymous():
             return HttpUnauthorized()
 
-        new_study = Study( name=params[ 'name' ],
-                           description=params[ 'description' ],
-                           user=logged_in_user,
-                           org=None )
-        #new_study_id = new_study.save()
+        # Convert new study data into a python dictionary. If we receive some
+        # error converting the data into a dictionary, return a HttpBadRequest.
+        try:
+            params = json.loads( request.body )
+        except Exception:
+            return HttpBadRequest()
 
-        # If the user wants a way to track things using this study, we'll create
-        # a special "registration" type repository.
+        # Validate the data passed into the form
+        form = NewStudyForm( params )
+        if not form.is_valid():
+            return HttpBadRequest()
 
-        new_study_id = 1
-        response_data = { 'success': True, 'id': new_study_id }
+        new_study = form.save( user=logged_in_user )
+
+        response_data = { 'success': True, 'id': new_study.id }
         return self.create_response( request, response_data )

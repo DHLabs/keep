@@ -9,7 +9,6 @@ from django.conf.urls import url
 from django.http import HttpResponse
 
 from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
-from tastypie.exceptions import BadRequest
 from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
