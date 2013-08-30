@@ -19,13 +19,16 @@ define( [ 'jquery',
         template: _.template( $( '#study-settings-template' ).html() )
         cancelEl: '.btn-primary'
 
-        initialize: ( study )->
-            @study = study
+        initialize: ( options ) ->
+            @collection = options.collection
+            @study = options.study
 
         delete_event: ( event ) =>
+            @collection.remove( @study )
             @study.destroy()
+            @close()
 
-        onRender: ()->
+        onRender: () =>
             $( '.study-name', @el ).html( @study.get( 'name' ) )
             $( '.study-delete', @el ).click( @delete_event )
 
@@ -53,8 +56,12 @@ define( [ 'jquery',
 
         submit: () ->
             study = new StudyModel()
-            study.save( @cleaned_data, {headers: {'X-CSRFToken': $.cookie( 'csrftoken' )}} )
-
+            study.save( @cleaned_data,
+                headers: {'X-CSRFToken': $.cookie( 'csrftoken' )}
+                success: ( model, response, options )=>
+                    model.set( {id: response.id} )
+                    @collection.add( model )
+                    )
 
     class DashboardView extends Backbone.View
         el: $( '#dashboard' )
@@ -72,21 +79,30 @@ define( [ 'jquery',
             "click #studies ul li a":           "refresh_repos_event"
 
         filter_repos_event: (event) ->
+            $( '.selected', '#filters' ).removeClass( 'selected' )
+            $( event.currentTarget ).parent().addClass( 'selected' )
+
             @repo_view.filter( $( event.currentTarget ).data( 'filter' ) )
 
         new_study_event: (event) ->
-            @modalView = new NewStudyModal()
+            @modalView = new NewStudyModal( { collection: @study_view.collection } )
             $('.modal').html( @modalView.render().el )
             $( '#study-name' ).focus()
 
         study_settings_event: (event) ->
-            study =
-                id: $( event.currentTarget ).data( 'id' )
-                name: $( event.currentTarget ).data( 'name' )
-
-            @modalView = new StudySettingsModal( new StudyModel( study ) )
-            $('.modal').html( @modalView.render().el )
             event.stopImmediatePropagation()
+
+            # Grab the study that this is for.
+            study = new StudyModel(
+                            id: $( event.currentTarget ).data( 'id' )
+                            name: $( event.currentTarget ).data( 'name' )
+                            )
+
+            # Create the modal and display it!
+            @modalView = new StudySettingsModal(
+                                'collection': @study_view.collection
+                                'study': study )
+            $('.modal').html( @modalView.render().el )
 
         initialize: ->
             # Initialize our collections!

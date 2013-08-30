@@ -61,8 +61,6 @@ define( [ 'jquery',
             @render()
 
         filter: ( filter ) ->
-            console.log( "Filtering #{filter}" )
-
             if filter == 'all'
                 $( 'tr', @el ).fadeIn( 'fast' )
             else
