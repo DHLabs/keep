@@ -39,6 +39,8 @@ define( [ 'jquery',
                 opacity: 0.7
             )
 
+            $( @el ).data( 'repo', @model.id )
+
             # Add filter categories to the row
             if @model.get( 'is_public' )
                 $( @el ).addClass( 'public' )
@@ -55,10 +57,6 @@ define( [ 'jquery',
         el: $( '#repo_list > tbody' )
         itemView: RepoItemView
         collection: new RepoCollection
-
-        initialize: ->
-            @collection.reset( document.repo_list )
-            @render()
 
         filter: ( filter ) ->
             if filter == 'all'
@@ -83,8 +81,9 @@ define( [ 'jquery',
                 reset: true
 
             fetch_options[ 'data' ] = { study: study } if study?
-
             @collection.fetch( fetch_options )
+
+            @
 
     return RepoCollectionView
 

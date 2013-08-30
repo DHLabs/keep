@@ -3,6 +3,9 @@ define( [ 'backbone' ],
 ( Backbone ) ->
 
     class RepoModel extends Backbone.Model
+
+        url: '/api/v1/repos/'
+
         toJSON: ->
             attrs = _(@attributes).clone()
 
@@ -17,5 +20,17 @@ define( [ 'backbone' ],
             else
                 attrs.privacy_icon = '<icon class="icon-lock"></i>'
             return attrs
+
+        sync: ( method, model, options ) ->
+            options = options || {};
+
+            if method.toLowerCase() in [ 'patch', 'update', 'delete' ]
+                options.url = "#{@url}#{model.id}/"
+                options.headers = {'X-CSRFToken': $.cookie( 'csrftoken' )}
+            else
+                options.url = @url
+
+            return Backbone.sync( method, model, options )
+
 
 )
