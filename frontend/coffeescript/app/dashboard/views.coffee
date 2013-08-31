@@ -137,6 +137,7 @@ define( [ 'jquery',
             @study_view.collection.reset( document.study_list )
 
             @study_view.on( 'after:item:added', @refresh_repos_event )
+            @study_view.on( 'item:removed', @refresh_repos_event )
 
             $( 'li', '#studies' ).droppable(
                 hoverClass: 'drop-hover'
@@ -144,6 +145,7 @@ define( [ 'jquery',
             @
 
         refresh_repos_event: ( event ) =>
+
             if event.currentTarget?
                 study_el   = event.currentTarget
                 study_id   = $( study_el ).data( 'study' )
@@ -152,6 +154,12 @@ define( [ 'jquery',
                 study_el   = event.el
                 study_id   = event.model.id
                 study_name = event.model.get( 'name' )
+
+                # Was this item removed or added? If isClosed is true, the item
+                # was removed from the collection.
+                if event.isClosed
+                    study_id = null
+                    study_name = 'All Diaries'
 
             # Update the "Study" name and highlight the one the user just clicked.
             $( '#study_name' ).html( study_name  )
