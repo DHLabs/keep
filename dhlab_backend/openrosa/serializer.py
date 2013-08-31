@@ -3,10 +3,6 @@
 
     Functions and helpers to handle OpenROSA API support.
 '''
-import StringIO
-
-from backend.db import db
-from bson import ObjectId
 from django.conf import settings
 
 from lxml import etree
