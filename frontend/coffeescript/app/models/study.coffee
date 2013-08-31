@@ -10,7 +10,9 @@ define( [ 'backbone', 'jquery_cookie' ],
         sync: ( method, model, options ) ->
             options = options || {};
 
-            if method.toLowerCase() in [ 'update', 'delete' ]
+            if method.toLowerCase() in [ 'create' ]
+                options.headers = {'X-CSRFToken': $.cookie( 'csrftoken' )}
+            else if method.toLowerCase() in [ 'update', 'delete' ]
                 options.url = "#{@url}#{model.id}/"
                 options.headers = {'X-CSRFToken': $.cookie( 'csrftoken' )}
             else

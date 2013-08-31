@@ -58,11 +58,10 @@ define( [ 'jquery',
         submit: () ->
             study = new StudyModel()
             study.save( @cleaned_data,
-                headers: {'X-CSRFToken': $.cookie( 'csrftoken' )}
-                success: ( model, response, options )=>
+                success: ( model, response, options ) =>
                     model.set( {id: response.id} )
-                    @collection.add( model )
-                    )
+                    @collection.add( model ) )
+
 
     class DashboardView extends Backbone.View
         el: $( '#dashboard' )
