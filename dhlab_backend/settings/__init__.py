@@ -52,3 +52,8 @@ AUTHENTICATION_BACKENDS = (
 TWOFACTOR_ENCRYPTION_KEY = ''
 
 ACCOUNT_ACTIVATION_DAYS = 1
+
+# Setup the default TASTYPIE_DEFAULT_FORMATS
+# See this page for more info:
+# http://django-tastypie.readthedocs.org/en/latest/settings.html#settings-tastypie-default-formats
+TASTYPIE_DEFAULT_FORMATS = ['json', 'xml']
