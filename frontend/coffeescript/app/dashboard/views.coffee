@@ -136,19 +136,30 @@ define( [ 'jquery',
             @study_view.on( 'render', @_apply_draggable )
             @study_view.collection.reset( document.study_list )
 
+            @study_view.on( 'after:item:added', @refresh_repos_event )
+
             $( 'li', '#studies' ).droppable(
                 hoverClass: 'drop-hover'
                 drop: @_drop_on_study )
             @
 
-        refresh_repos_event: ( event ) ->
+        refresh_repos_event: ( event ) =>
+            if event.currentTarget?
+                study_el   = event.currentTarget
+                study_id   = $( study_el ).data( 'study' )
+                study_name = $( study_el ).html()
+            else
+                study_el   = event.el
+                study_id   = event.model.id
+                study_name = event.model.get( 'name' )
+
             # Update the "Study" name and highlight the one the user just clicked.
-            $( '#study_name' ).html( $( event.currentTarget ).html()  )
+            $( '#study_name' ).html( study_name  )
             $( '#studies .selected' ).removeClass( 'selected' )
-            $( event.currentTarget ).parent().addClass( 'selected' )
+            $( study_el ).parent().addClass( 'selected' )
 
             # Fetch the new set of repositories
-            @repo_view.refresh( $( event.currentTarget ).data( 'study' ) )
+            @repo_view.refresh( study_id )
 
             @
 
