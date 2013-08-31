@@ -120,7 +120,7 @@ class Repository( models.Model ):
         Fields
         -------
         mongo_id : string : required
-            Reference to the MongoDB ID
+            Reference to the MongoDB ID.
 
         name : string : required
             Name only has to be unique for a user's list of repositories.
@@ -129,20 +129,26 @@ class Repository( models.Model ):
             Study this repository belongs too.
 
         user : id : required
-            User in which this repository belongs too
+            User in which this repository belongs too.
 
         org : id : required
-            Organization in which this repository belongs too
+            Organization in which this repository belongs too.
+
+        is_tracker : boolean: required, default=False
+            Whether this repository is being used to track items in a study.
 
         is_public : boolean : required, default=False
-            Whether this repository is public/private
+            Whether this everything in this repository is public/private.
+
+        is_form_public : boolean : required, default=False
+            Whether the form for this repository is public/private.
 
         description : string : optional
-            Description of the repository
+            Description of the repository.
 
         date_created : timestamp : auto
         date_uploaded : timestamp : auto
-            Datetime that the repository was created
+            Datetime that the repository was created.
     '''
     objects     = RepositoryManager()
 
@@ -164,11 +170,12 @@ class Repository( models.Model ):
                                       related_name='repositories',
                                       null=True )
 
-    is_public   = models.BooleanField( default=False )
-    is_form_public = models.BooleanField( default=False )
+    is_tracker      = models.BooleanField( default=False )
 
-    description = models.CharField( max_length=1024,
-                                    blank=True )
+    is_public       = models.BooleanField( default=False )
+    is_form_public  = models.BooleanField( default=False )
+
+    description = models.CharField( max_length=1024, blank=True )
 
     date_created = models.DateTimeField( auto_now_add=True )
     date_updated = models.DateTimeField( auto_now_add=True )
