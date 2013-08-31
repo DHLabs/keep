@@ -16,8 +16,6 @@ class StudySerializer( Serializer ):
         self._current.pop( 'user' )
         self._current.pop( 'org' )
 
-        print self._current
-
         self.objects.append( self._current )
 
 
