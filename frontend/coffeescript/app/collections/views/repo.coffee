@@ -13,7 +13,7 @@ define( [ 'jquery',
 
         template: _.template( '''
             <td class='privacy'>
-                <%= privacy_icon %>
+                <i class="<%= privacy_icon %>"></i>
             </td>
             <td class='add-data'>
                 <a href='<%= webform_uri %>' class='btn btn-small'>
@@ -23,8 +23,13 @@ define( [ 'jquery',
             <td>
                 <a href='<%= uri %>'>
                     <%= name %>
-                    <div class='help-block'>
-                        <%= description %>
+                    <div class='meta-data'>
+                        <% if( study ){ %>
+                            <div class='study'><i class='icon-briefcase'></i>&nbsp;<%= study %></div>
+                        <% } %>
+                        <% if( description.length > 0 ) { %>
+                            <div class='help-block'><%= description %></div>
+                        <% } %>
                     </div>
                 </a>
             </td>

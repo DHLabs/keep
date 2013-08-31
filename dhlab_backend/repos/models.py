@@ -38,6 +38,10 @@ class RepoSerializer( Serializer ):
         self._current[ 'id' ] = obj.mongo_id
         self._current.pop( 'mongo_id' )
 
+        # Convert study id into the actual study name
+        if obj.study:
+            self._current[ 'study' ] = obj.study.name
+
         # Convert timestamps into JSON timestamps
         self._current[ 'date_updated' ] = obj.date_updated.strftime( '%Y-%m-%dT%X' )
         self._current[ 'date_created' ] = obj.date_created.strftime( '%Y-%m-%dT%X' )

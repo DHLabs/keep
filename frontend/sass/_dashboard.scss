@@ -144,6 +144,21 @@ img.account-icon-large {
 		padding:4px 8px;
 	}
 
+	.meta-data {
+		overflow: auto;
+
+		.study {
+			float:left;
+			margin-right: 8px;
+			color: #666;
+			font-size: .8em;
+		}
+
+		.help-block {
+			float:left;
+		}
+	}
+
 	.privacy {
 		font-size:1.2em;
 		width:18px;

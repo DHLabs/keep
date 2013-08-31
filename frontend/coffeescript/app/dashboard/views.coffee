@@ -92,7 +92,8 @@ define( [ 'jquery',
             study_id = null if not study_id?
 
             repo = new RepoModel()
-            repo.save( { id: $( ui.draggable ).data( 'repo' ),  study: study_id },
+            repo_id = $( ui.draggable ).data( 'repo' )
+            repo.save( { id: repo_id, study: study_id },
                     patch: true
                     success: ( response, textStatus, jqXhr ) =>
                         if @study_view.selected()? and @study_view.selected() != study_id
