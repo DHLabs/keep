@@ -38,6 +38,10 @@ class Study( models.Model ):
         description : string : optional
             Description of the study.
 
+        tracker : string : optional
+            Field name that is used ( and automatically entered into new repos )
+            across all repos in this study to track certain objects.
+
         date_created : timestamp : auto
         date_updated : timestamp : auto
     '''
@@ -54,6 +58,8 @@ class Study( models.Model ):
 
     description = models.CharField( max_length=1024, blank=True )
 
+    tracker     = models.CharField( max_length=256, blank=True )
+
     date_created = models.DateTimeField( auto_now_add=True )
     date_updated = models.DateTimeField( auto_now_add=True )
 
@@ -61,6 +67,18 @@ class Study( models.Model ):
         ordering = [ 'name' ]
         verbose_name = 'study'
         verbose_name_plural = 'studies'
+
+    def delete( self ):
+        '''
+            If we have a bunch of repos attached to a study, delete them all
+            as well.
+        '''
+        study_repos = self.repositories.all()
+        if len( study_repos ) > 0:
+            for repo in study_repos:
+                repo.delete()
+
+        super( Study, self, ).delete()
 
     def owner( self ):
         if self.org:

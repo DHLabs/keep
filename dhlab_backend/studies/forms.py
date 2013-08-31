@@ -1,6 +1,7 @@
 from django import forms
+from django.utils.text import slugify
 
-#from repos.models import Repository
+from repos.models import Repository
 
 from .models import Study
 
@@ -37,13 +38,50 @@ class NewStudyForm( forms.Form ):
         if not self.is_valid():
             return None
 
-        new_study = Study( name=self.cleaned_data[ 'name' ],
-                           description=self.cleaned_data[ 'description' ],
-                           user=user,
-                           org=org )
+        kwargs = { 'name': self.cleaned_data[ 'name' ],
+                   'description': self.cleaned_data[ 'description' ],
+                   'user': user,
+                   'org': org }
+
+        # Set the "tracker" field if the user wants to start off tracking
+        # objects.
+        if self.cleaned_data[ 'tracker' ]:
+            kwargs[ 'tracker' ] = 'id'
+
+        new_study = Study( **kwargs )
         new_study.save()
 
-        # If the user wants a way to track things using this study, we'll create
-        # a special "registration" type repository.
+        if self.cleaned_data[ 'tracker' ]:
+            # If the user wants a way to track things using this study, we'll create
+            # a special "registration" type repository.
+
+            repo_fields = { 'fields': [] }
+
+            # Add the id field
+            repo_fields[ 'fields' ].append( { 'bind': { 'required': 'yes' },
+                                              'label': new_study.tracker,
+                                              'name': new_study.tracker,
+                                              'type': 'text' } )
+
+            # Add a generic "name" field.
+            repo_fields[ 'fields' ].append( { 'bind': { 'required': 'yes' },
+                                              'label': 'Name',
+                                              'name': 'name',
+                                              'type': 'text' } )
+
+            repo_name = '%s-tracker' % ( slugify( new_study.name.lower() ) )
+            repo_desc = 'Created to track objects for the %s study' % ( new_study.name )
+
+            # Attempt to create new repository.
+            new_repo = Repository( name=repo_name,
+                                   description=repo_desc,
+
+                                   user=new_study.user,
+                                   org=new_study.org,
+
+                                   is_tracker=True,
+                                   study=new_study )
+
+            new_repo.save( repo=repo_fields )
 
         return new_study
