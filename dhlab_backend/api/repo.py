@@ -94,6 +94,22 @@ class RepoResource( ModelResource ):
             response[ 'X-OpenRosa-Version'] = '1.0'
         return response
 
+    def dehydrate( self, bundle ):
+        '''
+            Serialize the current bundle.object using the RepoSerializer which
+            converts the model into a JSON compatible python dictionary.
+
+            - fields:
+                Fields are grabbed from MongoDB and appended to the bundle
+                dictionary.
+        '''
+        # First serialize the repo metadata.
+        serializer = RepoSerializer()
+        bundle.data = serializer.serialize( [bundle.obj] )[0]
+        bundle.data[ 'children' ] = bundle.obj.fields()
+
+        return bundle
+
     def _grab_media( self, root ):
 
         media = []
@@ -168,44 +184,3 @@ class RepoResource( ModelResource ):
         response_data = { 'success': True, 'id': str( new_id ) }
         return self.create_response( request, response_data )
 
-    def dehydrate( self, bundle ):
-        '''
-            Add additional information to the Repository bundle.
-
-            - fields:
-                Fields are grabbed from MongoDB and appended to the bundle
-                dictionary.
-        '''
-        # First serialize the repo metadata.
-        serializer = RepoSerializer()
-        bundle.data = serializer.serialize( [bundle.obj] )[0]
-
-        # Then serialize the repo fields.
-        repo_fields = db.repo.find_one( ObjectId( bundle.obj.mongo_id ) )
-        bundle.data['children'] = repo_fields[ 'fields' ]
-
-        if 'type' in repo_fields:
-            bundle.data['type'] = repo_fields[ 'type' ]
-        else:
-            bundle.data['type'] = "survey"
-
-        return bundle
-
-    def dehydrate_id( self, bundle ):
-        return bundle.obj.mongo_id
-
-    def dehydrate_study( self, bundle ):
-        return bundle.obj.study.name if bundle.obj.study else None
-
-    def dehydrate_user( self, bundle ):
-        '''
-            Convert user ids into a more informative username when displaying
-            results
-        '''
-        return bundle.obj.user.username if bundle.obj.user else None
-
-    def dehydrate_org( self, bundle ):
-        '''
-            Convert organization ids into the more informative org name.
-        '''
-        return bundle.obj.org.name if bundle.obj.org else None

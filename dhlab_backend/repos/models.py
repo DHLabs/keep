@@ -59,6 +59,12 @@ class RepoSerializer( Serializer ):
         self._current[ 'webform_uri' ] = reverse( 'repo_webform', kwargs=kwargs )
         self._current[ 'uri' ] = reverse( 'repo_visualize', kwargs=kwargs)
 
+        # Set the type of the "repo"
+        if obj.is_tracker:
+            self._current[ 'type' ] = 'registration'
+        else:
+            self._current[ 'type' ] = 'survey'
+
         # Remove references to user/org for now.
         self._current.pop( 'user' )
         self._current.pop( 'org' )
