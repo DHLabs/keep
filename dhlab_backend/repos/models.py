@@ -293,7 +293,7 @@ class Repository( models.Model ):
     def owner( self ):
         if self.org:
             return self.org.name
-        return self.user.name
+        return self.user.username
 
     def __unicode__( self ):
         return '<Repository %s>' % ( self.name )
