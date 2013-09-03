@@ -4,11 +4,11 @@ define( [ 'jquery',
           'marionette'
 
           # Model stuff
-          'app/collections/study' ],
+          'app/collections/data' ],
 
-( $, _, Backbone, Marionette, StudyCollection ) ->
+( $, _, Backbone, Marionette, DataCollection ) ->
 
-    class StudyItemView extends Backbone.Marionette.ItemView
+    class DataItemView extends Backbone.Marionette.ItemView
         tagName: 'li'
         template: _.template( '''
             <div class='study-settings'>
@@ -17,13 +17,10 @@ define( [ 'jquery',
             <a href='#' data-study='<%= id %>'><%= name %></a>''' )
 
 
-    class StudyCollectionView extends Backbone.Marionette.CollectionView
-        el: '#study_list'
+    class DataCollectionView extends Backbone.Marionette.CollectionView
+        el: '#data_list'
         itemView: StudyItemView
-        collection: new StudyCollection
+        collection: new DataCollection
 
-        selected: ()->
-            return $( 'li.selected > a', @el ).data( 'study' )
-
-    return StudyCollectionView
+    return DataCollectionView
 )

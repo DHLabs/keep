@@ -19,7 +19,7 @@ from backend.db import db, dehydrate_survey, user_or_organization
 #from privacy import privatize_geo
 
 from .forms import NewRepoForm, NewBatchRepoForm
-from .models import Repository
+from .models import Repository, RepoSerializer
 
 
 @login_required
@@ -315,7 +315,8 @@ def repo_viz( request, username, repo_name ):
     data = db.data.find( { 'repo': ObjectId( repo.mongo_id ) },
                          { 'survey_label': False,
                            'user': False } )\
-                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )
+                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
+                  .limit( 100 )
 
     data = dehydrate_survey( data )
 
@@ -328,17 +329,14 @@ def repo_viz( request, username, repo_name ):
     usePerms = get_users_with_perms( repo, attach_perms=True )
     usePerms.pop( account, None )
 
-    if isinstance( account, User ):
-        account_name = account.username
-    else:
-        account_name = account.name
+    serializer = RepoSerializer()
+    repo_json = serializer.serialize( [repo] )[0]
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
-                                 'sid': repo.mongo_id,
+                                 'repo_json': repo_json,
                                  'data': json.dumps( data ),
                                  'permissions': permissions,
                                  'account': account,
-                                 'account_name': account_name,
                                  'users_perms': usePerms },
                                context_instance=RequestContext(request) )

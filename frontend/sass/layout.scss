@@ -47,3 +47,30 @@ div.help-block {
 	font-size: .8em;
 	color: $theme;
 }
+
+// Autocomplete UI classes
+.autocomplete-list {
+	position:absolute;
+}
+
+.ui-helper-hidden-accessible {
+	display:none;
+}
+
+.ui-autocomplete {
+
+	border-bottom:1px solid #EEE;
+	border-right:1px solid #EEE;
+	border-left:1px solid #EEE;
+	list-style-type: none;
+	background-color: white;
+
+	> .ui-menu-item {
+		padding: 4px 8px;
+		cursor:pointer;
+	}
+
+	> .selected {
+		background-color: #EEE;
+	}
+}
