@@ -65,50 +65,6 @@
 		moveScroller();
 	});
 </script>
-
-<script type='text/javascript'>
-	$( function() {
-
-		$( '#share_username' ).autocomplete( {
-			appendTo: '#autofill_list',
-			minLength: 1,
-			source: function( request, response ) {
-				$.ajax( {
-					url: "/api/v1/user/",
-					data: {
-						username__icontains: $( '#share_username' ).val(),
-						format: 'json'
-					},
-					success: function( query ) {
-						response ( $.map( query.objects, function( item ){
-							return { label: item.username, value: item.username }
-						}));
-					}
-				});
-			}
-		});
-
-		$( '#move_username' ).autocomplete( {
-			appendTo: '#move_autofill_list',
-			minLength: 1,
-			source: function( request, response ) {
-				$.ajax( {
-					url: "/api/v1/user/",
-					data: {
-						username__icontains: $( '#move_username' ).val(),
-						format: 'json'
-					},
-					success: function( query ) {
-						response ( $.map( query.objects, function( item ){
-							return { label: item.username, value: item.username }
-						}));
-					}
-				});
-			}
-		});
-
-	});
-</script>
 {% endblock %}
 
 {% block outerspace %}
@@ -182,7 +138,7 @@
 	</div>
 </div>
 <div id='viz-data'>
-	<div style='background-color:#eee;padding: 4px 8px;'>
+	<div id='viz-data-controls'>
 		<div class='container'>
 			<div class='sixteen columns'>
 				<ul class='nav-list nav-inline'>
@@ -200,231 +156,229 @@
 			</div>
 		</div>
 	</div>
-	<div class='container'>
-		<div class='viz viz-active' id='raw_viz'>
-			<div id='raw_list' class='sixteen columns active'>
-				<table id='raw_table' class='table'><tbody></tbody></table>
+	<div class='viz viz-active' id='raw-viz'>
+		<div id='raw_list' class='sixteen columns active'>
+			<table id='raw_table' class='table'><tbody></tbody></table>
+		</div>
+		<div id='raw_grid' class='sixteen columns' style='display:none;position:relative;'></div>
+	</div>
+
+	<div class='viz' id='map_viz'>
+		<div class='sixteen columns' style='display:none;'>
+			<div id='time_select'>
+				<input type='range' id='fps' min='1' max='10'/>
+				<input type='range' id='playtime' step='10' min='10' max='300'/>
 			</div>
-			<div id='raw_grid' class='sixteen columns' style='display:none;position:relative;'></div>
+
+			<div id='cumulative'>
+				<input id='cumulativeCheck' type="checkbox">Cumulative
+				<input id='clusterCheck' type="checkbox">Show Clusters
+			</div>
+
+			<div >
+				Time Constraint: <input type="text" name="tc" id = "tc_input">
+				Day: <input type ="radio"  name="const" value ="day" checked="checked"/>
+				hour: <input type="radio" name="const"  value ="hour"/>
+				minute: <input type="radio" name="const" value ="minute"/>
+				<input type="submit" value="submit" class='btn'id ='time_c'>
+				Date: <input type ="radio" name="time" value = "date" checked="checked"/>
+				Time stamp: <input type ="radio" name="time" value = "timestamp"/>
+					<a href='#' id='clear' data-type='map' class='btn'>Clear Lines</a>
+			</div>
 		</div>
 
-		<div class='viz' id='map_viz'>
-			<div class='sixteen columns' style='display:none;'>
-				<div id='time_select'>
-					<input type='range' id='fps' min='1' max='10'/>
-					<input type='range' id='playtime' step='10' min='10' max='300'/>
-				</div>
+		<div class='sixteen columns' id='map'></div>
 
-				<div id='cumulative'>
-					<input id='cumulativeCheck' type="checkbox">Cumulative
-					<input id='clusterCheck' type="checkbox">Show Clusters
+		<div class='offset1 span10' style='clear:both;margin-top:16px;'>
+			<div id='current_time' style='text-align:center;'>
+				Playback Paused
+			</div>
+			<div id='progress_bar' class='progress progress-striped'>
+				<div class='bar'></div>
+			</div>
+		</div>
+		<div id='playback-controls'>
+			<div class='span3'>
+				<input type='date' id='start_date'><br>
+				<strong>Start Date</strong>
+			</div>
+			<div class='span6'>
+				<div class="btn-group">
+					<button id='pause' class='btn'><i class='icon-play'></i></button>
+					<button id='reset' class='btn'><i class='icon-stop'></i></button>
 				</div>
+			</div>
+			<div class='span3'>
+				<input type='date' id='end_date'><br>
+				<strong>End Date</strong>
+			</div>
+		</div>
+	</div>
 
-				<div >
-					Time Constraint: <input type="text" name="tc" id = "tc_input">
-					Day: <input type ="radio"  name="const" value ="day" checked="checked"/>
-					hour: <input type="radio" name="const"  value ="hour"/>
-					minute: <input type="radio" name="const" value ="minute"/>
-					<input type="submit" value="submit" class='btn'id ='time_c'>
-					Date: <input type ="radio" name="time" value = "date" checked="checked"/>
-					Time stamp: <input type ="radio" name="time" value = "timestamp"/>
-						<a href='#' id='clear' data-type='map' class='btn'>Clear Lines</a>
+	<div class='viz' id='line_viz'>
+		<div class='span2'>
+			<h4>Y-Axis Options</h4>
+			<div id='yaxis_options'></div>
+		</div>
+		<div class='span10' id='line'></div>
+	</div>
+
+	{% if 'delete_repository' in permissions %}
+	<div class='viz' id='settings_viz'>
+		<div class='sixteen columns'>
+
+			<h4>Administration</h4>
+
+			<div class='row'>
+				<div class='six columns'>
+					<strong>Edit this data repository</strong>
+				</div>
+				<div class='ten columns' style='text-align:right;'>
+					<a href='{% url "repo_edit" repo_id=repo.mongo_id %}' class='btn btn-medium'>
+						Edit Repository
+					</a>
 				</div>
 			</div>
 
-			<div class='sixteen columns' id='map'></div>
-
-			<div class='offset1 span10' style='clear:both;margin-top:16px;'>
-				<div id='current_time' style='text-align:center;'>
-					Playback Paused
-				</div>
-				<div id='progress_bar' class='progress progress-striped'>
-					<div class='bar'></div>
-				</div>
-			</div>
-			<div id='playback-controls'>
-				<div class='span3'>
-					<input type='date' id='start_date'><br>
-					<strong>Start Date</strong>
-				</div>
-				<div class='span6'>
-					<div class="btn-group">
-						<button id='pause' class='btn'><i class='icon-play'></i></button>
-						<button id='reset' class='btn'><i class='icon-stop'></i></button>
+			<div class='row'>
+				<div class='six columns'>
+					<strong>Delete this data repository</strong>
+					<div class='help-block'>
+						Once you delete a repository, <strong>ALL</strong> data will
+						be removed.
 					</div>
 				</div>
-				<div class='span3'>
-					<input type='date' id='end_date'><br>
-					<strong>End Date</strong>
+				<div class='ten columns' style='text-align:right;'>
+					<a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'>
+						<i class='icon-trash'></i> Delete Repository
+					</a>
 				</div>
 			</div>
-		</div>
 
-		<div class='viz' id='line_viz'>
-			<div class='span2'>
-				<h4>Y-Axis Options</h4>
-				<div id='yaxis_options'></div>
-			</div>
-			<div class='span10' id='line'></div>
-		</div>
+			<h4>Diary Backup</h4>
 
-		{% if 'delete_repository' in permissions %}
-		<div class='viz' id='settings_viz'>
-			<div class='sixteen columns'>
-
-				<h4>Administration</h4>
-
-				<div class='row'>
-					<div class='six columns'>
-						<strong>Edit this data repository</strong>
+			<div class='row'>
+				<div class='sixteen columns'>
+					<div>
+						<a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=json'>
+							Download Diary as JSON
+						</a>
 					</div>
-					<div class='ten columns' style='text-align:right;'>
-						<a href='{% url "repo_edit" repo_id=repo.mongo_id %}' class='btn btn-medium'>
-							Edit Repository
+					<div style='margin-top:16px;'>
+						<a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=xform'>
+							Download Diary as XForm
 						</a>
 					</div>
 				</div>
+			</div>
+		</div>
+	</div>
 
-				<div class='row'>
-					<div class='six columns'>
-						<strong>Delete this data repository</strong>
-						<div class='help-block'>
-							Once you delete a repository, <strong>ALL</strong> data will
-							be removed.
-						</div>
-					</div>
-					<div class='ten columns' style='text-align:right;'>
-						<a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'>
-							<i class='icon-trash'></i> Delete Repository
-						</a>
-					</div>
+	<div class='viz' id='share_viz'>
+
+		<div class='sixteen columns'>
+			<h4>Data Sharing Settings</h4>
+			<div class='row'>
+				<div class='seven columns'>
+					<strong>Who can see this data?</strong>
 				</div>
+				<div class='nine columns'>
+					<label class='checkbox'>
+						<input id='sharing_toggle' type='checkbox' {% if repo.is_public %}checked='checked'{% endif %}>
+						Allow data sharing
+					</label>
+					<span class='help-block'>
+						WARNING: Checking this box will make the data in this repository completely <strong>public</strong>.
+					</span>
 
-				<h4>Diary Backup</h4>
-
-				<div class='row'>
-					<div class='sixteen columns'>
-						<div>
-							<a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=json'>
-								Download Diary as JSON
-							</a>
-						</div>
-						<div style='margin-top:16px;'>
-							<a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=xform'>
-								Download Diary as XForm
-							</a>
-						</div>
-					</div>
+					<label class='checkbox'>
+						<input id='form_access_toggle' type='checkbox' {% if repo.is_form_public %}checked='checked'{% endif %}>
+						Allow Public Form Access
+					</label>
+					<span class='help-block'>
+						WARNING: Checking this box will allow anyone to view the form and submit data for it.
+					</span>
 				</div>
 			</div>
 		</div>
+		<div class='sixteen columns'>
 
-		<div class='viz' id='share_viz'>
+			<h4>Users with data diary permissions</h4>
 
-			<div class='sixteen columns'>
-				<h4>Data Sharing Settings</h4>
+			<hr />
+
+			<div id='user_permission_list'>
+			{% for theuser, value in users_perms.items %}
 				<div class='row'>
-					<div class='seven columns'>
-						<strong>Who can see this data?</strong>
+					<div class='two columns'>
+						<p>{{ theuser }}</p>
 					</div>
-					<div class='nine columns'>
-						<label class='checkbox'>
-							<input id='sharing_toggle' type='checkbox' {% if repo.is_public %}checked='checked'{% endif %}>
-							Allow data sharing
-						</label>
-						<span class='help-block'>
-							WARNING: Checking this box will make the data in this repository completely <strong>public</strong>.
-						</span>
 
-						<label class='checkbox'>
-							<input id='form_access_toggle' type='checkbox' {% if repo.is_form_public %}checked='checked'{% endif %}>
-							Allow Public Form Access
-						</label>
-						<span class='help-block'>
-							WARNING: Checking this box will allow anyone to view the form and submit data for it.
-						</span>
+					<div class='two columns'>
+					{% if 'change_repository' in value %}
+						<p>Can Edit Repo</p>
+					{% elif 'view_data' in value %}
+						<p>Can View Data</p>
+					{% elif 'add_data' in value %}
+						<p>Can Add Data</p>
+					{% else %}
+						<p>Can See Repo</p>
+					{% endif %}
 					</div>
+
+					<div class='two columns'>
+						<button type='button' onclick="remove_permissions(this,'{{ theuser }}')">Delete <i class='icon-trash'></i></button>
+					</div>
+					<hr />
+				</div>
+			{% endfor %}
+
+			</div>
+
+			<div class='row'>
+				<div class='one columns'>
+					<strong>Username:&nbsp;</strong>
+				</div>
+				<div class='four columns'>
+					<input id="share_username" name="share_username" type="text" />
+					<span id="autofill_list" class='autocomplete-list'></span>
+				</div>
+				<div class="two columns">
+					<select id='permission_select'>
+						<option value='view_repository'>See Repo</option>
+						<option value='add_data,view_repository'>Add Data</option>
+						<option value='view_data,add_data,view_repository'>View Data</option>
+						<option value='change_repository,view_data,add_data,view_repository'>Edit Repo</option>
+					</select>
+				</div>
+				<div class='two columns'>
+					<button type='button' id="addPermButton">Add Permission</button>
 				</div>
 			</div>
-			<div class='sixteen columns'>
+		</div>
+		<div class='sixteen columns'>
 
-				<h4>Users with data diary permissions</h4>
+			<h4>Move data dairy to User</h4>
+			<hr/>
 
-				<hr />
-
-				<div id='user_permission_list'>
-				{% for theuser, value in users_perms.items %}
-					<div class='row'>
-						<div class='two columns'>
-							<p>{{ theuser }}</p>
-						</div>
-
-						<div class='two columns'>
-						{% if 'change_repository' in value %}
-							<p>Can Edit Repo</p>
-						{% elif 'view_data' in value %}
-							<p>Can View Data</p>
-						{% elif 'add_data' in value %}
-							<p>Can Add Data</p>
-						{% else %}
-							<p>Can See Repo</p>
-						{% endif %}
-						</div>
-
-						<div class='two columns'>
-							<button type='button' onclick="remove_permissions(this,'{{ theuser }}')">Delete <i class='icon-trash'></i></button>
-						</div>
-						<hr />
-					</div>
-				{% endfor %}
-
-				</div>
-
-				<div class='row'>
+			<div class='row'>
+				<form action='{% url "repo_move" %}' method='POST'>
+					{% csrf_token %}
+					<input type='hidden' name='repo' value='{{ repo.mongo_id }}'>
 					<div class='one columns'>
 						<strong>Username:&nbsp;</strong>
 					</div>
 					<div class='four columns'>
-						<input id="share_username" name="share_username" type="text" />
-						<span id="autofill_list" class='autocomplete-list'></span>
-					</div>
-					<div class="two columns">
-						<select id='permission_select'>
-							<option value='view_repository'>See Repo</option>
-							<option value='add_data,view_repository'>Add Data</option>
-							<option value='view_data,add_data,view_repository'>View Data</option>
-							<option value='change_repository,view_data,add_data,view_repository'>Edit Repo</option>
-						</select>
+						<input id="move_username" name="move_username" type="text" />
+						<span id="move_autofill_list" class='autocomplete-list'></span>
 					</div>
 					<div class='two columns'>
-						<button type='button' id="addPermButton">Add Permission</button>
+						<button type='submit'>Move Dairy to User</button>
 					</div>
-				</div>
-			</div>
-			<div class='sixteen columns'>
-
-				<h4>Move data dairy to User</h4>
-				<hr/>
-
-				<div class='row'>
-					<form action='{% url "repo_move" %}' method='POST'>
-						{% csrf_token %}
-						<input type='hidden' name='repo' value='{{ repo.mongo_id }}'>
-						<div class='one columns'>
-							<strong>Username:&nbsp;</strong>
-						</div>
-						<div class='four columns'>
-							<input id="move_username" name="move_username" type="text" />
-							<span id="move_autofill_list" class='autocomplete-list'></span>
-						</div>
-						<div class='two columns'>
-							<button type='submit'>Move Dairy to User</button>
-						</div>
-					</form>
-				</div>
+				</form>
 			</div>
 		</div>
-		{% endif %}
 	</div>
+	{% endif %}
 </div>
 {% endblock %}

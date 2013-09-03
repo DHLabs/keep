@@ -316,7 +316,7 @@ def repo_viz( request, username, repo_name ):
                          { 'survey_label': False,
                            'user': False } )\
                   .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
-                  .limit( 100 )
+                  .limit( 50 )
 
     data = dehydrate_survey( data )
 

@@ -3,6 +3,22 @@
 	margin-top:16px;
 }
 
+#raw_table {
+
+	tr {
+		border-right: 1px solid #EEE;
+		cursor: pointer;
+	}
+
+	td {
+		border-left: 1px solid #EEE;
+		white-space: nowrap;
+		width: 256px;
+		max-width: 256px;
+		overflow:hidden;
+	}
+}
+
 .card {
 	background:white;
 	width:220px;

@@ -1,160 +1,84 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
-          'backbone-forms',
-          'app/viz/raw_view',
-          'app/viz/map_view',
-          'app/viz/chart_view' ],
+          'marionette',
 
-( $, _, Backbone, Forms, RawView, MapView, ChartView ) ->
+          'app/models/data',
+          'app/models/repo',
+          'app/collections/data' ],
 
+( $, _, Backbone, Marionette, DataModel, RepoModel, DataCollection ) ->
 
-    class DataModel extends Backbone.Model
-        defaults:
-            data: []
+    class RawItemView extends Backbone.Marionette.ItemView
+        tagName: 'tr'
 
+        initialize: (options) ->
+            @fields = options.fields
 
-    class FormModel extends Backbone.Model
-        initialize: ->
-            @form_id = $( '#form_id' ).html()
-            @user    = $( '#user' ).html()
+        template: ( model ) =>
+            data = { fields: @fields, model: model }
 
-            @url = "/api/v1/repos/#{@form_id}/?format=json&user=#{@user}"
+            templ = _.template( '''
+                <% _.each( fields, function( field ) { %>
+                    <td><%= model.data[ field.name ] %></td>
+                <% }); %>''')
 
-
-    class DataCollection extends Backbone.Collection
-        model: DataModel
-
-        initialize: ->
-            # Grab the form_id from the page
-            @form_id = $( '#form_id' ).html()
-            @url = "/api/v1/data/#{@form_id}/?format=json"
-
-        comparator: ( data ) ->
-            return data.get( 'timestamp' )
+            return templ( data )
 
 
-    class DataView extends Backbone.View
+    class RawView extends Backbone.Marionette.CollectionView
+        el: '#raw-viz table'
+        itemView: RawItemView
+        collection: new DataCollection
 
-        # The HTML element where the viz will be rendered
-        el: $( '#viz' )
+        header_template: _.template( '''
+                <tr>
+                <% _.each( fields, function( item ) { %>
+                    <th><%= item.name %></th>
+                <% }); %>
+                </tr>
+            ''')
 
-        events:
-            "click #viz_options a":         "switch_viz"
-            "change #sharing_toggle":       "toggle_public"
-            "change #form_access_toggle":   "toggle_form_public"
-            "click #addPermButton":         "add_permissions"
-
-        # Current list of survey data
-        data: new DataCollection()
-
-        # Current form that this data was for
-        form: new FormModel()
-
-        subviews: []
-
-        initialize: ->
-            # Begin render when the list is finished syncing with the server
-            @listenTo( @form, 'sync', @render )
-            @form.fetch()
-
-            @data = new DataCollection()
-            @data.reset( document.initial_data )
-
+        initialize: ( options )->
+            @fields = options.fields
+            @$el.append( @header_template( options ) )
             @
 
-        add_subview: (View) ->
-            options =
-                parent: @
-                data: @data
-                form: @form
-
-            subview = new View( options )
-            @subviews.push( subview )
-
-            return subview
-
-        toggle_public: (event) ->
-            $.post( "/repo/share/#{@form.form_id}/", {}, ( response ) =>
-                if response.success
-                    $( event.currentTarget ).attr( 'checked', response.public )
-
-                    if response.public
-                        $( '#privacy > div' ).html( '<i class=\'icon-unlock\'></i>' )
-                    else
-                        $( '#privacy > div' ).html( '<i class=\'icon-lock\'></i>' )
-            )
-            @
-
-        toggle_form_public: (event) ->
-            $.post( "/repo/form_share/#{@form.form_id}/", {}, ( response ) =>
-                if response.success
-                    $( event.currentTarget ).attr( 'checked', response.public )
-            )
-            @
-
-        add_permissions: (event) ->
-
-            $.post( "/repo/user_share/#{@form.form_id}/", { username:$('#share_username').val(), permissions:$('#permission_select').val() }, ( response ) =>
-                if response == 'success'
-                    bobby = "<div class='row'>"
-                    bobby += "<div class='two columns'>" + $('#share_username').val() + "</div>"
-                    el = document.getElementById('permission_select')
-                    bobby += "<div class='two columns'><p>" + el.options[el.selectedIndex].innerHTML + "</p></div>"
-                    bobby += "<div class='two columns'>"
-                    bobby += "<button type='button' onclick='remove_permissions"
-                    bobby += "(this, \"" + $('#share_username').val() + "\")'>"
-                    bobby += "Delete <i class='icon-trash'></i></button></div></div><hr />"
-                    $( '#user_permission_list' ).append( bobby )
-
-                    $('#share_username').val( '' )
-                else
-                    console.log response
-            )
-            @
+        buildItemView: ( item, ItemViewType, itemViewOptions ) ->
+            options = _.extend( { model: item, fields: @fields }, itemViewOptions )
+            return new ItemViewType( options )
 
 
-        switch_viz: (event) ->
+    class VizChrome extends Backbone.Marionette.Region
+        el: '#viz-chrome'
 
-            viz_type = $( event.currentTarget ).data( 'type' )
 
-            # Make sure that this tab isn't disabled before trying to switch
-            # to the view.
-            if $( event.currentTarget.parentNode ).hasClass( 'disabled' )
-                return false
+    class VizData extends Backbone.Marionette.Region
+        el: '#viz-data'
 
-            $( 'li.active' ).removeClass( 'active' )
-            $( event.currentTarget.parentNode ).addClass( 'active' )
+        initialize: ( options ) ->
 
-            $( '.viz-active' ).fadeOut( 'fast', ()->
-                $( @ ).removeClass( 'viz-active' )
+            @rawView = new RawView( options )
+            @rawView.collection.reset( document.initial_data )
+            @attachView( @rawView )
 
-                $( '#' + viz_type + '_viz' ).fadeIn( 'fast', ()=>
+    # Instantiate and startup the new process.
+    DataVizView = new Backbone.Marionette.Application
 
-                    # Remember to redraw the map when we switch tabs
-                    if viz_type == 'map'
-                        document.vizApp.map_view.map.invalidateSize( false )
-                ).addClass( 'viz-active' )
-            )
+    DataVizView.addInitializer ( options ) ->
 
-            # Prevent propagation of the event down the event chain.
-            return false
+        @repo = new RepoModel( document.repo )
 
-        render: ->
-            # Don't render until we get both the form & survey data
-            if( !@form.attributes.children || !@data )
-                return
+        # Add the different regions
+        vizChrome = new VizChrome
+        vizData   = new VizData( { fields: @repo.fields() } )
 
-            if not @raw_view?
-                @raw_view = @add_subview( RawView )
+        DataVizView.addRegions(
+                chrome: vizChrome
+                viz: vizData )
+        @
 
-            if not @chart_view?
-                @chart_view = @add_subview( ChartView )
-
-            if not @map_view?
-                @map_view = @add_subview( MapView )
-
-    return DataView
+    return DataVizView
 )
 
 remove_permissions= (div,username) ->
