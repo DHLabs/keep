@@ -330,7 +330,7 @@ def repo_viz( request, username, repo_name ):
     usePerms.pop( account, None )
 
     serializer = RepoSerializer()
-    repo_json = serializer.serialize( [repo] )[0]
+    repo_json = json.dumps( serializer.serialize( [repo] )[0] )
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,

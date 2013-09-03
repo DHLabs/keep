@@ -46,6 +46,9 @@ class RepoSerializer( Serializer ):
         self._current[ 'date_updated' ] = obj.date_updated.strftime( '%Y-%m-%dT%X' )
         self._current[ 'date_created' ] = obj.date_created.strftime( '%Y-%m-%dT%X' )
 
+        # Add reference
+        self._current[ 'children' ] = obj.fields()
+
         # Include the number of submissions for this repo
         self._current[ 'submissions' ]  = obj.submissions()
 

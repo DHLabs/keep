@@ -106,7 +106,6 @@ class RepoResource( ModelResource ):
         # First serialize the repo metadata.
         serializer = RepoSerializer()
         bundle.data = serializer.serialize( [bundle.obj] )[0]
-        bundle.data[ 'children' ] = bundle.obj.fields()
 
         return bundle
 
