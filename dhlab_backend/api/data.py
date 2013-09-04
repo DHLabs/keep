@@ -110,9 +110,11 @@ class DataResource( MongoDBResource ):
             if 'sort' in request.GET:
                 sort_parameter = 'data.%s' % ( request.GET['sort'] )
                 sort_type = pymongo.DESCENDING
+
                 if 'sort_type' in request.GET:
-                    if request.GET['sort_type'] == 'ascending':
+                    if request.GET['sort_type'] in [ 'asc', 'ascending' ]:
                         sort_type = pymongo.ASCENDING
+
                 cursor = cursor.sort( sort_parameter, sort_type )
 
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )

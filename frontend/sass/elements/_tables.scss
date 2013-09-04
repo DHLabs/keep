@@ -47,3 +47,12 @@ table.fixed {
 		width:100%;
 	}
 }
+
+// Align the sorting icons to the right.
+th {
+	i.sort-me {
+		margin-top:4px !important;
+		float:right;
+	}
+}
+

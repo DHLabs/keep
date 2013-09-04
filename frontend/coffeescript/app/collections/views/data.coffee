@@ -33,7 +33,9 @@ define( [ 'jquery',
         header_template: _.template( '''
                 <tr>
                 <% _.each( fields, function( item ) { %>
-                    <th><%= item.name %></th>
+                    <th data-field='<%= item.name %>'>
+                        <%= item.name %><i class='sort-me icon-sort'></i>
+                    </th>
                 <% }); %>
                     <th>&nbsp;</th>
                 </tr>
@@ -41,6 +43,8 @@ define( [ 'jquery',
 
         initialize: ( options )->
             @fields = options.fields
+            @repo   = options.repo
+
             @$el.append( @header_template( options ) )
             @
 

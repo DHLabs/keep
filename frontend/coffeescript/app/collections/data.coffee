@@ -7,13 +7,20 @@ define( [
     class DataCollection extends Backbone.Collection
         model: DataModel
 
-        initialize: ->
-            # Grab the form_id from the page
-            @form_id = $( '#form_id' ).html()
-            @url = "/api/v1/data/#{@form_id}/?format=json"
+        parse: ( response ) ->
+            return response.data
 
-        comparator: ( data ) ->
-            return data.get( 'timestamp' )
+        sort: ( options )->
+            if not options.repo?
+                return
+
+            @url = "/api/v1/data/#{options.repo}/"
+
+            fetch_data =
+                sort: options.field
+                sort_type: options.order
+
+            @fetch( { data: fetch_data } )
 
     return DataCollection
 )

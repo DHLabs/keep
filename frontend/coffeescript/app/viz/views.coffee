@@ -24,16 +24,11 @@ define( [ 'jquery',
 
             offsetTop = $( '#raw_table' ).position().top
 
-            # Check if we've already copied the header row of the table
-            # into the scroller div.
+            # Copy the header row of the table into the scroller div.
             header = $( '#fixed-header' )
-            if not header.data( 'header' )?
-                header_row = $( '#raw_table tr:first-child' )
-
-                $( 'table tr', header ).append( header_row.html() )
-
-                header.data( 'header', true )
-                header.css( 'width', header_row.width() )
+            header_row = $( '#raw_table tr:first-child' )
+            $( 'table tr', header ).empty().append( header_row.html() )
+            header.css( 'width', header_row.width() )
 
             # If we've scrolled past the header row of the table, make our
             # fixed header visible
@@ -46,12 +41,43 @@ define( [ 'jquery',
 
 
         initialize: ( options ) ->
+            # Bind scroll event to handle the fixed-header rendering.
+            $( @el ).scroll( @detect_scroll )
+
+            # Initialize and create the DataCollectionView.
             @rawView = new DataCollectionView( options )
-            @rawView.collection.reset( document.initial_data )
             @attachView( @rawView )
 
-            # Bind scroll event
-            $( @el ).scroll( @detect_scroll )
+            # Attach events where necessary.
+            @rawView.on( 'render', ()->
+                $( 'th', @el ).click( (event) =>
+
+                    el = $( event.currentTarget )
+
+                    field = el.data( 'field' )
+                    order = el.data( 'order' )
+
+                    # Permutate through the ordering options for the sort.
+                    if not order?
+                        order = 'desc'
+                        $( 'i', el ).removeClass( 'icon-sort icon-sort-up' ).addClass( 'icon-sort-down' )
+                    else if order == 'desc'
+                        order = 'asc'
+                        $( 'i', el ).removeClass( 'icon-sort-down' ).addClass( 'icon-sort-up' )
+                    else if order == 'asc'
+                        order = null
+                        $( 'i', el ).removeClass( 'icon-sort-up' ).addClass( 'icon-sort' )
+
+                    el.data( 'order', order )
+                    @collection.sort(
+                        repo: @repo
+                        field: field
+                        order: order )
+                )
+            )
+
+            # Load up the intial set of data to render.
+            @rawView.collection.reset( document.initial_data )
 
 
     # Instantiate and startup the new process.
@@ -63,7 +89,7 @@ define( [ 'jquery',
 
         # Add the different regions
         vizChrome = new VizChrome
-        vizData   = new VizData( { fields: @repo.fields() } )
+        vizData   = new VizData( { repo: @repo.id, fields: @repo.fields() } )
 
         DataVizView.addRegions(
                 chrome: vizChrome
