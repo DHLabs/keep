@@ -130,6 +130,13 @@ function jsGUIAddWindow() {
 		html: "<i class='icon-trash'></i> Delete"
 	}).addClass( 'delete-icon' ).appendTo('#' + windowID + ' .windowButtons');
 
+	//add a settings button right below "Add Relevances"
+	$('<button>', {
+		onclick: "jsGUIViewGroupSettings('" + windowID + "')",
+		type: 'button',
+		html: "<i class='icon-cog'></i> Group Settings"
+	}).addClass( 'group-set-icon' ).appendTo('#' + windowID + ' .windowButtons');
+
 	//add endpoints to the screen
 	jsPlumb.addEndpoint($('#' + windowID), sourceEndpoint);
 	jsPlumb.addEndpoint($('#' + windowID), targetEndpoint);
@@ -151,6 +158,21 @@ function jsGUIDeleteWindow(window) {
 	$('#' + window).remove();
 }
 
+function jsGUIViewGroupSettings(window) {
+	$( '#groupSettingsWindow' ).dialog ({
+		'width': 300
+	});
+}
+
+/*
+	Close the Group Modal, and add the group settings
+	to the group list (at some point...)
+*/
+function jsGUICloseGroupSettingsDialog() {
+	$("#groupSettingsWindow").dialog ({
+		'close'
+	});
+}
 
 /*
 ================
@@ -388,6 +410,7 @@ function closeNameDialog() {
 function jsGUIDFS() {
 	var windowList = ['screen0'];
 	var questionList = [];
+	var relevanceList = [];
 	var i = 0;
 
 	$(".window").removeClass("visited-DFS")

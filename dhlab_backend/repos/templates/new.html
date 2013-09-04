@@ -65,6 +65,15 @@
 	.relevance-icon {
 		position: relative;
 		padding: 2px;
+		margin-bottom: 2px;
+		left: 2px;
+		float: left;
+		bottom: 0;
+	}
+
+	.group-set-icon {
+		position: relative;
+		padding: 2px;
 		left: 2px;
 		float: left;
 		bottom: 0;
@@ -170,6 +179,7 @@
 	<form action='.' method='post' enctype='multipart/form-data'>
 		{% csrf_token %}
 
+		<!-- Modal view for editing repository settings -->
 		<div id='repositoryDefaultsWindow' title='New Repository' style='display:none;'>
 			<label {% if form.name.errors %}style='color:red'{%endif%}>
 				<strong>Repository name</strong>
@@ -208,6 +218,18 @@
 			<hr />
 
 			<a href="#" data-toggle="modal" class="btn" onclick="closeNameDialog();">Close</a>
+		</div>
+
+		<!-- Modal View for editing group settings -->
+		<div id='groupSettingsWindow' title="Group Settings" style="display:none;">
+			<div>
+				Group Type:
+				<select id="groupTypeToggle" name="groupTypeToggle">
+					<option value="field-list">Field List</option>
+					<option value="grid-list">Grid List</option>
+				</select>
+			</div>
+			<a href="#" data-toggle="modal" class="btn btn-primary" onclick="jsGUICloseGroupSettingsDialog();">Close</a>
 		</div>
 
 		<!-- Modal View for editing Relevances -->
