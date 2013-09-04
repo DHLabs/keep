@@ -1,177 +1,85 @@
 define( [ 'jquery',
           'underscore',
-          'backbone' ],
+          'backbone'
+          'marionette',
+          'app/collections/views/data' ],
 
-( $, _, Backbone ) ->
+( $, _, Backbone, Marionette, DataCollectionView ) ->
 
-    class RawView extends Backbone.View
+   class DataRawView extends Backbone.Marionette.Region
+        el: '#viz-data'
 
-        name: 'RawView'
-        el: $( '#raw_viz' )
-        events:
-            # Change raw viz type from list to grid view
-            "click #list-type > a":    "change_viz_type"
-            "change #test":            "toggle_media"
+        detect_scroll: ( event ) ->
 
-        media_base: '//d2oeqvnrcsteq9.cloudfront.net/'
+            scrollTop = $( event.currentTarget ).scrollTop()
+            scrollLeft = $( event.currentTarget ).scrollLeft()
 
-        column_headers: []
-        groups: []
+            offsetTop = $( '#raw_table' ).position().top
 
-        card_tmpl: _.template( '''
-            <div class='card card-active'>
-                <%= card_image %>
-                <%= card_data %>
-            </div>''' )
+            # Copy the header row of the table into the scroller div.
+            header = $( '#fixed-header' )
+            header_row = $( '#raw_table tr:first-child' )
+            $( 'table tr', header ).empty().append( header_row.html() )
+            header.css( 'width', header_row.width() )
 
-        card_img_tmpl: _.template( '''
-            <div class='card-image'>
-                <a href='<%= url %>' target='_blank'>
-                    <img src='<%= url %>'>
-                </a>
-            </div>''' )
+            # TODO
+            # Handle click events on the fixed header so that we trigger a
+            # sort.
 
-        card_video_tmpl: _.template( '''
-            <div class='card-video'>
-                <video controls>
-                    <source src='<%= url %>' type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
-                </video>
-            </div>''' )
+            # If we've scrolled past the header row of the table, make our
+            # fixed header visible
+            if scrollTop > offsetTop
+                header.css( { left: "-#{scrollLeft}px" } ).show()
+            else
+                # Otherwise just hide the sucker.
+                header.hide()
+            @
 
-        card_data_tmpl: _.template( '''
-            <div class='card-data'>
-                <div><%= data %></div>
-            </div>''' )
+        detect_sort: ( options ) ->
 
-        _detect_headers: ( root ) ->
+            if options.el?
+                headers = $( 'th', options.el )
+            else
+                headers = $( 'th', @el )
 
-            for field in root
-                if field.type in [ 'group' ]
-                    @_detect_headers( field.children )
+            headers.click( (event) =>
+                el = $( event.currentTarget )
 
-                # Don't show notes in the raw data table
-                if field.type not in [ 'note' ] and field.type not in [ 'group' ]
-                    @column_headers.push( field )
+                field = el.data( 'field' )
+                order = el.data( 'order' )
+
+                # Permutate through the ordering options for the sort.
+                if not order?
+                    order = 'desc'
+                    $( 'i', el ).removeClass( 'icon-sort icon-sort-up' ).addClass( 'icon-sort-down' )
+                else if order == 'desc'
+                    order = 'asc'
+                    $( 'i', el ).removeClass( 'icon-sort-down' ).addClass( 'icon-sort-up' )
+                else if order == 'asc'
+                    order = null
+                    $( 'i', el ).removeClass( 'icon-sort-up' ).addClass( 'icon-sort' )
+
+                el.data( 'order', order )
+                @collection.sort(
+                    repo: @repo
+                    field: field
+                    order: order )
+            )
+            @
 
         initialize: ( options ) ->
-            @parent = options.parent
-            @form   = options.form
-            @data   = options.data
+            # Bind scroll event to handle the fixed-header rendering.
+            $( @el ).scroll( @detect_scroll )
 
-            @_detect_headers( @form.attributes.children )
+            # Initialize and create the DataCollectionView.
+            @rawView = new DataCollectionView( options )
+            @attachView( @rawView )
 
-            @render()
-            
-            @
+            # Attach events where necessary.
+            @rawView.on( 'render', @detect_sort )
 
-        change_viz_type: ( event ) ->
-            viz_type = $( event.currentTarget ).data( 'type' )
-            $( 'button.active', @el ).removeClass( 'active' )
-            $( event.currentTarget ).addClass( 'active' )
+            # Load up the intial set of data to render.
+            @rawView.collection.reset( document.initial_data )
 
-            $( 'div.active').fadeOut( 'fast', () =>
-                $( 'div.active' ).removeClass( 'active' )
-                $( "#raw_#{viz_type}" ).fadeIn( 'fast' ).addClass( 'active' )
-
-                #if viz_type == 'grid' and @wall?
-                #    @wall.masonry( 'reload' )
-            )
-            @
-
-        toggle_media: ( event ) ->
-            only_photos = $( event.currentTarget ).is( ':checked' )
-
-            $( '.card' ).each( ()->
-                if $( '.card-image', @ ).length == 0 and only_photos
-                   $( @ ).fadeOut( 'fast' ).removeClass( 'card-active' )
-                else
-                    $( @ ).fadeIn( 'fast' ).addClass( 'card-active' )
-            )
-
-            #@wall.masonry( 'reload' )
-
-            @
-
-        _render_list: ->
-            # Add column headers
-            $( '#raw_table > thead > tr' ).html( '' )
-            for field in @column_headers
-                $( '#raw_table > thead > tr' ).append( "<th>#{field.name}</th>" )
-
-            $( '#raw_table > tbody' ).empty()
-
-            # Add data from data models
-            row_html = ''
-            for datum in @data.models
-
-                row_html += '<tr>'
-                for field in @column_headers
-
-                    value = datum.get( 'data' )[ field.name ]
-
-                    if not value?
-                        row_html += '<td>&nbsp;</td>'
-                        continue
-
-                    if field.type in [ 'photo', 'video' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
-                        row_html += "<td><a href='#{url}'>#{value}</a></td>"
-                    else
-                        row_html += "<td>#{value}</td>"
-
-                row_html += '</tr>'
-
-            $( '#raw_table > tbody' ).append( row_html )
-
-            # Render the table using jQuery's DataTable
-            $( '#raw_table' ).dataTable(
-                'sDom': "<'row'<'eight columns'l><'eight columns'f>r>t<'row'<'eight columns'i><'eight columns'p>>"
-                'bLengthChange': false
-                'bFilter': false
-                'iDisplayLength': 50
-            )
-
-            @
-
-        _render_grid: ->
-            # Add data from data models
-            for datum in @data.models
-
-                tmpl_options =
-                    card_image: ''
-                    card_data: ''
-
-                for field in @column_headers
-                    value = datum.get( 'data' )[ field.name ]
-
-                    if not value? or value.length == 0
-                        continue
-
-                    if field.type in [ 'photo' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
-                        tmpl_options.card_image = @card_img_tmpl( { url: url } )
-                    else if field.type in [ 'video' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
-                        tmpl_options.card_image = @card_video_tmpl( { url: url } )
-                    else
-                        tmpl_options.card_data += "<div><strong>#{field.name}:</strong> #{value}</div>"
-
-                if tmpl_options.card_data.length > 0
-                    tmpl_options.card_data = @card_data_tmpl( { data: tmpl_options.card_data } )
-
-                $( '#raw_grid' ).append( @card_tmpl( tmpl_options ) )
-
-            # @wall = $( '#raw_grid' ).masonry(
-            #         itemSelector: '.card-active'
-            #         isAnimated: true )
-
-            @
-
-        render: ->
-            @_render_list()
-            @_render_grid() if @data.models.length > 0
-
-            @
-
-    return RawView
+    return DataRawView
 )
