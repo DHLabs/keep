@@ -22,32 +22,26 @@ define( [ 'jquery',
             scrollTop = $( event.currentTarget ).scrollTop()
             scrollLeft = $( event.currentTarget ).scrollLeft()
 
-            offsetTop = $( '#raw_table' ).offset().top
-            offsetLeft = $( '#raw_table' ).offset().left
+            offsetTop = $( '#raw_table' ).position().top
 
-            header = $( '#scroller' )
+            # Check if we've already copied the header row of the table
+            # into the scroller div.
+            header = $( '#fixed-header' )
             if not header.data( 'header' )?
                 header_row = $( '#raw_table tr:first-child' )
 
                 $( 'table tr', header ).append( header_row.html() )
 
                 header.data( 'header', true )
-                console.log( header_row.width() )
                 header.css( 'width', header_row.width() )
 
-            if scrollTop + 68 > offsetTop
-                header.css(
-                    position: "fixed"
-                    top: "210px"
-                    left: ( 0 - ( scrollLeft ) ) + "px"
-                    "box-shadow": "0px 0px 5px rgba(0,0,0,0.3)",
-                    display: 'block' )
-
-            else if scrollTop <= offsetTop
-                header.css(
-                    position: "relative"
-                    top: ""
-                    display: 'none' )
+            # If we've scrolled past the header row of the table, make our
+            # fixed header visible
+            if scrollTop > offsetTop
+                header.css( { left: "-#{scrollLeft}px" } ).show()
+            else
+                # Otherwise just hide the sucker.
+                header.hide()
             @
 
 
