@@ -5,18 +5,25 @@
 
 #raw_table {
 
+	table-layout: fixed;
+
 	tr {
 		border-right: 1px solid #EEE;
 		cursor: pointer;
 	}
 
+	tr:hover {
+		border-right: 1px solid #FFF;
+
+		td {
+			border-left: 1px solid #FFF;
+		}
+	}
+
 	td {
 		border-left: 1px solid #EEE;
-		white-space: nowrap;
-		width: 256px;
-		max-width: 256px;
-		overflow:hidden;
 	}
+
 }
 
 .card {

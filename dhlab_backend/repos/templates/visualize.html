@@ -24,46 +24,6 @@
 
 		require( [ 'app/viz/main' ] )
 	});
-
-	function moveScroller() {
-    	var move = function() {
-
-    		var scrollTop = $( window ).scrollTop();
-    		var scrollLeft = $( window ).scrollLeft();
-
-    		var offsetTop = $( '#raw_table' ).offset().top;
-    		var offsetLeft = $( '#raw_table' ).offset().left;
-
-    		var header = $( '#scroller' );
-
-    		if( scrollTop + 68 > offsetTop ) {
-
-        		$( '#scroller-copy' ).show();
-
-            	header.css({
-                	position: "fixed",
-                	top: "68px",
-                	left: ( 0 - scrollLeft + offsetLeft ) + "px",
-                	"box-shadow": "0px 0px 5px rgba(0,0,0,0.3)"
-            	});
-
-        	} else if ( scrollTop <= offsetTop ) {
-
-        		$( '#scroller-copy' ).hide();
-
-            	header.css({
-                	position: "relative",
-                	top: ""
-            	});
-        	}
-    	};
-    	$(window).scroll(move);
-    	move();
-	}
-
-	$( function() {
-		moveScroller();
-	});
 </script>
 {% endblock %}
 
@@ -158,7 +118,10 @@
 	</div>
 	<div class='viz viz-active' id='raw-viz'>
 		<div id='raw_list' class='sixteen columns active'>
-			<table id='raw_table' class='table'><tbody></tbody></table>
+			<div id='scroller' style='display:none;'>
+				<table class='table fixed' style='width:100%;'><tr></tr></table>
+			</div>
+			<table id='raw_table' class='table fixed'><tbody></tbody></table>
 		</div>
 		<div id='raw_grid' class='sixteen columns' style='display:none;position:relative;'></div>
 	</div>

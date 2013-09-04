@@ -1,6 +1,5 @@
 // _tables.scss
-
-.table {
+table.table {
 
 	width:100%;
 
@@ -30,5 +29,21 @@
 		a {
 			display:block;
 		}
+	}
+}
+
+table.fixed {
+	td, th {
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow-x:hidden;
+
+		width: 256px;
+		min-width: 256px;
+		max-width: 256px;
+	}
+
+	td:last-child {
+		width:100%;
 	}
 }

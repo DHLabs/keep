@@ -9,18 +9,44 @@ define( [ 'jquery',
 ( $, _, Backbone, Marionette, DataCollection ) ->
 
     class DataItemView extends Backbone.Marionette.ItemView
-        tagName: 'li'
-        template: _.template( '''
-            <div class='study-settings'>
-                <a href='#' data-name='<%= name %>' data-study='<%= id %>'><i class='icon-cog'></i></a>
-            </div>
-            <a href='#' data-study='<%= id %>'><%= name %></a>''' )
+        tagName: 'tr'
+
+        initialize: (options) ->
+            @fields = options.fields
+
+        template: ( model ) =>
+            data = { fields: @fields, model: model }
+
+            templ = _.template( '''
+                <% _.each( fields, function( field ) { %>
+                    <td><%= model.data[ field.name ] %></td>
+                <% }); %><td>&nbsp;</td>''')
+
+            return templ( data )
 
 
     class DataCollectionView extends Backbone.Marionette.CollectionView
-        el: '#data_list'
-        itemView: StudyItemView
+        el: '#raw-viz #raw_table'
+        itemView: DataItemView
         collection: new DataCollection
+
+        header_template: _.template( '''
+                <tr>
+                <% _.each( fields, function( item ) { %>
+                    <th><%= item.name %></th>
+                <% }); %>
+                    <th>&nbsp;</th>
+                </tr>
+            ''')
+
+        initialize: ( options )->
+            @fields = options.fields
+            @$el.append( @header_template( options ) )
+            @
+
+        buildItemView: ( item, ItemViewType, itemViewOptions ) ->
+            options = _.extend( { model: item, fields: @fields }, itemViewOptions )
+            return new ItemViewType( options )
 
     return DataCollectionView
 )

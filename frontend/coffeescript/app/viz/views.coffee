@@ -5,49 +5,10 @@ define( [ 'jquery',
 
           'app/models/data',
           'app/models/repo',
+          'app/collections/views/data',
           'app/collections/data' ],
 
-( $, _, Backbone, Marionette, DataModel, RepoModel, DataCollection ) ->
-
-    class RawItemView extends Backbone.Marionette.ItemView
-        tagName: 'tr'
-
-        initialize: (options) ->
-            @fields = options.fields
-
-        template: ( model ) =>
-            data = { fields: @fields, model: model }
-
-            templ = _.template( '''
-                <% _.each( fields, function( field ) { %>
-                    <td><%= model.data[ field.name ] %></td>
-                <% }); %>''')
-
-            return templ( data )
-
-
-    class RawView extends Backbone.Marionette.CollectionView
-        el: '#raw-viz table'
-        itemView: RawItemView
-        collection: new DataCollection
-
-        header_template: _.template( '''
-                <tr>
-                <% _.each( fields, function( item ) { %>
-                    <th><%= item.name %></th>
-                <% }); %>
-                </tr>
-            ''')
-
-        initialize: ( options )->
-            @fields = options.fields
-            @$el.append( @header_template( options ) )
-            @
-
-        buildItemView: ( item, ItemViewType, itemViewOptions ) ->
-            options = _.extend( { model: item, fields: @fields }, itemViewOptions )
-            return new ItemViewType( options )
-
+( $, _, Backbone, Marionette, DataModel, RepoModel, DataCollectionView, DataCollection ) ->
 
     class VizChrome extends Backbone.Marionette.Region
         el: '#viz-chrome'
@@ -56,11 +17,48 @@ define( [ 'jquery',
     class VizData extends Backbone.Marionette.Region
         el: '#viz-data'
 
-        initialize: ( options ) ->
+        detect_scroll: ( event ) ->
 
-            @rawView = new RawView( options )
+            scrollTop = $( event.currentTarget ).scrollTop()
+            scrollLeft = $( event.currentTarget ).scrollLeft()
+
+            offsetTop = $( '#raw_table' ).offset().top
+            offsetLeft = $( '#raw_table' ).offset().left
+
+            header = $( '#scroller' )
+            if not header.data( 'header' )?
+                header_row = $( '#raw_table tr:first-child' )
+
+                $( 'table tr', header ).append( header_row.html() )
+
+                header.data( 'header', true )
+                console.log( header_row.width() )
+                header.css( 'width', header_row.width() )
+
+            if scrollTop + 68 > offsetTop
+                header.css(
+                    position: "fixed"
+                    top: "210px"
+                    left: ( 0 - ( scrollLeft ) ) + "px"
+                    "box-shadow": "0px 0px 5px rgba(0,0,0,0.3)",
+                    display: 'block' )
+
+            else if scrollTop <= offsetTop
+                header.css(
+                    position: "relative"
+                    top: ""
+                    display: 'none' )
+            @
+
+
+        initialize: ( options ) ->
+            @rawView = new DataCollectionView( options )
             @rawView.collection.reset( document.initial_data )
             @attachView( @rawView )
+
+            # Bind scroll event
+            $( @el ).scroll( @detect_scroll )
+
 
     # Instantiate and startup the new process.
     DataVizView = new Backbone.Marionette.Application
