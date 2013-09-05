@@ -78,6 +78,8 @@ define( [ 'jquery',
             @
 
         switch_view: ( view ) ->
+            $( '#fixed-header' ).hide()
+
             # Hide the currently selected view
             @currentView.$el.hide()
 
