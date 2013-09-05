@@ -28,7 +28,6 @@ define( [ 'jquery',
     class DataCollectionView extends Backbone.Marionette.CollectionView
         el: '#raw-viz #raw_table'
         itemView: DataItemView
-        collection: new DataCollection
 
         header_template: _.template( '''
                 <tr>
@@ -45,7 +44,10 @@ define( [ 'jquery',
             @fields = options.fields
             @repo   = options.repo
 
+            @collection = new DataCollection( options )
+
             @$el.append( @header_template( options ) )
+
             @
 
         buildItemView: ( item, ItemViewType, itemViewOptions ) ->

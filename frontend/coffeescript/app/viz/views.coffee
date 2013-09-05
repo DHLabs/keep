@@ -10,8 +10,37 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette, DataModel, RepoModel, DataRawView ) ->
 
+    class VizTabs extends Backbone.Marionette.View
+        el: '#viz-options'
+
+        events:
+            'click li': 'switch_event'
+
+        switch_event: ( event ) ->
+            target = $( event.currentTarget )
+
+            if @selected().attr( 'id' ) == target.attr( 'id' )
+                return
+
+            if target.hasClass( 'disabled' )
+                return
+
+            @selected().removeClass( 'active' )
+            target.addClass( 'active' )
+
+            @trigger( 'switch:' + target.data( 'type' ) )
+
+        selected: () ->
+            # Return the currently selected tab
+            return $( 'li.active', @el )
+
+
     class VizChrome extends Backbone.Marionette.Region
         el: '#viz-chrome'
+
+        initialize: ( options ) ->
+            view = new VizTabs()
+            @attachView( view )
 
 
     # Instantiate and startup the new process.
@@ -23,11 +52,22 @@ define( [ 'jquery',
 
         # Add the different regions
         vizChrome = new VizChrome
-        vizData   = new DataRawView( { repo: @repo.id, fields: @repo.fields() } )
+        rawView   = new DataRawView( { repo: @repo.id, fields: @repo.fields() } )
 
         DataVizApp.addRegions(
                 chrome: vizChrome
-                viz: vizData )
+                viz: rawView )
+
+        # Handle application wide events
+        vizChrome.currentView.on( 'switch:raw', () ->
+            rawView.switch_view( 'raw' ) )
+
+        vizChrome.currentView.on( 'switch:map', () ->
+            rawView.switch_view( 'map' ) )
+
+        vizChrome.currentView.on( 'switch:line', () ->
+            rawView.switch_view( 'line' ) )
+
         @
 
     return DataVizApp

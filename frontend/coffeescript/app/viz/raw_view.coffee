@@ -2,14 +2,20 @@ define( [ 'jquery',
           'underscore',
           'backbone'
           'marionette',
-          'app/collections/views/data' ],
 
-( $, _, Backbone, Marionette, DataCollectionView ) ->
+          'app/collections/views/data',
+          'app/viz/map_view',
+          'app/viz/chart_view' ],
 
-   class DataRawView extends Backbone.Marionette.Region
+( $, _, Backbone, Marionette, DataCollectionView, DataMapView, DataChartView ) ->
+
+    class DataRawView extends Backbone.Marionette.Region
         el: '#viz-data'
 
         detect_scroll: ( event ) ->
+
+            if $( '#raw_table' ).is( ':hidden' )
+                return
 
             scrollTop = $( event.currentTarget ).scrollTop()
             scrollLeft = $( event.currentTarget ).scrollLeft()
@@ -61,19 +67,36 @@ define( [ 'jquery',
 
                 el.data( 'order', order )
                 @collection.sort(
-                    repo: @repo
                     field: field
                     order: order )
             )
+            @
+
+        switch_view: ( view ) ->
+            @currentView.$el.hide()
+
+            if view == 'raw'
+                @attachView( @rawView )
+            else if view == 'map'
+                @attachView( @mapView )
+            else if view == 'line'
+                @attachView( @chartView )
+
+            @currentView.$el.show()
+            if @currentView.onShow? then @currentView.onShow()
+
             @
 
         initialize: ( options ) ->
             # Bind scroll event to handle the fixed-header rendering.
             $( @el ).scroll( @detect_scroll )
 
-            # Initialize and create the DataCollectionView.
+            # Initialize the different available views.
             @rawView = new DataCollectionView( options )
             @attachView( @rawView )
+
+            @mapView = new DataMapView( options )
+            @chartView = new DataChartView( options )
 
             # Attach events where necessary.
             @rawView.on( 'render', @detect_sort )
