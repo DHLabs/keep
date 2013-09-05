@@ -99,6 +99,10 @@ div#viz-data {
 	}
 }
 
+#settings-viz {
+	padding-top: 32px;
+}
+
 @import "viz/_chart_view";
 @import "viz/_map_view";
 @import "viz/_raw_view";

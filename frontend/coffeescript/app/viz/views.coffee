@@ -68,6 +68,9 @@ define( [ 'jquery',
         vizChrome.currentView.on( 'switch:line', () ->
             rawView.switch_view( 'line' ) )
 
+        vizChrome.currentView.on( 'switch:settings', () ->
+            rawView.switch_view( 'settings' ) )
+
         @
 
     return DataVizApp

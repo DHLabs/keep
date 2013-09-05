@@ -107,6 +107,12 @@ class DataResource( MongoDBResource ):
             # Query the database for the data
             cursor = db.data.find( query_parameters )
 
+            # Handle bounding box requests
+            # TODO
+            if 'bbox' in request.GET and 'geofield' in request.GET:
+                bbox = request.GET[ 'bbox' ].split( ',' )
+                geofield = request.GET[ 'geofield' ]
+
             if 'sort' in request.GET:
                 sort_parameter = 'data.%s' % ( request.GET['sort'] )
                 sort_type = pymongo.DESCENDING

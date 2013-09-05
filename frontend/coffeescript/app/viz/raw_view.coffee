@@ -9,6 +9,11 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette, DataCollectionView, DataMapView, DataChartView ) ->
 
+
+    class DataSettingsView extends Backbone.Marionette.View
+        el: '#settings-viz'
+
+
     class DataRawView extends Backbone.Marionette.Region
         el: '#viz-data'
 
@@ -73,16 +78,14 @@ define( [ 'jquery',
             @
 
         switch_view: ( view ) ->
+            # Hide the currently selected view
             @currentView.$el.hide()
 
-            if view == 'raw'
-                @attachView( @rawView )
-            else if view == 'map'
-                @attachView( @mapView )
-            else if view == 'line'
-                @attachView( @chartView )
-
+            # Attach the new view and render it
+            @attachView( @views[ view ] )
             @currentView.$el.show()
+
+            # Call the onShow handler if it exists in the view
             if @currentView.onShow? then @currentView.onShow()
 
             @
@@ -93,10 +96,16 @@ define( [ 'jquery',
 
             # Initialize the different available views.
             @rawView = new DataCollectionView( options )
-            @attachView( @rawView )
-
             @mapView = new DataMapView( options )
             @chartView = new DataChartView( options )
+            @settingsView = new DataSettingsView( options )
+
+            @views =
+                raw: @rawView
+                map: @mapView
+                line: @chartView
+                settings: @settingsView
+            @attachView( @rawView )
 
             # Attach events where necessary.
             @rawView.on( 'render', @detect_sort )
