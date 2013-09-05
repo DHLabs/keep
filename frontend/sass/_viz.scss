@@ -36,7 +36,7 @@ div#viz-data-controls {
 
 div#viz-data {
 	position:absolute;
-	top:210px;
+	top:184px;
 	bottom:0px;
 
 	width:100%;
@@ -44,7 +44,7 @@ div#viz-data {
 
 	#fixed-header {
 		position: fixed;
-		top: 210px;
+		top: 184px;
 		display: none;
 		box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
 	}
@@ -69,52 +69,32 @@ div#viz-data {
 	display: block !important;
 }
 
-#viz_options {
-
-	margin-top:8px;
-	margin-bottom: 0;
-
-	border-bottom: 1px solid white;
+#viz-options {
 
 	li {
-		margin-bottom: -1px;
+		border-top: 1px solid white;
+		border-left: 1px solid white;
+		border-right: 1px solid white;
+
+		display:inline-block;
 		text-align:center;
-		display: inline-block;
-		width: 80px;
+		padding:8px 0;
+		width: 96px;
 
 		a {
-			display:block;
-			padding:8px 0;
-			font-size: 0.9em;
-
+			color: #999;
 			i {
 				font-size: 1.2em;
 			}
 		}
 
-		a:hover {
-			border-top:1px solid #ddd !important;
-			border-right:1px solid #ddd !important;
-			border-left:1px solid #ddd !important;
-			border-bottom:1px solid white;
-			border-radius: 8px 8px 0 0;
-		}
-
 	}
 
-	li.disabled {
-		a:hover {
-			border:none !important;
-		}
-	}
+	li:hover, li.active {
+		border-color: $theme;
 
-	li.active {
 		a {
-			border-top:1px solid #ddd !important;
-			border-right:1px solid #ddd !important;
-			border-left:1px solid #ddd !important;
-			border-bottom:1px solid white;
-			border-radius: 8px 8px 0 0;
+			color: $theme;
 		}
 	}
 }

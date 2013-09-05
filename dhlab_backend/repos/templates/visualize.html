@@ -66,30 +66,26 @@
 	</div>
 	<div class='container'>
 		<div class='sixteen columns'>
-			<ul id='viz_options'>
-				<li id='raw_btn' class='active'>
-					<a href='#' data-type='raw'>
-						<i class='icon-list'></i><br/>
-						Raw
+			<ul id='viz-options' class='nav-list nav-inline'>
+				<li id='raw_btn' class='active' data-type='raw'>
+					<a href='#'>
+						<i class='icon-list'></i>&nbsp;Raw
 					</a>
 				</li>
-				<li id='map_btn' class='disabled'>
-					<a href='#' data-type='map'>
-						<i class='icon-map-marker'></i><br/>
-						Map
+				<li id='map_btn' data-type='map'>
+					<a href='#'>
+						<i class='icon-map-marker'></i>&nbsp;Map
 					</a>
 				</li>
-				<li id='line_btn'>
-					<a href='#' data-type='line'>
-						<i class='icon-signal'></i><br/>
-						Analytics
+				<li id='line_btn' data-type='line'>
+					<a href='#'>
+						<i class='icon-signal'></i>&nbsp;Analytics
 					</a>
 				</li>
 				{% if 'delete_repository' in permissions %}
-				<li>
+				<li data-type='settings'>
 					<a href='#' data-type='settings'>
-						<i class='icon-cog'></i><br/>
-						Settings
+						<i class='icon-cog'></i>&nbsp;Settings
 					</a>
 				</li>
 				{% endif %}
@@ -107,7 +103,7 @@
 		</div>
 	</div>
 
-	<div class='viz' id='map_viz'>
+	<div class='viz' id='map-viz'>
 		<div class='sixteen columns' style='display:none;'>
 			<div id='time_select'>
 				<input type='range' id='fps' min='1' max='10'/>
@@ -159,7 +155,7 @@
 		</div>
 	</div>
 
-	<div class='viz' id='line_viz'>
+	<div class='viz' id='analytics-viz'>
 		<div class='span2'>
 			<h4>Y-Axis Options</h4>
 			<div id='yaxis_options'></div>
@@ -168,7 +164,7 @@
 	</div>
 
 	{% if 'delete_repository' in permissions %}
-	<div class='viz' id='settings_viz'>
+	<div class='viz' id='settings-viz'>
 		<div class='sixteen columns'>
 
 			<h4>Administration</h4>
@@ -218,7 +214,7 @@
 		</div>
 	</div>
 
-	<div class='viz' id='share_viz'>
+	<div class='viz' id='share-viz'>
 
 		<div class='sixteen columns'>
 			<h4>Data Sharing Settings</h4>
