@@ -169,9 +169,7 @@ function jsGUIViewGroupSettings(window) {
 	to the group list (at some point...)
 */
 function jsGUICloseGroupSettingsDialog() {
-	$("#groupSettingsWindow").dialog ({
-		'close'
-	});
+	$("#groupSettingsWindow").dialog ( 'close' );
 }
 
 /*
@@ -405,13 +403,20 @@ function closeNameDialog() {
 /*
 	This function runs a Depth-first search to build the question
 	list and group list appropriately.  No JSON formatting here
-
+*/
 
 function jsGUIDFS() {
 	var windowList = ['screen0'];
-	var questionList = [];
-	var relevanceList = [];
-	var i = 0;
+
+	// Dictionary in following form: "screen#": [questionIDs]
+	var questionDictionary = {};
+
+	// Dictionary in following form: "relevance": [start, end]
+	var relevanceDictionary = {};
+
+	// Dictionary in following form: "screen#: [allconnectingscreen#s]
+	var pathDictionary = {};
+	var i = "";
 
 	$(".window").removeClass("visited-DFS")
 
@@ -423,31 +428,46 @@ function jsGUIDFS() {
 		}
 		else {
 			currentDiv.addClass("visited-DFS");
+			i = currentDiv.attr('id').substring(6);
 		}
 
-		if ($('#' + currentDiv.attr('id') + ' ul li').length == 0) {
+		if ($('#' + currentDiv.attr('id') + ' #sort' + i + ' li').length == 0) {
 
 		}
-		else if ($('#' + currentDiv.attr('id') + ' ul li').length == 1) {
-			questionList.push($('#' + currentDiv.attr('id') + ' ul li')[0]);
-			console.log($(currentDiv.attr('id') + ' ul li'));
+		else if ($('#' + currentDiv.attr('id') +  ' #sort' + i + ' li').length == 1) {
+			var tempQ = $('#' + currentDiv.attr('id') +  ' #sort' + i + ' li .true-name').html();
+			questionDictionary[i] = [tempQ];
 		}
 		else {
-			$('#' + currentDiv.attr('id') + ' ul li').each( function() {
-				console.log(this);
+			var tempQuestionArray = [];
+			$('#' + currentDiv.attr('id') + ' #sort' + i + ' li').each( function() {
+				tempQuestionArray.push($(this).find('.true-name').html());
 			});
+			questionDictionary[i] = tempQuestionArray;
 		}
 
 		if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
 			continue;
 		}
 		else {
-			for (i = 1; i < jsPlumb.getConnections(currentDiv)[0].endpoints.length; i++) {
-				windowList.push(jsPlumb.getConnections(currentDiv)[0].endpoints[i].elementId);
-			}
+			var tempConnectionArray = [];
+			console.log(jsPlumb.getEndpoints(currentDiv)[0].connections[0].endpoints[1].elementId)
+
+			var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0].endpoints[1].elementId;
+			windowList.push(tempConnectionID);
+			tempConnectionArray.push(tempConnectionID.substring(6));
+
+			//for (var k = 0; k < jsPlumb.getConnections(currentDiv)[0].endpoints.length; k++) {
+			//	var tempConnectionID = jsPlumb.getConnections(currentDiv)[0].endpoints[k].elementId;
+			//	windowList.push(tempConnectionID);
+			//	tempConnectionArray.push(tempConnectionID.substring(6));
+			//}
+			//console.log(tempConnectionArray);
+			pathDictionary[i] = tempConnectionArray;
 		}
 	}
 
-	console.log(questionList)
+	console.log(questionDictionary);
+	console.log(pathDictionary);
 
-}*/
+}
