@@ -304,7 +304,7 @@ function jsGUIAddRelevance(window, relevance) {
   	$('<div>', {
   		id: tempID + "_text",
   		html: relevance.name + ': ' + relevance.conditions,
-  	}).appendTo('#' + tempID);
+  	}).addClass('relevanceText').appendTo('#' + tempID);
 
 	//add relevance edit and delete buttons
 	$('<button>', {
@@ -403,6 +403,11 @@ function closeNameDialog() {
 /*
 	This function runs a Depth-first search to build the question
 	list and group list appropriately.  No JSON formatting here
+
+	Returns array structured as the following:
+		questionDictionary, 
+		relevanceList,
+		pathDictionary
 */
 
 function jsGUIDFS() {
@@ -411,10 +416,10 @@ function jsGUIDFS() {
 	// Dictionary in following form: "screen#": [questionIDs]
 	var questionDictionary = {};
 
-	// Dictionary in following form: "relevance": [start, end]
-	var relevanceDictionary = {};
+	// List in following form: "question: relevance"
+	var relevanceList = [];
 
-	// Dictionary in following form: "screen#: [allconnectingscreen#s]
+	// Dictionary in following form: "screen#: {attachScreen#: Relevance}
 	var pathDictionary = {};
 	var i = "";
 
@@ -446,28 +451,36 @@ function jsGUIDFS() {
 			questionDictionary[i] = tempQuestionArray;
 		}
 
+		// In the case of no connections, continue to the next screen
 		if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
 			continue;
 		}
+
 		else {
-			var tempConnectionArray = [];
-			console.log(jsPlumb.getEndpoints(currentDiv)[0].connections[0].endpoints[1].elementId)
+			var tempConnectionDict = {};
+			//console.log(jsPlumb.getEndpoints(currentDiv)[0].connections[0].endpoints[1].elementId)
 
-			var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0].endpoints[1].elementId;
-			windowList.push(tempConnectionID);
-			tempConnectionArray.push(tempConnectionID.substring(6));
+			var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0];
+			if (tempConnectionID != undefined) {
+				tempConnectionID = tempConnectionID.endpoints[1].elementId;
+				windowList.push(tempConnectionID);
+				tempConnectionDict[tempConnectionID.substring(6)] = "none";
+			}
 
-			//for (var k = 0; k < jsPlumb.getConnections(currentDiv)[0].endpoints.length; k++) {
-			//	var tempConnectionID = jsPlumb.getConnections(currentDiv)[0].endpoints[k].elementId;
-			//	windowList.push(tempConnectionID);
-			//	tempConnectionArray.push(tempConnectionID.substring(6));
-			//}
-			//console.log(tempConnectionArray);
-			pathDictionary[i] = tempConnectionArray;
+			// Code for handling the existence of relevances
+			if ($(currentDiv).find('.relevanceList') != undefined) {
+				$(currentDiv).find('.relevanceList li').each( function() {
+					tempRelevanceText = $(this).find('.relevanceText').html();
+					tempConnectionID = jsPlumb.getEndpoints($(this))[0].connections[0].endpoints[1].elementId;
+					windowList.push(tempConnectionID);
+					tempConnectionDict[tempConnectionID.substring(6)] = tempRelevanceText;
+				});
+			}
+
+			pathDictionary[i] = tempConnectionDict;
 		}
 	}
-
 	console.log(questionDictionary);
 	console.log(pathDictionary);
-
+	return [questionDictionary, pathDictionary];
 }
