@@ -101,6 +101,15 @@ function jsGUIAddWindow() {
 		backgroundColor: '#555555'
 	}).addClass('window').appendTo('#builder_gui');
 
+	//add hidden group settings
+	$('<div>', { html: 'field-list'	})
+	.css({
+		visibility: 'hidden',
+		padding: '0',
+		'padding-bottom': '0',
+		height: '0'
+	}).addClass('hiddenGroupSettings').appendTo('#' + windowID);
+
 	$('<ul>', { id: sortID }).appendTo('#' + windowID);
 
 	//make the list sortable and add a placeholder!
@@ -162,6 +171,7 @@ function jsGUIViewGroupSettings(window) {
 	$( '#groupSettingsWindow' ).dialog ({
 		'width': 300
 	});
+	$( '#groupSettingsWindow' ).addClass(window);
 }
 
 /*
@@ -169,6 +179,17 @@ function jsGUIViewGroupSettings(window) {
 	to the group list (at some point...)
 */
 function jsGUICloseGroupSettingsDialog() {
+	var windowSet = $("#groupSettingsWindow").attr('class');
+	$("#groupSettingsWindow").removeClass(windowSet);
+	var groupType = $("#groupTypeToggle").val().replace(' ', '-');
+
+	console.log(groupType);
+	if ($('#' + windowSet + ' .hiddenGroupSettings').html() != groupType) {
+		$('#' + windowSet + ' .hiddenGroupSettings').html(groupType);
+		console.log("Here");
+	}
+
+
 	$("#groupSettingsWindow").dialog ( 'close' );
 }
 
@@ -406,7 +427,6 @@ function closeNameDialog() {
 
 	Returns array structured as the following:
 		questionDictionary, 
-		relevanceList,
 		pathDictionary
 */
 
@@ -415,9 +435,6 @@ function jsGUIDFS() {
 
 	// Dictionary in following form: "screen#": [questionIDs]
 	var questionDictionary = {};
-
-	// List in following form: "question: relevance"
-	var relevanceList = [];
 
 	// Dictionary in following form: "screen#: {attachScreen#: Relevance}
 	var pathDictionary = {};
@@ -436,8 +453,12 @@ function jsGUIDFS() {
 			i = currentDiv.attr('id').substring(6);
 		}
 
-		if ($('#' + currentDiv.attr('id') + ' #sort' + i + ' li').length == 0) {
+		var tempConnectionDict = {};
+		tempConnectionDict['settings'] = $(currentDiv).find('.hiddenGroupSettings').html();
 
+
+		if ($('#' + currentDiv.attr('id') + ' #sort' + i + ' li').length == 0) {
+			console.log("This should NOT be hit.");
 		}
 		else if ($('#' + currentDiv.attr('id') +  ' #sort' + i + ' li').length == 1) {
 			var tempQ = $('#' + currentDiv.attr('id') +  ' #sort' + i + ' li .true-name').html();
@@ -457,9 +478,7 @@ function jsGUIDFS() {
 		}
 
 		else {
-			var tempConnectionDict = {};
-			//console.log(jsPlumb.getEndpoints(currentDiv)[0].connections[0].endpoints[1].elementId)
-
+			
 			var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0];
 			if (tempConnectionID != undefined) {
 				tempConnectionID = tempConnectionID.endpoints[1].elementId;
