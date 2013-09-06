@@ -33,6 +33,12 @@ define( [ 'jquery',
             $( 'table tr', header ).empty().append( header_row.html() )
             header.css( 'width', header_row.width() )
 
+            # Make sure our sorting still works
+            event.data.view.detect_sort(
+                    fixed_el: header
+                    el: event.data.view.currentView.el
+                    collection: event.data.view.currentView.collection )
+
             # TODO
             # Handle click events on the fixed header so that we trigger a
             # sort.
@@ -48,32 +54,64 @@ define( [ 'jquery',
 
         detect_sort: ( options ) ->
 
+            event_data = {}
+
             if options.el?
-                headers = $( 'th', options.el )
+                headers = $( 'th', options.fixed_el )
+
+                event_data =
+                    collection: options.collection
+                    headers: $( 'th', options.el )
             else
                 headers = $( 'th', @el )
 
-            headers.click( (event) =>
+                event_data =
+                    collection: @collection
+
+            headers.click( event_data, (event) ->
+
                 el = $( event.currentTarget )
 
                 field = el.data( 'field' )
                 order = el.data( 'order' )
 
+                # Update both the fixed and real table header if the click was
+                # detected on the fixed header. Since the fixed header is a
+                # completely separate table, we have to do a little jQuery magic
+                # to select both tables.
+                if event.data.headers?
+                    other_el = $( event.data.headers ).filter( ()->
+                                return $( @ ).data( 'field' ) == field )
+
+                # Create the selector that includes both the real & fixed header
+                # table header.
+                if other_el?
+                    els = $().add( 'i', el ).add( 'i', other_el )
+                else
+                    els = $( 'i', el )
+
                 # Permutate through the ordering options for the sort.
                 if not order?
                     order = 'desc'
-                    $( 'i', el ).removeClass( 'icon-sort icon-sort-up' ).addClass( 'icon-sort-down' )
+                    els.removeClass( 'icon-sort icon-sort-up' ).addClass( 'icon-sort-down' )
+
                 else if order == 'desc'
                     order = 'asc'
-                    $( 'i', el ).removeClass( 'icon-sort-down' ).addClass( 'icon-sort-up' )
+                    els.removeClass( 'icon-sort-down' ).addClass( 'icon-sort-up' )
+
                 else if order == 'asc'
                     order = null
-                    $( 'i', el ).removeClass( 'icon-sort-up' ).addClass( 'icon-sort' )
+                    els.removeClass( 'icon-sort-up' ).addClass( 'icon-sort' )
 
+                # Update the order for both the real & fixed table
                 el.data( 'order', order )
-                @collection.sort(
-                    field: field
-                    order: order )
+                other_el.data( 'order', order ) if other_el?
+
+                # Sort the sucker! The view should automatically refresh when
+                # the sort results are finally received.
+                event.data.collection.sort(
+                            field: field
+                            order: order )
             )
             @
 
@@ -94,7 +132,7 @@ define( [ 'jquery',
 
         initialize: ( options ) ->
             # Bind scroll event to handle the fixed-header rendering.
-            $( @el ).scroll( @detect_scroll )
+            $( @el ).scroll( { view: @ }, @detect_scroll )
 
             # Initialize the different available views.
             @rawView = new DataCollectionView( options )
