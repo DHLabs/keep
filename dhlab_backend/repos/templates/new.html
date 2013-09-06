@@ -174,9 +174,36 @@
 </script>
 {% endblock %}
 
+{% block footer %} {% endblock %}
+
+{% block searchbar %}
+
+
+	<a href="#" class="btn btn-primary" onclick="jsGUIAddWindow();">Add Screen</a>
+	<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn">
+		Add Question
+	</button>
+	<button type='button' id='repositoryname' onclick='editRepository()' class="btn btn-primary">
+		Survey Settings
+	</button>
+	<button type='button' id='dfsTest' onclick='jsGUIDFS()' class="btn btn-primary">
+		DFS Test
+	</button>
+
+	<button id='submit_btn' type='button' onclick='saveRepository()' class='btn btn-success'>
+    {% if repo_json %}
+    	Save Repository
+    {% else %}
+		Create Repository
+    {% endif %}
+    </button>
+			
+
+{% endblock %}
+
 {% block content %}
 <div class='fourteen columns offset-by-one'>
-	<form action='.' method='post' enctype='multipart/form-data'>
+	<form id='repoEditForm' action='.' method='post' enctype='multipart/form-data'>
 		{% csrf_token %}
 
 		<!-- Modal view for editing repository settings -->
@@ -329,28 +356,9 @@
 			</div>
 		</div>
 
-		<div id='builder_gui' onchange='buildSurvey()'>
-			<a href="#" class="btn btn-primary" onclick="jsGUIAddWindow();">Add Screen</a>
-			<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn">
-				Add Question
-			</button>
-			<button type='button' id='repositoryname' onclick='editRepository()' class="btn btn-primary">
-				Survey Settings
-			</button>
-			<button type='button' id='dfsTest' onclick='jsGUIDFS()' class="btn btn-primary">
-				DFS Test
-			</button>
-
-			<!-- <div style='clear:both;'> -->
-                {% if repo_json %}
-	            	<button id='submit_btn' type='submit' class='btn btn-success'>Save Repository</button>
-                {% else %}
-					<button id='submit_btn' type='submit' class='btn btn-success'>Create Repository</button>
-                {% endif %}
-			
-		</div>
+<div id='builder_gui' onchange='buildSurvey()'></div>
+		
 	</form>
 </div>
-
 
 {% endblock %}
