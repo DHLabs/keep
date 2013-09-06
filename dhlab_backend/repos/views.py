@@ -61,6 +61,10 @@ def new_repo( request ):
     if request.method == 'POST':
         # Check for a valid XForm and parse the file!
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
+        print form['name']
+        print form['desc']
+        print form['privacy']
+        print form['survey_json']
         if form.is_valid():
             form.save()
             return HttpResponseRedirect( '/' )

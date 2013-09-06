@@ -30,12 +30,115 @@
 	.ui-autocomplete > .selected {
 		background-color: #EEE;
 	}
+
+	input[type=checkbox] {
+		float: left;
+		margin-right: 0.4em;
+	}
+
+
+/* CSS for the Builder GUI */
+	#builder_gui {
+		/*height: 600px;
+		border:2px solid #000;
+		*/
+		height:100%;
+		margin: 0;
+	}
+
+	.delete-icon {
+		position: relative;
+		padding:2px;
+		right: 2px;
+		float: right;
+		bottom: 0;
+	}
+
+	.edit-icon {
+		position: relative;
+		padding:2px;
+		left: 2px;
+		float: left;
+		bottom: 0;
+	}
+
+	.relevance-icon {
+		position: relative;
+		padding: 2px;
+		margin-bottom: 2px;
+		left: 2px;
+		float: left;
+		bottom: 0;
+	}
+
+	.group-set-icon {
+		position: relative;
+		padding: 2px;
+		left: 2px;
+		float: left;
+		bottom: 0;
+	}
+
+	.windowButtons {
+		position: relative;
+
+	}
+
+	.window {
+		height: 30em;
+		width: 15em;
+		border: 2px solid #000;
+		position: absolute;
+	}
+
+	.question {
+		height: 5em;
+		width: 95%;
+		margin-left: auto;
+		margin-right: auto;
+		border: 2px solid #0F0;
+	}
+
+	.relevanceList {
+		position: relative;
+		right: 0;
+		bottom: 0;
+		padding: 2px;
+		width: 98%;
+		overflow: hidden;
+	}
+
+	.relevance {
+		position: relative;
+		height: 2em;
+		width: 100%;
+		border: 1px solid #F00;
+		background-color: #FFF;
+	}
+
+	.sortable {
+		background: #eee;
+		padding: 5px;
+	}
+
+	.sortable li {
+		margin: 1.5px 3px 3px 3px;
+		padding-bottom: 0.5em;
+	}
+
+	.ui-state-highlight {
+		height: 1.5em;
+	}
 </style>
 {% endblock %}
 
 {% block js %}
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="{% static 'js/vendor/jquery.center.js' %}"></script>
+<script src="{% static 'js/vendor/jquery.ui.touch-punch.min.js' %}"></script>
 <script src="{% static 'js/vendor/form_builder.js' %}"></script>
+<script src="{% static 'js/vendor/jquery.jsPlumb-1.4.1-all-min.js' %}"></script>
+<script src="{% static 'js/vendor/form_gui.js' %}"></script>
 <script id='form_id' type='text/javascript'>
 	{% if repo_json %}
 	document.repo = {{ repo_json | safe }};
@@ -47,10 +150,7 @@
 <script type='text/javascript'>
 	$( function() {
 
-		$( '#build_form' ).click( function() {
-			$( this ).hide();
-			$( '#survey_builder' ).show();
-		});
+		jsGUIReady();
 
 		$( '#questionName' ).autocomplete( {
 			appendTo: '#autofill_list',
@@ -79,27 +179,74 @@
 	<form action='.' method='post' enctype='multipart/form-data'>
 		{% csrf_token %}
 
-		<label {% if form.name.errors %}style='color:red'{%endif%}>
-			<strong>Repository name</strong>
-		</label>
-		{{ form.name }}
-		{{ form.name.errors }}
+		<!-- Modal view for editing repository settings -->
+		<div id='repositoryDefaultsWindow' title='New Repository' style='display:none;'>
+			<label {% if form.name.errors %}style='color:red'{%endif%}>
+				<strong>Repository name</strong>
+			</label>
+			{{ form.name }}
+			{{ form.name.errors }}
 
-		<label>
-			<strong>Description (optional)</strong>
-		</label>
-        {{ form.desc }}
-		<!--textarea rows='5' name='desc' class='input-xxlarge'></textarea-->
-		{{ form.desc.errors }}
+			<label>
+				<strong>Description (optional)</strong>
+			</label>
+	        {{ form.desc }}
+			<!--textarea rows='5' name='desc' class='input-xxlarge'></textarea-->
+			{{ form.desc.errors }}
+			<input id='registrationType' onchange="buildSurvey()" type="checkbox">
+			<label for='registrationType'>Registration Form</label>
+			<hr />
+			Privacy Settings:
+			<label class='radio'>
+				<input type='radio' name='privacy' value='public' style='margin-top:16px;'>
+				<i class='icon-unlock'></i>
+				<strong>Public</strong>
+				<div class='help-block'>
+					Anyone can see this repository and the data associated
+					with it.
+				</div>
+			</label>
+			<label class='radio' style='clear:both;'>
+				<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
+				<i class='icon-lock'></i>
+				<strong>Private</strong>
+				<div class='help-block'>
+					You choose who can see this repository and the data
+					associated with it.
+				</div>
+			</label>
+			<hr />
 
-		<hr/>
-
-		<div class='section'>
-			<a href='javascript:void;' id='build_form' class='btn btn-medium'>
-				Build XForm Manually
-			</a>
-			{{ form.survey_json }}
+			<a href="#" data-toggle="modal" class="btn" onclick="closeNameDialog();">Close</a>
 		</div>
+
+		<!-- Modal View for editing group settings -->
+		<div id='groupSettingsWindow' title="Group Settings" style="display:none;">
+			<div>
+				Group Type:
+				<select id="groupTypeToggle" name="groupTypeToggle">
+					<option value="field-list">Field List</option>
+					<option value="grid-list">Grid List</option>
+				</select>
+			</div>
+			<a href="#" data-toggle="modal" class="btn btn-primary" onclick="jsGUICloseGroupSettingsDialog();">Close</a>
+		</div>
+
+		<!-- Modal View for editing Relevances -->
+		<div id='relevanceEditWindow' title="Relevance Settings" style='display:none;'>
+			<div>
+				Relevance for Question:
+				<select id="relevanceQuestions" name="relevanceQuestions"></select>
+			</div>
+			<div>
+				Relevance Bounds: <input type="text" name="relevanceBounds" id="relevanceBounds">
+			</div>
+			<div id="windowNameTracker" style="display:none;"></div>
+			<div>
+				<a href="#" class="btn btn-primary" onclick="jsGUIEditRelevance()">OK</a>
+			</div>
+		</div>
+
 
 		<!-- Modal View For Editing Question-->
 		<div id='questionEditWindow' title='New Question' style='display:none;'>
@@ -177,73 +324,33 @@
 			<div id="relevances"></div>
 
 			<div style='margin-top:16px;'>
-				<a href="#" data-toggle="modal" class="btn" onclick="closeDialog();">Cancel</a>
+				<a href="#" data-toggle="modal" class="btn" onclick="closeEditDialog();">Cancel</a>
 				<a href="#" class="btn btn-primary" onclick="okClicked();">OK</a>
 			</div>
 		</div>
-		<div id='survey_builder' style='display:none;'>
-			<!--  Table for Survey Questions  -->
-			<table class='table table-striped table-bordered'>
-				<thead>
-					<tr>
-						<td colspan='3' style='background-color:#EEE;'>
-							<h4>
-								<div style='float:right;'>
-									<input id='registrationType' onchange="buildSurvey()" type="checkbox">
-									<label for='registrationType'>Registration Form</label>
-									<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn">
-										Add Question
-									</button>
-								</div>
-								Survey Questions
-							</h4>
-						</td>
-					</tr>
-				</thead>
-				<tbody id='questionList'></tbody>
-			</table>
-		</div>
 
-        <div id="xform_file_upload">
-			<label {% if form.xform_file.errors %}style='color:red'{%endif%}>
-				<strong>XForm File</strong>
-			</label>
-			{{ form.xform_file }}
-			<div class='help-block'>
-				Learn more about XForms <a href='http://en.wikipedia.org/wiki/XForms'>here</a>
-			</div>
-        </div>
-		{{ form.non_field_errors }}
-		{{ form.xform_file.errors }}
-		{{ form.survey_json.errors }}
-		<hr/>
+		<div id='builder_gui' onchange='buildSurvey()'>
+			<a href="#" class="btn btn-primary" onclick="jsGUIAddWindow();">Add Screen</a>
+			<button type='button' id='addquestion' onclick='editQuestion(null)' class="btn">
+				Add Question
+			</button>
+			<button type='button' id='repositoryname' onclick='editRepository()' class="btn btn-primary">
+				Survey Settings
+			</button>
+			<button type='button' id='dfsTest' onclick='jsGUIDFS()' class="btn btn-primary">
+				DFS Test
+			</button>
 
-		<label class='radio'>
-			<input type='radio' name='privacy' value='public' style='margin-top:16px;'>
-			<i class='icon-unlock'></i>
-			<strong>Public</strong>
-			<div class='help-block'>
-				Anyone can see this repository and the data associated
-				with it.
-			</div>
-		</label>
-		<label class='radio' style='clear:both;'>
-			<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
-			<i class='icon-lock'></i>
-			<strong>Private</strong>
-			<div class='help-block'>
-				You choose who can see this repository and the data
-				associated with it.
-			</div>
-		</label>
-		<div style='clear:both;'>
-			<hr/>
+			<!-- <div style='clear:both;'> -->
                 {% if repo_json %}
-            <button id='submit_btn' type='submit' class='btn btn-success'>Save Repository</button>
+	            	<button id='submit_btn' type='submit' class='btn btn-success'>Save Repository</button>
                 {% else %}
-			<button id='submit_btn' type='submit' class='btn btn-success'>Create Repository</button>
+					<button id='submit_btn' type='submit' class='btn btn-success'>Create Repository</button>
                 {% endif %}
+			
 		</div>
 	</form>
 </div>
+
+
 {% endblock %}

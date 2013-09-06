@@ -69,7 +69,7 @@ function questionTypeChanged() {
   	}
 }
 
-function closeDialog() {
+function closeEditDialog() {
 	$('#questionEditWindow').dialog( 'close' );
 }
 
@@ -689,9 +689,10 @@ function okClicked() {
             }
         }
 
+        jsGUIAddQuestion(question, currentQuestionName);
 		buildSurvey();
 		reloadQuestionListHTML();
-		closeDialog();
+		closeEditDialog();
         currentGroupName = null;
 	}
 }
@@ -710,8 +711,6 @@ function buildQuestionList( listQuestions, formChildren )  {
 			buildQuestionList( listQuestions, question.children );
 		} else if( question.type == 'note' ) {
 			//don't add note
-		} else if( question.type == 'note' ) {
-
 		} else {
 			listQuestions.push( question );
 		}
@@ -814,6 +813,12 @@ function editQuestion(questionName) {
 	$( '#questionEditWindow' ).dialog({
 		'width': 640
 	});
+}
+
+function editRepository() {
+	$( '#repositoryDefaultsWindow' ).dialog({
+		'width': 640
+	})
 }
 
 function sanitizeNameInput(inputElement) {
