@@ -55,7 +55,7 @@ define( [ 'jquery',
             @selected_header = @map_headers[0] if @map_headers.length > 0
 
         _resize_map: () =>
-            $( '#map' ).css( { 'height': @$el.parent().height() + 'px' } )
+            $( '#map' ).css( { 'height': ( @$el.parent().height() - 20 ) + 'px' } )
             @map.invalidateSize( false ) if @map?
 
         initialize: ( options ) ->
