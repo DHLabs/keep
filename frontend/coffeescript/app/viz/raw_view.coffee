@@ -19,17 +19,19 @@ define( [ 'jquery',
 
         detect_scroll: ( event ) ->
 
-            if $( '#raw_table' ).is( ':hidden' )
+            currentView = event.data.view.currentView
+
+            if $( currentView.el ).is( ':hidden' )
                 return
 
             scrollTop = $( event.currentTarget ).scrollTop()
             scrollLeft = $( event.currentTarget ).scrollLeft()
 
-            offsetTop = $( '#raw_table' ).position().top
+            offsetTop = $( currentView.el ).position().top
 
             # Copy the header row of the table into the scroller div.
             header = $( '#fixed-header' )
-            header_row = $( '#raw_table tr:first-child' )
+            header_row = $( 'tr:first-child', currentView.el )
             $( 'table tr', header ).empty().append( header_row.html() )
             header.css( 'width', header_row.width() )
 
@@ -39,10 +41,6 @@ define( [ 'jquery',
                     el: event.data.view.currentView.el
                     collection: event.data.view.currentView.collection )
 
-            # TODO
-            # Handle click events on the fixed header so that we trigger a
-            # sort.
-
             # If we've scrolled past the header row of the table, make our
             # fixed header visible
             if scrollTop > offsetTop
@@ -50,6 +48,29 @@ define( [ 'jquery',
             else
                 # Otherwise just hide the sucker.
                 header.hide()
+
+            @
+
+        detect_pagination: ( event ) ->
+
+            # Don't load another page while the page is being requested from the
+            # server
+            if @page_loading? and @page_loading
+                return
+
+            currentView = event.data.view.currentView
+
+            if $( currentView.el ).is( ':hidden' )
+                return
+
+            view_height = currentView.$el.height()
+            scroll_height = $( event.currentTarget ).scrollTop() + $( event.currentTarget ).height()
+
+            if scroll_height + 100 > view_height
+                @page_loading = true
+                currentView.collection.next( success: ()=>
+                    @page_loading = false )
+
             @
 
         detect_sort: ( options ) ->
@@ -109,9 +130,9 @@ define( [ 'jquery',
 
                 # Sort the sucker! The view should automatically refresh when
                 # the sort results are finally received.
-                event.data.collection.sort(
-                            field: field
-                            order: order )
+                event.data.collection.sort_fetch(
+                                field: field
+                                order: order )
             )
             @
 
@@ -133,6 +154,9 @@ define( [ 'jquery',
         initialize: ( options ) ->
             # Bind scroll event to handle the fixed-header rendering.
             $( @el ).scroll( { view: @ }, @detect_scroll )
+            # Bind scroll event to handle pagination ( scrolling to the end of the
+            # page. )
+            $( @el ).scroll( { view: @ }, @detect_pagination )
 
             # Initialize the different available views.
             @rawView = new DataCollectionView( options )

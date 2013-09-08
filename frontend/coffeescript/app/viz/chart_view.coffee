@@ -7,8 +7,12 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette, DataCollection, d3 ) ->
 
+    class ChartItemView extends Backbone.Marionette.ItemView
+        template: _.template( '''n/a''' )
+
     class DataChartView extends Backbone.Marionette.CollectionView
         el: '#analytics-viz'
+        itemView: ChartItemView
 
         events:
             "click #yaxis_options input":   "change_y_axis"
