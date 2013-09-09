@@ -69,7 +69,9 @@ define( [ 'jquery',
             @_detect_headers( @fields )
 
             # Setup the map itself
-            @map = L.map( 'map' ).setView( [ 0, 0 ], 10 )
+            # TODO: Pick a smart default location to look at. Maybe the user's
+            # current location?
+            @map = L.map( 'map' ).setView( [ 0, 0 ], 5 )
             L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
                          maxZoom: 18 }).addTo( @map )
