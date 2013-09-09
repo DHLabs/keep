@@ -61,11 +61,12 @@ class Command( BaseCommand ):
 
                     if field_name in data:
                         geodata = {
-                            'lat': None,
-                            'lng': None,
-                            'altitude': None,
-                            'accuracy': None,
-                            'comment': '' }
+                            'type': 'Point',
+                            'coordinates': [],
+                            'properties': {
+                                'altitude': 0,
+                                'accuracy': 0,
+                                'comment': '' }}
 
                         geostring = data[ field_name ]
 
@@ -81,17 +82,18 @@ class Command( BaseCommand ):
                             # Attempt to convert location string into the geodata
                             # object.
                             try:
-                                geodata[ 'lat' ] = float( geostring[0] )
-                                geodata[ 'lng' ] = float( geostring[1] )
-                                geodata[ 'altitude' ] = float( geostring[2] )
-                                geodata[ 'accuracy' ] = float( geostring[3] )
+                                # GeoJSON coordinates are stored <lng, lat>
+                                geodata[ 'coordinates' ].append( float( geostring[1] ) )
+                                geodata[ 'coordinates' ].append( float( geostring[0] ) )
+                                geodata[ 'properties' ][ 'altitude' ] = float( geostring[2] )
+                                geodata[ 'properties' ][ 'accuracy' ] = float( geostring[3] )
                             except ValueError:
                                 # If for some reason we can't convert this string
                                 # save the string as a "comment" metadata in the
                                 # new geodata object
-                                geodata[ 'comment' ] = data[ field_name ]
+                                geodata[ 'properties' ][ 'comment' ] = data[ field_name ]
                         else:
-                            geodata[ 'comment' ] = data[ field_name ]
+                            geodata[ 'properties' ][ 'comment' ] = data[ field_name ]
 
                         # Finally go in and update the said field in the actual
                         # database!
