@@ -89,6 +89,21 @@ class DataResource( MongoDBResource ):
 
         return filters
 
+    def _build_sort( self, request ):
+
+        if 'sort' not in request:
+            return None
+
+        sort = {}
+
+        sort[ 'param' ] = 'data.%s' % ( request.get('sort') )
+        sort[ 'type' ] = pymongo.DESCENDING
+
+        if 'sort_type' in request and request.get('sort_type') in [ 'asc', 'ascending' ]:
+            sort[ 'type' ] = pymongo.ASCENDING
+
+        return sort
+
     def get_detail( self, request, **kwargs ):
 
         # Grab the survey that we're querying survey data for
@@ -121,16 +136,9 @@ class DataResource( MongoDBResource ):
             # Query data from MongoDB
             cursor = db.data.find( query_parameters )
 
-            # If there are sort parameters, sort the data!
-            if 'sort' in request.GET:
-                sort_parameter = 'data.%s' % ( request.GET['sort'] )
-                sort_type = pymongo.DESCENDING
-
-                if 'sort_type' in request.GET:
-                    if request.GET['sort_type'] in [ 'asc', 'ascending' ]:
-                        sort_type = pymongo.ASCENDING
-
-                cursor = cursor.sort( sort_parameter, sort_type )
+            sort_params = self._build_sort( request.GET )
+            if sort_params is not None:
+                cursor = cursor.sort( sort_params.get( 'param' ), sort_params.get( 'type' ) )
 
             # Ensure correct pagination
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
