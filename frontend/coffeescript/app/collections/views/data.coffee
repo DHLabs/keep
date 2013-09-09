@@ -11,18 +11,29 @@ define( [ 'jquery',
     class DataItemView extends Backbone.Marionette.ItemView
         tagName: 'tr'
 
+        data_templates:
+            'text':     _.template( '<td><%= data %></td>' )
+            'geopoint': _.template( '<td><%= data.lat %>, <%= data.lng %></td>' )
+
         initialize: (options) ->
             @fields = options.fields
 
         template: ( model ) =>
-            data = { fields: @fields, model: model }
+            # Based on the field type, we use a specific formatter for that
+            # data type.
+            templ = []
+            for field in @fields
+                tdata = { data: model.data[ field.name ] }
 
-            templ = _.template( '''
-                <% _.each( fields, function( field ) { %>
-                    <td><%= model.data[ field.name ] %></td>
-                <% }); %><td>&nbsp;</td>''')
+                if field.type == 'geopoint'
+                    templ.push( @data_templates[ field.type ]( tdata ) )
+                else
+                    templ.push( @data_templates[ 'text' ]( tdata ) )
 
-            return templ( data )
+            # Fix for fixed-width tables. The last td is flexible, thus making
+            # the tds before it fixed.
+            templ.push( '<td>&nbsp;</td>' )
+            return templ.join( '' )
 
 
     class DataCollectionView extends Backbone.Marionette.CollectionView
