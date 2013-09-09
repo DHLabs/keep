@@ -89,6 +89,8 @@ define( [ 'jquery',
                 event_data =
                     collection: @collection
 
+            # Unbind any existing events
+            headers.unbind( 'click' )
             headers.click( event_data, (event) ->
 
                 el = $( event.currentTarget )
