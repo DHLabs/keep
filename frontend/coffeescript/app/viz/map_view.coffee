@@ -31,9 +31,9 @@ define( [ 'jquery',
             data = { fields: @fields, model: model }
 
             templ = _.template( '''
-                <% _.each( fields, function( field ) { %>
+                <% _.each( fields, function( field ) { if( field.type != 'geopoint' ) { %>
                     <div><%= field.name %>: <%= model.data[ field.name ] %></div>
-                <% }); %><td>&nbsp;</td>''')
+                <% }}); %><td>&nbsp;</td>''')
 
             return templ( data )
 
@@ -108,6 +108,9 @@ define( [ 'jquery',
             # Instead of appending these views into the DOM, place them in the
             # map instead!
             point = itemView.model.geopoint( collectionView.selected_header )
+            if not point?
+                return @
+
             marker = L.marker( point, {icon: mapIcon} )
             marker.bindPopup( itemView.el )
 

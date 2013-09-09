@@ -13,7 +13,7 @@ define( [ 'jquery',
 
         data_templates:
             'text':     _.template( '<td><%= data %></td>' )
-            'geopoint': _.template( '<td><%= data.lat %>, <%= data.lng %></td>' )
+            'geopoint': _.template( '<td><%= data.coordinates[1] %>, <%= data.coordinates[0] %></td>' )
 
         initialize: (options) ->
             @fields = options.fields

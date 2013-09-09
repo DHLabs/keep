@@ -10,21 +10,13 @@ define( [ 'backbone' ],
             # Converts the specified field(s) into a geopoint
             point = { lat: null, lng: null }
 
-            geostring = @get( 'data' )[ field.name ]
+            geojson = @get( 'data' )[ field.name ]
 
-            if not geostring?
+            if not geojson?
                 return null
 
             # Split and convert into lat, lng
-            geostring = geostring.split( ' ' )[0..2]
-
-            point.lat = parseFloat( geostring[0] )
-            point.lng = parseFloat( geostring[1] )
-
-            if isNaN( point.lat ) or isNaN( point.lng )
-                return null
-
-            return point
+            return { lng: geojson.coordinates[0], lat: geojson.coordinates[1] }
 
     return DataModel
 

@@ -7,7 +7,7 @@ import pymongo
 
 from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
-from tastypie.http import HttpUnauthorized
+from tastypie.http import HttpUnauthorized, HttpBadRequest
 
 from repos.models import Repository
 
@@ -104,15 +104,24 @@ class DataResource( MongoDBResource ):
             query_parameters = self._build_filters( request )
             query_parameters['repo'] = ObjectId( repo_id )
 
-            # Query the database for the data
-            cursor = db.data.find( query_parameters )
-
-            # Handle bounding box requests
-            # TODO
             if 'bbox' in request.GET and 'geofield' in request.GET:
-                bbox = request.GET[ 'bbox' ].split( ',' )
+                # Convert the bounding box into the $box format needed to do
+                # a geospatial search in MongoDB
+                # http://docs.mongodb.org/manual/reference/operator/box/
+                try:
+                    bbox = map( float, request.GET[ 'bbox' ].split( ',' ) )
+                except ValueError:
+                    return HttpBadRequest( 'Invalid bounding box' )
+
+                bbox = [ [ bbox[0], bbox[1] ], [ bbox[2], bbox[3] ] ]
                 geofield = request.GET[ 'geofield' ]
 
+                query_parameters[ 'data.%s' % ( geofield ) ] = {'$geoWithin': {'$box': bbox}}
+
+            # Query data from MongoDB
+            cursor = db.data.find( query_parameters )
+
+            # If there are sort parameters, sort the data!
             if 'sort' in request.GET:
                 sort_parameter = 'data.%s' % ( request.GET['sort'] )
                 sort_type = pymongo.DESCENDING
@@ -123,6 +132,7 @@ class DataResource( MongoDBResource ):
 
                 cursor = cursor.sort( sort_parameter, sort_type )
 
+            # Ensure correct pagination
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
 
             meta = {
@@ -137,5 +147,5 @@ class DataResource( MongoDBResource ):
                 'data': dehydrate_survey( cursor.skip(offset * 50).limit(50)) }
 
             return self.create_response( request, data )
-        except ValueError:
-            return HttpUnauthorized()
+        except ValueError as e:
+            return HttpBadRequest( str( e ) )
