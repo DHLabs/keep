@@ -338,7 +338,7 @@ function populateQuestion( questionName ) {
 	$("#groupOptions").hide();
 	$("#formRelationshipSelects").children().hide();
 
-	if( document.getElementById("formRelationship").length > 0 ) {
+	if( document.getElementById("formRelationship") != undefined && document.getElementById("formRelationship").length > 0 ) {
 		$("#formRelationship")[0].selectedIndex = 0;
 	}
 
@@ -575,7 +575,7 @@ function okClicked() {
 		}
 
 		//relationship
-		var relationshipForm = document.getElementById("formRelationship").value;
+		var relationshipForm = ((document.getElementById("formRelationship") != undefined) ? document.getElementById("formRelationship").value : "None");
 		if( relationshipForm != 'None' ) {
 
 			var relationship = new Object();

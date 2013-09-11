@@ -437,6 +437,8 @@ function jsGUIDFS() {
 	var questionDictionary = {};
 
 	// Dictionary in following form: "screen#: {attachScreen#: Relevance}
+	// There can also be {settings: type} in the case of a group,
+	// and {attachScreen#: none} in the case of a generic connection
 	var pathDictionary = {};
 	var i = "";
 
@@ -445,7 +447,12 @@ function jsGUIDFS() {
 	while (windowList.length > 0) {
 		currentDiv = $('#' + windowList.pop());
 
-		if (currentDiv.hasClass("visited-DFS")) {
+		// Technically, should never happen, but if DFS is called w/o any elements
+		if (currentDiv.length == 0) {
+			break;
+		}
+
+		else if (currentDiv.hasClass("visited-DFS")) {
 			continue;
 		}
 		else {
@@ -454,22 +461,27 @@ function jsGUIDFS() {
 		}
 
 		var tempConnectionDict = {};
-		tempConnectionDict['settings'] = $(currentDiv).find('.hiddenGroupSettings').html();
-
-
+		
+		// The case that there are no questions on the screen, another technicality
 		if ($('#' + currentDiv.attr('id') + ' #sort' + i + ' li').length == 0) {
 			console.log("This should NOT be hit.");
 		}
+
+		// Case of only one question on a screen
 		else if ($('#' + currentDiv.attr('id') +  ' #sort' + i + ' li').length == 1) {
 			var tempQ = $('#' + currentDiv.attr('id') +  ' #sort' + i + ' li .true-name').html();
 			questionDictionary[i] = [tempQ];
 		}
+
+		//Case of multiple questions on a screen
 		else {
 			var tempQuestionArray = [];
 			$('#' + currentDiv.attr('id') + ' #sort' + i + ' li').each( function() {
 				tempQuestionArray.push($(this).find('.true-name').html());
 			});
 			questionDictionary[i] = tempQuestionArray;
+			// Set the group settings 
+			tempConnectionDict['settings'] = $(currentDiv).find('.hiddenGroupSettings').html();
 		}
 
 		// In the case of no connections, continue to the next screen
@@ -478,7 +490,8 @@ function jsGUIDFS() {
 		}
 
 		else {
-			
+
+			// This 'fun' bit of code is using jsPlumb to get the next screen	
 			var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0];
 			if (tempConnectionID != undefined) {
 				tempConnectionID = tempConnectionID.endpoints[1].elementId;
