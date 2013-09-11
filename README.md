@@ -22,6 +22,9 @@ Make sure you are in the root of the project where the package.json file is loca
 
     npm install
 
+### Alternative npm and Node.js Installation
+If you are having problems with installing npm, or installing Node.js, try one of these alternatives: [https://gist.github.com/isaacs/579814](https://gist.github.com/isaacs/579814).
+
 ### Install Javascript/CSS dependencies
 Next we make sure bower ( a javascript/css package manager ) is installed and 
 accessible globally. You may need admin access to install globally.
@@ -61,7 +64,10 @@ Run mongod to ensure MongoDB is running
 
 ### Setting up the Databases
     python dhlab_backend/manage.py syncdb
+    python dhlab_backend/manage.py migrate
     fab restore_db
+
+**Note:** on a syncdb command, Django will ask you to create a superuser.  If you create one, use that username and password to log in to your local KEEP, rather than the below credentials.
 
 ### Running the Django server
     python dhlab_backend/manage.py runserver
