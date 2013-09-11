@@ -9,10 +9,25 @@ from django.http import QueryDict
 
 
 def validate_and_format( fields, data, files ):
-    '''
-        Do some basic validation and convert strings to <type> where
-        necessary.
-    '''
+    """Do some basic validation and convert strings to <type> where
+       necessary.
+
+       Parameters
+       ----------
+       fields : []
+           The JSON empty fields of the form.
+       data : array of strings
+           All user data provided to the form.
+       files : array of strings
+           All user files provided to the form.
+
+       Returns
+       -------
+       valid_data : dictionary
+           Dictionary of all validated data and corresponding questions
+       valid_files : dictionary
+           Dictionary of all validated files and corresponding questions
+    """
     valid_data = {}
     valid_files = {}
 

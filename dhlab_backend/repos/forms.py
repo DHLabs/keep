@@ -142,9 +142,25 @@ class NewBatchRepoForm( forms.Form ):
 
 
 class NewRepoForm( forms.Form ):
-    '''
-        Validates and creates a new repository based on form data.
-    '''
+    """Validates and creates a new repository based on form data.
+
+       Parameters
+       ----------
+       forms.Form : Form
+
+       Attributes
+       ----------
+       name : string
+           name of the form
+       desc : string
+           description of the form
+       privacy
+       survey_json : string, optional
+           the JSON of the form as a string, only if creating
+           a form from scratch
+       xform_file : FileField, optional
+
+    """
 
     name    = forms.CharField()
 
