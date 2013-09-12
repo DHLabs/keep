@@ -15,13 +15,28 @@ from .serializers import CSVSerializer
 
 
 class VocabResource( MongoDBResource ):
-    '''
-        VocabResource is used to access the database,
-        And query for autocomplete purposes.
-    '''
+    """
+        VocabResource is used to access the mecical vocabulary,
+        and query for autocomplete purposes.
+
+        Parameters
+        ----------
+        MongoDBResource : MongoDBResource
+
+        Attributes
+        ----------
+        id : string
+            A string comprising of the Mongo ID.
+        term : string
+            A string containing the medical term.
+        group : string
+            Unused as of now, a string defining the medical dictionary
+            the term is from.
+    """
 
     id      = fields.CharField( attribute='_id' )
     term    = fields.CharField( attribute='term' )
+    group   = fields.CharField( attribute='group' )
 
     class Meta:
         collection = 'vocab'
@@ -39,10 +54,18 @@ class VocabResource( MongoDBResource ):
         }
 
     def build_filters( self, filters=None ):
-        '''
+        """
             This API will only be used to get terms that start with
             requested string.  Require filter to be in API call.
-        '''
+
+            Parameters
+            ----------
+            filters : string, optional
+
+            Returns
+            -------
+            String
+        """
         if 'term__istartswith' not in filters:
             return BadRequest
         return super( VocabResource, self ).build_filters( filters )

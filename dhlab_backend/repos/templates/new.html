@@ -170,6 +170,18 @@
 				});
 			}
 		});
+
+		var confirmOnExit = function(e) {
+			e = e || window.event;
+
+			var message = "Leaving this page without saving will cause you to lose your form.";
+			if (e) {
+				e.returnValue = message;
+			}
+			return message;
+		}
+		window.onbeforeunload = confirmOnExit;
+		//window.onbeforeunload = null;
 	});
 </script>
 {% endblock %}
