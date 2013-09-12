@@ -85,14 +85,14 @@ Window operations
 	GUI.  It is automatically called if no screens exist on
 	creation of a question.
 */
-function jsGUIAddWindow() {
+function jsGUIAddWindow(x, y) {
 	var windowID = "screen" + $(".window").length;
 	var sortID = "sort" + $(".window").length;
 
 	$('<div>', { id: windowID } )
 	.css({
-		left: '10em',
-		top: '10em',
+		left: x + 'em',
+		top: y + 'em',
 		position: 'absolute',
 		backgroundColor: '#555555'
 	}).addClass('window').appendTo('#builder_gui');
@@ -153,6 +153,8 @@ function jsGUIAddWindow() {
 	//add endpoints to the screen
 	jsPlumb.addEndpoint($('#' + windowID), sourceEndpoint);
 	jsPlumb.addEndpoint($('#' + windowID), targetEndpoint);
+
+	return windowID;
 }
 
 /* 
@@ -207,21 +209,26 @@ Question operations
 	It is called in form_builder.js, before building
 	the JSON.
 */
-function jsGUIAddQuestion(question, currentQuestionName) {
-	if (currentQuestionName == null) {
+function jsGUIAddQuestion(question, currentQuestionName, currentNum) {
+	if (!currentQuestionName) {
 		var tempID = "dynQuestion_" + $(".question").length;
 		
 		// Create the window first, if none exists
 		if ($(".window").length < 1) {
-			jsGUIAddWindow();
+			jsGUIAddWindow(10, 10);
 		}
 
 		var recentSort = "sort" + ($(".sortable").length - 1);
 
 		//Create the question
 		var div = $('<li>', { id: tempID },
-							{ class: 'question' } )
-				  .appendTo('#' + recentSort);
+							{ class: 'question' } );
+		if (!currentWindow) {
+			div.appendTo('#' + recentSort);
+		}
+		else {
+			div.appendTo('#sort' + currentNum);
+		}
 
 	  	// Start adding Text to the question
 	  	$('<div>', {
@@ -519,4 +526,50 @@ function jsGUIDFS() {
 	console.log(questionDictionary);
 	console.log(pathDictionary);
 	return [questionDictionary, pathDictionary];
+}
+
+/*
+	This function is meant to be called when someone wants to
+	edit a repository.  This is meant to visually build the GUI
+	from a provided JSON repo. 
+*/
+function rebuildFormGUI(jsonRepo) {
+	var jsonConvert = JSON.parse(jsonRepo);
+	var xIndex, yIndex = 10;
+	var name = jsonConvert.name;
+	var currentWindow;
+	var prevWindow;
+
+	for (var key in jsonConvert.fields) {
+		if (!key.type) {
+			currentWindow = jsGUIAddWindow(xIndex, yIndex);
+			var currentQuestion;
+			currentQuestion.label = key.label;
+			currentQuestion.type = key.type;
+			currentQuestion.name = key.name;
+			jsGUIAddQuestion(currentQuestion, null,
+							 currentWindow.substring(6));
+		}
+
+		else if (key.type =='group') {
+			currentWindow = jsGUIAddWindow(xIndex, yIndex);
+			for (var elements in key.children) {
+				var currentQuestion;
+				currentQuestion.label = elements.label;
+				currentQuestion.type = elements.type;
+				currentQuestion.name = elements.name;
+				jsGUIAddQuestion(currentQuestion, null, 
+								 currentWindow.substring(6));
+			}
+
+		}
+
+		else {
+			console.log("New type!  Need to take care of!");
+		}
+
+		xIndex += 10;
+		prevWindow = currentWindow;
+
+	}
 }
