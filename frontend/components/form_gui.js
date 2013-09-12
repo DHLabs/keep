@@ -71,10 +71,6 @@ function jsGUIReady() {
 			]
 		})
 
-		// Debugging message, tells what is being connected.
-		jsPlumb.bind("connectionDrag", function(connection) {
-			console.log("connection " + connection.id + " is being dragged. suspendedElement is ", connection.suspendedElement, " of type ", connection.suspendedElementType);
-		})
 	});
 };
 
@@ -115,7 +111,15 @@ function jsGUIAddWindow() {
 	//make the list sortable and add a placeholder!
 	$('#' + sortID).sortable({
 		connectWith: ".sortable",
-		placeholder: "ui-state-highlight"
+		placeholder: "ui-state-highlight",
+		stop: function(event, ui) {
+			var tempList = $(ui.item).parent().parent().find('.relevanceList');
+			if (tempList != undefined) {
+				tempList.children('li').each(function() {
+					jsPlumb.repaint(this);
+				});
+			}
+		}
 	}).addClass('sortable');
 
 	//make the screen draggable!
