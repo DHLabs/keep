@@ -1,3 +1,24 @@
+# Keep
+
+Keep is a general purpose platform that is designed to facilitate data collection and analysis while providing a robust API to support its use in other mediums. 
+
+## Forms
+
+The data collection is defined through forms.  The form structure itself is based on [XForms](https://en.wikipedia.org/wiki/XForms).  Specifically, the OpenRosa subset.  While xforms are originally an xml specification, there is now a JSON representation for them, and both formats are available for use through our API. XForms can created using XLS documents as well with our system.  need documentation of JSON Form)
+
+XForm Documentation:
+
+- [Form Design](http://opendatakit.org/help/form-design/)
+- [Building XForms](https://bitbucket.org/javarosa/javarosa/wiki/buildxforms)
+- [XForm Binding](http://opendatakit.org/help/form-design/binding/)
+
+XLSForm Documentation:
+
+- [XLSForm Overview](http://formhub.org/syntax/)
+- [XLSForm Standard](https://docs.google.com/spreadsheet/ccc?key=0AgpC5gsTSm_4dDRVOEprRkVuSFZUWTlvclJ6UFRvdFE#gid=0)
+
+# Getting Started
+
 # Setting Up Your Dev Environment
 Make sure the following dependencies are installed:
 
@@ -78,4 +99,9 @@ You may now log in to the system using the following credentials.
 **Username:** admin
 
 **Password:** test
+
+# License
+
+Keep is licensed under the terms of the [MIT License](license.txt)
+
 
