@@ -43,7 +43,7 @@ class DataResource( MongoDBResource ):
         authorization = DataAuthorization()
 
     def _build_filters( self, request ):
-        '''
+        """
             Build filters based on request parameters. Filters are formatted as
             follows:
 
@@ -58,7 +58,7 @@ class DataResource( MongoDBResource ):
             Params
             ------
             request : HttpRequest
-        '''
+        """
 
         filters = {}
         for param in request.GET:

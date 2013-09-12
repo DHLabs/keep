@@ -30,9 +30,10 @@ ALL_REPO_PERMISSIONS = [
 
 
 class RepoSerializer( Serializer ):
-    '''
+    """
         Converts a QuerySet of Repository objects into a specific JSON format.
-    '''
+    """
+
     def end_object( self, obj ):
         # We want to refer to repos externally according to their mongo_id
         self._current[ 'id' ] = obj.mongo_id
@@ -104,9 +105,10 @@ class RepositoryManager( models.Manager ):
 
 
 class Relationship( models.Model ):
-    '''
+    """
         Represents a relationship between two repos
-    '''
+    """
+
     name        = models.CharField( max_length=256, blank=False )
 
     repo_parent = models.ForeignKey( 'repos.Repository',
@@ -124,7 +126,7 @@ class Relationship( models.Model ):
 
 
 class Repository( models.Model ):
-    '''
+    """
         Represents a data repository.
 
         Fields
@@ -159,7 +161,8 @@ class Repository( models.Model ):
         date_created : timestamp : auto
         date_uploaded : timestamp : auto
             Datetime that the repository was created.
-    '''
+    """
+
     objects     = RepositoryManager()
 
     mongo_id    = models.CharField( max_length=24,
@@ -207,9 +210,9 @@ class Repository( models.Model ):
             ( 'delete_data', 'Delete data from Repo' ), )
 
     def delete( self ):
-        '''
+        """
             Delete all data & objects related to this object
-        '''
+        """
         # Remove related data from MongoDB
         db.repo.remove( { '_id': ObjectId( self.mongo_id ) } )
         db.data.remove( { 'repo': ObjectId( self.mongo_id ) } )
@@ -254,9 +257,9 @@ class Repository( models.Model ):
             super( Repository, self ).save( *args, **kwargs )
 
     def add_data( self, data, files ):
-        '''
+        """
             Validate and add a new data record to this repo!
-        '''
+        """
         fields = self.fields()
         validated_data, valid_files = validate_and_format(fields, data, files)
 

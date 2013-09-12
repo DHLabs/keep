@@ -31,7 +31,7 @@ class VocabResource( MongoDBResource ):
             A string containing the medical term.
         group : string
             Unused as of now, a string defining the medical dictionary
-            the term is from.
+            the term is from.  (For KEEP, we have 'snomed' as our group)
     """
 
     id      = fields.CharField( attribute='_id' )
@@ -66,6 +66,7 @@ class VocabResource( MongoDBResource ):
             -------
             String
         """
+        
         if 'term__istartswith' not in filters:
             return BadRequest
         return super( VocabResource, self ).build_filters( filters )

@@ -7,9 +7,9 @@ from .models import Study
 
 
 class NewStudyForm( forms.Form ):
-    '''
+    """
         Validates and creates a new study.
-    '''
+    """
 
     name = forms.CharField()
     description = forms.CharField( required=False )
@@ -22,7 +22,7 @@ class NewStudyForm( forms.Form ):
         return self.cleaned_data[ 'description' ].strip()
 
     def save( self, user, org=None ):
-        '''
+        """
             Save and return the new study. Should only be called if there are
             no errors in the form.
 
@@ -34,7 +34,7 @@ class NewStudyForm( forms.Form ):
             org : Organization : optional
                 If a user is creating a study as part of an organization, this
                 will be set.
-        '''
+        """
         if not self.is_valid():
             return None
 

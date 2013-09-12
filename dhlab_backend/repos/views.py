@@ -54,9 +54,9 @@ def move_repo( request ):
 
 @login_required
 def new_repo( request ):
-    '''
+    """
         Creates a new repo under the currently logged in user.
-    '''
+    """
     # Handle XForm upload
     if request.method == 'POST':
         # Check for a valid XForm and parse the file!
@@ -90,10 +90,10 @@ def new_repo( request ):
 
 @login_required
 def edit_repo( request, repo_id ):
-    '''
+    """
         Edits a data repository
         Takes user to Form Builder
-    '''
+    """
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
     # Check that this user has permission to edit this repo
@@ -143,12 +143,12 @@ def edit_repo( request, repo_id ):
 
 @login_required
 def delete_repo( request, repo_id ):
-    '''
+    """
         Delete a data repository.
 
         Checks if the user is the original owner of the repository and removes
         the repository and the accompaning repo data.
-    '''
+    """
 
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
@@ -166,10 +166,10 @@ def delete_repo( request, repo_id ):
 @require_POST
 @login_required
 def toggle_public( request, repo_id ):
-    '''
+    """
         Toggle's a data repo's "publicness". Only the person who owns the form
         is allowed to make such changes to the form settings.
-    '''
+    """
 
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
@@ -188,11 +188,11 @@ def toggle_public( request, repo_id ):
 @require_POST
 @login_required
 def toggle_form_access( request, repo_id ):
-    '''
+    """
         Toggle's a form's access(Whether someone can view the form and submit data).
         Only the person who owns the form
         is allowed to make such changes to the form settings.
-    '''
+    """
 
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
@@ -209,9 +209,9 @@ def toggle_form_access( request, repo_id ):
 @csrf_exempt
 @login_required
 def share_repo( request, repo_id ):
-    '''
+    """
         Modifies sharing permissions for specific users
-    '''
+    """
 
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
@@ -245,10 +245,10 @@ def share_repo( request, repo_id ):
 
 @csrf_exempt
 def webform( request, username, repo_name ):
-    '''
+    """
         Simply grab the survey data and send it on the webform. The webform
         will handle rendering and submission of the final data to the server.
-    '''
+    """
 
     account = user_or_organization( username )
     if account is None:
@@ -287,12 +287,12 @@ def webform( request, username, repo_name ):
 
 @require_GET
 def repo_viz( request, username, repo_name ):
-    '''
+    """
         View repo <repo_name> under user <username>.
 
         Does the checks necessary to determine whether the current user has the
         authority to view the current repository.
-    '''
+    """
 
     # Grab the user/organization based on the username
     account = user_or_organization( username )
