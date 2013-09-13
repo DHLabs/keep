@@ -531,16 +531,24 @@ function jsGUIDFS() {
 /*
 	This function is meant to be called when someone wants to
 	edit a repository.  This is meant to visually build the GUI
-	from a provided JSON repo. 
+	from a provided JSON repo. This is the method that should be
+	called when rebuilding, the Rebuild Recurse method is a helper
+	method, and should not be called outside of rebuildFormGUI.
 */
 function rebuildFormGUI(jsonRepo) {
 	var jsonConvert = JSON.parse(jsonRepo);
 	var xIndex, yIndex = 10;
 	var name = jsonConvert.name;
-	var currentWindow;
-	var prevWindow;
+	var currentWindow;  // ID of the current window, for jsPlumb
+	var prevWindow;     // ID of the previous window, for jsPlumb
 
-	for (var key in jsonConvert.fields) {
+	$('#id_name').val(name);
+
+	rebuildRecurse(jsonConvert.fields, xIndex, yIndex);
+}
+
+function rebuildRecurse(jsonObject, xIndex, yIndex, currWind, prevWind) {
+	for (var key in jsonObject) {
 		if (!key.type) {
 			currentWindow = jsGUIAddWindow(xIndex, yIndex);
 			var currentQuestion;
@@ -552,16 +560,28 @@ function rebuildFormGUI(jsonRepo) {
 		}
 
 		else if (key.type =='group') {
-			currentWindow = jsGUIAddWindow(xIndex, yIndex);
-			for (var elements in key.children) {
-				var currentQuestion;
-				currentQuestion.label = elements.label;
-				currentQuestion.type = elements.type;
-				currentQuestion.name = elements.name;
-				jsGUIAddQuestion(currentQuestion, null, 
-								 currentWindow.substring(6));
+			// No control, chance of being nested group, recurse!
+			if (!key.control) {
+				rebuildRecurse(key.children, xIndex + 10, yIndex);
 			}
 
+			/* 
+				If there are appearance controls, there should be no
+				nested groups under it.  Handle the question adding
+				slightly differently (extra loop), unfortunately, can't
+				recurse in this case.
+			*/
+			else {
+				currentWindow = jsGUIAddWindow(xIndex, yIndex);
+				for (var elements in key.children) {
+					var currentQuestion;
+					currentQuestion.label = elements.label;
+					currentQuestion.type = elements.type;
+					currentQuestion.name = elements.name;
+					jsGUIAddQuestion(currentQuestion, null, 
+									 currentWindow.substring(6));
+				}
+			}
 		}
 
 		else {
