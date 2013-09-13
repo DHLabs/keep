@@ -215,16 +215,24 @@
 
 {% block content %}
 <div class='fourteen columns offset-by-one'>
-	<form id='repoEditForm' action='.' method='post' enctype='multipart/form-data'>
-		{% csrf_token %}
+	
+		
+
+
 
 		<!-- Modal view for editing repository settings -->
 		<div id='repositoryDefaultsWindow' title='New Repository' style='display:none;'>
+
+			<form id='repoEditForm' action='.' method='post' enctype='multipart/form-data'>
+			{% csrf_token %}
+
 			<label {% if form.name.errors %}style='color:red'{%endif%}>
 				<strong>Repository name</strong>
 			</label>
 			{{ form.name }}
 			{{ form.name.errors }}
+
+			{{ form.survey_json }}
 
 			<label>
 				<strong>Description (optional)</strong>
@@ -255,6 +263,8 @@
 				</div>
 			</label>
 			<hr />
+
+			</form>
 
 			<a href="#" data-toggle="modal" class="btn" onclick="closeNameDialog();">Close</a>
 		</div>
@@ -370,7 +380,7 @@
 
 <div id='builder_gui' onchange='buildSurvey()'></div>
 		
-	</form>
+	
 </div>
 
 {% endblock %}
