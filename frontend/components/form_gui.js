@@ -223,7 +223,7 @@ function jsGUIAddQuestion(question, currentQuestionName, currentNum) {
 		//Create the question
 		var div = $('<li>', { id: tempID },
 							{ class: 'question' } );
-		if (!currentWindow) {
+		if (!currentNum) {
 			div.appendTo('#' + recentSort);
 		}
 		else {
