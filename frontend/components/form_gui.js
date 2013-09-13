@@ -539,15 +539,19 @@ function rebuildFormGUI(jsonRepo) {
 	var jsonConvert = JSON.parse(jsonRepo);
 	var xIndex, yIndex = 10;
 	var name = jsonConvert.name;
-	var currentWindow;  // ID of the current window, for jsPlumb
-	var prevWindow;     // ID of the previous window, for jsPlumb
-
+	
 	$('#id_name').val(name);
 
 	rebuildRecurse(jsonConvert.fields, xIndex, yIndex);
 }
 
-function rebuildRecurse(jsonObject, xIndex, yIndex, currWind, prevWind) {
+function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
+	var currentWindow;  // ID of the current window, for jsPlumb
+	var prevWindow;     // ID of the previous window, for jsPlumb
+
+	if (prevWind){
+		prevWindow = prevWind;
+	}
 	for (var key in jsonObject) {
 		if (!key.type) {
 			currentWindow = jsGUIAddWindow(xIndex, yIndex);
@@ -562,7 +566,7 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, currWind, prevWind) {
 		else if (key.type =='group') {
 			// No control, chance of being nested group, recurse!
 			if (!key.control) {
-				rebuildRecurse(key.children, xIndex + 10, yIndex);
+				rebuildRecurse(key.children, xIndex + 10, yIndex, prevWindow);
 			}
 
 			/* 
@@ -586,6 +590,10 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, currWind, prevWind) {
 
 		else {
 			console.log("New type!  Need to take care of!");
+		}
+
+		if(prevWindow) {
+			jsPlumb.connect({source:prevWindow, target:currentWindow;})
 		}
 
 		xIndex += 10;
