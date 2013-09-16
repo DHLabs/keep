@@ -97,7 +97,14 @@ function jsGUIAddWindow(x, y) {
 		backgroundColor: '#555555'
 	}).addClass('window').appendTo('#builder_gui');
 
-	//add hidden group settings
+	//add hidden group labels and settings
+	$('<div>').css({
+		visibility: 'hidden',
+		padding: '0',
+		'padding-bottom': '0',
+		height: '0'
+	}).addClass('hiddenGroupLabel').appendTo('#' + windowID);
+
 	$('<div>', { html: 'field-list'	})
 	.css({
 		visibility: 'hidden',
@@ -174,6 +181,8 @@ function jsGUIDeleteWindow(window) {
 }
 
 function jsGUIViewGroupSettings(window) {
+	$('#groupLabel').html($('#' + window + ' .hiddenGroupLabel').html());
+
 	$( '#groupSettingsWindow' ).dialog ({
 		'width': 300
 	});
@@ -194,6 +203,8 @@ function jsGUICloseGroupSettingsDialog() {
 	}
 	$("#groupSettingsWindow").removeClass('[class^="screen"]');
 	var groupType = $("#groupTypeToggle").val().replace(' ', '-');
+
+	$('#' + windowSet + ' .hiddenGroupLabel').html($('#groupLabel').html());
 
 	if ($('#' + windowSet + ' .hiddenGroupSettings').html() != groupType) {
 		$('#' + windowSet + ' .hiddenGroupSettings').html(groupType);
@@ -450,7 +461,7 @@ function jsGUIDFS() {
 	var questionDictionary = {};
 
 	// Dictionary in following form: "screen#: {attachScreen#: Relevance}
-	// There can also be {settings: type} in the case of a group,
+	// There can also be {settings: [label, type]} in the case of a field/grid-list,
 	// and {attachScreen#: none} in the case of a generic connection
 	var pathDictionary = {};
 	var i = "";
@@ -494,7 +505,9 @@ function jsGUIDFS() {
 			});
 			questionDictionary[i] = tempQuestionArray;
 			// Set the group settings 
-			tempConnectionDict['settings'] = $(currentDiv).find('.hiddenGroupSettings').html();
+			tempConnectionDict['settings'] = 
+				[$(currentDiv).find('.hiddenGroupLabel').html(),
+				$(currentDiv).find('.hiddenGroupSettings').html()];
 		}
 
 		// In the case of no connections, continue to the next screen
@@ -542,9 +555,7 @@ function rebuildFormGUI(jsonRepo) {
 	var xIndex = yIndex = 10;
 	var name = jsonRepo.name;
 	var description = jsonRepo.description;
-	console.log(jsonRepo);
-	console.log(document.temp_dict);
-	
+
 	$('#id_name').val(name);
 	$('#id_desc').val(description);
 
@@ -576,6 +587,7 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 			*/
 			else {
 				currentWindow = jsGUIAddWindow(xIndex, yIndex);
+				$('#' + currentWindow + ' .hiddenGroupLabel').html(key.label);
 				$('#' + currentWindow + ' .hiddenGroupSettings').html(key.control.appearance);
 				for (var j = 0; j < key.children.length; j++) {
 					var inKey = key.children[j];

@@ -152,8 +152,6 @@
 <script type='text/javascript'>
 	$( function() {
 
-		//jsGUIReady();
-
 		$( '#questionName' ).autocomplete( {
 			appendTo: '#autofill_list',
 			minLength: 2,
@@ -273,6 +271,10 @@
 
 		<!-- Modal View for editing group settings -->
 		<div id='groupSettingsWindow' title="Group Settings" style="display:none;">
+			<div>
+				Group Label:
+				<textarea rows="4" cols="50" name="groupLabel" id="groupLabel"></textarea>
+			</div>
 			<div>
 				Group Type:
 				<select id="groupTypeToggle" name="groupTypeToggle">
