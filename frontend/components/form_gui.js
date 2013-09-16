@@ -592,8 +592,17 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 			console.log("New type!  Need to take care of!");
 		}
 
+		// If there is a bind, there is relevances, handle them
+		if(key.bind) {
+			var relevances = key.bind.relevant;
+			var relQuestion = relevances.substring(relevances.indexOf("${") + 2,
+												   relevances.indexOf("}"));
+			var relChoice = relevances.substring(relevances.indexOf("'") + 1,
+												 relevances.lastIndexOf("'"));
+		}
+
 		if(prevWindow) {
-			jsPlumb.connect({source:prevWindow, target:currentWindow;})
+			jsPlumb.connect({source:prevWindow, target:currentWindow;});
 		}
 
 		xIndex += 10;
