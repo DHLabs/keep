@@ -185,18 +185,22 @@ function jsGUIViewGroupSettings(window) {
 	to the group list (at some point...)
 */
 function jsGUICloseGroupSettingsDialog() {
-	var windowSet = $("#groupSettingsWindow").attr('class');
-	$("#groupSettingsWindow").removeClass(windowSet);
+	var windowSet = $("#groupSettingsWindow").attr('class').split(' ');
+	for (strings in windowSet) {
+		if (windowSet[strings].lastIndexOf('screen', 0) === 0) {
+			windowSet = windowSet[strings];
+			break;
+		}
+	}
+	$("#groupSettingsWindow").removeClass('[class^="screen"]');
 	var groupType = $("#groupTypeToggle").val().replace(' ', '-');
 
-	console.log(groupType);
 	if ($('#' + windowSet + ' .hiddenGroupSettings').html() != groupType) {
 		$('#' + windowSet + ' .hiddenGroupSettings').html(groupType);
-		console.log("Here");
 	}
 
 
-	$("#groupSettingsWindow").dialog ( 'close' );
+	$("#groupSettingsWindow").dialog( 'close' );
 }
 
 /*
@@ -384,8 +388,6 @@ function jsGUIDeleteRelevance(relevance) {
 	
 	jsPlumb.remove($('#' + relevance));
 	$('#' + relevance).remove();
-
-	console.log(releParent);
 
 	if (releParent.children('li').length < 1) {
 		releParent.parent().find('h5').remove();
@@ -602,7 +604,7 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		}
 
 		if(prevWindow) {
-			jsPlumb.connect({source:prevWindow, target:currentWindow;});
+			jsPlumb.connect({source:prevWindow, target:currentWindow});
 		}
 
 		xIndex += 10;
