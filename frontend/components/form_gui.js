@@ -601,11 +601,6 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 							 currentWindow.substring(6));
 		}
 
-
-//		else {
-//			console.log("New type!  Need to take care of!");
-//		}
-
 		// If there is a bind, there are relevances, handle them
 		if(key.bind) {
 			var relevances = key.bind.relevant;
@@ -615,7 +610,9 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		}
 
 		if(prevWindow) {
-			jsPlumb.connect({source:prevWindow, target:currentWindow});
+			var startEndpoint = jsPlumb.getEndpoints($('#' + prevWindow))[0];
+			var endEndpoint = jsPlumb.getEndpoints($('#' + currentWindow))[1];
+			jsPlumb.connect({source:startEndpoint, target:endEndpoint});
 		}
 
 		xIndex += 20;

@@ -4,6 +4,7 @@ var currentQuestionName;
 var currentGroupName;
 
 $( function() {
+	jsGUIReady();
 
    if( document.repo ) {
      questionList = document.repo.children;
