@@ -19,6 +19,7 @@ $( function() {
      $( '#survey_builder' ).show();
      reloadQuestionListHTML();
      buildSurvey();
+     rebuildFormGUI(document.repo);
    } else {
 
    	var jsonvalue = $("#id_survey_json").val();

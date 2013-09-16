@@ -85,14 +85,16 @@
 	}
 
 	.window {
-		height: 30em;
+		min-height: 30em;
+		height: auto;
 		width: 15em;
 		border: 2px solid #000;
 		position: absolute;
 	}
 
 	.question {
-		height: 5em;
+		min-height: 5em;
+		height: auto;
 		width: 95%;
 		margin-left: auto;
 		margin-right: auto;
@@ -136,8 +138,8 @@
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script src="{% static 'js/vendor/jquery.center.js' %}"></script>
 <script src="{% static 'js/vendor/jquery.ui.touch-punch.min.js' %}"></script>
-<script src="{% static 'js/vendor/form_builder.js' %}"></script>
 <script src="{% static 'js/vendor/jquery.jsPlumb-1.4.1-all-min.js' %}"></script>
+<script src="{% static 'js/vendor/form_builder.js' %}"></script>
 <script src="{% static 'js/vendor/form_gui.js' %}"></script>
 <script id='form_id' type='text/javascript'>
 	{% if repo_json %}

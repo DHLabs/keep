@@ -538,13 +538,17 @@ function jsGUIDFS() {
 	method, and should not be called outside of rebuildFormGUI.
 */
 function rebuildFormGUI(jsonRepo) {
-	var jsonConvert = JSON.parse(jsonRepo);
-	var xIndex, yIndex = 10;
-	var name = jsonConvert.name;
+	//var jsonConvert = JSON.parse(jsonRepo);
+	var xIndex = yIndex = 10;
+	var name = jsonRepo.name;
+	var description = jsonRepo.description;
+	console.log(jsonRepo);
+	console.log(document.temp_dict);
 	
 	$('#id_name').val(name);
+	$('#id_desc').val(description);
 
-	rebuildRecurse(jsonConvert.fields, xIndex, yIndex);
+	rebuildRecurse(jsonRepo.children, xIndex, yIndex);
 }
 
 function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
@@ -554,21 +558,14 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 	if (prevWind){
 		prevWindow = prevWind;
 	}
-	for (var key in jsonObject) {
-		if (!key.type) {
-			currentWindow = jsGUIAddWindow(xIndex, yIndex);
-			var currentQuestion;
-			currentQuestion.label = key.label;
-			currentQuestion.type = key.type;
-			currentQuestion.name = key.name;
-			jsGUIAddQuestion(currentQuestion, null,
-							 currentWindow.substring(6));
-		}
+	for (var i = 0; i < jsonObject.length; i++) {
 
-		else if (key.type =='group') {
+		var key = jsonObject[i];
+
+		if (key.type =='group') {
 			// No control, chance of being nested group, recurse!
 			if (!key.control) {
-				rebuildRecurse(key.children, xIndex + 10, yIndex, prevWindow);
+				rebuildRecurse(key.children, xIndex + 20, yIndex + 100, prevWindow);
 			}
 
 			/* 
@@ -579,11 +576,14 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 			*/
 			else {
 				currentWindow = jsGUIAddWindow(xIndex, yIndex);
-				for (var elements in key.children) {
-					var currentQuestion;
-					currentQuestion.label = elements.label;
-					currentQuestion.type = elements.type;
-					currentQuestion.name = elements.name;
+				$('#' + currentWindow + ' .hiddenGroupSettings').html(key.control.appearance);
+				for (var j = 0; j < key.children.length; j++) {
+					var inKey = key.children[j];
+					var currentQuestion = {
+						label: inKey.label,
+						type: inKey.type,
+						name: inKey.name
+					}
 					jsGUIAddQuestion(currentQuestion, null, 
 									 currentWindow.substring(6));
 				}
@@ -591,23 +591,34 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		}
 
 		else {
-			console.log("New type!  Need to take care of!");
+			currentWindow = jsGUIAddWindow(xIndex, yIndex);
+			var currentQuestion = {
+				label: key.label,
+				type: key.type,
+				name: key.name
+			}
+			jsGUIAddQuestion(currentQuestion, null,
+							 currentWindow.substring(6));
 		}
 
-		// If there is a bind, there is relevances, handle them
+
+//		else {
+//			console.log("New type!  Need to take care of!");
+//		}
+
+		// If there is a bind, there are relevances, handle them
 		if(key.bind) {
 			var relevances = key.bind.relevant;
 			var relQuestion = relevances.substring(relevances.indexOf("${") + 2,
 												   relevances.indexOf("}"));
-			var relChoice = relevances.substring(relevances.indexOf("'") + 1,
-												 relevances.lastIndexOf("'"));
+			var relChoice = relevances.substring(relevances.indexOf("=") + 2);
 		}
 
 		if(prevWindow) {
 			jsPlumb.connect({source:prevWindow, target:currentWindow});
 		}
 
-		xIndex += 10;
+		xIndex += 20;
 		prevWindow = currentWindow;
 
 	}
