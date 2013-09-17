@@ -25,12 +25,21 @@ table.table {
 
 	td {
 		padding: 8px 16px;
+	}
+}
 
-		a {
-			display:block;
+table.compressed {
+	font-size: .9em;
+
+	td {
+		padding: 4px 8px;
+
+		input, select {
+			margin:0;
 		}
 	}
 }
+
 
 table.fixed {
 	td, th {

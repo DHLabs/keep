@@ -6,9 +6,28 @@ define( [ 'jquery',
           'app/models/data',
           'app/models/repo',
 
-          'app/viz/raw_view' ],
+          'app/viz/modals/sharing',
+          'app/viz/raw_view',
 
-( $, _, Backbone, Marionette, DataModel, RepoModel, DataRawView ) ->
+          'backbone_modal',
+          'jqueryui' ],
+
+( $, _, Backbone, Marionette, DataModel, RepoModel, ShareSettingsModal, DataRawView ) ->
+
+
+    class VizActions extends Backbone.Marionette.View
+        el: '#viz-actions'
+
+        events:
+            'click #share-btn': 'sharing_settings'
+
+        initialize: ( options ) ->
+            @modalView = new ShareSettingsModal( options )
+
+        sharing_settings: ( event ) ->
+            $('.modal').html( @modalView.render().el )
+            @modalView.onAfterRender( $( '.modal' ) )
+
 
     class VizTabs extends Backbone.Marionette.View
         el: '#viz-options'
@@ -39,8 +58,10 @@ define( [ 'jquery',
         el: '#viz-chrome'
 
         initialize: ( options ) ->
-            view = new VizTabs()
-            @attachView( view )
+            @vizActions = new VizActions( options )
+            @vizTabs = new VizTabs( options )
+
+            @attachView( @vizTabs )
 
 
     # Instantiate and startup the new process.
@@ -51,7 +72,7 @@ define( [ 'jquery',
         @repo = new RepoModel( document.repo )
 
         # Add the different regions
-        vizChrome = new VizChrome
+        vizChrome = new VizChrome( { repo: @repo } )
         rawView   = new DataRawView( { repo: @repo.id, fields: @repo.fields() } )
 
         DataVizApp.addRegions(
@@ -75,14 +96,3 @@ define( [ 'jquery',
 
     return DataVizApp
 )
-
-remove_permissions= (div,username) ->
-    $.ajax({
-        type: "DELETE",
-        url: "/repo/user_share/"+$( '#form_id' ).html()+"/?username=" + username,
-        data: "username=" + username,
-        success: () ->
-            div.parentNode.parentNode.innerHTML = ""
-
-    })
-    @

@@ -1,9 +1,6 @@
 import json
 
-from backend.db import db
 from backend.db import user_or_organization
-
-from bson import ObjectId
 
 from django.conf.urls import url
 from django.http import HttpResponse

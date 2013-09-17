@@ -1,4 +1,4 @@
-define( [ 'backbone' ],
+define( [ 'backbone', 'jquery_cookie' ],
 
 ( Backbone ) ->
 
@@ -19,6 +19,19 @@ define( [ 'backbone' ],
             fields = []
             @_detect_fields( @get( 'children' ), fields )
             return fields
+
+        share: ( options ) ->
+
+            share_url = "/repo/user_share/#{@id}/"
+
+            $.post( share_url,
+                    { username: options.data.user, permissions: options.data.perms },
+                    ( response ) ->
+                        if response == 'success' and options.success?
+                            options.success( response )
+                        else if options.failure?
+                            options.failure( response )
+            )
 
         toJSON: ->
             attrs = _(@attributes).clone()
