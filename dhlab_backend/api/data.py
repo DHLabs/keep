@@ -117,16 +117,20 @@ class DataResource( MongoDBResource ):
 
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
 
+            limit = 50
+            if request.GET.get( 'format', None ) == 'csv':
+                limit = cursor.count()
+
             meta = {
-                'limit': 50,
+                'limit': limit,
                 'offset': offset,
                 'count': cursor.count(),
-                'pages': cursor.count() / 50
+                'pages': cursor.count() / limit
             }
 
             data = {
                 'meta': meta,
-                'data': dehydrate_survey( cursor.skip(offset * 50).limit(50)) }
+                'data': dehydrate_survey( cursor.skip( offset * limit ).limit( limit ) ) }
 
             return self.create_response( request, data )
         except ValueError:
