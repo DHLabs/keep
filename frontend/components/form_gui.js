@@ -368,6 +368,8 @@ function jsGUIAddRelevance(window, relevance) {
 
 	// Add endpoint to the relevance
 	jsPlumb.addEndpoint($('#' + tempID), sourceEndpoint);
+
+	return tempID;
 }
 
 function jsGUIEditRelevance(intakeRelevance) {
@@ -551,7 +553,6 @@ function jsGUIDFS() {
 	method, and should not be called outside of rebuildFormGUI.
 */
 function rebuildFormGUI(jsonRepo) {
-	//var jsonConvert = JSON.parse(jsonRepo);
 	var xIndex = yIndex = 10;
 	var name = jsonRepo.name;
 	var description = jsonRepo.description;
@@ -614,21 +615,86 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		}
 
 		// If there is a bind, there are relevances, handle them
-		if(key.bind) {
-			var relevances = key.bind.relevant;
-			var relQuestion = relevances.substring(relevances.indexOf("${") + 2,
-												   relevances.indexOf("}"));
-			var relChoice = relevances.substring(relevances.indexOf("=") + 2);
+		if(key.bind && key.bind.relevant) {
+			var relevanceSet = relevanceParser(key.bind.relevant);
+
+			for (var j = 0; j < relevanceSet.length; j++) {
+				var corresWindow = $('div.true-name:contains("' + relevanceSet[j].name + '")')
+									.parent().parent().parent().attr('id');
+				var tempID = jsGUIAddRelevance(corresWindow, relevanceSet[j]);
+				var releStart = jsPlumb.getEndpoints($('#' + tempID))[0];
+				var releEnd = jsPlumb.getEndpoints($('#' + currentWindow))[1];
+				jsPlumb.connect({source:releStart, target:releEnd});
+			}
 		}
 
-		if(prevWindow) {
-			var startEndpoint = jsPlumb.getEndpoints($('#' + prevWindow))[0];
-			var endEndpoint = jsPlumb.getEndpoints($('#' + currentWindow))[1];
-			jsPlumb.connect({source:startEndpoint, target:endEndpoint});
+		else {
+			if(prevWindow) {
+				var startEndpoint = jsPlumb.getEndpoints($('#' + prevWindow))[0];
+				var endEndpoint = jsPlumb.getEndpoints($('#' + currentWindow))[1];
+				jsPlumb.connect({source:startEndpoint, target:endEndpoint});
+			}
 		}
 
 		xIndex += 20;
 		prevWindow = currentWindow;
 
 	}
+}
+
+/*
+	Another helper function, mainly used in rebuildRecurse to process
+	a string of relevances into a form that the form rebuilder can
+	easily handle.  This is down here rather than in the rebuild
+	function to	declutter the code a bit.
+*/
+function relevanceParser(relevanceString) {
+	var preprocRelevances;
+	var procRelevances = new Array();
+	if (relevanceString.indexOf("AND") != -1) {
+		preprocRelevances = relevanceString.split(" AND ");
+	}
+	else {
+		preprocRelevances = relevanceString.split(" OR ");
+	}
+
+	for (var relevance in preprocRelevances) {
+		var relevanceType;
+		if( preprocRelevances[relevance].indexOf(">=") != -1 ) {
+			relevantType = ">=";
+		} else if( preprocRelevances[relevance].indexOf("<=") != -1 ) {
+			relevantType = "<=";
+		} else if( preprocRelevances[relevance].indexOf("<") != -1 ) {
+			relevantType = "<";
+		} else if( preprocRelevances[relevance].indexOf(">") != -1 ) {
+			relevantType = ">";
+		} else if( preprocRelevances[relevance].indexOf("!=") != -1 ) {
+			relevantType = "!=";
+		} else if( preprocRelevances[relevance].indexOf("=") != -1 ) {
+			relevantType = "=";
+		}
+
+		var strComps = preprocRelevances[relevance].split( " " + relevantType + " " )
+
+		var relevantQuestionName = strComps[0].split('$').join('');
+		relevantQuestionName = relevantQuestionName.split('$').join('');
+		relevantQuestionName = relevantQuestionName.split('{').join('');
+		relevantQuestionName = relevantQuestionName.split('}').join('');
+		var relevantValue = strComps[1].split("'").join("");
+
+		var singleProcRelevance = new (function(){
+			this.name = relevantQuestionName;
+			if(!relevanceType) {
+				this.conditions = relevantValue;
+			}
+			else {
+				this.conditions = relevanceType + ' ' + relevantValue;
+			}
+		});
+
+		relevanceList.push(singleProcRelevance);
+		procRelevances.push(singleProcRelevance);
+	}
+
+	return procRelevances;
 }
