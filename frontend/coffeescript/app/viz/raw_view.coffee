@@ -160,6 +160,13 @@ define( [ 'jquery',
             # page. )
             $( @el ).scroll( { view: @ }, @detect_pagination )
 
+            # Set the location of the data div and change it when we resize
+            # the window.
+            $( @el ).css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
+            $( window ).resize( ( event ) =>
+                $( @el ).css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
+            )
+
             # Initialize the different available views.
             @rawView = new DataCollectionView( options )
             @mapView = new DataMapView( options )
