@@ -564,8 +564,8 @@ function rebuildFormGUI(jsonRepo) {
 }
 
 function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
-	var currentWindow;  // ID of the current window, for jsPlumb
-	var prevWindow;     // ID of the previous window, for jsPlumb
+	var currentWindow;   // ID of the current window, for jsPlumb
+	var prevWindow = []; // ID of the previous window(s), for jsPlumb
 
 	if (prevWind){
 		prevWindow = prevWind;
@@ -626,18 +626,23 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 				var releEnd = jsPlumb.getEndpoints($('#' + currentWindow))[1];
 				jsPlumb.connect({source:releStart, target:releEnd});
 			}
+			prevWindow.push(currentWindow);
 		}
 
 		else {
 			if(prevWindow) {
-				var startEndpoint = jsPlumb.getEndpoints($('#' + prevWindow))[0];
 				var endEndpoint = jsPlumb.getEndpoints($('#' + currentWindow))[1];
-				jsPlumb.connect({source:startEndpoint, target:endEndpoint});
+				for (var j = 0; j < prevWindow.length; j++) {
+					var startEndpoint = jsPlumb.getEndpoints($('#' + prevWindow[j]))[0];
+					jsPlumb.connect({source:startEndpoint, target:endEndpoint});
+				}
 			}
+
+			prevWindow = [];
+			prevWindow[0] = currentWindow;
 		}
 
 		xIndex += 20;
-		prevWindow = currentWindow;
 
 	}
 }
