@@ -137,11 +137,14 @@ function jsGUIAddWindow(x, y) {
 	$('<div>').addClass('windowButtons').appendTo('#' + windowID);
 
 	//add a 'Add Relevances' button in the lower left corner
-	$('<button>', {
+
+	//Note: removing relevance path for now until we can come up with a good way
+	// of generating the xform from the tree or putting proper restrictions of some kind
+	/*$('<button>', {
 		onclick: "jsGUIViewRelevance('" + windowID + "')",
 		type: 'button',
 		html: "<i class='icon-filter'></i> Add Relevance"
-	}).addClass( 'relevance-icon' ).appendTo('#' + windowID + ' .windowButtons');
+	}).addClass( 'relevance-icon' ).appendTo('#' + windowID + ' .windowButtons');*/
 
 	//add a delete button in the lower right corner
 	$('<button>', {
@@ -543,6 +546,81 @@ function jsGUIDFS() {
 	console.log(questionDictionary);
 	console.log(pathDictionary);
 	return [questionDictionary, pathDictionary];
+}
+
+//Note: assumes linear tree with no branches for now
+function generateFormFromTree() {
+	var dfs = jsGUIDFS();
+	var questionDictionary = dfs[0];
+	var pathDictionary = dfs[1];
+
+	if( Object.keys(questionDictionary).length != Object.keys(pathDictionary).length ) {
+
+		alert( "Not all screens are connected" );
+		return false;
+	}
+
+	//get the first question
+	var firstScreen;
+	for( var question in pathDictionary ) {
+
+		var found = false;
+		for( var question2 in pathDictionary ) {
+			if( question != question2 ) {
+				for( var connection in question2 ) {
+					if( connection == question ) {
+						found = true;
+						break;
+					}
+				}
+			}
+			if( found ) {
+				break;
+			}
+		}
+
+		if( found ) {
+			firstScreen = question;
+			break;
+		}
+	}
+
+	alert( "first question: " + firstScreen );
+
+	//trace through and build
+	var end = false;
+	var currentScreen = firstScreen;
+	while( !end ) {
+
+		var screenQuestions = questionDictionary[currentScreen];
+		if( screenQuestions.length > 1 ) {
+			//handle group
+		} else if( screenQuestions.length == 0 ) {
+			//TODO: screen with no questions
+		} else {
+			//handle single question
+		}
+
+		//get next screen
+		var screenConnections = Object.keys( pathDictionary[currentScreen] );
+		if( screenConnections.length == 0 ) {
+			//no more screens, breakout
+			end = true;
+			break;
+		} else {
+			//can assume first one here, linearity mandates single connection
+			currentScreen = screenConnections[0];
+		}
+		
+	}
+
+	return true;
+}
+
+function saveRepository() {
+	if (generateFormFromTree() ) {
+		$("#repoEditForm").submit();
+	}
 }
 
 /*

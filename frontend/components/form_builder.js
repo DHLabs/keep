@@ -40,10 +40,6 @@ $( function() {
    }
 });
 
-function saveRepository() {
-	$("#repoEditForm").submit();
-}
-
 function questionTypeChanged() {
 	var questionType = $("#questionType").val();
 
