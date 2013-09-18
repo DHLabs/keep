@@ -6,7 +6,7 @@ from bson import ObjectId
 import pymongo
 
 from tastypie import fields
-from tastypie.authentication import MultiAuthentication, SessionAuthentication
+from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
 from tastypie.http import HttpUnauthorized
 
 from repos.models import Repository
@@ -37,8 +37,10 @@ class DataResource( MongoDBResource ):
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get' ]
 
-        authentication = MultiAuthentication( SessionAuthentication(),
-                                              ApiTokenAuthentication() )
+        authentication = Authentication()
+
+        # authentication = MultiAuthentication( SessionAuthentication(),
+        #                                       ApiTokenAuthentication() )
 
         authorization = DataAuthorization()
 
