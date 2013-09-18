@@ -107,6 +107,7 @@ def user_dashboard( request, username ):
         user_repos = Repository.objects.list_by_user( user=user,
                                                       organizations=organizations,
                                                       public=True )
+        user_studies = []
     else:
         user_repos = Repository.objects.list_by_user( user=user,
                                                       organizations=organizations )

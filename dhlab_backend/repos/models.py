@@ -64,7 +64,7 @@ class RepoSerializer( Serializer ):
 
         # Set the type of the "repo"
         if obj.is_tracker:
-            self._current[ 'type' ] = 'registration'
+            self._current[ 'type' ] = 'register'
         else:
             self._current[ 'type' ] = 'survey'
 
