@@ -1,4 +1,6 @@
+from django.contrib.auth.models import AnonymousUser
 from django.db.models import Q
+
 from tastypie.authorization import Authorization
 
 
@@ -13,10 +15,11 @@ class DataAuthorization( Authorization ):
         logged_in_user = bundle.request.user
 
         if logged_in_user.is_anonymous():
-            return object_detail.is_public
+            return object_detail.is_public or logged_in_user.has_perm( 'view_data', object_detail )
 
         if logged_in_user.is_authenticated():
-            return logged_in_user.has_perm( 'view_data', object_detail )
+            public = AnonymousUser()
+            return public.has_perm( 'view_data', object_detail ) or logged_in_user.has_perm( 'view_data', object_detail )
 
 
 class RepoAuthorization( Authorization ):

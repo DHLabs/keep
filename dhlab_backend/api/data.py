@@ -9,7 +9,7 @@ from bson.code import Code
 from django.conf.urls import url
 
 from tastypie import fields
-from tastypie.authentication import MultiAuthentication, SessionAuthentication
+from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
 from tastypie.http import HttpUnauthorized, HttpBadRequest
 
 from repos.models import Repository
@@ -40,8 +40,10 @@ class DataResource( MongoDBResource ):
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get' ]
 
-        authentication = MultiAuthentication( SessionAuthentication(),
-                                              ApiTokenAuthentication() )
+        authentication = Authentication()
+
+        # authentication = MultiAuthentication( SessionAuthentication(),
+        #                                       ApiTokenAuthentication() )
 
         authorization = DataAuthorization()
 
@@ -153,16 +155,20 @@ class DataResource( MongoDBResource ):
             # Ensure correct pagination
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
 
+            limit = 50
+            if request.GET.get( 'format', None ) == 'csv':
+                limit = cursor.count()
+
             meta = {
-                'limit': 50,
+                'limit': limit,
                 'offset': offset,
                 'count': cursor.count(),
-                'pages': cursor.count() / 50
+                'pages': cursor.count() / limit
             }
 
             data = {
                 'meta': meta,
-                'data': dehydrate_survey( cursor.skip(offset * 50).limit(50)) }
+                'data': dehydrate_survey( cursor.skip( offset * limit ).limit( limit ) ) }
 
             return self.create_response( request, data )
         except ValueError as e:

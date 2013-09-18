@@ -100,7 +100,8 @@ class XFormSerializer( Serializer ):
             # xform format.
             xform = {}
             xform[ 'name' ] = data.get( 'name' )
-            xform[ 'type' ] = data.get( 'type' )
+            # TODO: Fix pyxform to handle this correctly. #  data.get( 'type' )
+            xform[ 'type' ] = 'survey'
             xform[ 'default_language' ] = data.get( 'default_language', 'default' )
             xform[ 'children' ] = data.get( 'children' )
 
