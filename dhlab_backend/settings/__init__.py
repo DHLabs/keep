@@ -1,6 +1,11 @@
 import socket
 
+# Load and initialize Django-celery module.
+import djcelery
+djcelery.setup_loader()
+
 # Django settings for dhlab_backend project.
+from .defaults.celery import *
 from .defaults.database import *
 from .defaults.django import *
 from .defaults.logging import *
@@ -38,6 +43,7 @@ INSTALLED_APPS = (
     'storages',                 # Needed for S3 file storage
     'django_mailgun',           # Easy email API
     'south',                    # Database migrations
+    'djcelery',                 # Distributed Task Queue
 )
 
 ANONYMOUS_USER_ID = -1
