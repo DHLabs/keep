@@ -24,6 +24,19 @@
 		require( [ 'app/viz/main' ] )
 	});
 </script>
+<script type='text/template' id='empty-collection'>
+	<td id='filedrag' colspan=255>
+		<div style='padding:16px;font-size:1.2em;'>
+			<form action='{% url "repo_batch" %}' method='post' enctype='multipart/form-data'>
+				{% csrf_token %}
+				<span id='drag-text'>
+					<i class='icon-file'></i>&nbsp;&nbsp;Drag and drop a CSV file to instantly load up your data! <strong>or</strong>
+					<input type='file' id='fileselect' name='csv_file' multiple='multiple'/>
+				</span>
+			</form>
+		</div>
+	</td>
+</script>
 <script type='text/template' id='sharing-settings'>
 	<div class="bbm-modal__topbar">
 		<h3 class="bbm-modal__title">Data Sharing Settings</h3>

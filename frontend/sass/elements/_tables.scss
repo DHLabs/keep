@@ -25,9 +25,16 @@ table.table {
 
 	td {
 		padding: 8px 16px;
+
 		a {
 			display:block;
 		}
+	}
+
+	td.selected {
+		background-color: $theme;
+		color: white;
+		font-weight: bold;
 	}
 }
 

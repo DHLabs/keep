@@ -8,6 +8,53 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette, DataCollection ) ->
 
+
+    class EmptyItemView extends Backbone.Marionette.ItemView
+        tagName: 'tr'
+        template: '#empty-collection'
+
+        file_hover: ( event ) =>
+            event.stopPropagation()
+            event.preventDefault()
+
+            if event.type == 'dragover'
+                $( event.currentTarget ).addClass( 'selected' )
+            else
+                $( event.currentTarget ).removeClass( 'selected' )
+
+            @
+
+        file_selected: ( event ) =>
+            event.stopPropagation()
+            event.preventDefault()
+
+            # Grab list of files
+            files = null
+            if event.originalEvent.dataTransfer?
+                files = event.originalEvent.dataTransfer.files
+            else
+                files = event.originalEvent.target.files
+
+            $( '#fileselect' ).get().files = files
+            $( '#file-name' ).val( files[0].name.split( '.' )[0] )
+
+            # Change drag text to a loading message.
+            $( '#drag-text', @el ).html( '''
+                <i class="icon-spinner icon-spin icon-large"></i>&nbsp;&nbsp;
+                Uploading file. Please wait!''' )
+
+            # Submit the form!
+            # $( 'form', @el ).submit()
+            @
+
+        onRender: ->
+            $( '#fileselect', @el ).change( @file_selected )
+            $( '#filedrag', @el ).on( 'dragover', @file_hover )
+            $( '#filedrag', @el ).on( 'dragleave', @file_hover )
+            $( '#filedrag', @el ).on( 'drop', @file_selected )
+            @
+
+
     class DataItemView extends Backbone.Marionette.ItemView
         tagName: 'tr'
 
@@ -39,6 +86,7 @@ define( [ 'jquery',
     class DataCollectionView extends Backbone.Marionette.CollectionView
         el: '#raw-viz #raw_table'
         itemView: DataItemView
+        emptyView: EmptyItemView
 
         header_template: _.template( '''
                 <tr>
@@ -64,6 +112,7 @@ define( [ 'jquery',
         buildItemView: ( item, ItemViewType, itemViewOptions ) ->
             options = _.extend( { model: item, fields: @fields }, itemViewOptions )
             return new ItemViewType( options )
+
 
     return DataCollectionView
 )
