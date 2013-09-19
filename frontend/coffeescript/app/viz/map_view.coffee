@@ -117,10 +117,13 @@ define( [ 'jquery',
                         @selected_header = { location: field }
 
                     continue
-                else if field.label.search( 'lat' ) != -1
-                    @map_headers.push( field )
-                else if field.label.search( 'lng' ) != -1
-                    @map_headers.push( field )
+                else if field.label.length == 3
+                    if field.label.search( 'lat' ) != -1
+                        console.log(field)
+                        @map_headers.push( field )
+                    else if field.label.search( 'lng' ) != -1
+                        console.log(field)
+                        @map_headers.push( field )
 
             # This means there were no geopoints... attempt to find an lat/lng
             # combo between two columns
