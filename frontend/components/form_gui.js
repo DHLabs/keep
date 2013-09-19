@@ -352,6 +352,9 @@ function jsGUIAddRelevance(window, relevance) {
 		  .appendTo('#' + window);
 	}
 	
+	console.log($('.relevanceList').length + " and " + $('#' + window + ' .relevanceList li').length)
+	console.log(window)
+	console.log(relevance)
 	var tempID = "relevance_" + $('.relevanceList').length + $('#' + window + ' .relevanceList li').length;
 	//trying to keep the unique number, scramble (Randomize) it if it exists (sometimes occurs after deletion of relevances)
 	while ($('#' + tempID).length > 0) {
@@ -484,6 +487,7 @@ function jsGUIDFS() {
 	// and {attachScreen#: none} in the case of a generic connection
 	var pathDictionary = {};
 	var i = "";
+	var index = 1;
 
 	$(".window").removeClass("visited-DFS")
 
@@ -495,26 +499,22 @@ function jsGUIDFS() {
 			break;
 		}
 
-		else if (currentDiv.hasClass("visited-DFS")) {
-			continue;
-		}
-		else {
+		else if (!currentDiv.hasClass("visited-DFS")) {
 			currentDiv.addClass("visited-DFS");
 			i = currentDiv.attr('id').substring(6);
-		}
 
-		var tempConnectionDict = {};
-		
-		// The case that there are no questions on the screen, another technicality
-		if ($('#' + currentDiv.attr('id') + ' #sort' + i + ' li').length == 0) {
-			console.log("This should NOT be hit.");
-		}
+			var tempConnectionDict = {};
+			
+			// The case that there are no questions on the screen, another technicality
+			if ($('#' + currentDiv.attr('id') + ' #sort' + i + ' li').length == 0) {
+				console.log("This should NOT be hit.");
+			}
 
-		// Case of only one question on a screen
-		else if ($('#' + currentDiv.attr('id') +  ' #sort' + i + ' li').length == 1) {
-			var tempQ = $('#' + currentDiv.attr('id') +  ' #sort' + i + ' li .true-name').html();
-			questionDictionary[i] = [tempQ];
-		}
+			// Case of only one question on a screen
+			else if ($('#' + currentDiv.attr('id') +  ' #sort' + i + ' li').length == 1) {
+				var tempQ = $('#' + currentDiv.attr('id') +  ' #sort' + i + ' li .true-name').html();
+				questionDictionary[i] = [tempQ];
+			}
 
 		//Case of multiple questions on a screen
 		else {
@@ -536,33 +536,44 @@ function jsGUIDFS() {
 			}
 		}
 
-		// In the case of no connections, continue to the next screen
-		if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
-			continue;
-		}
-
-		else {
-
-			// This 'fun' bit of code is using jsPlumb to get the next screen	
-			var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0];
-			if (tempConnectionID != undefined) {
-				tempConnectionID = tempConnectionID.endpoints[1].elementId;
-				windowList.push(tempConnectionID);
-				tempConnectionDict[tempConnectionID.substring(6)] = "none";
+			// In the case of no connections, continue to the next screen
+			if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
+				continue;
 			}
 
-			// Code for handling the existence of relevances
-			if ($(currentDiv).find('.relevanceList') != undefined) {
-				$(currentDiv).find('.relevanceList li').each( function() {
-					tempRelevanceText = $(this).find('.relevanceText').html();
-					tempConnectionID = jsPlumb.getEndpoints($(this))[0].connections[0].endpoints[1].elementId;
+			else {
+
+				// This 'fun' bit of code is using jsPlumb to get the next screen	
+				var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0];
+				if (tempConnectionID != undefined) {
+					tempConnectionID = tempConnectionID.endpoints[1].elementId;
 					windowList.push(tempConnectionID);
-					tempConnectionDict[tempConnectionID.substring(6)] = tempRelevanceText;
-				});
-			}
+					tempConnectionDict[tempConnectionID.substring(6)] = "none";
+				}
 
-			pathDictionary[i] = tempConnectionDict;
+				// Code for handling the existence of relevances
+				if ($(currentDiv).find('.relevanceList') != undefined) {
+					$(currentDiv).find('.relevanceList li').each( function() {
+						tempRelevanceText = $(this).find('.relevanceText').html();
+						tempConnectionID = jsPlumb.getEndpoints($(this))[0].connections[0].endpoints[1].elementId;
+						windowList.push(tempConnectionID);
+						tempConnectionDict[tempConnectionID.substring(6)] = tempRelevanceText;
+					});
+				}
+
+				pathDictionary[i] = tempConnectionDict;
+			}
 		}
+
+		//Need to check if there are any missed windows before exiting the loop
+		if (windowList.length == 0) {
+			if (Object.keys(questionDictionary).length != $('.window').length) {
+				while (questionDictionary.hasOwnProperty(index)) {
+					index ++;
+				}
+				windowList.push('screen' + index);
+			}
+		} 
 	}
 	console.log(questionDictionary);
 	console.log(pathDictionary);
@@ -713,7 +724,8 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		if (key.type =='group') {
 			// No control, chance of being nested group, recurse!
 			if (!key.control) {
-				rebuildRecurse(key.children, xIndex + 20, yIndex + 100, prevWindow);
+				prevWindow = rebuildRecurse(key.children, xIndex + 20, yIndex + 35, prevWindow);
+				continue;
 			}
 
 			/* 
@@ -758,6 +770,7 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 				var corresWindow = $('div.true-name:contains("' + relevanceSet[j].name + '")')
 									.parent().parent().parent().attr('id');
 				var tempID = jsGUIAddRelevance(corresWindow, relevanceSet[j]);
+				console.log(tempID)
 				var releStart = jsPlumb.getEndpoints($('#' + tempID))[0];
 				var releEnd = jsPlumb.getEndpoints($('#' + currentWindow))[1];
 				jsPlumb.connect({source:releStart, target:releEnd});
@@ -781,6 +794,8 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		xIndex += 20;
 
 	}
+
+	return prevWindow;
 }
 
 /*
@@ -815,7 +830,11 @@ function relevanceParser(relevanceString) {
 			relevantType = "=";
 		}
 
-		var strComps = preprocRelevances[relevance].split( " " + relevantType + " " )
+		// Relevances, depending on who wrote them might not have spaces...
+		var strComps = preprocRelevances[relevance].split(" " + relevantType + " ");
+		if (strComps.length <= 1) {
+			strComps = preprocRelevances[relevance].split(relevantType)
+		}
 
 		var relevantQuestionName = strComps[0].split('$').join('');
 		relevantQuestionName = relevantQuestionName.split('$').join('');
