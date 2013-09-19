@@ -590,15 +590,33 @@ function generateFormFromTree() {
 	//trace through and build
 	var end = false;
 	var currentScreen = firstScreen;
+	var newQuestionList = new Array();
 	while( !end ) {
 
 		var screenQuestions = questionDictionary[currentScreen];
 		if( screenQuestions.length > 1 ) {
-			//handle group
+			//TODO:handle group
+			var group = new Object();
+			group.name = '';
+			var control = new Object();
+			control.appearance = '';
+
+			group.children = new Array();
+
+			for( var questionIndex in screenQuestions ) {
+				var question = getQuestionForName( screenQuestions[questionIndex] );
+				group.children.push( question );
+			}
+
+			newQuestionList.push( group );
+
 		} else if( screenQuestions.length == 0 ) {
-			//TODO: screen with no questions
+			//screen with no questions
+			//do nothing
 		} else {
 			//handle single question
+			var question = getQuestionForName( screenQuestions[0] );
+			newQuestionList.push( question );
 		}
 
 		//get next screen
@@ -613,6 +631,10 @@ function generateFormFromTree() {
 		}
 		
 	}
+
+	questionList = newQuestionList;
+	//build the json from the new question list
+	buildSurvey();
 
 	return true;
 }
