@@ -470,6 +470,7 @@ function jsGUIDFS() {
 	// and {attachScreen#: none} in the case of a generic connection
 	var pathDictionary = {};
 	var i = "";
+	var index = 1;
 
 	$(".window").removeClass("visited-DFS")
 
@@ -481,67 +482,74 @@ function jsGUIDFS() {
 			break;
 		}
 
-		else if (currentDiv.hasClass("visited-DFS")) {
-			continue;
-		}
-		else {
+		else if (!currentDiv.hasClass("visited-DFS")) {
 			currentDiv.addClass("visited-DFS");
 			i = currentDiv.attr('id').substring(6);
-		}
 
-		var tempConnectionDict = {};
-		
-		// The case that there are no questions on the screen, another technicality
-		if ($('#' + currentDiv.attr('id') + ' #sort' + i + ' li').length == 0) {
-			console.log("This should NOT be hit.");
-		}
-
-		// Case of only one question on a screen
-		else if ($('#' + currentDiv.attr('id') +  ' #sort' + i + ' li').length == 1) {
-			var tempQ = $('#' + currentDiv.attr('id') +  ' #sort' + i + ' li .true-name').html();
-			questionDictionary[i] = [tempQ];
-		}
-
-		//Case of multiple questions on a screen
-		else {
-			var tempQuestionArray = [];
-			$('#' + currentDiv.attr('id') + ' #sort' + i + ' li').each( function() {
-				tempQuestionArray.push($(this).find('.true-name').html());
-			});
-			questionDictionary[i] = tempQuestionArray;
-			// Set the group settings 
-			tempConnectionDict['settings'] = 
-				[$(currentDiv).find('.hiddenGroupLabel').html(),
-				$(currentDiv).find('.hiddenGroupSettings').html()];
-		}
-
-		// In the case of no connections, continue to the next screen
-		if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
-			continue;
-		}
-
-		else {
-
-			// This 'fun' bit of code is using jsPlumb to get the next screen	
-			var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0];
-			if (tempConnectionID != undefined) {
-				tempConnectionID = tempConnectionID.endpoints[1].elementId;
-				windowList.push(tempConnectionID);
-				tempConnectionDict[tempConnectionID.substring(6)] = "none";
+			var tempConnectionDict = {};
+			
+			// The case that there are no questions on the screen, another technicality
+			if ($('#' + currentDiv.attr('id') + ' #sort' + i + ' li').length == 0) {
+				console.log("This should NOT be hit.");
 			}
 
-			// Code for handling the existence of relevances
-			if ($(currentDiv).find('.relevanceList') != undefined) {
-				$(currentDiv).find('.relevanceList li').each( function() {
-					tempRelevanceText = $(this).find('.relevanceText').html();
-					tempConnectionID = jsPlumb.getEndpoints($(this))[0].connections[0].endpoints[1].elementId;
-					windowList.push(tempConnectionID);
-					tempConnectionDict[tempConnectionID.substring(6)] = tempRelevanceText;
+			// Case of only one question on a screen
+			else if ($('#' + currentDiv.attr('id') +  ' #sort' + i + ' li').length == 1) {
+				var tempQ = $('#' + currentDiv.attr('id') +  ' #sort' + i + ' li .true-name').html();
+				questionDictionary[i] = [tempQ];
+			}
+
+			//Case of multiple questions on a screen
+			else {
+				var tempQuestionArray = [];
+				$('#' + currentDiv.attr('id') + ' #sort' + i + ' li').each( function() {
+					tempQuestionArray.push($(this).find('.true-name').html());
 				});
+				questionDictionary[i] = tempQuestionArray;
+				// Set the group settings 
+				tempConnectionDict['settings'] = 
+					[$(currentDiv).find('.hiddenGroupLabel').html(),
+					$(currentDiv).find('.hiddenGroupSettings').html()];
 			}
 
-			pathDictionary[i] = tempConnectionDict;
+			// In the case of no connections, continue to the next screen
+			if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
+				continue;
+			}
+
+			else {
+
+				// This 'fun' bit of code is using jsPlumb to get the next screen	
+				var tempConnectionID = jsPlumb.getEndpoints(currentDiv)[0].connections[0];
+				if (tempConnectionID != undefined) {
+					tempConnectionID = tempConnectionID.endpoints[1].elementId;
+					windowList.push(tempConnectionID);
+					tempConnectionDict[tempConnectionID.substring(6)] = "none";
+				}
+
+				// Code for handling the existence of relevances
+				if ($(currentDiv).find('.relevanceList') != undefined) {
+					$(currentDiv).find('.relevanceList li').each( function() {
+						tempRelevanceText = $(this).find('.relevanceText').html();
+						tempConnectionID = jsPlumb.getEndpoints($(this))[0].connections[0].endpoints[1].elementId;
+						windowList.push(tempConnectionID);
+						tempConnectionDict[tempConnectionID.substring(6)] = tempRelevanceText;
+					});
+				}
+
+				pathDictionary[i] = tempConnectionDict;
+			}
 		}
+
+		//Need to check if there are any missed windows before exiting the loop
+		if (windowList.length == 0) {
+			if (Object.keys(questionDictionary).length != $('.window').length) {
+				while (questionDictionary.hasOwnProperty(index)) {
+					index ++;
+				}
+				windowList.push('screen' + index);
+			}
+		} 
 	}
 	console.log(questionDictionary);
 	console.log(pathDictionary);
