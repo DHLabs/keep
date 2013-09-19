@@ -1,7 +1,7 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
-          'marionette'
+          'marionette',
 
           # Model stuff
           'app/collections/data' ],
@@ -35,23 +35,35 @@ define( [ 'jquery',
             else
                 files = event.originalEvent.target.files
 
-            $( '#fileselect' ).get().files = files
-            $( '#file-name' ).val( files[0].name.split( '.' )[0] )
+            $( '#fileselect' ).prop( 'files', files )
 
             # Change drag text to a loading message.
+            $( '#drag-input' ).hide()
+
             $( '#drag-text', @el ).html( '''
                 <i class="icon-spinner icon-spin icon-large"></i>&nbsp;&nbsp;
                 Uploading file. Please wait!''' )
 
             # Submit the form!
-            # $( 'form', @el ).submit()
+            $( 'form', @el ).submit()
+            @
+
+        import_file: ( event ) =>
+            # filepicker.pickAndStore({},{}, (InkBlobs) =>
+
+            #     file = InkBlobs[0]
+
+            #     $( '#file_key' ).val( file.key )
+            #     $( '#file_size' ).val( file.size )
+
+            #     # Submit the form!
+            # )
+            $( 'form', @el ).submit()
+
             @
 
         onRender: ->
-            $( '#fileselect', @el ).change( @file_selected )
-            $( '#filedrag', @el ).on( 'dragover', @file_hover )
-            $( '#filedrag', @el ).on( 'dragleave', @file_hover )
-            $( '#filedrag', @el ).on( 'drop', @file_selected )
+            $( 'a', @el ).click( @import_file )
             @
 
 

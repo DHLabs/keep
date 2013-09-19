@@ -14,12 +14,27 @@ from django.views.decorators.http import require_POST, require_GET
 
 from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm
 
+from api.tasks import insert_csv_data
 from backend.db import db, dehydrate_survey, user_or_organization
 
 #from privacy import privatize_geo
 
 from .forms import NewRepoForm, NewBatchRepoForm
 from .models import Repository, RepoSerializer
+
+
+@login_required
+@require_POST
+def insert_data_into_repo( request, repo_id ):
+
+    repo = Repository.objects.get( mongo_id=repo_id )
+
+    insert_csv_data.delay( file=request.POST.get( 'file_key' ), repo=repo_id )
+
+    return HttpResponseRedirect(
+                reverse( 'repo_visualize',
+                         kwargs={ 'username': request.user.username,
+                                  'repo_name': repo.name } ) )
 
 
 @login_required

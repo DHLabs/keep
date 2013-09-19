@@ -14,6 +14,7 @@
 	document.repo = {{repo_json|safe}};
 	document.initial_data = {{data|safe}};
 </script>
+<script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
 <script src='{% static 'js/vendor/requirejs.js' %}'></script>
 <script type='text/javascript'>
 	require([ '{% static "js/common.js" %}' ], function (common) {
@@ -22,17 +23,20 @@
 		});
 
 		require( [ 'app/viz/main' ] )
+
+		filepicker.setKey( 'AtFpHahSSegcEhP2STuQAz' )
 	});
 </script>
 <script type='text/template' id='empty-collection'>
 	<td id='filedrag' colspan=255>
 		<div style='padding:16px;font-size:1.2em;'>
-			<form action='{% url "repo_batch" %}' method='post' enctype='multipart/form-data'>
+			<form action='{% url "repo_insert" repo_id=repo.mongo_id %}' method='post' enctype='multipart/form-data'>
 				{% csrf_token %}
-				<span id='drag-text'>
-					<i class='icon-file'></i>&nbsp;&nbsp;Drag and drop a CSV file to instantly load up your data! <strong>or</strong>
-					<input type='file' id='fileselect' name='csv_file' multiple='multiple'/>
-				</span>
+				<input type='hidden' id='file_key'  name='file_key' value='70lQnt0ZS96WPd0cAYAQ_test.csv'>
+				<input type='hidden' id='file_size' name='file_size' value='307'>
+				<a href='#'>
+					<i class='icon-file'></i>&nbsp;&nbsp;Already have data somewhere? Click to import!
+				</a>
 			</form>
 		</div>
 	</td>
