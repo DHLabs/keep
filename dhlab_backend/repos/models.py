@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
-from guardian.shortcuts import assign_perm, remove_perm
+from guardian.shortcuts import assign_perm, remove_perm, get_objects_for_user, get_perms, get_users_with_perms
 
 from backend.db import db
 from django.core.files.storage import default_storage as storage
@@ -66,26 +66,32 @@ class RepoSerializer( Serializer ):
             self._current[ 'type' ] = 'survey'
 
         # Remove references to user/org for now.
-        self._current.pop( 'user' )
         self._current.pop( 'org' )
 
         self.objects.append( self._current )
 
 
 class RepositoryManager( models.Manager ):
+
     def list_by_user( self, user, organizations=None, public=False ):
+        '''
+            List shared & user-owned repositories for a specific user.
+        '''
 
-        if organizations is None:
-            organizations = OrganizationUser.objects.filter( user=user )
+        # django-guardian has a quirk where if the user is a superuser, the
+        # entire queryset is returned. This is bullshit and we don't need that
+        # bullshit.
+        user.is_superuser = False
+        repositories = get_objects_for_user( user,
+                                             [ 'view_repository' ],
+                                             self,
+                                             use_groups=False,
+                                             any_perm=False )
 
-        if not public:
-            private_repos = Q( user=user, org=None )
-            shared_repos  = Q( org__in=organizations )
-        else:
-            private_repos = Q( user=user, org=None, is_public=True )
-            shared_repos  = Q( org__in=organizations, is_public=True )
+        if public:
+            return repositories.filter( is_public=True )
 
-        return self.filter( private_repos | shared_repos )
+        return repositories
 
     def get_by_username( self, repo_name, username ):
         user_repo_q = Q( name=repo_name )
