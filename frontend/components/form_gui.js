@@ -338,6 +338,9 @@ function jsGUIAddRelevance(window, relevance) {
 		  .appendTo('#' + window);
 	}
 	
+	console.log($('.relevanceList').length + " and " + $('#' + window + ' .relevanceList li').length)
+	console.log(window)
+	console.log(relevance)
 	var tempID = "relevance_" + $('.relevanceList').length + $('#' + window + ' .relevanceList li').length;
 	//trying to keep the unique number, scramble (Randomize) it if it exists (sometimes occurs after deletion of relevances)
 	while ($('#' + tempID).length > 0) {
@@ -663,7 +666,8 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		if (key.type =='group') {
 			// No control, chance of being nested group, recurse!
 			if (!key.control) {
-				rebuildRecurse(key.children, xIndex + 20, yIndex + 100, prevWindow);
+				prevWindow = rebuildRecurse(key.children, xIndex + 20, yIndex + 35, prevWindow);
+				continue;
 			}
 
 			/* 
@@ -708,6 +712,7 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 				var corresWindow = $('div.true-name:contains("' + relevanceSet[j].name + '")')
 									.parent().parent().parent().attr('id');
 				var tempID = jsGUIAddRelevance(corresWindow, relevanceSet[j]);
+				console.log(tempID)
 				var releStart = jsPlumb.getEndpoints($('#' + tempID))[0];
 				var releEnd = jsPlumb.getEndpoints($('#' + currentWindow))[1];
 				jsPlumb.connect({source:releStart, target:releEnd});
@@ -731,6 +736,8 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		xIndex += 20;
 
 	}
+
+	return prevWindow;
 }
 
 /*
@@ -765,7 +772,11 @@ function relevanceParser(relevanceString) {
 			relevantType = "=";
 		}
 
-		var strComps = preprocRelevances[relevance].split( " " + relevantType + " " )
+		// Relevances, depending on who wrote them might not have spaces...
+		var strComps = preprocRelevances[relevance].split(" " + relevantType + " ");
+		if (strComps.length <= 1) {
+			strComps = preprocRelevances[relevance].split(relevantType)
+		}
 
 		var relevantQuestionName = strComps[0].split('$').join('');
 		relevantQuestionName = relevantQuestionName.split('$').join('');
