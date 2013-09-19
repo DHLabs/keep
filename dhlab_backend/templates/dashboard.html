@@ -6,6 +6,8 @@
 {% block js %}
 <script src='{% static "js/vendor/dashboard.js" %}'></script>
 <script src='{% static "js/vendor/requirejs.js" %}'></script>
+<!-- Used to determine shared versus not shared repos -->
+<script id='user_id'>{{ user.id }}</script>
 <script type='text/javascript'>
 	document.repo_list  = {{user_repos|safe}};
 	document.study_list = {{user_studies|safe}};

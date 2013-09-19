@@ -50,9 +50,65 @@ define( [ 'jquery',
                 if field.type in [ 'geopoint' ]
                     @map_headers.push( field )
 
-            # Select the first field we find as the currently selected
-            # "geofield"
-            @selected_header = @map_headers[0] if @map_headers.length > 0
+                    if not @selected_header?
+                        @selected_header = { location: field }
+
+                    continue
+                else if field.label.length == 3
+                    if field.label.search( 'lat' ) != -1
+                        console.log(field)
+                        @map_headers.push( field )
+                    else if field.label.search( 'lng' ) != -1
+                        console.log(field)
+                        @map_headers.push( field )
+
+            # This means there were no geopoints... attempt to find an lat/lng
+            # combo between two columns
+            if not @selected_header?
+
+                @selected_header = {}
+                for field in @map_headers
+                    if field.label.search( 'lat' ) != -1
+                        @selected_header.lat = field
+                    else if field.label.search( 'lng' ) != -1
+                        @selected_header.lng = field
+
+        _geopoint: ( datum ) ->
+
+            geopoint = undefined
+
+            if @selected_header.location?
+
+                geopoint = datum.get( 'data' )[ @selected_header.location.name ]
+
+                if not geopoint?
+                    return null
+
+                geopoint = geopoint.split( ' ' )[0..2]
+
+                if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
+                    return null
+
+            else
+                geopoint = [ datum.get( 'data' )[ @selected_header.lat.name ],
+                             datum.get( 'data' )[ @selected_header.lng.name ] ]
+
+            geopoint[0] = parseFloat( geopoint[0] )
+            geopoint[1] = parseFloat( geopoint[1] )
+
+            if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
+                return null
+
+            return geopoint
+
+        render: () ->
+            # Calculate the center of the data
+            center = [ 0, 0 ]
+
+            valid_count = 0
+            for datum in @data.models
+
+                geopoint = @_geopoint( datum )
 
         _resize_map: () =>
             $( '#map' ).css( { 'height': ( @$el.parent().height() - 20 ) + 'px' } )
