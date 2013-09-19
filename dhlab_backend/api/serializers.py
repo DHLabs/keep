@@ -13,13 +13,14 @@ class CSVSerializer( Serializer ):
         'csv': 'text/csv',
     }
 
-    def to_csv(self, data, options=None):
+    def to_csv( self, data, options=None ):
         options = options or {}
-        data = self.to_simple(data, options)
+
+        data = self.to_simple( data, options )
         raw_data = StringIO.StringIO()
 
         writer = None
-        for item in data['data']:
+        for item in data.get( 'data', [] ):
 
             sub_data = item[ 'data' ]
 
@@ -30,5 +31,7 @@ class CSVSerializer( Serializer ):
                 writer.writeheader()
 
             writer.writerow( sub_data )
+
+        print raw_data
 
         return raw_data.getvalue()

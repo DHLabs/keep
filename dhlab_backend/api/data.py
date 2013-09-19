@@ -159,11 +159,16 @@ class DataResource( MongoDBResource ):
             if request.GET.get( 'format', None ) == 'csv':
                 limit = cursor.count()
 
+            if limit == 0:
+                pages = 0
+            else:
+                pages = cursor.count() / limit
+
             meta = {
                 'limit': limit,
                 'offset': offset,
                 'count': cursor.count(),
-                'pages': cursor.count() / limit
+                'pages': pages
             }
 
             data = {
