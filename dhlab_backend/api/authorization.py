@@ -3,6 +3,8 @@ from django.db.models import Q
 
 from tastypie.authorization import Authorization
 
+from repos.models import Repository
+
 
 class DataAuthorization( Authorization ):
     '''
@@ -37,7 +39,7 @@ class RepoAuthorization( Authorization ):
         # Case 2: There *is* a logged in user and no user query. Query repos
         # that only belong to the currently logged in user
         if user is None and logged_in_user.is_authenticated():
-            return object_list.filter( user=logged_in_user )
+            return Repository.objects.list_by_user( user=logged_in_user )
 
         # Case 3: A user query is provided. Only show public repositories for this user.
         # or repos that are shared to the logged in user.
