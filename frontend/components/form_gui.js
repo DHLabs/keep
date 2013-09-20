@@ -113,6 +113,15 @@ function jsGUIAddWindow(x, y) {
 		height: '0'
 	}).addClass('hiddenGroupSettings').appendTo('#' + windowID);
 
+	$('<div>').css({
+		visibility: 'hidden',
+		padding: '0',
+		'padding-bottom': '0',
+		height: '0'
+	}).addClass('hiddenGroupName').appendTo('#' + windowID);
+
+
+
 	$('<ul>', { id: sortID }).appendTo('#' + windowID);
 
 	//make the list sortable and add a placeholder!
@@ -185,6 +194,8 @@ function jsGUIDeleteWindow(window) {
 
 function jsGUIViewGroupSettings(window) {
 	$('#groupLabel').html($('#' + window + ' .hiddenGroupLabel').html());
+	$('#grouTypeToggle').val($('#' + window + ' .hiddenGroupSettings').html().replace('-',' '));
+	$('#groupName').val($('#' + window + ' .hiddenGroupName').html());
 
 	$( '#groupSettingsWindow' ).dialog ({
 		'width': 300
@@ -207,7 +218,10 @@ function jsGUICloseGroupSettingsDialog() {
 	$("#groupSettingsWindow").removeClass('[class^="screen"]');
 	var groupType = $("#groupTypeToggle").val().replace(' ', '-');
 
+	var groupName = $('#groupName').val();
+
 	$('#' + windowSet + ' .hiddenGroupLabel').html($('#groupLabel').html());
+	$('#' + windowSet + ' .hiddenGroupName').html(groupName);
 
 	if ($('#' + windowSet + ' .hiddenGroupSettings').html() != groupType) {
 		$('#' + windowSet + ' .hiddenGroupSettings').html(groupType);
@@ -499,18 +513,25 @@ function jsGUIDFS() {
 				questionDictionary[i] = [tempQ];
 			}
 
-			//Case of multiple questions on a screen
-			else {
-				var tempQuestionArray = [];
-				$('#' + currentDiv.attr('id') + ' #sort' + i + ' li').each( function() {
-					tempQuestionArray.push($(this).find('.true-name').html());
-				});
-				questionDictionary[i] = tempQuestionArray;
-				// Set the group settings 
-				tempConnectionDict['settings'] = 
-					[$(currentDiv).find('.hiddenGroupLabel').html(),
-					$(currentDiv).find('.hiddenGroupSettings').html()];
+		//Case of multiple questions on a screen
+		else {
+			var tempQuestionArray = [];
+			$('#' + currentDiv.attr('id') + ' #sort' + i + ' li').each( function() {
+				tempQuestionArray.push($(this).find('.true-name').html());
+			});
+			questionDictionary[i] = tempQuestionArray;
+			// Set the group settings 
+			tempConnectionDict['settings'] = 
+				[$(currentDiv).find('.hiddenGroupLabel').html(),
+				$(currentDiv).find('.hiddenGroupSettings').html(),
+				$(currentDiv).find('.hiddenGroupName').html()];
+
+			//handles case of only one screen with multiple questions
+			if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
+				pathDictionary[i] = tempConnectionDict;
+				continue;
 			}
+		}
 
 			// In the case of no connections, continue to the next screen
 			if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
@@ -562,7 +583,9 @@ function generateFormFromTree() {
 	var questionDictionary = dfs[0];
 	var pathDictionary = dfs[1];
 
-	if( Object.keys(questionDictionary).length != Object.keys(pathDictionary).length ) {
+	var numQuestions = Object.keys(questionDictionary).length;
+
+	if( numQuestions > 1 && numQuestions != Object.keys(pathDictionary).length ) {
 
 		alert( "Not all screens are connected" );
 		return false;
@@ -570,31 +593,33 @@ function generateFormFromTree() {
 
 	//get the first question
 	var firstScreen;
-	for( var question in pathDictionary ) {
+	if( numQuestions == 1 ) {
+		firstScreen = Object.keys(questionDictionary)[0];
+	} else {
+		for( var question in pathDictionary ) {
 
-		var found = false;
-		for( var question2 in pathDictionary ) {
-			if( question != question2 ) {
-				for( var connection in question2 ) {
-					if( connection == question ) {
-						found = true;
-						break;
+			var found = false;
+			for( var question2 in pathDictionary ) {
+				if( question != question2 ) {
+					for( var connection in question2 ) {
+						if( connection == question ) {
+							found = true;
+							break;
+						}
 					}
 				}
+				if( found ) {
+					break;
+				}
 			}
+
 			if( found ) {
+				firstScreen = question;
 				break;
 			}
 		}
-
-		if( found ) {
-			firstScreen = question;
-			break;
-		}
 	}
-
-	alert( "first question: " + firstScreen );
-
+	
 	//trace through and build
 	var end = false;
 	var currentScreen = firstScreen;
@@ -603,11 +628,17 @@ function generateFormFromTree() {
 
 		var screenQuestions = questionDictionary[currentScreen];
 		if( screenQuestions.length > 1 ) {
-			//TODO:handle group
+			//handle group
 			var group = new Object();
-			group.name = '';
+
+			var groupSettings = pathDictionary[currentScreen].settings;
+
+			group.name = groupSettings[2];
+			group.label = groupSettings[0];
+			group.type = 'group';
 			var control = new Object();
-			control.appearance = '';
+			control.appearance = groupSettings[1];
+			group.control = control;
 
 			group.children = new Array();
 
@@ -628,14 +659,19 @@ function generateFormFromTree() {
 		}
 
 		//get next screen
-		var screenConnections = Object.keys( pathDictionary[currentScreen] );
-		if( screenConnections.length == 0 ) {
-			//no more screens, breakout
+		if( numQuestions != 1 ) {
+			var screenConnections = Object.keys( pathDictionary[currentScreen] );
+			if( screenConnections.length == 0 ) {
+				//no more screens, breakout
+				end = true;
+				break;
+			} else {
+				//can assume first one here, linearity mandates single connection
+				currentScreen = screenConnections[0];
+			}
+		} else {
 			end = true;
 			break;
-		} else {
-			//can assume first one here, linearity mandates single connection
-			currentScreen = screenConnections[0];
 		}
 		
 	}
