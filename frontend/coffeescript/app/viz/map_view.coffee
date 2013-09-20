@@ -102,13 +102,7 @@ define( [ 'jquery',
             return geopoint
 
         render: () ->
-            # Calculate the center of the data
-            center = [ 0, 0 ]
-
-            valid_count = 0
-            for datum in @data.models
-
-                geopoint = @_geopoint( datum )
+            @
 
         _resize_map: () =>
             $( '#map' ).css( { 'height': ( @$el.parent().height() - 20 ) + 'px' } )
