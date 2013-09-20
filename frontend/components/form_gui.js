@@ -595,18 +595,18 @@ function generateFormFromTree() {
 	if( numScreens == 1 ) {
 		firstScreen = Object.keys(screensDictionary)[0];
 	} else {
-		for( var question in pathDictionary ) {
+		for( var question in screensDictionary ) {
 
 			var found = false;
+
 			for( var question2 in pathDictionary ) {
-				for( var connection in question2 ) {
+				for( var connection in pathDictionary[question2] ) {
 					if( connection == question ) {
 						found = true;
 						break;
 					}
 				}
-				
-				if( !found ) {
+				if( found ) {
 					break;
 				}
 			}
@@ -618,8 +618,6 @@ function generateFormFromTree() {
 		}
 	}
 	
-	alert( "frist screen" + firstScreen );
-
 	//trace through and build
 	var end = false;
 	var currentScreen = firstScreen;
