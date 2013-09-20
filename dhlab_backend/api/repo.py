@@ -73,6 +73,31 @@ class RepoResource( ModelResource ):
 
         return orm_filters
 
+    def get_object_list( self, request ):
+        '''
+            Copied from the tastypie source but modified so start with a list of
+            repostiories that contain shared repos as well.
+        '''
+        logged_in_user = request.user
+        user = request.GET.get( 'user', None )
+
+        # Case 1: There is no logged in user and no user query provided. We don't
+        # know what to query.
+        if user is None and logged_in_user.is_anonymous():
+            return self._meta.queryset.none()
+
+        # Case 2: There *is* a logged in user and no user query. Query repos
+        # that only belong to the currently logged in user
+        if user is None and logged_in_user.is_authenticated():
+            return Repository.objects.list_by_user( user=logged_in_user )
+
+        # Case 3: A user query is provided. Only show public repositories for this user.
+        # or repos that are shared to the logged in user.
+        if user is not None:
+            return Repository.objects.list_by_user( user__username=user )
+
+        return seql._meta.queryset.none()
+
     def create_response( self, request, data, response_class=HttpResponse, **response_kwargs):
         """
         Extracts the common "which-format/serialize/return-response" cycle.
