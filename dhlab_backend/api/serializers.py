@@ -29,9 +29,19 @@ class CSVSerializer( Serializer ):
                 standard string format that can be later parsed back into the
                 system if necessary.
         '''
+
+        # If the field_value is None, simply return an empty string.
+        if field_value is None:
+            return ''
+
         if field_type == 'geopoint':
+            # Converts geopoints into an X,Y coordinate string
             coords = field_value.get( 'coordinates' )
             return '%s, %s' % ( str( coords[0] ), str( coords[1] ) )
+
+        elif 'select all' in field_type:
+            # Converts a list into a comma-seperated list of values
+            return ','.join( field_value )
         else:
             return str( field_value )
 

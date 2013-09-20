@@ -32,8 +32,8 @@
 		<div style='padding:16px;font-size:1.2em;'>
 			<form action='{% url "repo_insert" repo_id=repo.mongo_id %}' method='post' enctype='multipart/form-data'>
 				{% csrf_token %}
-				<input type='hidden' id='file_key'  name='file_key' value='70lQnt0ZS96WPd0cAYAQ_test.csv'>
-				<input type='hidden' id='file_size' name='file_size' value='307'>
+				<input type='hidden' id='file_key'  name='file_key' value=''>
+				<input type='hidden' id='file_size' name='file_size' value=''>
 				<a href='#'>
 					<i class='icon-file'></i>&nbsp;&nbsp;Already have data somewhere? Click to import!
 				</a>
@@ -142,7 +142,7 @@
 		</div>
 		<div id='repo-meta' class='ten columns'>
 			<h4>{{ repo.owner }} / {{ repo.name }}</h4>
-			<div>
+			<div style='margin-bottom: 8px;'>
 				{% if repo.description %}
 					{{ repo.description }}
 				{% else %}

@@ -26,32 +26,36 @@ from .models import Repository, RepoSerializer
 @login_required
 @require_POST
 def insert_data_into_repo( request, repo_id ):
+    '''
+        Insert data from a CSV into a repo. This is relayed as a task to a
+        Celery worker.
+    '''
 
     repo = Repository.objects.get( mongo_id=repo_id )
 
-    insert_csv_data.delay( file=request.POST.get( 'file_key' ), repo=repo_id )
+    # Place the task in the queue
+    task = insert_csv_data.delay( file=request.POST.get( 'file_key' ), repo=repo_id )
 
-    return HttpResponseRedirect(
-                reverse( 'repo_visualize',
-                         kwargs={ 'username': request.user.username,
-                                  'repo_name': repo.name } ) )
+    # Save the task id so we can go back and check on the task
+    repo.add_task( task.task_id, 'csv_insert' )
+
+    return HttpResponseRedirect( reverse( 'repo_visualize',
+                                          kwargs={ 'username': request.user.username,
+                                                   'repo_name': repo.name } ) )
 
 
 @login_required
+@require_POST
 def batch_repo( request ):
 
-    if request.method == 'POST':
-        form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
+    form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
 
-        if form.is_valid():
-            new_repo = form.save()
+    if form.is_valid():
+        new_repo = form.save()
 
-            return HttpResponseRedirect(
-                        reverse( 'repo_visualize',
-                                 kwargs={ 'username': request.user.username,
-                                          'repo_name': new_repo.name } ) )
-
-    return HttpResponseRedirect( '/' )
+        return HttpResponseRedirect( reverse( 'repo_visualize',
+                                              kwargs={ 'username': request.user.username,
+                                                       'repo_name': new_repo.name } ) )
 
 
 @login_required

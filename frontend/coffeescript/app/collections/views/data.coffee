@@ -49,16 +49,19 @@ define( [ 'jquery',
             @
 
         import_file: ( event ) =>
-            # filepicker.pickAndStore({},{}, (InkBlobs) =>
+            filepicker.pickAndStore({},{}, (InkBlobs) =>
 
-            #     file = InkBlobs[0]
+                # Grab the file key that was submitted.
+                file = InkBlobs[0]
 
-            #     $( '#file_key' ).val( file.key )
-            #     $( '#file_size' ).val( file.size )
+                # Set the file key and size
+                $( '#file_key' ).val( file.key )
+                $( '#file_size' ).val( file.size )
 
-            #     # Submit the form!
-            # )
-            $( 'form', @el ).submit()
+                # Submit the form!
+                $( 'form', @el ).submit()
+
+            )
 
             @
 

@@ -1,3 +1,5 @@
+import logging
+
 from bson import ObjectId
 from datetime import datetime
 
@@ -6,14 +8,14 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
-from guardian.shortcuts import assign_perm, remove_perm, get_objects_for_user, get_perms, get_users_with_perms
+from guardian.shortcuts import assign_perm, remove_perm, get_objects_for_user
 
 from backend.db import db
 from django.core.files.storage import default_storage as storage
 
-from organizations.models import OrganizationUser
-
 from . import validate_and_format
+
+logger = logging.getLogger( __name__ )
 
 ALL_REPO_PERMISSIONS = [
     ( 'add_repository', 'Add Repo' ),
@@ -223,11 +225,14 @@ class Repository( models.Model ):
 
         for field in fields:
 
-            if field.get( 'type' ) is 'group':
+            if field.get( 'type' ) == 'note':
+                continue
+
+            if 'group' in field.get( 'type' ):
                 field_list.extend( self._flatten( field.get( 'children' ) ) )
                 continue
 
-            field_list.append( field.get( 'name' ) )
+            field_list.append( field )
 
         return field_list
 
@@ -291,6 +296,8 @@ class Repository( models.Model ):
             'data': validated_data,
             'timestamp': datetime.utcnow() }
 
+        logger.info( repo_data )
+
         new_data_id = db.data.insert( repo_data )
 
         # Once we save the repo data, save the files to S3
@@ -309,6 +316,29 @@ class Repository( models.Model ):
 
         return new_data_id
 
+    def add_task( self, task_id, task_type ):
+        '''
+            Track of tasks id ( and subsequently their results ) on a per repo
+            basis.
+
+            Params
+            ------
+            task_id : integer
+                Task id returned by Celery
+            task_type : string
+                An identifier for this task. ( i.e "csv_upload", etc )
+        '''
+        task_data = {
+            'repo': ObjectId( self.mongo_id ),
+            'task': task_id,
+            'type': task_type }
+
+        task_id = db.task.insert( task_data )
+        return task_id
+
+    def remove_task( self, task_id ):
+        return db.task.remove( { '_id': ObjectId( task_id ) } )
+
     def flatten_fields( self ):
         return self._flatten( self.fields() )
 
@@ -317,6 +347,9 @@ class Repository( models.Model ):
 
     def submissions( self ):
         return db.data.find({ 'repo': ObjectId( self.mongo_id ) } ).count()
+
+    def tasks( self ):
+        return db.task.find( { 'repo': ObjectId( self.mongo_id ) } )
 
     def owner( self ):
         if self.org:

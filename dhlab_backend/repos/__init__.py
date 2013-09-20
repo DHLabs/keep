@@ -4,8 +4,11 @@
     Views that have to do with manipulating/viewing forms and form data are
     placed in this module
 '''
+import logging
 from django.core.files import File
 from django.http import QueryDict
+
+logger = logging.getLogger( __name__ )
 
 
 def validate_and_format( fields, data, files ):
@@ -24,23 +27,54 @@ def validate_and_format( fields, data, files ):
         # Flatten groups by making a recursive call
         if 'group' in etype:
             temp_data = validate_and_format( element[ 'children' ], data, files )
-            valid_data.update(temp_data[0])
-            valid_files.update(temp_data[1])
+            valid_data.update( temp_data[0] )
+            valid_files.update( temp_data[1] )
 
         # Do type conversions
         if ename in data:
             # Convert to integer
-            if etype is 'integer':
+            if etype == 'integer':
                 valid_data[ ename ] = int( data[ ename ] )
+
             elif 'select all' in etype:
+
+                # If data is a QueryDict ( from a HttpRequest ), grab the list like so
                 if isinstance( data, QueryDict ):
                     valid_data[ ename ] = data.getlist( ename, [] )
+                # Otherwise attempt to parse the data value
                 else:
-                    valid_data[ ename ] = data.get( ename, [] )
+
+                    list_data = data.get( ename, [] )
+
+                    if isinstance( list_data, basestring ):
+                        valid_data[ ename ] = list_data.split( ',' )
+                        logger.info( list_data.split( ',' ) )
+                    else:
+                        valid_data[ ename ] = list_data
+
             elif etype in [ 'photo', 'video' ] and isinstance( data.get( ename ), File ):
+
                 valid_data[ ename ] = data.get( ename ).name
                 valid_files[ ename ] = data.get( ename )
+
+            elif etype == 'geopoint':
+
+                # Convert a X,Y string into a geocoordinate.
+                geodata = { 'type': 'Point',
+                            'coordinates': [],
+                            'properties': {
+                                'altitude': 0,
+                                'accuracy': 0,
+                                'comment': '' }}
+
+                # TODO: Handle potential errors parsing the string?
+                coords = data.get( ename, '0,0' )
+                coords = coords.split( ',' )
+                geodata[ 'coordinates' ] = [ float( coords[0] ), float( coords[1] ) ]
+                valid_data[ ename ] = geodata
+
             else:
+                # Otherwise treat the piece of data as whatever it came in as.
                 valid_data[ ename ] = data[ ename ]
 
         if files is not None and ename in files:
