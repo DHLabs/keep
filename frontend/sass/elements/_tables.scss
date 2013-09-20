@@ -1,6 +1,5 @@
 // _tables.scss
-
-.table {
+table.table {
 
 	width:100%;
 
@@ -20,17 +19,63 @@
 		padding: 8px 16px;
 		color: $theme;
 
-		border: 1px solid $accent;
 		background-color: #FFF !important;
 		white-space: nowrap;
 	}
 
 	td {
-		padding: 8px 16px;
-		white-space: nowrap;
+		padding: 8px;
 
 		a {
 			display:block;
 		}
 	}
+
+	td.selected {
+		background-color: $theme;
+		color: white;
+		font-weight: bold;
+	}
 }
+
+table.compressed {
+	font-size: .9em;
+
+	td {
+		padding: 4px 8px;
+
+		input, select {
+			margin:0;
+		}
+
+		a {
+			display: inline;
+		}
+	}
+}
+
+
+table.fixed {
+	td, th {
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow-x:hidden;
+
+		width: 256px;
+		min-width: 256px;
+		max-width: 256px;
+	}
+
+	td:last-child {
+		width:100%;
+	}
+}
+
+// Align the sorting icons to the right.
+th {
+	i.sort-me {
+		margin-top:4px !important;
+		float:right;
+	}
+}
+

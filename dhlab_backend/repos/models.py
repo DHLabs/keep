@@ -1,3 +1,5 @@
+import logging
+
 from bson import ObjectId
 from datetime import datetime
 
@@ -6,14 +8,14 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
-from guardian.shortcuts import assign_perm, remove_perm
+from guardian.shortcuts import assign_perm, remove_perm, get_objects_for_user
 
 from backend.db import db
 from django.core.files.storage import default_storage as storage
 
-from organizations.models import OrganizationUser
-
 from . import validate_and_format
+
+logger = logging.getLogger( __name__ )
 
 ALL_REPO_PERMISSIONS = [
     ( 'add_repository', 'Add Repo' ),
@@ -47,6 +49,9 @@ class RepoSerializer( Serializer ):
         self._current[ 'date_updated' ] = obj.date_updated.strftime( '%Y-%m-%dT%X' )
         self._current[ 'date_created' ] = obj.date_created.strftime( '%Y-%m-%dT%X' )
 
+        # Add reference
+        self._current[ 'children' ] = obj.fields()
+
         # Include the number of submissions for this repo
         self._current[ 'submissions' ]  = obj.submissions()
 
@@ -62,31 +67,37 @@ class RepoSerializer( Serializer ):
 
         # Set the type of the "repo"
         if obj.is_tracker:
-            self._current[ 'type' ] = 'registration'
+            self._current[ 'type' ] = 'register'
         else:
             self._current[ 'type' ] = 'survey'
 
         # Remove references to user/org for now.
-        self._current.pop( 'user' )
         self._current.pop( 'org' )
 
         self.objects.append( self._current )
 
 
 class RepositoryManager( models.Manager ):
+
     def list_by_user( self, user, organizations=None, public=False ):
+        '''
+            List shared & user-owned repositories for a specific user.
+        '''
 
-        if organizations is None:
-            organizations = OrganizationUser.objects.filter( user=user )
+        # django-guardian has a quirk where if the user is a superuser, the
+        # entire queryset is returned. This is bullshit and we don't need that
+        # bullshit.
+        user.is_superuser = False
+        repositories = get_objects_for_user( user,
+                                             [ 'view_repository' ],
+                                             self,
+                                             use_groups=False,
+                                             any_perm=False )
 
-        if not public:
-            private_repos = Q( user=user, org=None )
-            shared_repos  = Q( org__in=organizations )
-        else:
-            private_repos = Q( user=user, org=None, is_public=True )
-            shared_repos  = Q( org__in=organizations, is_public=True )
+        if public:
+            return repositories.filter( is_public=True )
 
-        return self.filter( private_repos | shared_repos )
+        return repositories
 
     def get_by_username( self, repo_name, username ):
         user_repo_q = Q( name=repo_name )
@@ -209,6 +220,25 @@ class Repository( models.Model ):
             ( 'edit_data', 'Edit data in Repo' ),
             ( 'delete_data', 'Delete data from Repo' ), )
 
+    def _flatten( self, fields ):
+        '''
+            Returns a flat list of fields.
+        '''
+        field_list = []
+
+        for field in fields:
+
+            if field.get( 'type' ) == 'note':
+                continue
+
+            if 'group' in field.get( 'type' ):
+                field_list.extend( self._flatten( field.get( 'children' ) ) )
+                continue
+
+            field_list.append( field )
+
+        return field_list
+
     def delete( self ):
         """
             Delete all data & objects related to this object
@@ -269,6 +299,8 @@ class Repository( models.Model ):
             'data': validated_data,
             'timestamp': datetime.utcnow() }
 
+        logger.info( repo_data )
+
         new_data_id = db.data.insert( repo_data )
 
         # Once we save the repo data, save the files to S3
@@ -287,16 +319,45 @@ class Repository( models.Model ):
 
         return new_data_id
 
+    def add_task( self, task_id, task_type ):
+        '''
+            Track of tasks id ( and subsequently their results ) on a per repo
+            basis.
+
+            Params
+            ------
+            task_id : integer
+                Task id returned by Celery
+            task_type : string
+                An identifier for this task. ( i.e "csv_upload", etc )
+        '''
+        task_data = {
+            'repo': ObjectId( self.mongo_id ),
+            'task': task_id,
+            'type': task_type }
+
+        task_id = db.task.insert( task_data )
+        return task_id
+
+    def remove_task( self, task_id ):
+        return db.task.remove( { '_id': ObjectId( task_id ) } )
+
+    def flatten_fields( self ):
+        return self._flatten( self.fields() )
+
     def fields( self ):
         return db.repo.find_one( ObjectId( self.mongo_id ) )[ 'fields' ]
 
     def submissions( self ):
         return db.data.find({ 'repo': ObjectId( self.mongo_id ) } ).count()
 
+    def tasks( self ):
+        return db.task.find( { 'repo': ObjectId( self.mongo_id ) } )
+
     def owner( self ):
         if self.org:
             return self.org.name
-        return self.user.name
+        return self.user.username
 
     def __unicode__( self ):
         return '<Repository %s>' % ( self.name )

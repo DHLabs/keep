@@ -14,29 +14,48 @@ from django.views.decorators.http import require_POST, require_GET
 
 from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm
 
+from api.tasks import insert_csv_data
 from backend.db import db, dehydrate_survey, user_or_organization
 
 #from privacy import privatize_geo
 
 from .forms import NewRepoForm, NewBatchRepoForm
-from .models import Repository
+from .models import Repository, RepoSerializer
 
 
 @login_required
+@require_POST
+def insert_data_into_repo( request, repo_id ):
+    '''
+        Insert data from a CSV into a repo. This is relayed as a task to a
+        Celery worker.
+    '''
+
+    repo = Repository.objects.get( mongo_id=repo_id )
+
+    # Place the task in the queue
+    task = insert_csv_data.delay( file=request.POST.get( 'file_key' ), repo=repo_id )
+
+    # Save the task id so we can go back and check on the task
+    repo.add_task( task.task_id, 'csv_insert' )
+
+    return HttpResponseRedirect( reverse( 'repo_visualize',
+                                          kwargs={ 'username': request.user.username,
+                                                   'repo_name': repo.name } ) )
+
+
+@login_required
+@require_POST
 def batch_repo( request ):
 
-    if request.method == 'POST':
-        form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
+    form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
 
-        if form.is_valid():
-            new_repo = form.save()
+    if form.is_valid():
+        new_repo = form.save()
 
-            return HttpResponseRedirect(
-                        reverse( 'repo_visualize',
-                                 kwargs={ 'username': request.user.username,
-                                          'repo_name': new_repo.name } ) )
-
-    return HttpResponseRedirect( '/' )
+        return HttpResponseRedirect( reverse( 'repo_visualize',
+                                              kwargs={ 'username': request.user.username,
+                                                       'repo_name': new_repo.name } ) )
 
 
 @login_required
@@ -319,7 +338,8 @@ def repo_viz( request, username, repo_name ):
     data = db.data.find( { 'repo': ObjectId( repo.mongo_id ) },
                          { 'survey_label': False,
                            'user': False } )\
-                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )
+                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
+                  .limit( 50 )
 
     data = dehydrate_survey( data )
 
@@ -332,17 +352,14 @@ def repo_viz( request, username, repo_name ):
     usePerms = get_users_with_perms( repo, attach_perms=True )
     usePerms.pop( account, None )
 
-    if isinstance( account, User ):
-        account_name = account.username
-    else:
-        account_name = account.name
+    serializer = RepoSerializer()
+    repo_json = json.dumps( serializer.serialize( [repo] )[0] )
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
-                                 'sid': repo.mongo_id,
+                                 'repo_json': repo_json,
                                  'data': json.dumps( data ),
                                  'permissions': permissions,
                                  'account': account,
-                                 'account_name': account_name,
                                  'users_perms': usePerms },
                                context_instance=RequestContext(request) )

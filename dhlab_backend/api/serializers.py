@@ -13,22 +13,66 @@ class CSVSerializer( Serializer ):
         'csv': 'text/csv',
     }
 
-    def to_csv(self, data, options=None):
+    def _format_data( self, field_type, field_value ):
+        '''
+            Given a certain data type, format the value into a string that could
+            possibly be parsed later by our same code.
+
+            Params
+            ------
+            field_type : string
+                A string representation the type of data this field holds.
+
+            field_value : Object
+                A python object ( string, dict, etc ) that is our internal
+                representation of this data. This will be converted to a
+                standard string format that can be later parsed back into the
+                system if necessary.
+        '''
+
+        # If the field_value is None, simply return an empty string.
+        if field_value is None:
+            return ''
+
+        if field_type == 'geopoint':
+            # Converts geopoints into an X,Y coordinate string
+            coords = field_value.get( 'coordinates' )
+            return '%s, %s' % ( str( coords[0] ), str( coords[1] ) )
+
+        elif 'select all' in field_type:
+            # Converts a list into a comma-seperated list of values
+            return ','.join( field_value )
+        else:
+            return str( field_value )
+
+    def to_csv( self, data, options=None ):
+        '''
+            Converts the JSON representation from the data API into a CSV file.
+        '''
         options = options or {}
-        data = self.to_simple(data, options)
+
+        data = self.to_simple( data, options )
         raw_data = StringIO.StringIO()
 
-        writer = None
-        for item in data['data']:
+        writer = csv.DictWriter( raw_data,
+                                 [ x.get( 'name' ) for x in data[ 'meta' ][ 'fields' ] ],
+                                 extrasaction='ignore')
+        writer.writeheader()
 
-            sub_data = item[ 'data' ]
+        for item in data.get( 'data', [] ):
 
-            if writer is None:
-                writer = csv.DictWriter( raw_data,
-                                         sub_data.keys(),
-                                         extrasaction='ignore')
-                writer.writeheader()
+            # Loops through the field list and format each data value according to
+            # the type.
+            row = {}
+            for field in data[ 'meta' ][ 'fields' ]:
 
-            writer.writerow( sub_data )
+                # Grab the field details and convert the field into a string.
+                field_name = field.get( 'name' )
+                field_type = field.get( 'type' )
+                field_value = item.get( 'data' ).get( field_name, None )
+
+                row[ field_name ] = self._format_data( field_type, field_value )
+
+            writer.writerow( row )
 
         return raw_data.getvalue()

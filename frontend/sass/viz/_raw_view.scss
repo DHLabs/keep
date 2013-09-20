@@ -3,6 +3,29 @@
 	margin-top:16px;
 }
 
+#raw_table {
+
+	table-layout: fixed;
+
+	tr {
+		border-right: 1px solid #EEE;
+		cursor: pointer;
+	}
+
+	tr:hover {
+		border-right: 1px solid #FFF;
+
+		td {
+			border-left: 1px solid #FFF;
+		}
+	}
+
+	td {
+		border-left: 1px solid #EEE;
+	}
+
+}
+
 .card {
 	background:white;
 	width:220px;

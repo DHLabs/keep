@@ -1,9 +1,6 @@
 import json
 
-from backend.db import db
 from backend.db import user_or_organization
-
-from bson import ObjectId
 
 from django.conf.urls import url
 from django.http import HttpResponse
@@ -106,7 +103,6 @@ class RepoResource( ModelResource ):
         # First serialize the repo metadata.
         serializer = RepoSerializer()
         bundle.data = serializer.serialize( [bundle.obj] )[0]
-        bundle.data[ 'children' ] = bundle.obj.fields()
 
         return bundle
 

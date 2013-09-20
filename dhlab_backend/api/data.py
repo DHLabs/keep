@@ -1,13 +1,16 @@
+import pymongo
+
 from backend.db import db
 from backend.db import dehydrate_survey
 
 from bson import ObjectId
+from bson.code import Code
 
-import pymongo
+from django.conf.urls import url
 
 from tastypie import fields
-from tastypie.authentication import MultiAuthentication, SessionAuthentication
-from tastypie.http import HttpUnauthorized
+from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
+from tastypie.http import HttpUnauthorized, HttpBadRequest
 
 from repos.models import Repository
 
@@ -37,10 +40,19 @@ class DataResource( MongoDBResource ):
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get' ]
 
-        authentication = MultiAuthentication( SessionAuthentication(),
-                                              ApiTokenAuthentication() )
+        authentication = Authentication()
+
+        # authentication = MultiAuthentication( SessionAuthentication(),
+        #                                       ApiTokenAuthentication() )
 
         authorization = DataAuthorization()
+
+    def prepend_urls(self):
+        base_url = '^(?P<resource_name>%s)/' % ( self._meta.resource_name )
+        return [
+            url( regex=r"%s(?P<mongo_id>\w+)/stats/$" % ( base_url ),
+                 view=self.wrap_view('get_statistics'),
+                 name="api_dispatch_statistics") ]
 
     def _build_filters( self, request ):
         """
@@ -89,6 +101,21 @@ class DataResource( MongoDBResource ):
 
         return filters
 
+    def _build_sort( self, request ):
+
+        if 'sort' not in request:
+            return None
+
+        sort = {}
+
+        sort[ 'param' ] = 'data.%s' % ( request.get('sort') )
+        sort[ 'type' ] = pymongo.DESCENDING
+
+        if 'sort_type' in request and request.get('sort_type') in [ 'asc', 'ascending' ]:
+            sort[ 'type' ] = pymongo.ASCENDING
+
+        return sort
+
     def get_detail( self, request, **kwargs ):
 
         # Grab the survey that we're querying survey data for
@@ -104,30 +131,91 @@ class DataResource( MongoDBResource ):
             query_parameters = self._build_filters( request )
             query_parameters['repo'] = ObjectId( repo_id )
 
-            # Query the database for the data
+            if 'bbox' in request.GET and 'geofield' in request.GET:
+                # Convert the bounding box into the $box format needed to do
+                # a geospatial search in MongoDB
+                # http://docs.mongodb.org/manual/reference/operator/box/
+                try:
+                    bbox = map( float, request.GET[ 'bbox' ].split( ',' ) )
+                except ValueError:
+                    return HttpBadRequest( 'Invalid bounding box' )
+
+                bbox = [ [ bbox[0], bbox[1] ], [ bbox[2], bbox[3] ] ]
+                geofield = request.GET[ 'geofield' ]
+
+                query_parameters[ 'data.%s' % ( geofield ) ] = {'$geoWithin': {'$box': bbox}}
+
+            # Query data from MongoDB
             cursor = db.data.find( query_parameters )
 
-            if 'sort' in request.GET:
-                sort_parameter = 'data.%s' % ( request.GET['sort'] )
-                sort_type = pymongo.DESCENDING
-                if 'sort_type' in request.GET:
-                    if request.GET['sort_type'] == 'ascending':
-                        sort_type = pymongo.ASCENDING
-                cursor = cursor.sort( sort_parameter, sort_type )
+            sort_params = self._build_sort( request.GET )
+            if sort_params is not None:
+                cursor = cursor.sort( sort_params.get( 'param' ), sort_params.get( 'type' ) )
 
+            # Ensure correct pagination
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
 
+            limit = 50
+            if request.GET.get( 'format', None ) == 'csv':
+                limit = cursor.count()
+
+            if limit == 0:
+                pages = 0
+            else:
+                pages = cursor.count() / limit
+
             meta = {
-                'limit': 50,
+                'fields': repo.flatten_fields(),
+                'limit': limit,
                 'offset': offset,
                 'count': cursor.count(),
-                'pages': cursor.count() / 50
+                'pages': pages
             }
 
             data = {
                 'meta': meta,
-                'data': dehydrate_survey( cursor.skip(offset * 50).limit(50)) }
+                'data': dehydrate_survey( cursor.skip( offset * limit ).limit( limit ) ) }
 
             return self.create_response( request, data )
-        except ValueError:
-            return HttpUnauthorized()
+        except ValueError as e:
+            return HttpBadRequest( str( e ) )
+
+    def get_statistics( self, request, **kwargs ):
+        '''
+            Get "statistics" aim is to (ultimately) run MapReduce functions on
+            the set of data in a specific repository.
+        '''
+        day_map = Code( '''
+            function() {
+                day = Date.UTC( this.timestamp.getFullYear(), this.timestamp.getMonth(), this.timestamp.getDate() );
+                emit( { day: day }, { count: 1 } )
+            }''')
+
+        day_reduce = Code( '''
+            function( key, values ) {
+                var count = 0;
+                values.forEach( function( v ) {
+                    count += v[ 'count' ];
+                });
+                return {count: count};
+            }''')
+
+        # Grab the survey that we're querying survey data for
+        repo_filter = { 'repo': ObjectId( kwargs.get( 'mongo_id' ) ) }
+
+        cursor = db.data.find( repo_filter )
+
+        first = db.data.find_one( repo_filter, sort=[( '_id', pymongo.ASCENDING )] )
+        last  = db.data.find_one( repo_filter, sort=[( '_id', pymongo.DESCENDING )] )
+
+        result = db.data.map_reduce( day_map, day_reduce, "myresults", query=repo_filter )
+        for doc in result.find():
+            print doc
+
+        stats = {
+            'count': cursor.count(),
+            'first_submission': first,
+            'last_submission': last,
+        }
+
+        return self.create_response( request, stats )

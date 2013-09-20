@@ -46,9 +46,6 @@ requirejs.config(
 			exports: 'd3'
 
 		# Leaflet & associated plugins
-		leaflet:
-			deps: [ 'jquery' ]
-			exports: 'L'
 		leaflet_heatmap:
 			deps: [ 'leaflet', 'heatmap' ]
 		leaflet_cluster:
