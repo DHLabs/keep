@@ -160,6 +160,7 @@ class DataResource( MongoDBResource ):
                 limit = cursor.count()
 
             meta = {
+                'fields': repo.flatten_fields(),
                 'limit': limit,
                 'offset': offset,
                 'count': cursor.count(),
