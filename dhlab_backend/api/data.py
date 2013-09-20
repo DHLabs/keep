@@ -165,6 +165,7 @@ class DataResource( MongoDBResource ):
                 pages = cursor.count() / limit
 
             meta = {
+                'fields': repo.flatten_fields(),
                 'limit': limit,
                 'offset': offset,
                 'count': cursor.count(),

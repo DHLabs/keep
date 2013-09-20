@@ -19,19 +19,12 @@ class CSVSerializer( Serializer ):
         data = self.to_simple( data, options )
         raw_data = StringIO.StringIO()
 
-        writer = None
+        writer = csv.DictWriter( raw_data,
+                                 data[ 'meta' ][ 'fields' ],
+                                 extrasaction='ignore')
+        writer.writeheader()
+
         for item in data.get( 'data', [] ):
-
-            sub_data = item[ 'data' ]
-
-            if writer is None:
-                writer = csv.DictWriter( raw_data,
-                                         sub_data.keys(),
-                                         extrasaction='ignore')
-                writer.writeheader()
-
-            writer.writerow( sub_data )
-
-        print raw_data
+            writer.writerow( item.get( 'data' ) )
 
         return raw_data.getvalue()
