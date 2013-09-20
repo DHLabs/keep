@@ -212,6 +212,22 @@ class Repository( models.Model ):
             ( 'edit_data', 'Edit data in Repo' ),
             ( 'delete_data', 'Delete data from Repo' ), )
 
+    def _flatten( self, fields ):
+        '''
+            Returns a flat list of fields.
+        '''
+        field_list = []
+
+        for field in fields:
+
+            if field.get( 'type' ) is 'group':
+                field_list.extend( self._flatten( field.get( 'children' ) ) )
+                continue
+
+            field_list.append( field.get( 'name' ) )
+
+        return field_list
+
     def delete( self ):
         '''
             Delete all data & objects related to this object
@@ -289,6 +305,9 @@ class Repository( models.Model ):
                 storage.save( s3_url, file_to_upload )
 
         return new_data_id
+
+    def flatten_fields( self ):
+        return self._flatten( self.fields() )
 
     def fields( self ):
         return db.repo.find_one( ObjectId( self.mongo_id ) )[ 'fields' ]
