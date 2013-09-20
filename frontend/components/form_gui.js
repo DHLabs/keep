@@ -26,8 +26,8 @@ element.
 ================
 */
 var sourceEndpoint = {
-	anchor: ["TopRight"],
-	endpoint: ["Dot", {radius: 5}],
+	anchor: ["Right"],
+	endpoint: ["Dot", {radius: 10}],
 	paintStyle: {fillStyle: "#00F"},
 	isSource: true,
 	isTarget: false
@@ -35,7 +35,7 @@ var sourceEndpoint = {
 
 var targetEndpoint = {
 	anchor: ["Left"],
-	endpoint: ["Dot", {radius: 5}],
+	endpoint: ["Dot", {radius: 10}],
 	paintStyle: {fillStyle: "#F00"},
 	isSource: false,
 	isTarget: true,
@@ -513,28 +513,24 @@ function jsGUIDFS() {
 			// Case of only one question on a screen
 			else if ($('#' + currentDiv.attr('id') +  ' #sort' + i + ' li').length == 1) {
 				var tempQ = $('#' + currentDiv.attr('id') +  ' #sort' + i + ' li .true-name').html();
-				questionDictionary[i] = [tempQ];
+				questionDictionary[i] = new Object();
+				questionDictionary[i].questions = [tempQ];
 			}
 
-		//Case of multiple questions on a screen
-		else {
-			var tempQuestionArray = [];
-			$('#' + currentDiv.attr('id') + ' #sort' + i + ' li').each( function() {
-				tempQuestionArray.push($(this).find('.true-name').html());
-			});
-			questionDictionary[i] = tempQuestionArray;
-			// Set the group settings 
-			tempConnectionDict['settings'] = 
-				[$(currentDiv).find('.hiddenGroupLabel').html(),
-				$(currentDiv).find('.hiddenGroupSettings').html(),
-				$(currentDiv).find('.hiddenGroupName').html()];
-
-			//handles case of only one screen with multiple questions
-			if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
-				pathDictionary[i] = tempConnectionDict;
-				continue;
+			//Case of multiple questions on a screen
+			else {
+				var tempQuestionArray = [];
+				$('#' + currentDiv.attr('id') + ' #sort' + i + ' li').each( function() {
+					tempQuestionArray.push($(this).find('.true-name').html());
+				});
+				questionDictionary[i] = new Object();
+				questionDictionary[i].questions = tempQuestionArray;
+				// Set the group settings 
+				questionDictionary[i].settings = 
+					[$(currentDiv).find('.hiddenGroupLabel').html(),
+					$(currentDiv).find('.hiddenGroupSettings').html(),
+					$(currentDiv).find('.hiddenGroupName').html()];
 			}
-		}
 
 			// In the case of no connections, continue to the next screen
 			if (jsPlumb.getConnections(currentDiv)[0] == undefined) {
@@ -561,7 +557,9 @@ function jsGUIDFS() {
 					});
 				}
 
-				pathDictionary[i] = tempConnectionDict;
+				if( Object.keys( tempConnectionDict ).length > 0 ) {
+					pathDictionary[i] = tempConnectionDict;
+				}
 			}
 		}
 
@@ -583,58 +581,60 @@ function jsGUIDFS() {
 //Note: assumes linear tree with no branches for now
 function generateFormFromTree() {
 	var dfs = jsGUIDFS();
-	var questionDictionary = dfs[0];
+	var screensDictionary = dfs[0];
 	var pathDictionary = dfs[1];
 
-	var numQuestions = Object.keys(questionDictionary).length;
+	var numScreens = Object.keys(screensDictionary).length;
+	var numConnections = Object.keys(pathDictionary).length;
 
-	if( numQuestions > 1 && numQuestions != Object.keys(pathDictionary).length ) {
+	if( !(numScreens == (numConnections + 1)) ) {
 
-		alert( "Not all screens are connected" );
+		alert( "Improper number of screen connections" );
 		return false;
 	}
 
 	//get the first question
 	var firstScreen;
-	if( numQuestions == 1 ) {
-		firstScreen = Object.keys(questionDictionary)[0];
+	if( numScreens == 1 ) {
+		firstScreen = Object.keys(screensDictionary)[0];
 	} else {
 		for( var question in pathDictionary ) {
 
 			var found = false;
 			for( var question2 in pathDictionary ) {
-				if( question != question2 ) {
-					for( var connection in question2 ) {
-						if( connection == question ) {
-							found = true;
-							break;
-						}
+				for( var connection in question2 ) {
+					if( connection == question ) {
+						found = true;
+						break;
 					}
 				}
-				if( found ) {
+				
+				if( !found ) {
 					break;
 				}
 			}
 
-			if( found ) {
+			if( !found ) {
 				firstScreen = question;
 				break;
 			}
 		}
 	}
 	
+	alert( "frist screen" + firstScreen );
+
 	//trace through and build
 	var end = false;
 	var currentScreen = firstScreen;
 	var newQuestionList = new Array();
 	while( !end ) {
 
-		var screenQuestions = questionDictionary[currentScreen];
-		if( screenQuestions.length > 1 ) {
+		var screenDict = screensDictionary[currentScreen];
+		if( screenDict.questions.length > 1 ) {
 			//handle group
 			var group = new Object();
 
-			var groupSettings = pathDictionary[currentScreen].settings;
+			var groupSettings = screenDict.settings;
 
 			group.name = groupSettings[2];
 			group.label = groupSettings[0];
@@ -645,33 +645,31 @@ function generateFormFromTree() {
 
 			group.children = new Array();
 
-			for( var questionIndex in screenQuestions ) {
-				var question = getQuestionForName( screenQuestions[questionIndex] );
+			for( var questionIndex in screenDict.questions ) {
+				var question = getQuestionForName( screenDict.questions[questionIndex] );
 				group.children.push( question );
 			}
 
 			newQuestionList.push( group );
 
-		} else if( screenQuestions.length == 0 ) {
+		} else if( screenDict.questions.length == 0 ) {
 			//screen with no questions
 			//do nothing
 		} else {
 			//handle single question
-			var question = getQuestionForName( screenQuestions[0] );
+			var question = getQuestionForName( screenDict.questions[0] );
 			newQuestionList.push( question );
 		}
 
 		//get next screen
-		if( numQuestions != 1 ) {
-			var screenConnections = Object.keys( pathDictionary[currentScreen] );
-			if( screenConnections.length == 0 ) {
-				//no more screens, breakout
+		if( numScreens != 1 ) {
+			var screenConnections = pathDictionary[currentScreen];
+			if( screenConnections == null ) {
 				end = true;
 				break;
 			} else {
-				//can assume first one here, linearity mandates single connection
-				currentScreen = screenConnections[0];
-			}
+				currentScreen = Object.keys(screenConnections)[0];
+			}			
 		} else {
 			end = true;
 			break;
