@@ -337,10 +337,7 @@ function jsGUIAddRelevance(window, relevance) {
 		  .addClass('relevanceList')
 		  .appendTo('#' + window);
 	}
-	
-	console.log($('.relevanceList').length + " and " + $('#' + window + ' .relevanceList li').length)
-	console.log(window)
-	console.log(relevance)
+
 	var tempID = "relevance_" + $('.relevanceList').length + $('#' + window + ' .relevanceList li').length;
 	//trying to keep the unique number, scramble (Randomize) it if it exists (sometimes occurs after deletion of relevances)
 	while ($('#' + tempID).length > 0) {
@@ -672,6 +669,9 @@ function rebuildFormGUI(jsonRepo) {
 	$('#id_desc').val(description);
 
 	rebuildRecurse(jsonRepo.children, xIndex, yIndex);
+
+	// Final repaint command, to fix anything that was messed up
+	jsPlumb.repaintEverything();
 }
 
 function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
@@ -688,7 +688,9 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		if (key.type =='group') {
 			// No control, chance of being nested group, recurse!
 			if (!key.control) {
-				prevWindow = rebuildRecurse(key.children, xIndex + 20, yIndex + 35, prevWindow);
+				var tempReturn = rebuildRecurse(key.children, xIndex + 20, yIndex, prevWindow);
+				prevWindow = tempReturn[0];
+				xIndex = tempReturn[1];
 				continue;
 			}
 
@@ -734,7 +736,6 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 				var corresWindow = $('div.true-name:contains("' + relevanceSet[j].name + '")')
 									.parent().parent().parent().attr('id');
 				var tempID = jsGUIAddRelevance(corresWindow, relevanceSet[j]);
-				console.log(tempID)
 				var releStart = jsPlumb.getEndpoints($('#' + tempID))[0];
 				var releEnd = jsPlumb.getEndpoints($('#' + currentWindow))[1];
 				jsPlumb.connect({source:releStart, target:releEnd});
@@ -759,7 +760,7 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 
 	}
 
-	return prevWindow;
+	return [prevWindow, xIndex];
 }
 
 /*
