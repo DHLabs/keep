@@ -694,11 +694,6 @@ function saveRepository() {
 */
 function rebuildFormGUI(jsonRepo) {
 	var xIndex = yIndex = 10;
-	var name = jsonRepo.name;
-	var description = jsonRepo.description;
-
-	$('#id_name').val(name);
-	$('#id_desc').val(description);
 
 	rebuildRecurse(jsonRepo.children, xIndex, yIndex);
 
