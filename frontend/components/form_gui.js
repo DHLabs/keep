@@ -710,7 +710,7 @@ function rebuildFormGUI(jsonRepo) {
 	jsPlumb.repaintEverything();
 }
 
-function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
+function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind, groupRelevances) {
 	var currentWindow;   // ID of the current window, for jsPlumb
 	var prevWindow = []; // ID of the previous window(s), for jsPlumb
 
@@ -724,7 +724,17 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 		if (key.type =='group') {
 			// No control, chance of being nested group, recurse!
 			if (!key.control) {
-				var tempReturn = rebuildRecurse(key.children, xIndex + 20, yIndex, prevWindow);
+				// Adding group relevances
+				if (key.bind && key.bind.relevant) {
+					if (!groupRelevances) {
+						groupRelevances = key.bind.relevant;
+					}
+					else {
+						groupRelevances += " AND " + key.bind.relevant;
+					}
+				}
+
+				var tempReturn = rebuildRecurse(key.children, xIndex + 20, yIndex, prevWindow, groupRelevances);
 				prevWindow = tempReturn[0];
 				xIndex = tempReturn[1];
 				continue;
@@ -766,7 +776,13 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind) {
 
 		// If there is a bind, there are relevances, handle them
 		if(key.bind && key.bind.relevant) {
-			var relevanceSet = relevanceParser(key.bind.relevant);
+			var relevanceSet;
+			if (groupRelevances) {
+				relevanceSet = relevanceParser(groupRelevances + " AND " + key.bind.relevant);
+			}
+			else {
+				relevanceSet = relevanceParser(key.bind.relevant);
+			}
 
 			for (var j = 0; j < relevanceSet.length; j++) {
 				var corresWindow = $('div.true-name:contains("' + relevanceSet[j].name + '")')
