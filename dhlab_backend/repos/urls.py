@@ -3,11 +3,16 @@ from django.conf.urls import patterns, url
 ## Webform/Data submission ##
 urlpatterns = patterns( 'repos.views',
 
-    # Batch create a repo and import data into it from a
-    # CSV file.
+    # Batch upload data into a repo from a CSV file.
     url(regex=r'^repo/insert/(?P<repo_id>[-\w]+)/$',
         view='insert_data_into_repo',
         name='repo_insert' ),
+
+    # Batch create a repo and import data into it from a
+    # CSV file.
+    url(regex=r'^repo/batch$',
+        view='batch_repo',
+        name='repo_batch' ),
 
     # Create new data repository
     url(regex=r'^repo/new/$',
