@@ -727,12 +727,15 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind, groupRelevances) {
 					}
 					else {
 						groupRelevances += " AND " + key.bind.relevant;
+						key.bind.relevant = groupRelevances;
+
 					}
 				}
 
 				var tempReturn = rebuildRecurse(key.children, xIndex + 20, yIndex, prevWindow, groupRelevances);
 				prevWindow = tempReturn[0];
 				xIndex = tempReturn[1];
+				groupRelevances = null;
 				continue;
 			}
 
@@ -770,7 +773,18 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind, groupRelevances) {
 							 currentWindow.substring(6));
 		}
 
-		// If there is a bind, there are relevances, handle them
+		if (groupRelevances) {
+			if (key.bind && key.bind.relevant) {
+				key.bind.relevant = groupRelevances + " AND " + key.bind.relevant;
+			}
+			else {
+				key.bind = [];
+				key.bind.relevant = groupRelevances;
+			}
+			console.log(key.bind.relevant);
+		}
+
+		/* If there is a bind, there are relevances, handle them
 		if(key.bind && key.bind.relevant) {
 			var relevanceSet;
 			if (groupRelevances) {
@@ -790,8 +804,8 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind, groupRelevances) {
 			}
 			prevWindow.push(currentWindow);
 		}
-
-		else {
+	*/
+		//else {
 			if(prevWindow) {
 				var endEndpoint = jsPlumb.getEndpoints($('#' + currentWindow))[1];
 				for (var j = 0; j < prevWindow.length; j++) {
@@ -802,7 +816,7 @@ function rebuildRecurse(jsonObject, xIndex, yIndex, prevWind, groupRelevances) {
 
 			prevWindow = [];
 			prevWindow[0] = currentWindow;
-		}
+		//}
 
 		xIndex += 20;
 
