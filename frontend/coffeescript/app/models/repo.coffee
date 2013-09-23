@@ -9,7 +9,7 @@ define( [ 'backbone', 'jquery_cookie' ],
         _detect_fields: ( root, fields ) ->
             for field in root
                 if field.type in [ 'group' ]
-                    @_detect_headers( field.children, fields )
+                    @_detect_fields( field.children, fields )
 
                 # Don't show notes in the raw data table
                 if field.type not in [ 'note' ] and field.type not in [ 'group' ]
