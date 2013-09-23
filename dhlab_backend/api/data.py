@@ -124,6 +124,7 @@ class DataResource( MongoDBResource ):
                 limit = cursor.count()
 
             meta = {
+                'form_name': repo.name,
                 'fields': repo.flatten_fields(),
                 'limit': limit,
                 'offset': offset,
