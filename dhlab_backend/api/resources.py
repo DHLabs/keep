@@ -10,6 +10,8 @@ from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpUnauthorized
 from tastypie.resources import Resource
 
+from django.http import HttpResponse
+
 
 class Document( dict ):
     # Dictionary-like object for MongoDB documents
@@ -20,6 +22,14 @@ class MongoDBResource(Resource):
     """
     A base resource that allows to make CRUD operations for mongodb.
     """
+    def create_response(self, request, data, response_class=HttpResponse, **response_kwargs):
+
+        response = super(MongoDBResource, self).create_response(request, data)
+        desired_format = self.determine_format(request)
+        if desired_format == 'text/csv':
+            response['Content-Disposition'] = 'inline; filename="%s.csv"' % (data['meta']['form_name'])
+        return response
+
     def get_collection(self):
         """
         Encapsulates collection name.

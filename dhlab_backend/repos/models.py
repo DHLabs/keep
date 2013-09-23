@@ -227,7 +227,6 @@ class Repository( models.Model ):
         field_list = []
 
         for field in fields:
-
             if field.get( 'type' ) == 'note':
                 continue
 
