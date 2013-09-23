@@ -7,7 +7,7 @@ import pymongo
 
 from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
-from tastypie.http import HttpUnauthorized
+from tastypie.http import HttpUnauthorized, HttpBadRequest
 
 from repos.models import Repository
 
@@ -137,5 +137,6 @@ class DataResource( MongoDBResource ):
                 'data': dehydrate_survey( cursor.skip( offset * limit ).limit( limit ) ) }
 
             return self.create_response( request, data )
-        except ValueError:
-            return HttpUnauthorized()
+        except ValueError as e:
+            return HttpBadRequest( e )
+
