@@ -220,7 +220,7 @@ class Repository( models.Model ):
 
         for field in fields:
 
-            if field.get( 'type' ) is 'group':
+            if field.get( 'type' ) == 'group':
                 field_list.extend( self._flatten( field.get( 'children' ) ) )
                 continue
 
