@@ -17,10 +17,11 @@ class XFormSerializer( Serializer ):
         Uses the pyxform provided classes to convert from JSON -> XForm xml
         and back again.
     '''
-    formats = [ 'xform', 'json' ]
+    formats = [ 'xform', 'json', 'xls' ]
     content_types = {
         'json': 'application/json',
         'xform': 'text/xml',
+        'xls': 'application/vnd.ms-excel'
     }
 
     def to_formList( self, repos ):
@@ -110,3 +111,7 @@ class XFormSerializer( Serializer ):
             raise Exception( data )
 
         return None
+
+    def to_xls( self, data, options=None ):
+        options = options or {}
+        data = self.to_simple(data, options)
