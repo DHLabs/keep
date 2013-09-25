@@ -102,6 +102,6 @@ You may now log in to the system using the following credentials.
 
 # License
 
-Keep is licensed under the terms of the [MIT License](license.txt)
+Keep is licensed under the terms of the [MIT License](LICENSE.txt)
 
 
