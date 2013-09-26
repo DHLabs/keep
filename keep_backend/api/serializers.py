@@ -1,4 +1,4 @@
-import csv
+import unicodecsv
 import StringIO
 
 from tastypie.serializers import Serializer
@@ -54,9 +54,9 @@ class CSVSerializer( Serializer ):
         data = self.to_simple( data, options )
         raw_data = StringIO.StringIO()
 
-        writer = csv.DictWriter( raw_data,
-                                 [ x.get( 'name' ) for x in data[ 'meta' ][ 'fields' ] ],
-                                 extrasaction='ignore')
+        writer = unicodecsv.DictWriter( raw_data,
+                                        data[ 'meta' ][ 'fields' ],
+                                        extrasaction='ignore')
         writer.writeheader()
 
         for item in data.get( 'data', [] ):

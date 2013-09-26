@@ -12,9 +12,6 @@ db = connection[ settings.MONGODB_DBNAME ]
 
 
 def dehydrate( survey ):
-    for key in survey.keys():
-        if isinstance( survey[ key ], ObjectId ):
-            survey[ key ] = str( survey[ key ] )
 
     # Reformat python DateTime into JS DateTime
     if 'timestamp' in survey:
@@ -22,6 +19,12 @@ def dehydrate( survey ):
 
     if '_id' in survey:
         survey[ 'id' ] = survey.pop( '_id' )
+
+    for key in survey.keys():
+        if isinstance( survey[key], dict ):
+            survey[ key ] = dehydrate( survey[key] )
+        else:
+            survey[ key ] = unicode( survey[ key ] ).encode( 'utf-8' )
 
     return survey
 

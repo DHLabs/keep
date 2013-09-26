@@ -1,6 +1,6 @@
 # Keep
 
-Keep is a general purpose platform that is designed to facilitate data collection and analysis while providing a robust API to support its use in other mediums. 
+Keep is a general purpose platform that is designed to facilitate data collection and analysis while providing a robust API to support its use in other mediums.
 
 ## Forms
 
@@ -27,7 +27,7 @@ Make sure the following dependencies are installed:
 - Python 2.7 ( http://www.python.org )
 
 ## Frontend Dev Environment
-**You must setup Frontend Dev even if you're only doing backend development.** 
+**You must setup Frontend Dev even if you're only doing backend development.**
 The Front-end development environment will set up the resources needed to compile
 and minify your frontend assets. To correctly ensure that you have a working local
 development environment, follow these instructions:
@@ -47,12 +47,12 @@ Make sure you are in the root of the project where the package.json file is loca
 If you are having problems with installing npm, or installing Node.js, try one of these alternatives: [https://gist.github.com/isaacs/579814](https://gist.github.com/isaacs/579814).
 
 ### Install Javascript/CSS dependencies
-Next we make sure bower ( a javascript/css package manager ) is installed and 
+Next we make sure bower ( a javascript/css package manager ) is installed and
 accessible globally. You may need admin access to install globally.
 
     (sudo) npm install -g bower
     bower install
-    
+
 ### Build Front-End
 Finally, we used the tools we have just installed to build our javascript/css
 files. When the build task is completed, grunt will watch for changes in the
@@ -67,7 +67,7 @@ Make sure you have the following Python modules installed:
 - virtualenv ( http://pypi.python.org/pypi/virtualenv )
 - virtualenvwrapper ( http://www.doughellmann.com/projects/virtualenvwrapper )
 
-Ensure that virtualenvwrapper is correctly setup. You should be able to run 
+Ensure that virtualenvwrapper is correctly setup. You should be able to run
 mkvirtualenv_help from the command line.
 
 ### Create your development workspace
@@ -102,6 +102,5 @@ You may now log in to the system using the following credentials.
 
 # License
 
-Keep is licensed under the terms of the [MIT License](license.txt)
-
+Keep is licensed under the terms of the [MIT License](LICENSE.txt)
 
