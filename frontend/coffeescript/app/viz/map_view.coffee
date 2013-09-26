@@ -51,9 +51,8 @@ define( [ 'jquery',
                     @map_headers.push( field )
 
                     if not @selected_header?
-                        @selected_header = { location: field }
+                        @selected_header = field
 
-                    continue
                 else if field.label.length == 3
                     if field.label.search( 'lat' ) != -1
                         console.log(field)
@@ -64,14 +63,14 @@ define( [ 'jquery',
 
             # This means there were no geopoints... attempt to find an lat/lng
             # combo between two columns
-            if not @selected_header?
-
-                @selected_header = {}
-                for field in @map_headers
-                    if field.label.search( 'lat' ) != -1
-                        @selected_header.lat = field
-                    else if field.label.search( 'lng' ) != -1
-                        @selected_header.lng = field
+            # TODO: Support separate lat/lngs somehow. Perhaps introduce a merging utility?
+            # if not @selected_header?
+            #     @selected_header = {}
+            #     for field in @map_headers
+            #         if field.label.search( 'lat' ) != -1
+            #             @selected_header.lat = field
+            #         else if field.label.search( 'lng' ) != -1
+            #             @selected_header.lng = field
 
         _geopoint: ( datum ) ->
 
@@ -100,9 +99,6 @@ define( [ 'jquery',
                 return null
 
             return geopoint
-
-        render: () ->
-            @
 
         _resize_map: () =>
             $( '#map' ).css( { 'height': ( @$el.parent().height() - 20 ) + 'px' } )
