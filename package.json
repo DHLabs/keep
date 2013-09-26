@@ -4,7 +4,7 @@
   "author": "Andrew Huynh",
   "license": "BSD",
   "readmeFilename": "README.md",
-  "static_dir": "dhlab_backend/static",
+  "static_dir": "keep_backend/static",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-watch": "~0.4.4",
