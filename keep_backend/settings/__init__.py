@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'storages',                 # Needed for S3 file storage
     'django_mailgun',           # Easy email API
     'south',                    # Database migrations
+    'raven.contrib.django.raven_compat',    # Smart error logging. See logging.py for raven settings
 )
 
 ANONYMOUS_USER_ID = -1

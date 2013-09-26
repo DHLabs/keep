@@ -1,3 +1,5 @@
+from credentials import RAVEN_CONFIG, SENTRY_KEY
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
