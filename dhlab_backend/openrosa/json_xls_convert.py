@@ -3,20 +3,9 @@ import re
 from openpyxl import Workbook
 
 class jsonXlsConvert():
-	'''
-	def __init__(self, file_name): 
-		self.xlsFileName = file_name + ".xls"
-		self.bindDict = {}
-		self.questionDict = {}
+	def __init__(self): 
+		pass
 
-	def getBindDict(self, jsonDict):
-		for element in jsonDict:
-			if "bind" in element:
-				stuff
-
-				if element["type"] == 'group':
-					self.getBindDict(self, element)
-	'''
 
 	def writeToXls(self, json_dict, file_name):
 		wb = Workbook()
@@ -33,8 +22,46 @@ class jsonXlsConvert():
 		choicesHeaders = ['list name', 'name', 'label', 'image']
 		self.writeArrayToXLS(worksheet2, choicesHeaders, 'A1')
 
+		self.recurseWriter(json_dict, worksheet1, worksheet2, surveyHeaders, choicesHeaders)
+
+		return wb.save(file_name + '.xls')
+
+	def recurseWriter(self, json_dict, wb1, wb2, wb1Headers, wb2Headers):
+		iterRow = 1
+		choicesRow = 1
+		for element in json_dict:
+			iterRow += 1
+			surveyWriteRow = []
+
+			if element["type"] == 'group':
+				surveyWriteRow = ['begin group']
+				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + iterRow))
+				self.recurseWriter(element["children"], wb1, wb2, wb1Headers, wb2Headers)
+				iterRow += 1
+				surveyWriteRow = ['end group']
+				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + iterRow))
+
+			else:			
+				for header in wb1Headers:
+					if header in element:
+						surveyWriteRow += [element[header]]
+					else:
+						surveyWriteRow += [""]
+				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + iterRow))
+
+			if 'choices' in element:
+				choicesRow += 1
+				choiceWriteRow = []
+				for choice in element['choice']:
+					for header in wb2Headers:
+						if header in choice:
+							choiceWriteRow += [choice[header]]
+						else:
+							choiceWriteRow += [""]
+					self.writeArrayToXLS(wb2, choiceWriteRow, ('A' + choicesRow))
+
 	'''Utility function to write an array to excel using openpyxl'''
-	def writeArrayToXLS(worksheet, array_to_write, starting_cell, horizontal=True):
+	def writeArrayToXLS(self, worksheet, array_to_write, starting_cell, horizontal=True):
 		res = re.findall(r'\d+', starting_cell)
 		
 		row = res[0]

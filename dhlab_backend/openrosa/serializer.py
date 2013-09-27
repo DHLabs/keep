@@ -118,4 +118,4 @@ class XFormSerializer( Serializer ):
         options = options or {}
         data    = self.to_simple(data, options)
 
-        jXConv.writeToXls(data["children"], data["name"])
+        return jXConv.writeToXls(data["children"], data["name"])
