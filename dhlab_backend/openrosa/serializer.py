@@ -11,6 +11,8 @@ from tastypie.serializers import Serializer
 
 from pyxform.builder import create_survey_element_from_dict
 
+import json_xls_convert as jXConv
+
 
 class XFormSerializer( Serializer ):
     '''
@@ -114,4 +116,6 @@ class XFormSerializer( Serializer ):
 
     def to_xls( self, data, options=None ):
         options = options or {}
-        data = self.to_simple(data, options)
+        data    = self.to_simple(data, options)
+
+        jXConv.writeToXls(data["children"], data["name"])

@@ -27,14 +27,3 @@ class CSVSerializer( Serializer ):
             writer.writerow( item.get( 'data' ) )
 
         return raw_data.getvalue()
-
-class XLSSerializer( Serializer ):
-    formats = [ 'json', 'xls' ]
-    content_types = {
-        'json': 'application/json',
-        'xls': 'application/vnd.ms-excel'
-    }
-
-    def to_xls( self, data, options=None ):
-        options = options or {}
-        data = self.to_simple(data, options)
