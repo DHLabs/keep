@@ -4,6 +4,8 @@ import socket
 import djcelery
 djcelery.setup_loader()
 
+from credentials import SECRET_KEY
+
 # Django settings for dhlab_backend project.
 from .defaults.celery import *
 from .defaults.database import *

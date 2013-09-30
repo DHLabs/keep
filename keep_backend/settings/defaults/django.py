@@ -1,4 +1,5 @@
 import os
+
 CURRENT_FILE = os.path.abspath(__file__)
 PROJECT_ROOT = os.path.join( os.path.dirname(CURRENT_FILE), '../..' )
 
@@ -66,9 +67,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'rt26r6ti28t)=%3q*sqbvr2a^lv+kcx&amp;h&amp;k#uocrh*p_v)+h9f'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
