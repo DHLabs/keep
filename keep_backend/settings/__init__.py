@@ -5,6 +5,8 @@ from .defaults.database import *
 from .defaults.django import *
 from .defaults.logging import *
 
+from credentials import SECRET_KEY, TWOFACTOR_ENCRYPTION_KEY
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -49,8 +51,6 @@ AUTHENTICATION_BACKENDS = (
     # Set up per-object permissions backend
     'guardian.backends.ObjectPermissionBackend',
 )
-
-TWOFACTOR_ENCRYPTION_KEY = ''
 
 ACCOUNT_ACTIVATION_DAYS = 1
 
