@@ -1,3 +1,3 @@
 [submodule "keep_backend/twofactor"]
 	path = keep_backend/twofactor
-	url = git@bitbucket.org:distributedhealth/twofactor.git
+	url = https://github.com/DHLabs/django-twofactor.git
