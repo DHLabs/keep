@@ -20,7 +20,10 @@ class jsonXlsConvert():
 		self.worksheet2.title = 'choices'
 		jsonXlsConvert.choicesHeaders = ['list name', 'name', 'label', 'image']
 		self.writeArrayToXLS(self.worksheet2, self.choicesHeaders, 'A1')
-		jsonXlsConvert.file_name = (file_name + ".xls")
+		jsonXlsConvert.file_name = (file_name + ".xlsx")
+
+		jsonXlsConvert.iterRow = 1
+		jsonXlsConvert.choicesRow = 1
 
 	def writeToXls(self, json_dict):
 
@@ -31,19 +34,19 @@ class jsonXlsConvert():
 		return response
 
 	def recurseWriter(self, json_dict):
-		iterRow = 1
-		choicesRow = 1
 		for element in json_dict:
-			iterRow += 1
+			self.iterRow += 1
 			surveyWriteRow = []
 
 			if element.get("type") == 'group':
+				self.iterRow += 1
 				surveyWriteRow = ['begin group']
-				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `iterRow`))
+				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `self.iterRow`))
 				self.recurseWriter(element.get("children"))
-				iterRow += 1
+				self.iterRow += 1
 				surveyWriteRow = ['end group']
-				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `iterRow`))
+				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `self.iterRow`))
+				self.iterRow += 1
 
 			else:
 				for header in self.surveyHeaders:
@@ -51,11 +54,11 @@ class jsonXlsConvert():
 						surveyWriteRow += [element.get(header)]
 					else:
 						surveyWriteRow += [""]
-				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `iterRow`))
+				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `self.iterRow`))
 
 			if 'choices' in element:
 				choiceOptions = element['choices']
-				choicesRow += 1
+				self.choicesRow += 1
 				choiceWriteRow = []
 				for choice in choiceOptions:
 					for header in self.choicesHeaders:
@@ -63,7 +66,7 @@ class jsonXlsConvert():
 							choiceWriteRow += [choice.get(header)]
 						else:
 							choiceWriteRow += [""]
-					self.writeArrayToXLS(self.worksheet2, choiceWriteRow, ('A' + `choicesRow`))
+					self.writeArrayToXLS(self.worksheet2, choiceWriteRow, ('A' + `self.choicesRow`))
 					choiceWriteRow = []
 
 	'''Utility function to write an array to excel using openpyxl'''
