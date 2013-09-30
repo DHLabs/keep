@@ -3,8 +3,8 @@ import re
 from openpyxl import Workbook
 
 class jsonXlsConvert():
-	def __init__(self): 
-		pass
+	#def __init__(self): 
+	#	pass
 
 
 	def writeToXls(self, json_dict, file_name):
@@ -33,37 +33,39 @@ class jsonXlsConvert():
 			iterRow += 1
 			surveyWriteRow = []
 
-			if element["type"] == 'group':
+			if element.get("type") == 'group':
 				surveyWriteRow = ['begin group']
-				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + iterRow))
-				self.recurseWriter(element["children"], wb1, wb2, wb1Headers, wb2Headers)
+				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + `iterRow`))
+				self.recurseWriter(element.get("children"), wb1, wb2, wb1Headers, wb2Headers)
 				iterRow += 1
 				surveyWriteRow = ['end group']
-				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + iterRow))
+				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + `iterRow`))
 
-			else:			
+			else:
 				for header in wb1Headers:
 					if header in element:
-						surveyWriteRow += [element[header]]
+						surveyWriteRow += [element.get(header)]
 					else:
 						surveyWriteRow += [""]
-				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + iterRow))
+				self.writeArrayToXLS(wb1, surveyWriteRow, ('A' + `iterRow`))
 
 			if 'choices' in element:
+				choiceOptions = element['choices']
 				choicesRow += 1
 				choiceWriteRow = []
-				for choice in element['choice']:
+				for choice in choiceOptions:
 					for header in wb2Headers:
 						if header in choice:
-							choiceWriteRow += [choice[header]]
+							choiceWriteRow += [choice.get(header)]
 						else:
 							choiceWriteRow += [""]
-					self.writeArrayToXLS(wb2, choiceWriteRow, ('A' + choicesRow))
+					self.writeArrayToXLS(wb2, choiceWriteRow, ('A' + `choicesRow`))
+					choiceWriteRow = []
 
 	'''Utility function to write an array to excel using openpyxl'''
 	def writeArrayToXLS(self, worksheet, array_to_write, starting_cell, horizontal=True):
 		res = re.findall(r'\d+', starting_cell)
-		
+
 		row = res[0]
 		col = starting_cell[:-len(res[0])]
 		col_ind = ord(col) - 96 + 32 # only works for A-Z in caps
@@ -79,5 +81,4 @@ class jsonXlsConvert():
 				cell_str = '%s%d' % (chr(col_ind + 64 ), int(row) + i)
 				worksheet.cell(cell_str).value = array_to_write[i]
 				# print cell_str
-
 

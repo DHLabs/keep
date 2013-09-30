@@ -12,6 +12,7 @@ from tastypie.utils.mime import build_content_type
 
 from repos.models import Repository, RepoSerializer
 from openrosa.serializer import XFormSerializer
+from openrosa.json_xls_convert import jsonXlsConvert
 
 from .authentication import ApiTokenAuthentication
 from .authorization import RepoAuthorization
