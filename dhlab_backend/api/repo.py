@@ -83,10 +83,11 @@ class RepoResource( ModelResource ):
         desired_format = self.determine_format(request)
 
         serialized = self.serialize(request, data, desired_format)
+        
         # if its a XLSX file, the response has already been handled in json_xls_convert
         if desired_format == 'application/vnd.ms-excel':
             return serialized
-        
+
         response = response_class( content=serialized,
                                    content_type=build_content_type(desired_format),
                                    **response_kwargs )

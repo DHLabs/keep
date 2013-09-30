@@ -59,15 +59,16 @@ class jsonXlsConvert():
 			if 'choices' in element:
 				choiceOptions = element['choices']
 				self.choicesRow += 1
-				choiceWriteRow = []
+				choiceWriteRow = [element.get("name")]
 				for choice in choiceOptions:
+					#print choice
 					for header in self.choicesHeaders:
 						if header in choice:
 							choiceWriteRow += [choice.get(header)]
 						else:
 							choiceWriteRow += [""]
 					self.writeArrayToXLS(self.worksheet2, choiceWriteRow, ('A' + `self.choicesRow`))
-					choiceWriteRow = []
+					choiceWriteRow = [element.get("name")]
 
 	'''Utility function to write an array to excel using openpyxl'''
 	def writeArrayToXLS(self, worksheet, array_to_write, starting_cell, horizontal=True):

@@ -117,6 +117,6 @@ class XFormSerializer( Serializer ):
     def to_xls( self, data, options=None ):
         options = options or {}
         data    = self.to_simple(data, options)
-        convertor = jsonXlsConvert(data.get('name'))
+        converter = jsonXlsConvert(data.get('name'))
 
-        return convertor.writeToXls(data.get("children"))
+        return converter.writeToXls(data.get("children"))
