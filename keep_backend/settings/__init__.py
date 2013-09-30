@@ -4,7 +4,7 @@ import socket
 import djcelery
 djcelery.setup_loader()
 
-from credentials import SECRET_KEY
+from credentials import SECRET_KEY, TWOFACTOR_ENCRYPTION_KEY
 
 # Django settings for dhlab_backend project.
 from .defaults.celery import *
@@ -56,8 +56,6 @@ AUTHENTICATION_BACKENDS = (
     # Set up per-object permissions backend
     'guardian.backends.ObjectPermissionBackend',
 )
-
-TWOFACTOR_ENCRYPTION_KEY = ''
 
 ACCOUNT_ACTIVATION_DAYS = 1
 
