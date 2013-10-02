@@ -24,6 +24,7 @@ class jsonXlsConvert():
 
 		jsonXlsConvert.iterRow = 1
 		jsonXlsConvert.choicesRow = 1
+		self.surveyHeaders = [s.replace('read-only', 'readonly') for s in self.surveyHeaders]
 
 	def writeToXls(self, json_dict):
 
@@ -31,28 +32,34 @@ class jsonXlsConvert():
 
 		response = HttpResponse(save_virtual_workbook(self.wb), content_type='application/vnd.ms-excel')
 		response['Content-Disposition'] = 'attachment; filename="' + self.file_name + '"'
-		print self.choicesHeaders
 		return response
 
 	def recurseWriter(self, json_dict):
 		for element in json_dict:
 			self.iterRow += 1
 			surveyWriteRow = []
+			prepBinds = []
+			try:
+				prepBinds = element['bind']
+			except KeyError:
+				pass
 
 			if element.get("type") == 'group':
-				self.iterRow += 1
+				#self.iterRow += 1
 				surveyWriteRow = ['begin group']
 				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `self.iterRow`))
 				self.recurseWriter(element.get("children"))
 				self.iterRow += 1
 				surveyWriteRow = ['end group']
 				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `self.iterRow`))
-				self.iterRow += 1
+				#self.iterRow += 1
 
 			else:
 				for header in self.surveyHeaders:
 					if header in element:
 						surveyWriteRow += [element.get(header)]
+					elif header in prepBinds:
+						surveyWriteRow += [prepBinds.get(header)]
 					else:
 						surveyWriteRow += [""]
 				self.writeArrayToXLS(self.worksheet1, surveyWriteRow, ('A' + `self.iterRow`))
