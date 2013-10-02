@@ -24,7 +24,9 @@ class jsonXlsConvert():
 
 		jsonXlsConvert.iterRow = 1
 		jsonXlsConvert.choicesRow = 1
-		self.surveyHeaders = [s.replace('read-only', 'readonly') for s in self.surveyHeaders]
+		#self.surveyHeaders = [s.replace('read_only', 'readonly') for s in self.surveyHeaders]
+		self.surveyHeaders[12] = 'readonly'
+		self.choicesHeaders.pop(0)
 
 	def writeToXls(self, json_dict):
 
@@ -32,6 +34,7 @@ class jsonXlsConvert():
 
 		response = HttpResponse(save_virtual_workbook(self.wb), content_type='application/vnd.ms-excel')
 		response['Content-Disposition'] = 'attachment; filename="' + self.file_name + '"'
+		print self.surveyHeaders
 		return response
 
 	def recurseWriter(self, json_dict):
@@ -57,6 +60,12 @@ class jsonXlsConvert():
 			else:
 				for header in self.surveyHeaders:
 					if header in element:
+						if header is 'type':
+							print element[header]
+							if element[header] == 'select one':
+								element[header] = ('select one from ' + element.get('name'))
+							elif element[header] == 'select all that apply':
+								element[header] = ('select_multiple ' + element.get('name'))
 						surveyWriteRow += [element.get(header)]
 					elif header in prepBinds:
 						surveyWriteRow += [prepBinds.get(header)]
