@@ -31,6 +31,7 @@ class jsonXlsConvert():
 
 		response = HttpResponse(save_virtual_workbook(self.wb), content_type='application/vnd.ms-excel')
 		response['Content-Disposition'] = 'attachment; filename="' + self.file_name + '"'
+		print self.choicesHeaders
 		return response
 
 	def recurseWriter(self, json_dict):
@@ -59,16 +60,15 @@ class jsonXlsConvert():
 			if 'choices' in element:
 				choiceOptions = element['choices']
 				self.choicesRow += 1
-				choiceWriteRow = [element.get("name")]
 				for choice in choiceOptions:
-					#print choice
+					choiceWriteRow = [element.get("name")]
 					for header in self.choicesHeaders:
 						if header in choice:
 							choiceWriteRow += [choice.get(header)]
 						else:
-							choiceWriteRow += [""]
+							choiceWriteRow += [""] 
 					self.writeArrayToXLS(self.worksheet2, choiceWriteRow, ('A' + `self.choicesRow`))
-					choiceWriteRow = [element.get("name")]
+					self.choicesRow += 1
 
 	'''Utility function to write an array to excel using openpyxl'''
 	def writeArrayToXLS(self, worksheet, array_to_write, starting_cell, horizontal=True):
