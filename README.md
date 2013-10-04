@@ -45,6 +45,7 @@ Make sure you are in the root of the project where the package.json file is loca
 
 ### Alternative npm and Node.js Installation
 If you are having problems with installing npm, or installing Node.js, try typing the following lines into the command line:
+
     echo 'export PATH=$HOME/local/bin:$PATH' >> ~/.bashrc
     . ~/.bashrc
     mkdir ~/local
@@ -97,7 +98,7 @@ Run mongod to ensure MongoDB is running
     python keep_backend/manage.py migrate
     fab restore_db
 
-**Note:** on a syncdb command, Django will ask you to create a superuser.  If you create one, use that username and password to log in to your local KEEP, rather than the below credentials.
+**Note:** on a syncdb command, Django will ask you to create a superuser.  Create one, and use these as your login credentials for the Logging in portion.
 
 ### Running the Django server
     python keep_backend/manage.py runserver
