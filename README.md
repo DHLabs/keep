@@ -44,7 +44,16 @@ Make sure you are in the root of the project where the package.json file is loca
     npm install
 
 ### Alternative npm and Node.js Installation
-If you are having problems with installing npm, or installing Node.js, try one of these alternatives: [https://gist.github.com/isaacs/579814](https://gist.github.com/isaacs/579814).
+If you are having problems with installing npm, or installing Node.js, try typing the following lines into the command line:
+    echo 'export PATH=$HOME/local/bin:$PATH' >> ~/.bashrc
+    . ~/.bashrc
+    mkdir ~/local
+    mkdir ~/node-latest-install
+    cd ~/node-latest-install
+    curl http://nodejs.org/dist/node-latest.tar.gz | tar xz --strip-components=1
+    ./configure --prefix=~/local
+    make install  #This will take a couple minutes to run
+    curl https://npmjs.org/install.sh | sh
 
 ### Install Javascript/CSS dependencies
 Next we make sure bower ( a javascript/css package manager ) is installed and 
@@ -84,14 +93,14 @@ Run mongod to ensure MongoDB is running
     mongod
 
 ### Setting up the Databases
-    python dhlab_backend/manage.py syncdb
-    python dhlab_backend/manage.py migrate
+    python keep_backend/manage.py syncdb
+    python keep_backend/manage.py migrate
     fab restore_db
 
 **Note:** on a syncdb command, Django will ask you to create a superuser.  If you create one, use that username and password to log in to your local KEEP, rather than the below credentials.
 
 ### Running the Django server
-    python dhlab_backend/manage.py runserver
+    python keep_backend/manage.py runserver
 
 ### Logging In
 You may now log in to the system using the following credentials.
