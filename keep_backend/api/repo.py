@@ -3,6 +3,7 @@ import json
 from backend.db import user_or_organization
 
 from django.conf.urls import url
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 
 from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
@@ -95,9 +96,10 @@ class RepoResource( ModelResource ):
         # Case 3: A user query is provided. Only show public repositories for this user.
         # or repos that are shared to the logged in user.
         if user is not None:
-            return Repository.objects.list_by_user( user__username=user )
+            user = User.objects.get( username=user )
+            return Repository.objects.list_by_user( user=user )
 
-        return seql._meta.queryset.none()
+        return self._meta.queryset.none()
 
     def create_response( self, request, data, response_class=HttpResponse, **response_kwargs):
         """
@@ -108,7 +110,7 @@ class RepoResource( ModelResource ):
         desired_format = self.determine_format(request)
 
         serialized = self.serialize(request, data, desired_format)
-        
+
         # if its a XLSX file, the response has already been handled in json_xls_convert
         if desired_format == 'application/vnd.ms-excel':
             return serialized
