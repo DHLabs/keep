@@ -9,7 +9,7 @@ from bson.code import Code
 from django.conf.urls import url
 
 from tastypie import fields
-from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
+from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.http import HttpUnauthorized, HttpBadRequest
 
 from repos.models import Repository
