@@ -6,14 +6,13 @@ from django.conf.urls import url
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 
-from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
+from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
 from repos.models import Repository, RepoSerializer
 from openrosa.serializer import XFormSerializer
-from openrosa.json_xls_convert import jsonXlsConvert
 
 from .authentication import ApiTokenAuthentication
 from .authorization import RepoAuthorization
@@ -36,8 +35,7 @@ class RepoResource( ModelResource ):
         # Ensure we have an API token before returning any data.
         # TODO: Make sure this API token concept works with public/private
         # data.
-        #authentication = MultiAuthentication( SessionAuthentication(), ApiTokenAuthentication() )
-        authenication = Authentication()
+        authentication = MultiAuthentication( SessionAuthentication(), ApiTokenAuthentication() )
 
         # TODO: Authorize based on sharing preferences.
         authorization = RepoAuthorization()
