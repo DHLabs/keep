@@ -316,22 +316,61 @@ class WebformForm( forms.Form ):
             if element.type in ( 'string', 'text' ):
                 if element.bind and element.bind.readonly:
                     # FIXME: This should have false is_field, mirroring builder.coffee
-                    fieldDict[element.label] = None
-                fieldDict[element.label] = forms.CharField(
-                    widget=forms.TextInput( attrs={'class':'control-group'} ) ) 
+                    fieldDict[element.name] = None
+                fieldDict[element.name] = forms.CharField(label=element.label,
+                    widget=forms.TextInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
 
             elif element.type in ( 'decimal', 'int', 'integer' ):
-                fieldDict[element.label] = forms.DecimalField(
-                    widget=forms.TextInput( attrs={'class':'control-group'} ) ) 
+                fieldDict[element.name] = forms.DecimalField(label=element.label,
+                    widget=forms.TextInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
 
             # TODO: check JSON date format, and force only that format
             elif element.type == 'date':
-                fieldDict[element.label] = forms.DateField(
-                    widget=forms.TextInput( attrs={'class':'control-group'} ) )
+                fieldDict[element.name] = forms.DateField(label=element.label,
+                    widget=forms.DateInput( attrs={'data-key': element.name, 'class':'control-group'} ) )
 
-            elif element.type == 'time':
-                fieldDict[element.label] = forms.DateTimeField(
-                    widget=forms.TextInput( attrs={'class':'control-group'} ) ) 
+            elif element.type in ( 'time', 'datetime' ):
+                fieldDict[element.naem] = forms.DateTimeField(label=element.label,
+                    widget=forms.DateTimeInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
 
-            # TODO: add fields from Geopoint onwards (from builder.coffee, starting L52) excepting 'time'
+            elif element.type == 'geopoint':
+                pass
 
+            elif element.type == 'today':
+                pass
+
+            elif element.type == 'trigger':
+                pass
+
+            elif element.type == 'note':
+                pass
+
+            elif element.type == 'photo':
+                pass
+
+            elif element.type == 'video':
+                pass
+
+            elif element.type == 'select all that apply':
+                pass
+
+            elif element.type == 'group':
+                pass
+
+            elif element.type == 'select one':
+                
+
+                if element.control and element.control.appearance == 'minimal':
+                    fieldDict[element.name] = forms.ChoiceField(label=element.label,
+                        widget=forms.Select( attrs={'data-key': element.name, 'class':'control-group'},
+                                                choices=))
+
+            elif element.type == 'calculate':
+                pass
+
+            self.webform = self.setAllWithKwArgs(fieldDict)
+
+            # TODO: add all 'pass'ed fields in correctly
+
+    def prepChoices ( self, choices ):
+        
