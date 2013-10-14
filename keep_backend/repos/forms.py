@@ -293,3 +293,45 @@ class NewRepoForm( forms.Form ):
                         org=self._org,
                         is_public=self.cleaned_data[ 'privacy' ] == 'public' )
         return new_repo.save( repo=repo )
+
+class WebformForm( forms.Form ):
+    def __init__():
+        webform = Form(auto_id="%s_field")
+
+
+    def setAllWithKwArgs( self, **kwargs ):
+        for key, value in kwargs.items():
+            setattr( self, key, value )
+
+    def buildForm( self, in_json ):
+        '''
+            Build the form server-side, for webform entry
+            This method is mirroring the structure of builder.coffee
+            in the frontend.
+        '''
+        # TODO: double-check the JSON to see if this format is correct
+        jsonElement = json.loads( in_json )
+        fieldDict = {}
+        for element in jsonElement:
+            if element.type in ( 'string', 'text' ):
+                if element.bind and element.bind.readonly:
+                    # FIXME: This should have false is_field, mirroring builder.coffee
+                    fieldDict[element.label] = None
+                fieldDict[element.label] = forms.CharField(
+                    widget=forms.TextInput( attrs={'class':'control-group'} ) ) 
+
+            elif element.type in ( 'decimal', 'int', 'integer' ):
+                fieldDict[element.label] = forms.DecimalField(
+                    widget=forms.TextInput( attrs={'class':'control-group'} ) ) 
+
+            # TODO: check JSON date format, and force only that format
+            elif element.type == 'date':
+                fieldDict[element.label] = forms.DateField(
+                    widget=forms.TextInput( attrs={'class':'control-group'} ) )
+
+            elif element.type == 'time':
+                fieldDict[element.label] = forms.DateTimeField(
+                    widget=forms.TextInput( attrs={'class':'control-group'} ) ) 
+
+            # TODO: add fields from Geopoint onwards (from builder.coffee, starting L52) excepting 'time'
+

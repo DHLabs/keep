@@ -146,10 +146,19 @@ $("alert_template .close").click(function(e) {
 	<div class="row">
 		<div id="autofill_list" class='autocomplete-list'></div>
 	  	<div id="xform_view" class="span12">
+
+	  		<form method="post"
+	  			{% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>{% csrf_token %}
+	  			{{ form.as_p }}
+  			</form>
+
+	  		<!--
 	    	<div id="form_fields" class="formbox">
 		  		<div id="formDiv"></div>
 		  		<div id="alert-placeholder"></div>
 	    	</div>
+			-->
+
 	    	<div id='form_actions' style='overflow:auto;'>
 	    		<div class='pull-right'>
 	    			<a href="#" class='btn' id="next_btn">Next</a>
