@@ -1,177 +1,190 @@
 define( [ 'jquery',
           'underscore',
-          'backbone' ],
+          'backbone'
+          'marionette',
 
-( $, _, Backbone ) ->
+          'app/collections/views/data',
+          'app/viz/map_view',
+          'app/viz/chart_view' ],
 
-    class RawView extends Backbone.View
+( $, _, Backbone, Marionette, DataCollectionView, DataMapView, DataChartView ) ->
 
-        name: 'RawView'
-        el: $( '#raw_viz' )
-        events:
-            # Change raw viz type from list to grid view
-            "click #list-type > a":    "change_viz_type"
-            "change #test":            "toggle_media"
 
-        media_base: '//d2oeqvnrcsteq9.cloudfront.net/'
+    class DataSettingsView extends Backbone.Marionette.View
+        el: '#settings-viz'
 
-        column_headers: []
-        groups: []
 
-        card_tmpl: _.template( '''
-            <div class='card card-active'>
-                <%= card_image %>
-                <%= card_data %>
-            </div>''' )
+    class DataRawView extends Backbone.Marionette.Region
+        el: '#viz-data'
 
-        card_img_tmpl: _.template( '''
-            <div class='card-image'>
-                <a href='<%= url %>' target='_blank'>
-                    <img src='<%= url %>'>
-                </a>
-            </div>''' )
+        detect_scroll: ( event ) ->
 
-        card_video_tmpl: _.template( '''
-            <div class='card-video'>
-                <video controls>
-                    <source src='<%= url %>' type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
-                </video>
-            </div>''' )
+            currentView = event.data.view.currentView
 
-        card_data_tmpl: _.template( '''
-            <div class='card-data'>
-                <div><%= data %></div>
-            </div>''' )
+            if $( currentView.el ).is( ':hidden' )
+                return
 
-        _detect_headers: ( root ) ->
+            scrollTop = $( event.currentTarget ).scrollTop()
+            scrollLeft = $( event.currentTarget ).scrollLeft()
 
-            for field in root
-                if field.type in [ 'group' ]
-                    @_detect_headers( field.children )
+            offsetTop = $( currentView.el ).position().top
 
-                # Don't show notes in the raw data table
-                if field.type not in [ 'note' ] and field.type not in [ 'group' ]
-                    @column_headers.push( field )
+            # Copy the header row of the table into the scroller div.
+            header = $( '#fixed-header' )
+            header_row = $( 'tr:first-child', currentView.el )
+            $( 'table tr', header ).empty().append( header_row.html() )
+            header.css( 'width', header_row.width() )
+
+            # Make sure our sorting still works
+            event.data.view.detect_sort(
+                    fixed_el: header
+                    el: event.data.view.currentView.el
+                    collection: event.data.view.currentView.collection )
+
+            # If we've scrolled past the header row of the table, make our
+            # fixed header visible
+            if scrollTop > offsetTop
+                header.css( { left: "-#{scrollLeft}px" } ).show()
+            else
+                # Otherwise just hide the sucker.
+                header.hide()
+
+            @
+
+        detect_pagination: ( event ) ->
+
+            # Don't load another page while the page is being requested from the
+            # server
+            if @page_loading? and @page_loading
+                return
+
+            currentView = event.data.view.currentView
+
+            if $( currentView.el ).is( ':hidden' )
+                return
+
+            view_height = currentView.$el.height()
+            scroll_height = $( event.currentTarget ).scrollTop() + $( event.currentTarget ).height()
+
+            if scroll_height + 100 > view_height
+                @page_loading = true
+                currentView.collection.next( success: ()=>
+                    @page_loading = false )
+
+            @
+
+        detect_sort: ( options ) ->
+
+            event_data = {}
+
+            if options.el?
+                headers = $( 'th', options.fixed_el )
+
+                event_data =
+                    collection: options.collection
+                    headers: $( 'th', options.el )
+            else
+                headers = $( 'th', @el )
+
+                event_data =
+                    collection: @collection
+
+            # Unbind any existing events
+            headers.unbind( 'click' )
+            headers.click( event_data, (event) ->
+
+                el = $( event.currentTarget )
+
+                field = el.data( 'field' )
+                order = el.data( 'order' )
+
+                # Update both the fixed and real table header if the click was
+                # detected on the fixed header. Since the fixed header is a
+                # completely separate table, we have to do a little jQuery magic
+                # to select both tables.
+                if event.data.headers?
+                    other_el = $( event.data.headers ).filter( ()->
+                                return $( @ ).data( 'field' ) == field )
+
+                # Create the selector that includes both the real & fixed header
+                # table header.
+                if other_el?
+                    els = $().add( 'i', el ).add( 'i', other_el )
+                else
+                    els = $( 'i', el )
+
+                # Permutate through the ordering options for the sort.
+                if not order?
+                    order = 'desc'
+                    els.removeClass( 'icon-sort icon-sort-up' ).addClass( 'icon-sort-down' )
+
+                else if order == 'desc'
+                    order = 'asc'
+                    els.removeClass( 'icon-sort-down' ).addClass( 'icon-sort-up' )
+
+                else if order == 'asc'
+                    order = null
+                    els.removeClass( 'icon-sort-up' ).addClass( 'icon-sort' )
+
+                # Update the order for both the real & fixed table
+                el.data( 'order', order )
+                other_el.data( 'order', order ) if other_el?
+
+                # Sort the sucker! The view should automatically refresh when
+                # the sort results are finally received.
+                event.data.collection.sort_fetch(
+                                field: field
+                                order: order )
+            )
+            @
+
+        switch_view: ( view ) ->
+            $( '#fixed-header' ).hide()
+
+            # Hide the currently selected view
+            @currentView.$el.hide()
+
+            # Attach the new view and render it
+            @attachView( @views[ view ] )
+            @currentView.$el.show()
+
+            # Call the onShow handler if it exists in the view
+            if @currentView.onShow? then @currentView.onShow()
+
+            @
 
         initialize: ( options ) ->
-            @parent = options.parent
-            @form   = options.form
-            @data   = options.data
+            # Bind scroll event to handle the fixed-header rendering.
+            $( @el ).scroll( { view: @ }, @detect_scroll )
+            # Bind scroll event to handle pagination ( scrolling to the end of the
+            # page. )
+            $( @el ).scroll( { view: @ }, @detect_pagination )
 
-            @_detect_headers( @form.attributes.children )
-
-            @render()
-            
-            @
-
-        change_viz_type: ( event ) ->
-            viz_type = $( event.currentTarget ).data( 'type' )
-            $( 'button.active', @el ).removeClass( 'active' )
-            $( event.currentTarget ).addClass( 'active' )
-
-            $( 'div.active').fadeOut( 'fast', () =>
-                $( 'div.active' ).removeClass( 'active' )
-                $( "#raw_#{viz_type}" ).fadeIn( 'fast' ).addClass( 'active' )
-
-                #if viz_type == 'grid' and @wall?
-                #    @wall.masonry( 'reload' )
-            )
-            @
-
-        toggle_media: ( event ) ->
-            only_photos = $( event.currentTarget ).is( ':checked' )
-
-            $( '.card' ).each( ()->
-                if $( '.card-image', @ ).length == 0 and only_photos
-                   $( @ ).fadeOut( 'fast' ).removeClass( 'card-active' )
-                else
-                    $( @ ).fadeIn( 'fast' ).addClass( 'card-active' )
+            # Set the location of the data div and change it when we resize
+            # the window.
+            $( @el ).css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
+            $( window ).resize( ( event ) =>
+                $( @el ).css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
             )
 
-            #@wall.masonry( 'reload' )
+            # Initialize the different available views.
+            @rawView = new DataCollectionView( options )
+            @mapView = new DataMapView( options )
+            @chartView = new DataChartView( options )
+            @settingsView = new DataSettingsView( options )
 
-            @
+            @views =
+                raw: @rawView
+                map: @mapView
+                line: @chartView
+                settings: @settingsView
+            @attachView( @rawView )
 
-        _render_list: ->
-            # Add column headers
-            $( '#raw_table > thead > tr' ).html( '' )
-            for field in @column_headers
-                $( '#raw_table > thead > tr' ).append( "<th>#{field.name}</th>" )
+            # Attach events where necessary.
+            @rawView.on( 'render', @detect_sort )
 
-            $( '#raw_table > tbody' ).empty()
+            # Load up the intial set of data to render.
+            @rawView.collection.reset( document.initial_data )
 
-            # Add data from data models
-            row_html = ''
-            for datum in @data.models
-
-                row_html += '<tr>'
-                for field in @column_headers
-
-                    value = datum.get( 'data' )[ field.name ]
-
-                    if not value?
-                        row_html += '<td>&nbsp;</td>'
-                        continue
-
-                    if field.type in [ 'photo', 'video' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
-                        row_html += "<td><a href='#{url}'>#{value}</a></td>"
-                    else
-                        row_html += "<td>#{value}</td>"
-
-                row_html += '</tr>'
-
-            $( '#raw_table > tbody' ).append( row_html )
-
-            # Render the table using jQuery's DataTable
-            $( '#raw_table' ).dataTable(
-                'sDom': "<'row'<'eight columns'l><'eight columns'f>r>t<'row'<'eight columns'i><'eight columns'p>>"
-                'bLengthChange': false
-                'bFilter': false
-                'iDisplayLength': 50
-            )
-
-            @
-
-        _render_grid: ->
-            # Add data from data models
-            for datum in @data.models
-
-                tmpl_options =
-                    card_image: ''
-                    card_data: ''
-
-                for field in @column_headers
-                    value = datum.get( 'data' )[ field.name ]
-
-                    if not value? or value.length == 0
-                        continue
-
-                    if field.type in [ 'photo' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
-                        tmpl_options.card_image = @card_img_tmpl( { url: url } )
-                    else if field.type in [ 'video' ]
-                        url = @media_base + "#{datum.get('repo')}/#{datum.get('id')}/#{value}"
-                        tmpl_options.card_image = @card_video_tmpl( { url: url } )
-                    else
-                        tmpl_options.card_data += "<div><strong>#{field.name}:</strong> #{value}</div>"
-
-                if tmpl_options.card_data.length > 0
-                    tmpl_options.card_data = @card_data_tmpl( { data: tmpl_options.card_data } )
-
-                $( '#raw_grid' ).append( @card_tmpl( tmpl_options ) )
-
-            # @wall = $( '#raw_grid' ).masonry(
-            #         itemSelector: '.card-active'
-            #         isAnimated: true )
-
-            @
-
-        render: ->
-            @_render_list()
-            @_render_grid() if @data.models.length > 0
-
-            @
-
-    return RawView
+    return DataRawView
 )

@@ -26,6 +26,7 @@
 		text-align:center;
 		padding: 16px 8px;
 		margin: 16px 8px;
+
 	}
 
 	#filedrag {
@@ -74,6 +75,7 @@ ul.nav-inline {
 		display:inline;
 		margin-right: 8px;
 	}
+
 }
 
 span.label {
@@ -113,25 +115,7 @@ img.account-icon-large {
 }
 
 #user_search_list {
-
 	position:absolute;
-
-	.ui-autocomplete {
-		border-bottom:1px solid #EEE;
-		border-right:1px solid #EEE;
-		border-left:1px solid #EEE;
-		list-style-type: none;
-		background-color: white;
-	}
-
-	.ui-autocomplete > .ui-menu-item {
-		padding: 4px 8px;
-		cursor:pointer;
-	}
-
-	.ui-autocomplete > .selected {
-		background-color: #EEE;
-	}
 }
 
 .diary-list {
@@ -146,16 +130,17 @@ img.account-icon-large {
 
 	.meta-data {
 		overflow: auto;
+		color: #666;
 
 		.study {
 			float:left;
 			margin-right: 8px;
-			color: #666;
 			font-size: .8em;
 		}
 
 		.help-block {
 			float:left;
+			font-size: .8em;
 		}
 	}
 

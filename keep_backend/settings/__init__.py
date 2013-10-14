@@ -1,6 +1,13 @@
 import socket
 
+# Load and initialize Django-celery module.
+import djcelery
+djcelery.setup_loader()
+
+from credentials import SECRET_KEY, TWOFACTOR_ENCRYPTION_KEY
+
 # Django settings for dhlab_backend project.
+from .defaults.celery import *
 from .defaults.database import *
 from .defaults.django import *
 from .defaults.logging import *
@@ -40,7 +47,11 @@ INSTALLED_APPS = (
     'storages',                 # Needed for S3 file storage
     'django_mailgun',           # Easy email API
     'south',                    # Database migrations
+<<<<<<< HEAD
     'raven.contrib.django.raven_compat',    # Smart error logging. See logging.py for raven settings
+=======
+    'djcelery',                 # Distributed Task Queue
+>>>>>>> develop
 )
 
 ANONYMOUS_USER_ID = -1

@@ -23,6 +23,6 @@ MAILGUN_SERVER_NAME     = MAILGUN[ 'SERVER_NAME' ]
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'local_production.db',
+        'NAME': 'local.db',
     }
 }

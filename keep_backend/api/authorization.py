@@ -1,9 +1,7 @@
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.db.models import Q
 
 from tastypie.authorization import Authorization
-
-from repos.models import Repository
 
 
 class DataAuthorization( Authorization ):
@@ -15,13 +13,25 @@ class DataAuthorization( Authorization ):
     def read_detail( self, object_detail, bundle ):
 
         logged_in_user = bundle.request.user
+        user = bundle.request.GET.get( 'user', None )
 
-        if logged_in_user.is_anonymous():
-            return object_detail.is_public or logged_in_user.has_perm( 'view_data', object_detail )
+        # Case 1: There is no logged in user and no user query provided. We don't
+        # know what to query
+        if logged_in_user.is_anonymous() and user is None:
+            return False
 
-        if logged_in_user.is_authenticated():
+        # Case 2: There *is* a logged in user and no user query. Query repos
+        # that only belong to the currently logged in user
+        if user is None and logged_in_user.is_authenticated():
             public = AnonymousUser()
             return public.has_perm( 'view_data', object_detail ) or logged_in_user.has_perm( 'view_data', object_detail )
+
+        # Case 3: User query is provided. Check whether the public or the user has access
+        # to this data.
+        if user is not None:
+            public = AnonymousUser()
+            user   = User.objects.get( username=user )
+            return public.has_perm( 'view_data, object_detail' ) or user.has_perm( 'view_data', object_detail )
 
 
 class RepoAuthorization( Authorization ):
@@ -39,7 +49,7 @@ class RepoAuthorization( Authorization ):
         # Case 2: There *is* a logged in user and no user query. Query repos
         # that only belong to the currently logged in user
         if user is None and logged_in_user.is_authenticated():
-            return Repository.objects.list_by_user( user=logged_in_user )
+            return object_list.filter( user=logged_in_user )
 
         # Case 3: A user query is provided. Only show public repositories for this user.
         # or repos that are shared to the logged in user.

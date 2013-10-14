@@ -3,9 +3,9 @@ from django.db import models
 
 
 class StudySerializer( Serializer ):
-    '''
+    """
         Converts a QuerySet of Study objects into a specific JSON format.
-    '''
+    """
     def end_object( self, obj ):
         # Convert timestamps into JSON timestamps
         self._current[ 'date_updated' ] = obj.date_updated.strftime( '%Y-%m-%dT%X' )
@@ -20,7 +20,7 @@ class StudySerializer( Serializer ):
 
 
 class Study( models.Model ):
-    '''
+    """
         Represents a "study" aka group of repository. A study is a purely
         grouping concept.
 
@@ -44,7 +44,7 @@ class Study( models.Model ):
 
         date_created : timestamp : auto
         date_updated : timestamp : auto
-    '''
+    """
 
     name        = models.CharField( max_length=256, blank=False )
 

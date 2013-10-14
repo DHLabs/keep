@@ -142,9 +142,27 @@ class NewBatchRepoForm( forms.Form ):
 
 
 class NewRepoForm( forms.Form ):
-    '''
-        Validates and creates a new repository based on form data.
-    '''
+    """Validates and creates a new repository based on creation data.
+
+       Parameters
+       ----------
+       forms.Form : Form
+
+       Attributes
+       ----------
+       name : string
+           name of the form
+       desc : string
+           description of the form
+       privacy
+       survey_json : string, optional
+           The JSON of the form as a string, only if creating
+           a form from scratch
+       xform_file : File, optional
+           Generally, the csv/xform that we are creating a repository
+           from.
+
+    """
 
     name    = forms.CharField()
 
@@ -159,18 +177,19 @@ class NewRepoForm( forms.Form ):
     xform_file      = forms.FileField( required=False )
 
     def __init__( self, *args, **kwargs ):
-        '''
-            We pass in the current user/org to test for the uniqueness of the
-            repository name in that current user's/org's list of repositories.
+        """We pass in the current user/org to test for the uniqueness of
+           the repository name in that current user's/org's list of
+           repositories.
 
-            Params
-            ------
-            user : User : required
+           Params
+           ------
+           user : User
 
-            org : Organization : optional
-                If a user is acting on behalf of an organization, this needs
-                to be set.
-        '''
+           org : Organization, optional
+               If a user is acting on behalf of an organization, 
+               this needs to be set.
+        """
+
         self._user = None
         if 'user' in kwargs:
             self._user = kwargs.pop( 'user' )
@@ -182,10 +201,10 @@ class NewRepoForm( forms.Form ):
         super( NewRepoForm, self ).__init__( *args, **kwargs )
 
     def clean( self ):
-        '''
+        """
             Run final checks on whether we have valid form schema to create the
             repository.
-        '''
+        """
         if self.cleaned_data[ 'survey_json' ] is None and\
                 self.cleaned_data[ 'xform_file' ] is None:
             raise forms.ValidationError('''Please create or upload an XForm''')
@@ -193,7 +212,7 @@ class NewRepoForm( forms.Form ):
         return self.cleaned_data
 
     def clean_name( self ):
-        '''
+        """
             Clean & checks for the validity of the repo name.
 
             1. Strip the repo name of any whitespace.
@@ -202,7 +221,8 @@ class NewRepoForm( forms.Form ):
 
             See http://docs.python.org/2/library/re.html for more info on the
             regexes used.
-        '''
+        """
+
         data = self.cleaned_data[ 'name' ].strip()
 
         # Ensure form name is a valid form
@@ -219,9 +239,10 @@ class NewRepoForm( forms.Form ):
         return data
 
     def clean_survey_json( self ):
-        '''
+        """
             Clean & checks the validity of the repo JSON representation.
-        '''
+        """
+
         data = self.cleaned_data[ 'survey_json' ].strip()
 
         if len( data ) == 0:
@@ -249,9 +270,10 @@ class NewRepoForm( forms.Form ):
         return data
 
     def clean_xform_file( self ):
-        '''
+        """
             Clean & checks the validity of the uploaded xform file.
-        '''
+        """
+
         data = self.cleaned_data[ 'xform_file' ]
 
         if data is None:
@@ -270,10 +292,11 @@ class NewRepoForm( forms.Form ):
         return survey.to_json_dict()
 
     def save( self ):
-        '''
+        """
             If everything is in place, attempt to save the new repository to
             MongoDB & our database.
-        '''
+        """
+        
         repo = {}
         if self.cleaned_data[ 'xform_file' ]:
             repo['fields'] = self.cleaned_data[ 'xform_file' ]['children']

@@ -84,8 +84,12 @@ module.exports = ( grunt ) ->
 					modules: [ {
 						name: '../common'
 						include: [ 'jquery',
+								   'app/dashboard/main',
 								   'app/viz/main',
-								   'app/webform/main']
+								   'app/webform/main' ]
+					},{
+						name: 'app/dashboard/main'
+						exclude: [ '../common' ]
 					},{
 						name: 'app/viz/main'
 						exclude: [ '../common' ]

@@ -1,16 +1,18 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
+          'marionette',
+          'app/collections/data',
           'd3' ],
 
-( $, _, Backbone, d3 ) ->
+( $, _, Backbone, Marionette, DataCollection, d3 ) ->
 
-    class ChartView extends Backbone.View
+    class ChartItemView extends Backbone.Marionette.ItemView
+        template: _.template( '''n/a''' )
 
-        name: 'ChartView'
-
-        el: $( '#line_viz' )
-        btn: $( '#line_btn' )
+    class DataChartView extends Backbone.Marionette.CollectionView
+        el: '#analytics-viz'
+        itemView: ChartItemView
 
         events:
             "click #yaxis_options input":   "change_y_axis"
@@ -24,32 +26,26 @@ define( [ 'jquery',
         yaxis_fields: []
 
         initialize: ( options ) ->
-            @parent     = options.parent
-            @form       = options.form
-            @data       = options.data
+            @repo = options.repo
+            @fields = options.fields
+
+            @collection = new DataCollection( options )
 
             @_parse_date = d3.time.format( '%Y-%m-%dT%H:%M:%S' ).parse
 
-            @_detect_axes( @form.attributes.children )
+            @_detect_axes( @fields )
+            @
 
-            if @yaxis_fields.length > 0 and @data.models.length > 0
-                $( '#line_btn' ).removeClass( 'disabled' )
-                @render()
-            else
-                $( '#line_btn' ).addClass( 'disabled' )
+        _detect_axes: ( fields ) ->
 
-        _detect_axes: ( root ) ->
-
-            for field in root
-                if field.type in [ 'group' ]
-                    @_detect_axes( field.children )
-
+            for field in fields
                 # Only chart fields that are some sort of number
                 if field.type in [ 'decimal', 'int', 'integer' ]
                     @yaxis_fields.push( field )
 
                     if not @yaxis?
                         @yaxis = field
+            @
 
         _x_datum: ( d ) =>
             # Render the actual line chart
@@ -141,6 +137,6 @@ define( [ 'jquery',
 
             @
 
-    return ChartView
+    return DataChartView
 
 )

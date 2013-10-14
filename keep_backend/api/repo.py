@@ -3,16 +3,16 @@ import json
 from backend.db import user_or_organization
 
 from django.conf.urls import url
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 
-from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
+from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
 from repos.models import Repository, RepoSerializer
 from openrosa.serializer import XFormSerializer
-from openrosa.json_xls_convert import jsonXlsConvert
 
 from .authentication import ApiTokenAuthentication
 from .authorization import RepoAuthorization
@@ -35,8 +35,7 @@ class RepoResource( ModelResource ):
         # Ensure we have an API token before returning any data.
         # TODO: Make sure this API token concept works with public/private
         # data.
-        #authentication = MultiAuthentication( SessionAuthentication(), ApiTokenAuthentication() )
-        authenication = Authentication()
+        authentication = MultiAuthentication( SessionAuthentication(), ApiTokenAuthentication() )
 
         # TODO: Authorize based on sharing preferences.
         authorization = RepoAuthorization()
@@ -74,6 +73,32 @@ class RepoResource( ModelResource ):
 
         return orm_filters
 
+    def get_object_list( self, request ):
+        '''
+            Copied from the tastypie source but modified so start with a list of
+            repostiories that contain shared repos as well.
+        '''
+        logged_in_user = request.user
+        user = request.GET.get( 'user', None )
+
+        # Case 1: There is no logged in user and no user query provided. We don't
+        # know what to query.
+        if user is None and logged_in_user.is_anonymous():
+            return self._meta.queryset.none()
+
+        # Case 2: There *is* a logged in user and no user query. Query repos
+        # that only belong to the currently logged in user
+        if user is None and logged_in_user.is_authenticated():
+            return Repository.objects.list_by_user( user=logged_in_user )
+
+        # Case 3: A user query is provided. Only show public repositories for this user.
+        # or repos that are shared to the logged in user.
+        if user is not None:
+            user = User.objects.get( username=user )
+            return Repository.objects.list_by_user( user=user )
+
+        return self._meta.queryset.none()
+
     def create_response( self, request, data, response_class=HttpResponse, **response_kwargs):
         """
         Extracts the common "which-format/serialize/return-response" cycle.
@@ -83,7 +108,7 @@ class RepoResource( ModelResource ):
         desired_format = self.determine_format(request)
 
         serialized = self.serialize(request, data, desired_format)
-        
+
         # if its a XLSX file, the response has already been handled in json_xls_convert
         if desired_format == 'application/vnd.ms-excel':
             return serialized
@@ -109,7 +134,6 @@ class RepoResource( ModelResource ):
         # First serialize the repo metadata.
         serializer = RepoSerializer()
         bundle.data = serializer.serialize( [bundle.obj] )[0]
-        bundle.data[ 'children' ] = bundle.obj.fields()
 
         return bundle
 

@@ -23,10 +23,26 @@ def dehydrate( survey ):
     for key in survey.keys():
         if isinstance( survey[key], dict ):
             survey[ key ] = dehydrate( survey[key] )
+        elif isinstance( survey[key], list ):
+            survey[ key ] = dehydrate_list( survey[key] )
         else:
             survey[ key ] = unicode( survey[ key ] ).encode( 'utf-8' )
 
     return survey
+
+
+def dehydrate_list( target ):
+
+    hydrated = []
+    for el in target:
+        if isinstance( el, dict ):
+            hydrated.append( dehydrate( el ) )
+        elif isinstance( el, list ):
+            hydrated.append( dehydrate_list( el ) )
+        else:
+            hydrated.append( unicode( el ).encode( 'utf-8' ) )
+
+    return hydrated
 
 
 def dehydrate_survey( cursor ):
