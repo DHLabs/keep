@@ -3,6 +3,10 @@
 *.db
 *.db.bak
 
+# Misc dev folders
+.pyenv
+logs
+
 htmlcov
 *.coverage
 
@@ -10,6 +14,7 @@ _artwork
 media
 node_modules
 bower_components
+.bowerrc
 static
 
 credentials.py
