@@ -55,7 +55,7 @@ class CSVSerializer( Serializer ):
         raw_data = StringIO.StringIO()
 
         writer = unicodecsv.DictWriter( raw_data,
-                                        data[ 'meta' ][ 'fields' ],
+                                        [ x[ 'name' ] for x in data[ 'meta' ][ 'fields' ] ],
                                         extrasaction='ignore')
         writer.writeheader()
 
