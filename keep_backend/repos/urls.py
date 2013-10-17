@@ -10,7 +10,7 @@ urlpatterns = patterns( 'repos.views',
 
     # Batch create a repo and import data into it from a
     # CSV file.
-    url(regex=r'^repo/batch$',
+    url(regex=r'^repo/batch/$',
         view='batch_repo',
         name='repo_batch' ),
 

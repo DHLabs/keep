@@ -186,7 +186,7 @@ class NewRepoForm( forms.Form ):
            user : User
 
            org : Organization, optional
-               If a user is acting on behalf of an organization, 
+               If a user is acting on behalf of an organization,
                this needs to be set.
         """
 
@@ -296,7 +296,7 @@ class NewRepoForm( forms.Form ):
             If everything is in place, attempt to save the new repository to
             MongoDB & our database.
         """
-        
+
         repo = {}
         if self.cleaned_data[ 'xform_file' ]:
             repo['fields'] = self.cleaned_data[ 'xform_file' ]['children']
