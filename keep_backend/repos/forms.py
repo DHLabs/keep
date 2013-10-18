@@ -332,6 +332,7 @@ class WebformForm( forms.Form ):
             This method is mirroring the structure of builder.coffee
             in the frontend.
         '''
+
         # TODO: double-check the JSON to see if this format is correct
         jsonElement = json.loads( in_json )
         fieldDict = {}
@@ -343,19 +344,23 @@ class WebformForm( forms.Form ):
                 fieldDict[element.name] = forms.CharField(label=element.label,
                     widget=forms.TextInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
 
+            # Numeric type to field
             elif element.type in ( 'decimal', 'int', 'integer' ):
                 fieldDict[element.name] = forms.DecimalField(label=element.label,
                     widget=forms.TextInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
 
             # TODO: check JSON date format, and force only that format
+            # Date type to field
             elif element.type == 'date':
                 fieldDict[element.name] = forms.DateField(label=element.label,
                     widget=forms.DateInput( attrs={'data-key': element.name, 'class':'control-group'} ) )
 
+            # Time type to field
             elif element.type in ( 'time', 'datetime' ):
                 fieldDict[element.naem] = forms.DateTimeField(label=element.label,
                     widget=forms.DateTimeInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
 
+            # Geographical data type to field
             elif element.type == 'geopoint':
                 pass
 
@@ -365,9 +370,11 @@ class WebformForm( forms.Form ):
             elif element.type == 'trigger':
                 pass
 
+            # Advisement text to field
             elif element.type == 'note':
                 pass
 
+            # All media types
             elif element.type == 'photo':
                 pass
 
@@ -377,23 +384,32 @@ class WebformForm( forms.Form ):
             elif element.type == 'select all that apply':
                 pass
 
+            # Woo!  MORE Recursion!  
+            # TODO: I'll take care of this later, don't want to handle recursion logic right now
             elif element.type == 'group':
                 pass
 
+            # Selections to either a radio list or a dropdown list (minimal is dropdown!)
             elif element.type == 'select one':
                 
 
                 if element.control and element.control.appearance == 'minimal':
                     fieldDict[element.name] = forms.ChoiceField(label=element.label,
                         widget=forms.Select( attrs={'data-key': element.name, 'class':'control-group'},
-                                                choices=))
+                                                choices=None))
 
+            # TODO: Calculations need to be handled!... somehow...
             elif element.type == 'calculate':
                 pass
 
+            # Set the parameters of the object
             self.webform = self.setAllWithKwArgs(fieldDict)
 
             # TODO: add all 'pass'ed fields in correctly
 
+    '''
+        Meant for select multiple and select one
+        For preparation of the choices for the question
+    '''
     def prepChoices ( self, choices ):
-        
+        pass

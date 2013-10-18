@@ -149,7 +149,9 @@ $("alert_template .close").click(function(e) {
 
 	  		<form method="post"
 	  			{% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>{% csrf_token %}
-	  			{{ form.as_p }}
+	  			{% for element in form %}
+	  			<div class="control-group {{ element.name }}">{{ element }}</div>
+	  			{% endfor %}
   			</form>
 
 	  		<!--
