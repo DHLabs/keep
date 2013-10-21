@@ -342,23 +342,23 @@ class WebformForm( forms.Form ):
                     # FIXME: This should have false is_field, mirroring builder.coffee
                     fieldDict[element.name] = None
                 fieldDict[element.name] = forms.CharField(label=element.label,
-                    widget=forms.TextInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
+                    widget=forms.TextInput( attrs={'data-key': element.name} ) ) 
 
             # Numeric type to field
             elif element.type in ( 'decimal', 'int', 'integer' ):
                 fieldDict[element.name] = forms.DecimalField(label=element.label,
-                    widget=forms.TextInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
+                    widget=forms.TextInput( attrs={'data-key': element.name} ) ) 
 
             # TODO: check JSON date format, and force only that format
             # Date type to field
             elif element.type == 'date':
                 fieldDict[element.name] = forms.DateField(label=element.label,
-                    widget=forms.DateInput( attrs={'data-key': element.name, 'class':'control-group'} ) )
+                    widget=forms.DateInput( attrs={'data-key': element.name} ) )
 
             # Time type to field
             elif element.type in ( 'time', 'datetime' ):
-                fieldDict[element.naem] = forms.DateTimeField(label=element.label,
-                    widget=forms.DateTimeInput( attrs={'data-key': element.name, 'class':'control-group'} ) ) 
+                fieldDict[element.name] = forms.DateTimeField(label=element.label,
+                    widget=forms.DateTimeInput( attrs={'data-key': element.name} ) ) 
 
             # Geographical data type to field
             elif element.type == 'geopoint':
@@ -395,8 +395,13 @@ class WebformForm( forms.Form ):
 
                 if element.control and element.control.appearance == 'minimal':
                     fieldDict[element.name] = forms.ChoiceField(label=element.label,
-                        widget=forms.Select( attrs={'data-key': element.name, 'class':'control-group'},
+                        widget=forms.Select( attrs={'data-key': element.name},
                                                 choices=None))
+
+                else:
+                    fieldDict[element.name] = forms.ChoiceField(label=element.label,
+                        widget=forms.RadioSelect( attrs={'data-key': element.name}, 
+                            choices=prepChoices(element.choice) ) )
 
             # TODO: Calculations need to be handled!... somehow...
             elif element.type == 'calculate':
@@ -413,3 +418,4 @@ class WebformForm( forms.Form ):
     '''
     def prepChoices ( self, choices ):
         pass
+
