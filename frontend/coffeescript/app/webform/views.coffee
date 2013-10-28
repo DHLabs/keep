@@ -177,7 +177,7 @@ define( [ 'jquery',
               question_info = @input_fields[question]
 
               while question_info.tree is current_tree
-                question_change = $('#' + $($('.control-group').eq(question)[0]).data('key') + "_field")
+                question_change = $('#' + question_info.name + "_field")
                 question_change.fadeIn(1).addClass('active')
                 $('.active input').focus()
                 question++
