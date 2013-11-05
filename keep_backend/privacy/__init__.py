@@ -8,7 +8,7 @@ def privatize_geo( repo, data ):
     # Does this data have any geo data?
     has_geo = False
     geo_index = None
-    for field in repo[ 'children' ]:
+    for field in repo.fields():
         if field[ 'type' ] == 'geopoint':
             has_geo = True
             geo_index = field[ 'name' ]
