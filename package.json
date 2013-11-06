@@ -5,6 +5,7 @@
   "license": "BSD",
   "readmeFilename": "README.md",
   "static_dir": "keep_backend/static",
+  "repository": {},
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-watch": "~0.4.4",
