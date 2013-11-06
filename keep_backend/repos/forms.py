@@ -84,6 +84,9 @@ class NewBatchRepoForm( forms.Form ):
 
             label = header.strip()
 
+            if len( label ) == 0:
+                raise forms.ValidationError( 'Columns headers can not be blank!' )
+
             header_info = {
                 'name': slugify( unicode( label ) ),
                 'label': label,
