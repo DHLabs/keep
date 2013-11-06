@@ -330,11 +330,63 @@ class WebformForm( forms.Form ):
         '''
             Build the form server-side, for webform entry
             This method is mirroring the structure of builder.coffee
-            in the frontend.
+            in the frontend.  This method only serves as setup for the
+            recursive bulk of the code
+        '''
+        jsonElement = json.loads( in_json )
+        #raw_template = ""
+        #context_dict = {}
+        for element in jsonElement:
+            rawElements = buildFormTree( self, element, "/" )
+
+
+    def buildFormTree( self, child, path ):
+        '''
+            More work for building the form server-side.
+            This is only the recursive part that goes and creates
+            each field.  Any prebuild code should go in buildForm above
         '''
 
+        schema_dict = {
+            'help': child.hint,
+            'title': child.label,
+            'is_field': True,
+            'bind': child.bind,
+            'tree': path
+        }
+
+        # LBYL rather than EAFP, mainly due to what we are doing
+        if hasattr(child, 'relationship'):
+            schema_dict['type'] = 'Text'
+            schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                        '<label for="%s">%s</label>'
+                        "<input data-repo='%s' data-field='%s'"
+                            'class="autofill" type="text" name="%s">'
+                    '</div>' % ( child.name, child.name, child.name, schema_dict['title'],
+                    child.relationship.repo, child.relationship.field, child.name ) )
+
+        elif child.type in ( 'string', 'text' ):
+            if hasattr( child, 'bind' ) and child.bind.readonly:
+                schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                                                        '<strong></strong>%s'
+                                                   '</div>' % (child.name, child.name, schema_dict['title']))
+                schema_dict('is_field') = False
+
+            schema_dict['type'] = 'Text'
+
+        elif child.type in ( 'decimal', 'int', 'integer' ):
+            schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                                                        '<strong></strong>%s'
+                                                   '</div>' % (child.name, child.name, schema_dict['title'])
+
+            schema_dict['type'] = 'Numeric'
+
+        #return raw_html, schema_dict
+
+
         # TODO: double-check the JSON to see if this format is correct
-        jsonElement = json.loads( in_json )
+'''
+We're changing everything!        
         fieldDict = {}
         for element in jsonElement:
             if element.type in ( 'string', 'text' ):
@@ -411,6 +463,8 @@ class WebformForm( forms.Form ):
             self.webform = self.setAllWithKwArgs(fieldDict)
 
             # TODO: add all 'pass'ed fields in correctly
+
+'''
 
     '''
         Meant for select multiple and select one
