@@ -18,6 +18,7 @@ class NewBatchRepoForm( forms.Form ):
 
     FLOAT_TYPE = re.compile(r'^(\d+\.\d*|\d*\.\d+)$')
     INT_TYPE   = re.compile(r'^\d+$')
+    LOCATION_TYPE = re.compile(r'^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$')
 
     def __init__( self, *args, **kwargs ):
         self._user = None
@@ -38,6 +39,8 @@ class NewBatchRepoForm( forms.Form ):
             return 'decimal'
         elif self.INT_TYPE.match( val ):
             return 'int'
+        elif self.LOCATION_TYPE.match( val ):
+            return 'geopoint'
         else:
             return 'text'
 
@@ -76,6 +79,7 @@ class NewBatchRepoForm( forms.Form ):
 
         # Grab the headers and create fields for the new repo
         headers = csv_file.next()
+        # Used to sniff the data types
         row_one = csv_file.next()
 
         self.cleaned_data['headers'] = []
