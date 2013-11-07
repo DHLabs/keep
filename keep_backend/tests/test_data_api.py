@@ -2,36 +2,25 @@
     Makes HTTP requests to each of our Data API functions to ensure there are
     no templating/etc errors on the pages.
 '''
-from urllib2 import HTTPError
+import json
+
 from tests import ApiTestCase
 
 
-class DataApiV1Tests( ApiTestCase ):
+class DataApiV1KeyTests( ApiTestCase ):
 
-    def test_data_list( self ):
-        '''
-            Test if we can list the last 5 data entries for a user
-        '''
-        # Grab the list of datapoints for this repo.
-        response = self.open( '/data/', {'format': 'json', 'user': 'admin'} )
-        assert response is not None
+    AUTH_DETAILS = { 'format':  'json',
+                     'user':    'admin',
+                     'key':     '35f7d1fb1890bdc05f9988d01cf1dcab' }
 
-    def test_data_list_nonexistent_user( self ):
-        '''
-            Test failure state when listing data for a nonexistent user
-        '''
-        # Grab the list of datapoints for this repo.
-        error_thrown = False
-        response = None
+    INVALID_AUTH = { 'format':  'json',
+                     'user':    'admin',
+                     'key':     'invalid_key' }
 
-        try:
-            response = self.open( '/data/',
-                                  {'format': 'json', 'user': 'doestexist'} )
-        except HTTPError as e:
-            error_thrown = True
-            assert e.code == 401
+    AUTH_DETAILS_OTHER = {  'format':  'json',
+                            'user':    'test_user',
+                            'key':     '35f7d1fb1890bdc05f9988d01cf1dcab' }
 
-        assert error_thrown and response is None
 
     def test_data_detail( self ):
         '''
@@ -39,90 +28,65 @@ class DataApiV1Tests( ApiTestCase ):
             test user.
         '''
         # Get the list of repos for the test user
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
-        repo = response[ 'objects' ][0][ 'id' ]
+        repos = self.open( '/repos/', self.AUTH_DETAILS )
+        repos = json.loads( repos.content )
 
-        # Grab the list of datapoints for this repo.
-        response = self.open( '/data/%s/' % ( repo ),
-                              {'format': 'json', 'user': 'admin'} )
+        for repo in repos.get( 'objects' ):
+            response = self.open( '/data/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS )
+            assert response.status_code == 200
 
-        assert response is not None
-        assert len( response ) > 0
-
-        # Grab the list of datapoints for this repo.
-        response = self.open( '/data/%s/' % ( repo ),
-                              {'format': 'csv', 'user': 'admin'},
-                              format='csv' )
-
-        assert response is not None
-        assert len( response ) > 0
-
-    def test_data_detail_different_user( self ):
+    def test_data_detail_failures( self ):
         '''
             Test failure state when querying for repo data under a
             non-permitted user
         '''
         # Get the list of repos for the test user
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
-        repo = response[ 'objects' ][0][ 'id' ]
+        repos = self.open( '/repos/', self.AUTH_DETAILS )
+        repos = json.loads( repos.content )
 
-        error_thrown = False
-        response = None
-        try:
-            response = self.open( '/data/%s/' % ( repo ),
-                                  {'format': 'json', 'user': 'test_user'} )
-        except HTTPError as e:
-            error_thrown = True
-            assert e.code == 401
+        for repo in repos.get( 'objects' ):
 
-        assert error_thrown and response is None
+            # Test valid user/key
+            response = self.open( '/data/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS_OTHER )
+            if repo.get( 'is_public' ):
+                assert response.status_code == 200
+            else:
+                assert response.status_code == 401
 
-    def test_data_detail_nonexistent_user( self ):
-        '''
-            Test failure state when querying for repo data under a
-            non-existent user
-        '''
-        # Get the list of repos for the test user
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
-        repo = response[ 'objects' ][0][ 'id' ]
-
-        error_thrown = False
-        response = None
-        try:
-            response = self.open( '/data/%s/' % ( repo ),
-                                  {'format': 'json', 'user': 'doesntexist'} )
-        except HTTPError as e:
-            error_thrown = True
-            assert e.code == 401
-
-        assert error_thrown and response is None
+            # Test invalid user/key
+            response = self.open( '/data/%s/' % ( repo.get( 'id' ) ), self.INVALID_AUTH )
+            assert response.status_code == 401
 
     def test_data_post( self ):
         '''
             Test if we can successfully post data to the API for a repo.
         '''
         # Get the list of repos for the test user
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
-        repo = response[ 'objects' ][0][ 'id' ]
+        repos = self.open( '/repos/', self.AUTH_DETAILS )
+        repos = json.loads( repos.content )
 
-        # Grab the list of datapoints for this repo
-        response = self.open( '/data/%s' % ( repo ),
-                              {'format': 'json', 'user': 'admin'} )
+        for repo in repos.get( 'objects' ):
 
-        assert response is not None
-        assert len( response ) > 0
+            # Grab the list of datapoints for this repo
+            response = self.open( '/data/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS )
+            response = json.loads( response.content )
 
-        beforeLength = len( response )
-        data = { 'name': 'Bob Dole', 'age': 20, 'gender': 'male' }
+            beforeCount = response.get( 'meta' ).get( 'count' )
 
-        # Attempt to post data to the repo.
-        response = self.open( '/repos/%s/?user=admin&format=json' % ( repo ),
-                              data,
-                              method='POST' )
+            new_data = { 'name': 'Bob Dole', 'age': 20, 'gender': 'male' }
 
-        assert response[ 'success' ]
+            # Attempt to post data to the repo.
+            response = self.open( '/repos/%s/?user=%s&key=%s&format=%s' % ( repo.get( 'id' ),
+                                                                            self.AUTH_DETAILS[ 'user' ],
+                                                                            self.AUTH_DETAILS[ 'key' ],
+                                                                            self.AUTH_DETAILS[ 'format' ] ),
+                                  new_data,
+                                  method='POST' )
+            response = json.loads( response.content )
 
-        # Assert that the number of datapoints increased by one.
-        response = self.open( '/data/%s' % ( repo ),
-                              {'format': 'json', 'user': 'admin'} )
-        assert len( response ) == beforeLength + 1
+            assert response.get( 'success' )
+
+            response = self.open( '/data/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS )
+            response = json.loads( response.content )
+
+            assert response.get( 'meta' ).get( 'count' ) == ( beforeCount + 1 )

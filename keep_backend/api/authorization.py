@@ -15,6 +15,9 @@ class DataAuthorization( Authorization ):
         logged_in_user = bundle.request.user
         user = bundle.request.GET.get( 'user', None )
 
+        if object_detail.is_public:
+            return True
+
         # Case 1: There is no logged in user and no user query provided. We don't
         # know what to query
         if logged_in_user.is_anonymous() and user is None:
@@ -32,6 +35,8 @@ class DataAuthorization( Authorization ):
             public = AnonymousUser()
             user   = User.objects.get( username=user )
             return public.has_perm( 'view_data, object_detail' ) or user.has_perm( 'view_data', object_detail )
+
+        return False
 
 
 class RepoAuthorization( Authorization ):

@@ -6,7 +6,6 @@ import json
 
 from django.test import Client
 
-from urllib2 import HTTPError
 from tests import ApiTestCase
 
 
