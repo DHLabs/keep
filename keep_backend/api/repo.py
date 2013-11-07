@@ -35,7 +35,8 @@ class RepoResource( ModelResource ):
         # Ensure we have an API token before returning any data.
         # TODO: Make sure this API token concept works with public/private
         # data.
-        authentication = MultiAuthentication( SessionAuthentication(), ApiTokenAuthentication() )
+        authentication = MultiAuthentication( ApiTokenAuthentication(),
+                                              SessionAuthentication() )
 
         # TODO: Authorize based on sharing preferences.
         authorization = RepoAuthorization()

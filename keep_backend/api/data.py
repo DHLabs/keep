@@ -40,8 +40,8 @@ class DataResource( MongoDBResource ):
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get' ]
 
-        authentication = MultiAuthentication( SessionAuthentication(),
-                                              ApiTokenAuthentication() )
+        authentication = MultiAuthentication( ApiTokenAuthentication(),
+                                              SessionAuthentication() )
 
         authorization = DataAuthorization()
 
