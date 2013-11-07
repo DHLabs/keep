@@ -39,7 +39,7 @@ class DataApiV1KeyTests( ApiTestCase ):
             assert response.status_code == 200
 
             response = self.open( '/data/%s/' % ( repo.get( 'id' ) ), CSV_AUTH )
-            print response.status_code == 200
+            assert response.status_code == 200
 
     def test_data_detail_failures( self ):
         '''
