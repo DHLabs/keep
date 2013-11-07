@@ -2,16 +2,73 @@
     Makes HTTP requests to each of our Repo API functions to ensure that
     basic API authentication, authorization, and functionality is available.
 '''
-#from django.contrib.auth.models import User
+import json
+
+from django.test import Client
+
 from urllib2 import HTTPError
 from tests import ApiTestCase
 
 
-class RepoApiV1Tests( ApiTestCase ):
+class RepoApiV1SessionTests( ApiTestCase ):
+
+    AUTH_DETAILS = { 'format':  'json',
+                     'user':    'admin' }
+
+    def login( self ):
+        self.client.post( '/accounts/login/', { 'username': 'admin',
+                                                'password': 'test',
+                                                'token': ''} )
+
+    def logout( self ):
+        self.client.get( '/accounts/logout/' )
+
+    def test_repo_list( self ):
+
+        self.login()
+
+        # Get the list of repos for the test user
+        response = self.open( '/repos/', self.AUTH_DETAILS )
+        response = json.loads( response.content )
+
+        self.logout()
+
+        assert 'meta' in response and 'objects' in response
+        assert len( response[ 'objects' ] ) > 0
+
+        return response
+
+    def test_repo_detail( self ):
+
+        response = self.test_repo_list()
+
+        self.login()
+
+        for repo in response[ 'objects' ]:
+            response = self.open( '/repos/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS )
+            response = json.loads( response.content )
+            assert response[ 'id' ] == repo.get( 'id' )
+
+        self.logout()
+
+    def test_repo_list_fail( self ):
+
+        self.logout()
+
+        # Not logged in and no user query.
+        response = self.open( '/repos/', {} )
+        assert response.status_code == 401
+
+
+class RepoApiV1KeyTests( ApiTestCase ):
 
     AUTH_DETAILS = { 'format':  'json',
                      'user':    'admin',
                      'key':     '35f7d1fb1890bdc05f9988d01cf1dcab' }
+
+    INVALID_AUTH = { 'format':  'json',
+                     'user':    'admin',
+                     'key':     'invalid_key' }
 
     AUTH_DETAILS_OTHER = {  'format':  'json',
                             'user':    'test_user',
@@ -30,6 +87,7 @@ class RepoApiV1Tests( ApiTestCase ):
 
         # Get the list of repos for the test user
         response = self.open( '/repos/', self.AUTH_DETAILS )
+        response = json.loads( response.content )
 
         assert 'meta' in response and 'objects' in response
         assert len( response[ 'objects' ] ) > 0
@@ -40,17 +98,10 @@ class RepoApiV1Tests( ApiTestCase ):
         '''
             Test failure states for the repo listings API.
         '''
-        error_thrown = False
-        response = None
-        try:
-            data = {'format': 'json', 'user': 'doesntexist'}
-            response = self.open( '/repos/', data )
-        except HTTPError as e:
-            error_thrown = True
-            assert e.code == 401
+        data = {'format': 'json', 'user': 'doesntexist'}
+        response = self.open( '/repos/', data )
 
-        assert error_thrown
-        assert response is None
+        assert response.status_code == 401
 
     def test_repo_detail( self ):
         '''
@@ -62,7 +113,8 @@ class RepoApiV1Tests( ApiTestCase ):
         repo = response[ 'objects' ][0][ 'id' ]
 
         # Grab the repo details
-        response = self.open( '/repos/%s' % ( repo ), self.AUTH_DETAILS )
+        response = self.open( '/repos/%s/' % ( repo ), self.AUTH_DETAILS )
+        response = json.loads( response.content )
 
         assert response is not None
         assert 'id' in response and response[ 'id' ] == repo
@@ -82,7 +134,8 @@ class RepoApiV1Tests( ApiTestCase ):
                 break
 
         # Grab the repo details under a different user
-        response = self.open( '/repos/%s' % ( repo[ 'id' ] ), self.AUTH_DETAILS_OTHER )
+        response = self.open( '/repos/%s/' % ( repo[ 'id' ] ), self.AUTH_DETAILS_OTHER )
+        response = json.loads( response.content )
 
         assert response is not None
         assert 'id' in response and response[ 'id' ] == repo[ 'id' ]
@@ -96,19 +149,11 @@ class RepoApiV1Tests( ApiTestCase ):
         response = self.test_repo_list()
         repo = response[ 'objects' ][0][ 'id' ]
 
-        error_thrown = False
-        response = None
+        # Grab the repo details under a non-existent user
+        data = {'format': 'json', 'user': 'doesntexist'}
+        response = self.open( '/repos/%s/' % ( repo ), data )
 
-        try:
-            # Grab the repo details under a non-existent user
-            data = {'format': 'json', 'user': 'doesntexist'}
-            response = self.open( '/repos/%s' % ( repo ), data )
-        except HTTPError as e:
-            error_thrown = True
-            assert e.code == 401
-
-        assert error_thrown
-        assert response is None
+        assert response.status_code == 401
 
     def test_repo_detail_fail_different_user( self ):
         '''
@@ -124,14 +169,17 @@ class RepoApiV1Tests( ApiTestCase ):
         if repo.get( 'is_public' ):
             return
 
-        error_thrown = False
-        response = None
-        try:
-            # Grab the repo details under a non-existent user
-            response = self.open( '/repos/%s' % ( repo.get( 'id' ) ), self.AUTH_DETAILS_OTHER )
-        except HTTPError as e:
-            error_thrown = True
-            assert e.code == 404
+        # Grab the repo details under a non-existent user
+        response = self.open( '/repos/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS_OTHER )
+        assert response.status_code == 404
 
-        assert error_thrown
-        assert response is None
+    def test_invalid_api_key( self ):
+        '''
+            Attempt to access the repo API using an invalid API key.
+        '''
+        response = None
+
+        # Attempt with a valid user but invalid API key
+        response = self.open( '/repos/', self.INVALID_AUTH )
+
+        assert response.status_code == 401

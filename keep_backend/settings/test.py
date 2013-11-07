@@ -3,6 +3,7 @@
 from . import *
 
 DEBUG = True
+TESTING = True
 USE_TZ = False
 
 TEST_RUNNER = 'discover_runner.DiscoverRunner'

@@ -13,6 +13,7 @@ from .defaults.django import *
 from .defaults.logging import *
 
 DEBUG = True
+TESTING = False
 TEMPLATE_DEBUG = DEBUG
 
 try:

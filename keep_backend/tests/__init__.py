@@ -1,11 +1,10 @@
-import json
 import os
 import shlex
 import subprocess
 import urllib
 import urllib2
 
-from django.test import LiveServerTestCase
+from django.test import Client, LiveServerTestCase, TestCase
 
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver
@@ -36,12 +35,15 @@ class HttpTestCase( LiveServerTestCase ):
         self.selenium.get( '%s%s' % ( self.live_server_url, url ) )
 
 
-class ApiTestCase( LiveServerTestCase ):
+class ApiTestCase( TestCase ):
 
     fixtures = [ '../_data/fixtures/test_data.yaml' ]
 
     @classmethod
     def setUpClass( cls ):
+
+        cls.client = Client()
+
         with open( os.devnull, 'w' ) as devnull:
             testdb = 'mongorestore -d test --drop ../_data/mongo-test/dhlab'
             subprocess.call( shlex.split( testdb ),
@@ -55,20 +57,10 @@ class ApiTestCase( LiveServerTestCase ):
         return urllib2.urlopen( final_url, params ).read()
 
     def open( self, url, params, method='GET', format='JSON' ):
-        final_url = '%s%s' % ( self.live_server_url, '/api/v1' )
-        final_url += url
-
-        encoded_params = ''
-        if params is not None:
-            encoded_params = urllib.urlencode( params, True )
+        final_url = '/api/v1' + url
 
         if method == 'GET':
-            final_url += '?' + encoded_params
-            response = urllib2.urlopen( final_url )
+            return self.client.get( final_url, params )
         else:
-            response = urllib2.urlopen( final_url, encoded_params )
+            return self.client.post( final_url, params )
 
-        if format == 'JSON':
-            return json.load( response )
-        else:
-            return response.read()
