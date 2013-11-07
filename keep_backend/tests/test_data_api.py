@@ -31,9 +31,15 @@ class DataApiV1KeyTests( ApiTestCase ):
         repos = self.open( '/repos/', self.AUTH_DETAILS )
         repos = json.loads( repos.content )
 
+        CSV_AUTH = dict( self.AUTH_DETAILS )
+        CSV_AUTH[ 'format' ] = 'csv'
+
         for repo in repos.get( 'objects' ):
             response = self.open( '/data/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS )
             assert response.status_code == 200
+
+            response = self.open( '/data/%s/' % ( repo.get( 'id' ) ), CSV_AUTH )
+            print response.status_code == 200
 
     def test_data_detail_failures( self ):
         '''
