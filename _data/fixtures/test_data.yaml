@@ -71,10 +71,3 @@
     mongo_id: 527bc855b92df3e0f6816b87, name: testing_hidden, org: null, study: null, user: 1}
   model: repos.repository
   pk: 2
-
-- fields: {content_type: 8, object_pk: '1', permission: 25, user: 1}
-  model: guardian.userobjectpermission
-  pk: 1
-- fields: {content_type: 8, object_pk: '2', permission: 25, user: 1}
-  model: guardian.userobjectpermission
-  pk: 2

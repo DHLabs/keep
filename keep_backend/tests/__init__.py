@@ -4,7 +4,12 @@ import subprocess
 import urllib
 import urllib2
 
+from repos.models import Repository
+
+from django.contrib.auth.models import User
 from django.test import Client, LiveServerTestCase, TestCase
+
+from guardian.shortcuts import assign_perm
 
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver
@@ -38,6 +43,13 @@ class HttpTestCase( LiveServerTestCase ):
 class ApiTestCase( TestCase ):
 
     fixtures = [ '../_data/fixtures/test_data.yaml' ]
+
+    def setUp( cls ):
+        # Make sure the repository objects have the correct permissions
+        user = User.objects.get( id=1 )
+
+        for repo in Repository.objects.all():
+            assign_perm( 'view_repository', user, repo )
 
     @classmethod
     def setUpClass( cls ):
