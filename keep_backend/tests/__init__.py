@@ -64,10 +64,6 @@ class ApiTestCase( TestCase ):
 
         super( ApiTestCase, cls ).setUpClass()
 
-    def openRaw( self, url, params ):
-        final_url = '%s%s' % ( self.live_server_url, url )
-        return urllib2.urlopen( final_url, params ).read()
-
     def open( self, url, params, method='GET', format='JSON' ):
         final_url = '/api/v1' + url
 
