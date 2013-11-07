@@ -3,6 +3,7 @@
 from . import *
 
 DEBUG = True
+USE_TZ = False
 
 TEST_RUNNER = 'discover_runner.DiscoverRunner'
 TEST_DISCOVER_TOP_LEVEL = PROJECT_ROOT

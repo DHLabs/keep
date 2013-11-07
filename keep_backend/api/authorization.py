@@ -40,6 +40,7 @@ class RepoAuthorization( Authorization ):
 
         logged_in_user = bundle.request.user
         user = bundle.request.GET.get( 'user', None )
+        key  = bundle.request.GET.get( 'key', None )
 
         # Case 1: There is no logged in user and no user query provided. We don't
         # know what to query.
@@ -51,9 +52,10 @@ class RepoAuthorization( Authorization ):
         if user is None and logged_in_user.is_authenticated():
             return object_list.filter( user=logged_in_user )
 
-        # Case 3: A user query is provided. Only show public repositories for this user.
-        # or repos that are shared to the logged in user.
-        if user is not None:
+        # Case 3: A user query is provided and this is not an API call. Only
+        # show public repositories for this user or repos that are shared to
+        # the logged in user.
+        if user is not None and key is None:
             # Filter for all objects by this user
             all_repos = object_list.filter( Q(user__username=user) | Q(org__name=user) )
 
@@ -65,6 +67,10 @@ class RepoAuthorization( Authorization ):
 
             return filtered
 
+        # Case 4: API call. The object list should already be correct.
+        if user is not None and key is not None:
+            return object_list
+
         return False
 
     def read_detail( self, object_detail, bundle ):
@@ -73,8 +79,14 @@ class RepoAuthorization( Authorization ):
             return True
 
         logged_in_user = bundle.request.user
+        user = bundle.request.GET.get( 'user', None )
+        key  = bundle.request.GET.get( 'key', None )
 
-        return logged_in_user.has_perm( 'view_repository', bundle.obj )
+        if key is None:
+            return logged_in_user.has_perm( 'view_repository', bundle.obj )
+        else:
+            user = User.objects.get( username=user )
+            return user.has_perm( 'view_repository', bundle.obj )
 
     def create_detail( self, object_detail, bundle ):
         return True

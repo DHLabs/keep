@@ -117,6 +117,7 @@ class RepoResource( ModelResource ):
         response = response_class( content=serialized,
                                    content_type=build_content_type(desired_format),
                                    **response_kwargs )
+
         # FOR ODKCollect
         # If the device requests an xform add an OpenRosa header
         if desired_format == 'text/xml':

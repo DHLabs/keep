@@ -38,6 +38,8 @@ class HttpTestCase( LiveServerTestCase ):
 
 class ApiTestCase( LiveServerTestCase ):
 
+    fixtures = [ '../_data/fixtures/test_data.yaml' ]
+
     @classmethod
     def setUpClass( cls ):
         with open( os.devnull, 'w' ) as devnull:

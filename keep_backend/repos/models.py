@@ -84,6 +84,9 @@ class RepositoryManager( models.Manager ):
             List shared & user-owned repositories for a specific user.
         '''
 
+        # Grab all public repositories
+        public_repos = self.filter( is_public=True )
+
         # django-guardian has a quirk where if the user is a superuser, the
         # entire queryset is returned. This is bullshit and we don't need that
         # bullshit.
@@ -97,7 +100,7 @@ class RepositoryManager( models.Manager ):
         if public:
             return repositories.filter( is_public=True )
 
-        return repositories
+        return repositories | public_repos
 
     def get_by_username( self, repo_name, username ):
         user_repo_q = Q( name=repo_name )

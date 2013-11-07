@@ -1,6 +1,6 @@
 '''
-    Makes HTTP requests to each of our Repo API functions to ensure there are
-    no templating/etc errors on the pages.
+    Makes HTTP requests to each of our Repo API functions to ensure that
+    basic API authentication, authorization, and functionality is available.
 '''
 #from django.contrib.auth.models import User
 from urllib2 import HTTPError
@@ -9,14 +9,32 @@ from tests import ApiTestCase
 
 class RepoApiV1Tests( ApiTestCase ):
 
+    AUTH_DETAILS = { 'format':  'json',
+                     'user':    'admin',
+                     'key':     '35f7d1fb1890bdc05f9988d01cf1dcab' }
+
+    AUTH_DETAILS_OTHER = {  'format':  'json',
+                            'user':    'test_user',
+                            'key':     '35f7d1fb1890bdc05f9988d01cf1dcab' }
+
     def test_repo_list( self ):
         '''
-            Test if we can list the repos for the test user
+            Test if we can list the repos for the test user.
+
+            Returns
+            -------
+            response : dict
+                This is the full JSON response converted into a python
+                dictionary.
         '''
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
+
+        # Get the list of repos for the test user
+        response = self.open( '/repos/', self.AUTH_DETAILS )
 
         assert 'meta' in response and 'objects' in response
         assert len( response[ 'objects' ] ) > 0
+
+        return response
 
     def test_repo_list_fail( self ):
         '''
@@ -40,31 +58,31 @@ class RepoApiV1Tests( ApiTestCase ):
             test user.
         '''
 
-        # Get the list of repos for the test user
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
+        response = self.test_repo_list()
         repo = response[ 'objects' ][0][ 'id' ]
 
         # Grab the repo details
-        response = self.open( '/repos/%s' % ( repo ),
-                              {'format': 'json', 'user': 'admin'} )
+        response = self.open( '/repos/%s' % ( repo ), self.AUTH_DETAILS )
 
         assert response is not None
         assert 'id' in response and response[ 'id' ] == repo
+
+        return response
 
     def test_repo_detail_public( self ):
         '''
             Test accessing public repo details
         '''
-        # Get the list of repos for the test user
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
 
+        response = self.test_repo_list()
+
+        # Find the first public repository
         for repo in response[ 'objects' ]:
-            if 'public' in repo and repo[ 'public' ]:
+            if repo.get( 'is_public', False ):
                 break
 
         # Grab the repo details under a different user
-        data = {'format': 'json', 'user': 'test_user'}
-        response = self.open( '/repos/%s' % ( repo[ 'id' ] ), data )
+        response = self.open( '/repos/%s' % ( repo[ 'id' ] ), self.AUTH_DETAILS_OTHER )
 
         assert response is not None
         assert 'id' in response and response[ 'id' ] == repo[ 'id' ]
@@ -75,7 +93,7 @@ class RepoApiV1Tests( ApiTestCase ):
             non-existent user
         '''
         # Get the list of repos for the test user
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
+        response = self.test_repo_list()
         repo = response[ 'objects' ][0][ 'id' ]
 
         error_thrown = False
@@ -98,19 +116,22 @@ class RepoApiV1Tests( ApiTestCase ):
             user who does not own the current repo
         '''
         # Get the list of repos for the test user
-        response = self.open( '/repos/', {'format': 'json', 'user': 'admin'} )
-        repo = response[ 'objects' ][0][ 'id' ]
+        response = self.test_repo_list()
+        for repo in response.get( 'objects' ):
+            if repo.get( 'is_public' ) == False:
+                break
+
+        if repo.get( 'is_public' ):
+            return
 
         error_thrown = False
         response = None
-
         try:
             # Grab the repo details under a non-existent user
-            data = {'format': 'json', 'user': 'test_user'}
-            response = self.open( '/repos/%s' % ( repo ), data )
+            response = self.open( '/repos/%s' % ( repo.get( 'id' ) ), self.AUTH_DETAILS_OTHER )
         except HTTPError as e:
             error_thrown = True
-            assert e.code == 401
+            assert e.code == 404
 
         assert error_thrown
         assert response is None
