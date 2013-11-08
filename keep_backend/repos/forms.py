@@ -370,101 +370,96 @@ class WebformForm( forms.Form ):
                 schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
                                                         '<strong></strong>%s'
                                                    '</div>' % (child.name, child.name, schema_dict['title']))
-                schema_dict('is_field') = False
+                schema_dict['is_field'] = False
 
             schema_dict['type'] = 'Text'
 
         elif child.type in ( 'decimal', 'int', 'integer' ):
             schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
-                                                        '<strong></strong>%s'
-                                                   '</div>' % (child.name, child.name, schema_dict['title'])
+                                                        '<label class="control-label" for="%s">%s</label>'
+                                                        '<div class="controls">'
+                                                            '<span data-editor>'
+                                                                '<input id="%s" name="%s" type="number" step="any">'
+                                                            '</span>'
+                                                            '<div class="help-inline" data-error></div>'
+                                                            '<div class="help-block">'
+                                                        '</div>'
+                                                   '</div>' % (child.name, child.name, child.name,
+                                                    schema_dict['title'], child.name, child.name))
 
             schema_dict['type'] = 'Numeric'
+
+        elif child.type == 'date':
+            pass
+
+        elif child.type in ( 'time', 'datetime' ):
+            pass
+
+        elif child.type == 'today':
+            pass
+
+        # Geographical data type to field
+        elif child.type == 'geopoint':
+            schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                                            '<strong></strong>%s<br>'
+                                            '<input id="%s" type="hidden" name="%s" >'
+                                            '<div id="%s_map" style="width:100%; height: 500px; position: relative;"></div>'
+                                       '</div>' % (child.name, child.name, schema_dict['title'],
+                                                   child.name, child.name, child.name))
+
+            schema_dict['bind'] = 'map'
+
+        elif child.type == 'trigger':
+            pass
+
+        # Advisement text to field
+        elif child.type == 'note':
+            schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                                            '%s'
+                                       '</div>' % (child.name, child.name, schema_dict['title']))
+
+            schema_dict['type'] = 'Text'
+            schema_dict['is_field'] = False
+
+        # All media types
+        elif child.type == 'photo':
+            schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                                            '<label for="%s">%s</label>'
+                                            '<input type="file" name="%s" accept="image/*"></input>'
+                                       '</div>' % (child.name, child.name, child.name, 
+                                                   schema_dict['title'], child.name))
+
+            schema_dict['type'] = 'Text'
+
+
+        elif child.type == 'video':
+            schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                                            '<label for="%s">%s</label>'
+                                            '<input type="file" name="%s" accept="video/*"></input>'
+                                       '</div>' % (child.name, child.name, child.name,
+                                                   schema_dict['title'], child.name))
+
+            schema_dict['type'] = 'Text'
+
+        # selections.  Generation of selections happens in another method.
+        elif child.type == 'select all that apply':
+            pass
+
+        elif child.type == "select one":
+            pass
+
+        # Woo!  MORE Recursion!  
+        # TODO: I'll take care of this later, don't want to handle recursion logic right now
+        elif child.type == 'group':
+            pass
+
+        elif child.type == 'calculate':
+            pass
 
         #return raw_html, schema_dict
 
 
         # TODO: double-check the JSON to see if this format is correct
-'''
-We're changing everything!        
-        fieldDict = {}
-        for element in jsonElement:
-            if element.type in ( 'string', 'text' ):
-                if element.bind and element.bind.readonly:
-                    # FIXME: This should have false is_field, mirroring builder.coffee
-                    fieldDict[element.name] = None
-                fieldDict[element.name] = forms.CharField(label=element.label,
-                    widget=forms.TextInput( attrs={'data-key': element.name} ) ) 
-
-            # Numeric type to field
-            elif element.type in ( 'decimal', 'int', 'integer' ):
-                fieldDict[element.name] = forms.DecimalField(label=element.label,
-                    widget=forms.TextInput( attrs={'data-key': element.name} ) ) 
-
-            # TODO: check JSON date format, and force only that format
-            # Date type to field
-            elif element.type == 'date':
-                fieldDict[element.name] = forms.DateField(label=element.label,
-                    widget=forms.DateInput( attrs={'data-key': element.name} ) )
-
-            # Time type to field
-            elif element.type in ( 'time', 'datetime' ):
-                fieldDict[element.name] = forms.DateTimeField(label=element.label,
-                    widget=forms.DateTimeInput( attrs={'data-key': element.name} ) ) 
-
-            # Geographical data type to field
-            elif element.type == 'geopoint':
-                pass
-
-            elif element.type == 'today':
-                pass
-
-            elif element.type == 'trigger':
-                pass
-
-            # Advisement text to field
-            elif element.type == 'note':
-                pass
-
-            # All media types
-            elif element.type == 'photo':
-                pass
-
-            elif element.type == 'video':
-                pass
-
-            elif element.type == 'select all that apply':
-                pass
-
-            # Woo!  MORE Recursion!  
-            # TODO: I'll take care of this later, don't want to handle recursion logic right now
-            elif element.type == 'group':
-                pass
-
-            # Selections to either a radio list or a dropdown list (minimal is dropdown!)
-            elif element.type == 'select one':
-                
-
-                if element.control and element.control.appearance == 'minimal':
-                    fieldDict[element.name] = forms.ChoiceField(label=element.label,
-                        widget=forms.Select( attrs={'data-key': element.name},
-                                                choices=None))
-
-                else:
-                    fieldDict[element.name] = forms.ChoiceField(label=element.label,
-                        widget=forms.RadioSelect( attrs={'data-key': element.name}, 
-                            choices=prepChoices(element.choice) ) )
-
-            # TODO: Calculations need to be handled!... somehow...
-            elif element.type == 'calculate':
-                pass
-
-            # Set the parameters of the object
-            self.webform = self.setAllWithKwArgs(fieldDict)
-
-            # TODO: add all 'pass'ed fields in correctly
-
-'''
 
     '''
         Meant for select multiple and select one
