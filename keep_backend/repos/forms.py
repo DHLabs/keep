@@ -407,7 +407,7 @@ class WebformForm( forms.Form ):
                                        '</div>' % (child.name, child.name, schema_dict['title'],
                                                    child.name, child.name, child.name))
 
-            schema_dict['bind'] = 'map'
+            schema_dict['bind'] = { 'map': True }
 
         elif child.type == 'trigger':
             pass
@@ -451,10 +451,26 @@ class WebformForm( forms.Form ):
         # Woo!  MORE Recursion!  
         # TODO: I'll take care of this later, don't want to handle recursion logic right now
         elif child.type == 'group':
-            pass
+            schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                                            '%s'
+                                       '</div>' % (child.name, child.name, schema_dict['title']))
+
+            schema_dict['type'] = 'Text'
+            schema_dict['is_field'] = False
+            schema_dict['tree'] += child.name + "/"
+            schema_dict['control'] = child.control
+            schema_dict['bind'] = { group_start: True }
+
+            #TODO: What to do with fieldset?  Also, Recursion Logic needed (builder 119-132)
 
         elif child.type == 'calculate':
             pass
+
+        # Unknown type
+        else:
+            schema_dict['template'] = ('<div id="%s_field" data-key="%s" class="control-group">'
+                                            '<label for="%s"><strong>Unsupported:</strong>%s</label>'
+                                       '</div>' % (child.name, child.name, child.name, schema_dict['title']))
 
         #return raw_html, schema_dict
 
