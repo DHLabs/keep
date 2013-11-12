@@ -5,6 +5,31 @@ from repos.models import Repository
 
 class RepoViewTests( ViewTestCase ):
 
+    def test_webform( self ):
+        '''
+            URL Tested: /<username>/<repo_name>/webform/
+        '''
+        repos = Repository.objects.all()
+
+        self.login()
+        for repo in repos:
+            response = self.client.get( '/%s/%s/webform/' % ( repo.user.username, repo.name ) )
+            self.assertEqual( response.status_code, 200 )
+        self.logout()
+
+    def test_webform_failure( self ):
+        repos = Repository.objects.all()
+
+        self.login()
+
+        response = self.client.get( '/invalid_user/invalid_repo/webform/' )
+        self.assertEqual( response.status_code, 404 )
+
+        response = self.client.get( '/admin/invalid_repo/webform/' )
+        self.assertEqual( response.status_code, 404 )
+
+        self.logout()
+
     def test_repo_viz( self ):
         '''
             URL Tested: /<username>/<repo_name>/
