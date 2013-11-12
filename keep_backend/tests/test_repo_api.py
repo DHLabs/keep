@@ -146,13 +146,14 @@ class RepoApiV1KeyTests( ApiTestCase ):
         '''
         # Get the list of repos for the test user
         response = self.test_repo_list()
-        repo = response[ 'objects' ][0][ 'id' ]
 
-        # Grab the repo details under a non-existent user
-        data = {'format': 'json', 'user': 'doesntexist'}
-        response = self.open( '/repos/%s/' % ( repo ), data )
+        for repo in response.get( 'objects' ):
 
-        assert response.status_code == 401
+            # Grab the repo details under a non-existent user
+            data = {'format': 'json', 'user': 'doesntexist'}
+            response = self.open( '/repos/%s/' % ( repo.get( 'id' ) ), data )
+
+            assert response.status_code == 401
 
     def test_repo_detail_fail_different_user( self ):
         '''
@@ -162,15 +163,14 @@ class RepoApiV1KeyTests( ApiTestCase ):
         # Get the list of repos for the test user
         response = self.test_repo_list()
         for repo in response.get( 'objects' ):
-            if repo.get( 'is_public' ) == False:
-                break
 
-        if repo.get( 'is_public' ):
-            return
+            # Grab the repo details under a non-existent user
+            response = self.open( '/repos/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS_OTHER )
 
-        # Grab the repo details under a non-existent user
-        response = self.open( '/repos/%s/' % ( repo.get( 'id' ) ), self.AUTH_DETAILS_OTHER )
-        assert response.status_code == 404
+            if repo.get( 'is_public' ):
+                assert response.status_code == 200
+            else:
+                assert response.status_code == 404
 
     def test_invalid_api_key( self ):
         '''
