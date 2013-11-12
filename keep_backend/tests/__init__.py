@@ -40,7 +40,11 @@ class HttpTestCase( LiveServerTestCase ):
         self.selenium.get( '%s%s' % ( self.live_server_url, url ) )
 
 
-class ApiTestCase( TestCase ):
+class KeepTestCase( TestCase ):
+    '''
+        KeepTestCase is a superclass that set ups all KEEP related test data fixtures
+        and MongoDB test data.
+    '''
 
     fixtures = [ '../_data/fixtures/test_data.yaml' ]
 
@@ -62,9 +66,18 @@ class ApiTestCase( TestCase ):
                              stdout=devnull,
                              stderr=devnull )
 
-        super( ApiTestCase, cls ).setUpClass()
+        super( KeepTestCase, cls ).setUpClass()
+
+class ApiTestCase( KeepTestCase ):
+    '''
+        Extends from KeepTestCase and adds a helper function specifically to
+        easily call and test API requests.
+    '''
 
     def open( self, url, params, method='GET', format='JSON' ):
+        '''
+            A helper function to quickly do API requests.
+        '''
         final_url = '/api/v1' + url
 
         if method == 'GET':
@@ -72,3 +85,19 @@ class ApiTestCase( TestCase ):
         else:
             return self.client.post( final_url, params )
 
+
+class ViewTestCase( KeepTestCase ):
+
+    def login( self ):
+        '''
+            Helper method to login into the test account.
+        '''
+        self.client.post( '/accounts/login/', { 'username': 'admin',
+                                                'password': 'test',
+                                                'token': ''} )
+
+    def logout( self ):
+        '''
+            Helper method to logout of the test account
+        '''
+        self.client.get( '/accounts/logout/' )
