@@ -112,8 +112,6 @@ class XFormSerializer( Serializer ):
         else:
             raise Exception( data )
 
-        return None
-
     def to_xls( self, data, options=None ):
         options = options or {}
         data    = self.to_simple(data, options)
