@@ -3,6 +3,7 @@ import logging
 from bson import ObjectId
 from datetime import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.python import Serializer
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -110,7 +111,10 @@ class RepositoryManager( models.Manager ):
         org_repo_q = Q( name=repo_name )
         org_repo_q.add( Q( org__name=username ), Q.AND )
 
-        return self.get( user_repo_q | org_repo_q )
+        try:
+            return self.get( user_repo_q | org_repo_q )
+        except ObjectDoesNotExist as e:
+            return None
 
     def repo_exists( self, repo_name, username ):
         return self.filter(Q(name=repo_name),
