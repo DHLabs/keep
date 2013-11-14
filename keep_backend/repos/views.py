@@ -239,6 +239,8 @@ def share_repo( request, repo_id ):
 
     if request.method == 'POST':
         username = request.POST.get( 'username', None )
+    elif request.method == 'DELETE':
+        username = json.loads( request.body ).get( 'username', None )
     else:
         username = request.GET.get( 'username', None )
 
@@ -250,11 +252,13 @@ def share_repo( request, repo_id ):
     if account == request.user:
         return HttpResponse( status=401 )
 
+    # Remove permissions from user
     if request.method == 'DELETE':
         old_permissions = get_perms( account, repo )
         for old_permission in old_permissions:
             remove_perm( old_permission, account, repo )
         return HttpResponse( 'success', status=204 )
+    # Add certain permissions for a specific user
     else:
         new_permissions = request.POST.get( 'permissions', '' ).split(',')
         for new_permission in new_permissions:

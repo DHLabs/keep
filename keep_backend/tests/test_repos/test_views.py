@@ -1,9 +1,42 @@
+import json
+
+from django.core.urlresolvers import reverse
 from tests import ViewTestCase
 
 from repos.models import Repository
 
 
 class RepoViewTests( ViewTestCase ):
+
+    def test_share( self ):
+        '''
+            URL Tested: /repo/share/<repo_id>/
+        '''
+
+        repos = Repository.objects.all()
+
+        self.login()
+        for repo in repos:
+
+            url = reverse( 'share_repo', kwargs={ 'repo_id': repo.mongo_id } )
+
+            # Test basic error handling
+            response = self.client.get( url )
+            self.assertEqual( response.status_code, 404 )
+
+            # Test attempting to change your own permissions
+            response = self.client.get( url, { 'username': repo.user.username } )
+            self.assertEqual( response.status_code, 401 )
+
+            # Test add permissions to a user
+            response = self.client.post( url, { 'username': 'test_user', 'permissions': 'view_repository' } )
+            self.assertEqual( response.status_code, 200 )
+
+            # Test deleting permissions from a user
+            response = self.client.delete( url, json.dumps( { 'username': 'test_user' } ) )
+            self.assertEqual( response.status_code, 204 )
+
+        self.logout()
 
     def test_webform( self ):
         '''
@@ -13,7 +46,8 @@ class RepoViewTests( ViewTestCase ):
 
         self.login()
         for repo in repos:
-            response = self.client.get( '/%s/%s/webform/' % ( repo.user.username, repo.name ) )
+            kwargs = { 'username': repo.user.username, 'repo_name': repo.name }
+            response = self.client.get( reverse( 'repo_webform', kwargs=kwargs ) )
             self.assertEqual( response.status_code, 200 )
         self.logout()
 
@@ -33,7 +67,9 @@ class RepoViewTests( ViewTestCase ):
             before_count = repo.data().count()
 
             test_data = { 'name': 'test_name' }
-            response = self.client.post( '/%s/%s/webform/' % ( repo.user.username, repo.name ),
+
+            kwargs = { 'username': repo.user.username, 'repo_name': repo.name }
+            response = self.client.post( reverse( 'repo_webform', kwargs=kwargs ),
                                          test_data )
 
             after_count = repo.data().count()
