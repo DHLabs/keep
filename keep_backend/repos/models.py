@@ -292,6 +292,12 @@ class Repository( models.Model ):
         else:
             super( Repository, self ).save( *args, **kwargs )
 
+    def data( self ):
+        '''
+            Does a simple query for data.
+        '''
+        return db.data.find( { 'repo': ObjectId( self.mongo_id ) } )
+
     def add_data( self, data, files ):
         """
             Validate and add a new data record to this repo!

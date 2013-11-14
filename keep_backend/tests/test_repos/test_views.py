@@ -17,6 +17,46 @@ class RepoViewTests( ViewTestCase ):
             self.assertEqual( response.status_code, 200 )
         self.logout()
 
+    def test_webform_post( self ):
+        '''
+            URL Tested: /<username>/<repo_name>/webform/
+
+            Test posting data to a webform.
+        '''
+
+        repos = Repository.objects.all()
+
+        # LOGGED IN
+        self.login()
+        for repo in repos:
+
+            before_count = repo.data().count()
+
+            test_data = { 'name': 'test_name' }
+            response = self.client.post( '/%s/%s/webform/' % ( repo.user.username, repo.name ),
+                                         test_data )
+
+            after_count = repo.data().count()
+
+            self.assertEqual( response.status_code, 302 )
+            self.assertEqual( before_count + 1, after_count )
+
+        self.logout()
+
+        # NOT LOGGED IN
+        for repo in repos:
+
+            before_count = repo.data().count()
+
+            test_data = { 'name': 'test_name' }
+            response = self.client.post( '/%s/%s/webform/' % ( repo.user.username, repo.name ),
+                                         test_data )
+
+            after_count = repo.data().count()
+
+            self.assertEqual( response.status_code, 200 )
+            self.assertEqual( before_count + 1, after_count )
+
     def test_webform_failure( self ):
         repos = Repository.objects.all()
 
