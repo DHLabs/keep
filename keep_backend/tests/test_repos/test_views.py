@@ -5,8 +5,24 @@ from tests import ViewTestCase
 
 from repos.models import Repository
 
+BATCH_DOC = '../_data/test_docs/batch_test_data.csv'
+
 
 class RepoViewTests( ViewTestCase ):
+
+    def test_batch( self ):
+        self.login()
+
+        url = reverse( 'repo_batch' )
+
+        response = self.client.get( url )
+        self.assertEqual( response.status_code, 405 )
+
+        with open( BATCH_DOC, 'rb' ) as batch_file:
+            response = self.client.post( url, {'csv_file': batch_file} )
+            print response.status_code
+
+        self.logout()
 
     def test_delete( self ):
 
