@@ -8,6 +8,24 @@ from repos.models import Repository
 
 class RepoViewTests( ViewTestCase ):
 
+    def test_delete( self ):
+
+        # Add a test repo and then delete it.
+        self.test_new()
+        repo = Repository.objects.get( name='new_test' )
+        self.assertNotEqual( repo, None )
+
+        # Attempt to delete repo
+        self.login()
+
+        url = reverse( 'repo_delete', kwargs={ 'repo_id': repo.mongo_id } )
+        response = self.client.get( url )
+        self.assertEqual( response.status_code, 302 )
+        repos = Repository.objects.filter( name='new_test' )
+        self.assertEqual( len( repos ), 0 )
+
+        self.logout()
+
     def test_edit( self ):
         '''
             URL Tested: /repo/edit/<repo_id>/
@@ -34,6 +52,36 @@ class RepoViewTests( ViewTestCase ):
             }
             response = self.client.post( url, edit_data )
             self.assertEqual( response.status_code, 302 )
+
+        self.logout()
+
+    def test_new( self ):
+        '''
+            URL Tested: /repo/new/
+        '''
+
+        self.login()
+
+        url = reverse( 'repo_new' )
+
+        # Test GET response
+        response = self.client.get( url )
+        self.assertEqual( response.status_code, 200 )
+
+        # Test POST response
+        repo_data = {
+            'name': 'new_test',
+            'desc': 'description',
+            'privacy': 'private',
+            'survey_json': json.dumps( {
+                'type': 'survey',
+                'children': [ { 'type': 'text',
+                                'name': 'name',
+                                'label': 'What\'s your name?' }]
+            })
+        }
+        response = self.client.post( url, repo_data )
+        self.assertEqual( response.status_code, 302 )
 
         self.logout()
 
