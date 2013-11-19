@@ -88,12 +88,12 @@ class ApiTestCase( KeepTestCase ):
 
 class ViewTestCase( KeepTestCase ):
 
-    def login( self ):
+    def login( self, username='admin', password='test' ):
         '''
             Helper method to login into the test account.
         '''
-        self.client.post( '/accounts/login/', { 'username': 'admin',
-                                                'password': 'test',
+        self.client.post( '/accounts/login/', { 'username': username,
+                                                'password': password,
                                                 'token': ''} )
 
     def logout( self ):

@@ -20,7 +20,7 @@ class RepoViewTests( ViewTestCase ):
 
         with open( BATCH_DOC, 'rb' ) as batch_file:
             response = self.client.post( url, {'csv_file': batch_file} )
-            print response.status_code
+            self.assertEqual( response.status_code, 302 )
 
         self.logout()
 
