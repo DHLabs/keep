@@ -8,6 +8,35 @@ from repos.models import Repository
 
 class RepoViewTests( ViewTestCase ):
 
+    def test_edit( self ):
+        '''
+            URL Tested: /repo/edit/<repo_id>/
+        '''
+
+        repos = Repository.objects.all()
+
+        self.login()
+        for repo in repos:
+
+            url = reverse( 'repo_edit', kwargs={ 'repo_id': repo.mongo_id } )
+
+            # Access the editing page
+            response = self.client.get( url )
+            self.assertEqual( response.status_code, 200 )
+
+            # Attempt to "edit" the repo.
+            edit_data = {
+                'name': repo.name + '_edited',
+                'desc': repo.description,
+                'survey_json': json.dumps( {
+                    'type': 'survey',
+                    'children': repo.fields() } )
+            }
+            response = self.client.post( url, edit_data )
+            self.assertEqual( response.status_code, 302 )
+
+        self.logout()
+
     def test_share( self ):
         '''
             URL Tested: /repo/share/<repo_id>/
