@@ -22,9 +22,10 @@ define( [ 'jquery',
             'click #share-btn': 'sharing_settings'
 
         initialize: ( options ) ->
-            @modalView = new ShareSettingsModal( options )
+            @options = options
 
         sharing_settings: ( event ) ->
+            @modalView = new ShareSettingsModal( @options )
             $('.modal').html( @modalView.render().el )
             @modalView.onAfterRender( $( '.modal' ) )
 
