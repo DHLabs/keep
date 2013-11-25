@@ -194,9 +194,7 @@ class RepoResource( ModelResource ):
 
     def post_detail( self, request, **kwargs ):
 
-        #basic_bundle = self.build_bundle( request=request )
-
-        user_accessing = request.GET.get( 'user', None )
+        user_accessing = request.POST.get( 'user', None )
         user = user_or_organization( user_accessing )
         if user is None:
             return HttpUnauthorized()
