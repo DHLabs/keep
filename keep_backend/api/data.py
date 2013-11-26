@@ -6,6 +6,7 @@ from backend.db import dehydrate_survey
 from bson import ObjectId
 from bson.code import Code
 
+from django.conf import settings
 from django.conf.urls import url
 
 from tastypie import fields
@@ -114,6 +115,65 @@ class DataResource( MongoDBResource ):
 
         return sort
 
+    def _serialize_data( self, data, fields, repo_id, data_id ):
+
+        copy = {}
+
+        for field in fields:
+
+            key = field.get( 'name' )
+            val = data.get( key )
+
+            # Convert strings into a unicode representation.
+            if field.get( 'type' ) in [ 'text', 'note' ]:
+                val = unicode( val ).encode( 'utf-8' )
+
+            # Give a full URL for media
+            elif field.get( 'type' ) in [ 'photo' ]:
+
+                host = settings.AWS_S3_MEDIA_DOMAIN
+                if settings.DEBUG:
+                    host = 'localhost:8000/media'
+
+                val = 'http://%s/%s/%s/%s' % ( host, repo_id, data_id, val )
+
+            # Correctly recurse through groups
+            elif field.get( 'type' ) == 'group':
+
+                val = self._serialize_data( data=val,
+                                            fields=field.get( 'children' ),
+                                            repo_id=repo_id,
+                                            data_id=data_id )
+
+            copy[ key ] = val
+
+        return copy
+
+
+    def _dehydrate_data( self, data, fields ):
+
+        hydrated = []
+        for row in data:
+            copy = dict( row )
+
+            # Hydrate the base data keys.
+            # 1. Remove the "repo" key if it exists.
+            # 2. Rename the "_id" key into the more common "id" key.
+            # 3. Convert the python timestamp into a JSON friendly one.
+            repo = copy.pop( 'repo' )
+            copy[ 'id' ] = copy.pop( '_id' )
+            copy[ 'timestamp' ] = copy[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
+
+            # Now serialize the data according to the field data.
+            copy[ 'data' ] = self._serialize_data( data=copy[ 'data' ],
+                                                   fields=fields,
+                                                   repo_id=repo,
+                                                   data_id=copy[ 'id' ] )
+
+            hydrated.append( copy )
+
+        return hydrated
+
     def get_detail( self, request, **kwargs ):
 
         # Grab the survey that we're querying survey data for
@@ -153,13 +213,16 @@ class DataResource( MongoDBResource ):
             # Ensure correct pagination
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
 
+            #
+            # TODO: Smarter way of printing out entire dataset for CSVs
+            # When people download CSVs, make sure we include the entire dataset.
             limit = 50
             if request.GET.get( 'format', None ) == 'csv':
                 limit = cursor.count()
 
-            if limit == 0:
-                pages = 0
-            else:
+            # Determine the number of pages available.
+            pages = 0
+            if limit > 0:
                 pages = cursor.count() / limit
 
             meta = {
@@ -168,12 +231,12 @@ class DataResource( MongoDBResource ):
                 'limit': limit,
                 'offset': offset,
                 'count': cursor.count(),
-                'pages': pages
-            }
+                'pages': pages }
 
             data = {
                 'meta': meta,
-                'data': dehydrate_survey( cursor.skip( offset * limit ).limit( limit ) ) }
+                'data': self._dehydrate_data( cursor.skip( offset * limit ).limit( limit ),
+                                              repo.fields() ) }
 
             return self.create_response( request, data )
         except ValueError as e:

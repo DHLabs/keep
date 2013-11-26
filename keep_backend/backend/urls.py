@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
+from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from api.data import DataResource
@@ -33,7 +34,7 @@ urlpatterns = patterns( 'backend.views',
     	 name='settings' ),
 
     # User dashboard
-    url( regex=r'^(?P<username>\w+)/$',
+    url( regex=r'^(?P<username>(?!static|media)\w+)/$',
     	 view='user_dashboard',
     	 name='user_dashboard' ),
 
@@ -56,3 +57,4 @@ urlpatterns += patterns( '', url( r'', include( 'openrosa.urls' ) ) )
 # Handle static files on local dev machine
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
+    urlpatterns += static( settings.MEDIA_URL, document_root=settings.MEDIA_ROOT )
