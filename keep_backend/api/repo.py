@@ -2,6 +2,7 @@ import json
 
 from backend.db import user_or_organization
 
+from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -158,7 +159,12 @@ class RepoResource( ModelResource ):
         return media
 
     def get_manifest( self, request, **kwargs ):
-        base = 'http://s3.amazonaws.com/keep-media/%s/%s'
+
+        if settings.DEBUG:
+            base = 'http://localhost:8000'
+        else:
+            base = 'http://%s' % ( settings.AWS_MEDIA_STORAGE_BUCKET_NAME )
+        base += '/%s/%s'
 
         bundle = self.build_bundle( request=request )
         obj = self.obj_get( bundle, **self.remove_api_resource_names(kwargs) )

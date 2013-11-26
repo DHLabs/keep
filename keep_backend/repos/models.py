@@ -3,6 +3,7 @@ import logging
 from bson import ObjectId
 from datetime import datetime
 
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.python import Serializer
 from django.core.urlresolvers import reverse
@@ -318,7 +319,8 @@ class Repository( models.Model ):
         # Once we save the repo data, save the files to S3
         if len( valid_files.keys() ) > 0:
             # If we have media data, save it to this repo's data folder
-            storage.bucket_name = 'keep-media'
+            if not settings.DEBUG:
+                storage.bucket_name = settings.AWS_MEDIA_STORAGE_BUCKET_NAME
             for key in valid_files.keys():
 
                 file_to_upload = valid_files.get( key )

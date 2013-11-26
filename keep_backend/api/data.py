@@ -131,9 +131,10 @@ class DataResource( MongoDBResource ):
             # Give a full URL for media
             elif field.get( 'type' ) in [ 'photo' ]:
 
-                host = settings.AWS_S3_MEDIA_DOMAIN
                 if settings.DEBUG:
                     host = 'localhost:8000/media'
+                else:
+                    host = settings.AWS_S3_MEDIA_DOMAIN
 
                 val = 'http://%s/%s/%s/%s' % ( host, repo_id, data_id, val )
 
