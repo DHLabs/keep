@@ -23,8 +23,8 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_ACCESS_KEY_ID       = AWS[ 'ACCESS_KEY_ID' ]
 AWS_SECRET_ACCESS_KEY   = AWS[ 'SECRET_KEY' ]
 
-AWS_STORAGE_BUCKET_NAME = 'myoasis-static'
-AWS_MEDIA_STORAGE_BUCKET_NAME = 'myoasis-media'
+AWS_STORAGE_BUCKET_NAME = 'keep-static'
+AWS_MEDIA_STORAGE_BUCKET_NAME = 'keep-media'
 
 # Use Amazon Cloudfront
 AWS_S3_CUSTOM_DOMAIN    = 's3.amazonaws.com/%s' % ( AWS_STORAGE_BUCKET_NAME )
