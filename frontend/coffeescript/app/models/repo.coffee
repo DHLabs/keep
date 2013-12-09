@@ -42,7 +42,9 @@ define( [ 'backbone', 'jquery_cookie' ],
 
             # Figure out which privacy icon will be shown based on the public/
             # private attributes of the Repository.
-            if @get( 'is_public' )
+            if @get( 'user' ) != document.user_id
+                attrs.privacy_icon = 'icon-group'
+            else if @get( 'is_public' )
                 attrs.privacy_icon = 'icon-unlock'
             else
                 attrs.privacy_icon = 'icon-lock'
