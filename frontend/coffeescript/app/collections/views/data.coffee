@@ -76,6 +76,7 @@ define( [ 'jquery',
         data_templates:
             'text':     _.template( '<td><%= data %></td>' )
             'geopoint': _.template( '<td><%= data.coordinates[1] %>, <%= data.coordinates[0] %></td>' )
+            'photo':    _.template( '<td><a href="<%= data %>" target="blank">Click to view photo</a></td>'  )
 
         initialize: (options) ->
             @fields = options.fields
@@ -87,7 +88,7 @@ define( [ 'jquery',
             for field in @fields
                 tdata = { data: model.data[ field.name ] }
 
-                if field.type == 'geopoint'
+                if field.type in [ 'geopoint', 'photo' ]
                     templ.push( @data_templates[ field.type ]( tdata ) )
                 else
                     templ.push( @data_templates[ 'text' ]( tdata ) )

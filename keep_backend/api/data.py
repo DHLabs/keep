@@ -1,7 +1,7 @@
 import pymongo
 
 from backend.db import db
-from backend.db import dehydrate_survey
+from backend.db import DataSerializer
 
 from bson import ObjectId
 from bson.code import Code
@@ -115,66 +115,6 @@ class DataResource( MongoDBResource ):
 
         return sort
 
-    def _serialize_data( self, data, fields, repo_id, data_id ):
-
-        copy = {}
-
-        for field in fields:
-
-            key = field.get( 'name' )
-            val = data.get( key )
-
-            # Convert strings into a unicode representation.
-            if field.get( 'type' ) in [ 'text', 'note' ]:
-                val = unicode( val ).encode( 'utf-8' )
-
-            # Give a full URL for media
-            elif field.get( 'type' ) in [ 'photo' ]:
-
-                if settings.DEBUG or settings.TESTING:
-                    host = 'localhost:8000/media'
-                else:
-                    host = settings.AWS_S3_MEDIA_DOMAIN
-
-                val = 'http://%s/%s/%s/%s' % ( host, repo_id, data_id, val )
-
-            # Correctly recurse through groups
-            elif field.get( 'type' ) == 'group':
-
-                val = self._serialize_data( data=val,
-                                            fields=field.get( 'children' ),
-                                            repo_id=repo_id,
-                                            data_id=data_id )
-
-            copy[ key ] = val
-
-        return copy
-
-
-    def _dehydrate_data( self, data, fields ):
-
-        hydrated = []
-        for row in data:
-            copy = dict( row )
-
-            # Hydrate the base data keys.
-            # 1. Remove the "repo" key if it exists.
-            # 2. Rename the "_id" key into the more common "id" key.
-            # 3. Convert the python timestamp into a JSON friendly one.
-            repo = copy.pop( 'repo' )
-            copy[ 'id' ] = copy.pop( '_id' )
-            copy[ 'timestamp' ] = copy[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
-
-            # Now serialize the data according to the field data.
-            copy[ 'data' ] = self._serialize_data( data=copy[ 'data' ],
-                                                   fields=fields,
-                                                   repo_id=repo,
-                                                   data_id=copy[ 'id' ] )
-
-            hydrated.append( copy )
-
-        return hydrated
-
     def get_detail( self, request, **kwargs ):
 
         # Grab the survey that we're querying survey data for
@@ -234,10 +174,11 @@ class DataResource( MongoDBResource ):
                 'count': cursor.count(),
                 'pages': pages }
 
+            data_serializer = DataSerializer()
             data = {
                 'meta': meta,
-                'data': self._dehydrate_data( cursor.skip( offset * limit ).limit( limit ),
-                                              repo.fields() ) }
+                'data': data_serializer.dehydrate( cursor.skip( offset * limit ).limit( limit ),
+                                                   repo.fields() ) }
 
             return self.create_response( request, data )
         except ValueError as e:

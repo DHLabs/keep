@@ -15,7 +15,7 @@ from django.views.decorators.http import require_POST, require_GET
 from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm
 
 from api.tasks import insert_csv_data
-from backend.db import db, dehydrate_survey, user_or_organization
+from backend.db import db, DataSerializer, user_or_organization
 
 #from privacy import privatize_geo
 
@@ -341,7 +341,8 @@ def repo_viz( request, username, repo_name ):
                   .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
                   .limit( 50 )
 
-    data = dehydrate_survey( data )
+    data_serializer = DataSerializer()
+    data = data_serializer.dehydrate( data, repo.fields() )
 
     # Is some unknown user looking at this data?
     # TODO: Make the privatizer take into account

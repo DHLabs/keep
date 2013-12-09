@@ -7,6 +7,11 @@
 
 	table-layout: fixed;
 
+	a {
+		color: $theme;
+		text-decoration: underline;
+	}
+
 	tr {
 		border-right: 1px solid #EEE;
 		cursor: pointer;
