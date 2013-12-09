@@ -4,14 +4,16 @@
 {% block title %}{{ user.username }}{% endblock %}
 
 {% block js %}
-<script src='{% static "js/vendor/dashboard.js" %}'></script>
-<script src='{% static "js/vendor/requirejs.js" %}'></script>
+
 <!-- Used to determine shared versus not shared repos -->
-<script id='user_id'>{{ user.id }}</script>
 <script type='text/javascript'>
+	document.user = "{{ user }}";
 	document.repo_list  = {{user_repos|safe}};
 	document.study_list = {{user_studies|safe}};
 </script>
+
+<!-- Load our app -->
+<script src='{% static "js/vendor/requirejs.js" %}'></script>
 <script type="text/javascript">
 	require([ '{% static "js/common.js" %}' ], function (common) {
 		require.config({
@@ -19,6 +21,27 @@
 		});
 		require( [ 'app/dashboard/main' ] );
 	});
+</script>
+<script type='text/template' id='file-dropped-template'>
+	<div class="bbm-modal__topbar">
+		<h3 class="bbm-modal__title">
+			Uploading <span class='file-type'></span> File
+		</h3>
+	</div>
+
+	<div class="bbm-modal__section">
+		<div>
+			<div>
+				<i class='icon-file-alt'></i>
+				<span class='file-name'></span>
+				(<span class='file-size'></span> KB)
+			</div>
+		</div>
+    </div>
+    <div class="bbm-modal__bottombar">
+    	<a href="#" class="btn btn-primary">Upload</a>
+    	<a href='#' class='btn btn-cancel'>Cancel</a>
+    </div>
 </script>
 <script type='text/template' id='study-settings-template'>
 	<div class="bbm-modal__topbar">
@@ -64,6 +87,15 @@
 {% endblock %}
 
 {% block content %}
+<div id='file-drop-overlay'>
+	<div class='center'>
+		<p>
+			<i class='icon-file-alt' style='font-size:64px;'></i>
+			<br/>&nbsp;<br/>
+			Drop your file to upload
+		</p>
+	</div>
+</div>
 <div id='dashboard'>
 	<div class='three columns sidebar'>
 
@@ -147,18 +179,16 @@
 				{% endif %}
 			</ul>
 		</div>
-
-		<div style='display:none;'>
-			<form action='{% url "repo_batch" %}' method="POST" enctype="multipart/form-data">
-				{% csrf_token %}
-				<input type='file' name='csv_file'>
-				<button type='submit'>Batch</button>
-			</form>
-		</div>
 	</div>
 
 	<!-- REPOSITORIES -->
 	<div id='repos' class='thirteen columns repos'>
+
+		<div style='float:right;'>
+			<a href='#' id='refresh-repos'>
+				<i class='icon-refresh'></i>
+			</a>
+		</div>
 
 		<div>
 			<ul id='filters' class='nav-list nav-inline'>

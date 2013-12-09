@@ -1,67 +1,28 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
-          'marionette'
+          'marionette',
 
           # Model stuff
-          'app/collections/views/repo'
-          'app/collections/views/study'
-          'app/models/repo'
-          'app/models/study'
+          'app/collections/views/repo',
+          'app/collections/views/study',
+          'app/models/repo',
+          'app/models/study',
+
+          # Modals/views
+          'app/dashboard/modals/file_dropped',
+          'app/dashboard/modals/study_settings',
+          'app/dashboard/modals/new_study',
 
           # Plugins, etc.
           'backbone_modal',
           'jqueryui',
           'jquery_cookie' ],
 
-( $, _, Backbone, Marionette, RepoCollectionView, StudyCollectionView, RepoModel, StudyModel ) ->
-
-    class StudySettingsModal extends Backbone.Modal
-        template: _.template( $( '#study-settings-template' ).html() )
-        cancelEl: '.btn-primary'
-
-        initialize: ( options ) ->
-            @collection = options.collection
-            @study = options.study
-
-        delete_event: ( event ) =>
-            @collection.remove( @study )
-            @study.destroy()
-            @close()
-
-        onRender: () =>
-            $( '.study-name', @el ).html( @study.get( 'name' ) )
-            $( '.study-delete', @el ).click( @delete_event )
-
-
-    class NewStudyModal extends Backbone.Modal
-        template: _.template( $( '#new-study-template' ).html() )
-        submitEl: '.btn-primary'
-        cancelEl: '.btn-cancel'
-
-        clean: () ->
-            values =
-                name: $( '#study-name' ).val().replace( /^\s+|\s+$/g, "" )
-                description: $( '#study-description' ).val().replace( /^\s+|\s+$/g, "" )
-                tracker: $( '#study-tracker' ).is( ':checked' )
-
-            return values
-
-        beforeSubmit: () ->
-
-            @cleaned_data = @clean()
-
-            if @cleaned_data[ 'name' ].length == 0
-                $( '.error', $( '#study-name' ).parent() ).html( 'Please used a valid study name' )
-                return false
-
-        submit: () ->
-            study = new StudyModel()
-            study.save( @cleaned_data,
-                success: ( model, response, options ) =>
-                    model.set( {id: response.id} )
-                    @collection.add( model ) )
-
+( $, _, Backbone, Marionette,
+    RepoCollectionView, StudyCollectionView,
+    RepoModel, StudyModel,
+    FileDroppedModal, StudySettingsModal, NewStudyModal ) ->
 
     class DashboardView extends Backbone.View
         el: $( '#dashboard' )
@@ -77,9 +38,11 @@ define( [ 'jquery',
 
             "click #filters li a":              "filter_repos_event"
             "click #studies ul li a":           "refresh_repos_event"
+            "click #repos #refresh-repos":      "refresh_repos_event"
 
         _apply_draggable: () =>
-
+            # When the view is finished rendering or refreshed, add the
+            # droppable event to each study in the study list.
             $( 'li', '#study_list' ).droppable(
                 hoverClass: 'drop-hover'
                 drop: @_drop_on_study )
@@ -99,6 +62,46 @@ define( [ 'jquery',
                         if @study_view.selected()? and @study_view.selected() != study_id
                             @repo_view.collection.remove( {id: repo_id} )
             )
+
+            @
+
+        file_dragleave: ( event ) ->
+
+            @drag_overlay_timer = setTimeout( ()->
+                event.stopPropagation()
+                $( '#file-drop-overlay' ).hide()
+            , 300 )
+
+            @
+
+        file_dragover: ( event ) ->
+
+            clearTimeout( @drag_overlay_timer )
+            event.stopPropagation()
+            event.preventDefault()
+            $( '#file-drop-overlay' ).show();
+
+            @
+
+        file_drop: ( event ) =>
+            event.stopPropagation()
+            event.preventDefault()
+
+            options =
+                files: event.originalEvent.dataTransfer.files
+                success: ( data ) ->
+
+                    if data.success
+                        $( '#refresh-repos' ).trigger( 'click' )
+                    else
+                        console. log( data )
+
+                error: ( data ) ->
+                    console.log( data )
+
+            @modalView = new FileDroppedModal( options )
+            $( '.modal' ).html( @modalView.render().el )
+            $( '#file-drop-overlay' ).hide()
 
             @
 
@@ -140,6 +143,13 @@ define( [ 'jquery',
             @study_view.on( 'after:item:added', @refresh_repos_event )
             @study_view.on( 'item:removed', @refresh_repos_event )
 
+            # TODO: Detect ability to read local files in the browser. This
+            # is a notably HTML5 feature and should be in most if not all browsers
+            # but you never know...
+            $(window).bind( 'dragover', @file_dragover )
+            $(window).bind( 'drop', @file_drop )
+            $( '#file-drop-overlay' ).bind( 'dragleave', @file_dragleave )
+
             $( 'li', '#studies' ).droppable(
                 hoverClass: 'drop-hover'
                 drop: @_drop_on_study )
@@ -147,10 +157,19 @@ define( [ 'jquery',
 
         refresh_repos_event: ( event ) =>
 
-            if event.currentTarget?
+            # Manual refresh of the currently selected study
+            if event.currentTarget? and $( event.currentTarget ).attr( 'id' ) == 'refresh-repos'
+                study_el   = $( '#studies .selected' )
+                study_id   = $( study_el ).data( 'study' )
+                study_name = $( study_el ).html()
+
+            # A study was clicked, switch to that study and refresh the screen!
+            else if event.currentTarget?
                 study_el   = event.currentTarget
                 study_id   = $( study_el ).data( 'study' )
                 study_name = $( study_el ).html()
+
+            # A repo/study was removed
             else
                 study_el   = event.el
                 study_id   = event.model.id
