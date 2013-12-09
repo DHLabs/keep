@@ -18,6 +18,14 @@
 @import "_dashboard";
 @import "_viz";
 
+.hints {
+	font-size: 0.8em;
+	margin-top: -12px;
+	background-color: #DDD;
+	margin-bottom: 12px;
+	padding: 4px 8px;
+}
+
 .footer {
 	background: #EEE;
 	font-size: 75%;
