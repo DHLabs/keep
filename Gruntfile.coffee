@@ -80,13 +80,17 @@ module.exports = ( grunt ) ->
 					mainConfigFile: 'build/js/common.js'
 					dir: '<%= pkg.static_dir %>'
 					keepBuildDir: true
+					removeCombined: true
 					optimize: 'none'
 					modules: [ {
 						name: '../common'
 						include: [ 'jquery',
 								   'app/dashboard/main',
+								   'app/dashboard/views',
 								   'app/viz/main',
-								   'app/webform/main' ]
+								   'app/viz/views',
+								   'app/webform/main',
+								   'app/webform/views' ]
 					},{
 						name: 'app/dashboard/main'
 						exclude: [ '../common' ]
