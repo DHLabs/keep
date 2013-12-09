@@ -80,7 +80,6 @@ module.exports = ( grunt ) ->
 					mainConfigFile: 'build/js/common.js'
 					dir: '<%= pkg.static_dir %>'
 					keepBuildDir: true
-					removeCombined: true
 					optimize: 'none'
 					modules: [ {
 						name: '../common'

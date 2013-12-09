@@ -105,6 +105,7 @@
 {% endblock %}
 
 {% block js %}
+<script src="{% static 'js/vendor/jquery.js' %}"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script src="{% static 'js/vendor/jquery.center.js' %}"></script>
 <script src="{% static 'js/vendor/jquery.ui.touch-punch.min.js' %}"></script>
@@ -172,7 +173,7 @@
         <a href='#' id='repositoryname' onclick='editRepository()' class='btn'>
             <i class='icon-cog'></i>&nbsp;Settings
         </a>&nbsp;
-        <!-- For testing 
+        <!-- For testing
         <a href='#' id='dfsTest' onclick='jsGUIDFS()' class='btn'>
             DFS Test
         </a>&nbsp;
