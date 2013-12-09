@@ -1,3 +1,5 @@
+from backend.db import user_or_organization
+
 from django.contrib.auth.models import AnonymousUser, User
 from django.db.models import Q
 
@@ -94,4 +96,50 @@ class RepoAuthorization( Authorization ):
             return user.has_perm( 'view_repository', bundle.obj )
 
     def create_detail( self, object_detail, bundle ):
-        return True
+
+        logged_in_user = bundle.request.user
+        user = bundle.request.POST.get( 'user', None )
+        key  = bundle.request.POST.get( 'key', None )
+
+        # Case 1: No user query & the user is not logged in?
+        if user is None and logged_in_user.is_anonymous():
+            return False
+
+        # Case 2: Session call. Check if the specified user has permission to
+        # add data to this repo.
+        if user is None and logged_in_user.is_authenticated():
+            return logged_in_user.has_perm( 'add_data', object_detail )
+
+        # Case 3: API call. Check if the specified user has permission to add
+        # data to this repo
+        if user is not None and key is not None:
+            user = user_or_organization( user )
+            return user.has_perm( 'add_data', object_detail )
+
+        return False
+
+    def create_list( self, object_list, bundle ):
+
+        logged_in_user = bundle.request.user
+        user = bundle.request.POST.get( 'user', None )
+        key  = bundle.request.POST.get( 'key', None )
+
+        # Case 1: There is no logged in user and no user query provided. We don't
+        # know what to do.
+        if user is None and logged_in_user.is_anonymous():
+            return False
+
+        # Case 2: There *is* a logged in user and no user query. Query repos
+        # that only belong to the currently logged in user
+        if logged_in_user.is_authenticated():
+            return True
+
+        # Case 3: A user query is provided and this is not an API call. Only
+        # show public repositories for this user or repos that are shared to
+        # the logged in user.
+        if user is not None and key is None:
+            return False
+
+        # Case 4: API call. The object list should already be correct.
+        if user is not None and key is not None:
+            return True

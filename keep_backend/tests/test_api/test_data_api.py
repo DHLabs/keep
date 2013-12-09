@@ -79,15 +79,17 @@ class DataApiV1KeyTests( ApiTestCase ):
 
             beforeCount = response.get( 'meta' ).get( 'count' )
 
-            new_data = { 'name': 'Bob Dole', 'age': 20, 'gender': 'male' }
+            new_data = { 'name': 'Bob Dole',
+                         'age': 20,
+                         'gender': 'male',
+                         'user': self.AUTH_DETAILS[ 'user' ],
+                         'key': self.AUTH_DETAILS[ 'key' ],
+                         'format': self.AUTH_DETAILS[ 'format' ] }
 
-            # Attempt to post data to the repo.
-            response = self.open( '/repos/%s/?user=%s&key=%s&format=%s' % ( repo.get( 'id' ),
-                                                                            self.AUTH_DETAILS[ 'user' ],
-                                                                            self.AUTH_DETAILS[ 'key' ],
-                                                                            self.AUTH_DETAILS[ 'format' ] ),
+            response = self.open( '/repos/%s/' % ( repo.get( 'id' ) ),
                                   new_data,
                                   method='POST' )
+
             response = json.loads( response.content )
 
             assert response.get( 'success' )

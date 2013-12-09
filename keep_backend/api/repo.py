@@ -12,6 +12,7 @@ from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
+from repos.forms import NewBatchRepoForm
 from repos.models import Repository, RepoSerializer
 from openrosa.serializer import XFormSerializer
 
@@ -25,7 +26,7 @@ class RepoResource( ModelResource ):
         queryset = Repository.objects.all()
         resource_name = 'repos'
 
-        list_allowed_methods = [ 'get' ]
+        list_allowed_methods = [ 'get', 'post' ]
         detail_allowed_methods = [ 'get', 'post', 'patch' ]
 
         excludes = [ 'mongo_id' ]
@@ -200,20 +201,45 @@ class RepoResource( ModelResource ):
 
     def post_detail( self, request, **kwargs ):
 
-        user_accessing = request.POST.get( 'user', None )
-        user = user_or_organization( user_accessing )
-        if user is None:
-            return HttpUnauthorized()
-
         repo = Repository.objects.get( mongo_id=kwargs.get( 'mongo_id' ) )
         if repo is None:
             return HttpNotFound()
 
-        if not user.has_perm( 'add_data', repo ):
+        bundle = self.build_bundle( request=request )
+        if not self.authorized_create_detail( repo, bundle ):
             return HttpUnauthorized()
 
         new_id = repo.add_data( request.POST, request.FILES )
 
         response_data = { 'success': True, 'id': str( new_id ) }
         return self.create_response( request, response_data )
+
+    def post_list( self, request, **kwargs ):
+
+        response_data = { 'success': False }
+        try:
+            # Check if the user has enough permission to create a new
+            # repository.
+            bundle = self.build_bundle( request=request )
+            if not self.authorized_create_list( None, bundle ):
+                return HttpUnauthorized()
+
+            # TODO: Support POSTs through the API using the API keys
+            user = bundle.request.user
+            form = NewBatchRepoForm( request.POST, request.FILES, user=user )
+
+            if form.is_valid():
+                new_repo = form.save()
+
+                response_data[ 'success' ] = True
+                response_data[ 'repo' ] = new_repo.mongo_id
+            else:
+                response_data[ 'errors' ] = [( k, v[0] ) for k, v in form.errors.items()]
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+
+        return self.create_response( request, response_data )
+
 

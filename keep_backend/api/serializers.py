@@ -1,5 +1,8 @@
-import unicodecsv
+import re
 import StringIO
+import unicodecsv
+
+from django.utils.text import slugify
 
 from tastypie.serializers import Serializer
 
@@ -12,6 +15,23 @@ class CSVSerializer( Serializer ):
         'jsonp': 'text/javascript',
         'csv': 'text/csv',
     }
+
+    FLOAT_TYPE = re.compile(r'^(\d+\.\d*|\d*\.\d+)$')
+    INT_TYPE   = re.compile(r'^\d+$')
+    LOCATION_TYPE = re.compile(r'^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$')
+
+    def _sniff_type( self, val ):
+        '''
+            A really stupid and bare-bones approach to data type detection.
+        '''
+        if self.FLOAT_TYPE.match( val ):
+            return 'decimal'
+        elif self.INT_TYPE.match( val ):
+            return 'int'
+        elif self.LOCATION_TYPE.match( val ):
+            return 'geopoint'
+        else:
+            return 'text'
 
     def _format_data( self, field_type, field_value ):
         '''
@@ -76,3 +96,44 @@ class CSVSerializer( Serializer ):
             writer.writerow( row )
 
         return raw_data.getvalue()
+
+    def from_csv( self, csv_data ):
+
+        fields, data = ( [], [] )
+
+        csv_file = unicodecsv.DictReader( csv_data )
+
+        # Grab the headers and create fields for the new repo
+        headers = csv_file.fieldnames
+
+        # Used to sniff the data types
+        sniff = csv_file.next()
+
+        # Go through each field name and attempt to parse the corresponding
+        # data type.
+        for idx, header in enumerate( headers ):
+
+            if len( header ) == 0:
+                raise Exception( 'Column headers can not be blank!' )
+
+            fields.append({
+                'name': slugify( unicode( header ) ),
+                'label': header,
+                'type': self._sniff_type( sniff[ header ] )
+            })
+
+        # Parse the first data row
+        datum = {}
+        for field in fields:
+            datum[ field[ 'name' ] ] = sniff.get( field[ 'label' ], None )
+        data.append( datum )
+
+        # Now parse the rest of them
+        for item in csv_file:
+            datum = {}
+            for field in fields:
+                datum[ field[ 'name' ] ] = item.get( field[ 'label' ], None )
+            data.append( datum )
+
+        return ( fields, data )
+

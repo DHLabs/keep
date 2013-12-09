@@ -10,20 +10,6 @@ BATCH_DOC = '../_data/test_docs/batch_test_data.csv'
 
 class RepoViewTests( ViewTestCase ):
 
-    def test_batch( self ):
-        self.login()
-
-        url = reverse( 'repo_batch' )
-
-        response = self.client.get( url )
-        self.assertEqual( response.status_code, 405 )
-
-        with open( BATCH_DOC, 'rb' ) as batch_file:
-            response = self.client.post( url, {'csv_file': batch_file} )
-            self.assertEqual( response.status_code, 302 )
-
-        self.logout()
-
     def test_delete( self ):
 
         # Add a test repo and then delete it.

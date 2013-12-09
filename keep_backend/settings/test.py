@@ -1,6 +1,6 @@
 """ Test settings and globals which allow us to run our test suite locally """
 
-from . import *
+from settings import *
 
 DEBUG = True
 TESTING = True
@@ -23,3 +23,6 @@ DATABASES = {
 }
 
 MONGODB_DBNAME = 'test'
+
+# Run celery tasks locally
+CELERY_ALWAYS_EAGER = True

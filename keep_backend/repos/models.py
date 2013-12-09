@@ -354,13 +354,17 @@ class Repository( models.Model ):
         return task_id
 
     def remove_task( self, task_id ):
-        return db.task.remove( { '_id': ObjectId( task_id ) } )
+        return db.task.remove( { 'task': task_id } )
 
     def flatten_fields( self ):
         return self._flatten( self.fields() )
 
     def fields( self ):
         return db.repo.find_one( ObjectId( self.mongo_id ) )[ 'fields' ]
+
+    def update_fields( self, fields ):
+        db.repo.update( { '_id': ObjectId( self.mongo_id ) },
+                        { '$set': { 'fields': fields } } )
 
     def submissions( self ):
         return db.data.find({ 'repo': ObjectId( self.mongo_id ) } ).count()

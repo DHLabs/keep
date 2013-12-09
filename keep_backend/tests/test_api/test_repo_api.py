@@ -9,6 +9,9 @@ from django.test import Client
 from tests import ApiTestCase
 
 
+BATCH_CSV_DOC = '../_data/test_docs/batch_test_data.csv'
+
+
 class RepoApiV1SessionTests( ApiTestCase ):
 
     AUTH_DETAILS = { 'format':  'json',
@@ -21,6 +24,17 @@ class RepoApiV1SessionTests( ApiTestCase ):
 
     def logout( self ):
         self.client.get( '/accounts/logout/' )
+
+    def test_repo_create( self ):
+
+        self.login()
+
+        with open( BATCH_CSV_DOC, 'rb' ) as batch_file:
+            response = self.client.post( '/api/v1/repos/', { 'repo_file': batch_file } )
+            result = json.loads( response.content )
+            self.assertTrue( result[ 'success' ] )
+
+        self.logout()
 
     def test_repo_list( self ):
 

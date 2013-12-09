@@ -4,21 +4,26 @@ import os
 import re
 
 from django import forms
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage as storage
 from django.utils.text import slugify
 
 from pyxform.xls2json import SurveyReader
 from openrosa.xform_reader import XFormReader
 
 from .models import Repository
+from api.tasks import create_repo_from_file
 
 
 class NewBatchRepoForm( forms.Form ):
+    '''
+        Create a new repo from a CSV file.
+    '''
 
-    csv_file = forms.FileField( required=True )
+    repo_file  = forms.FileField( required=True )
 
-    FLOAT_TYPE = re.compile(r'^(\d+\.\d*|\d*\.\d+)$')
-    INT_TYPE   = re.compile(r'^\d+$')
-    LOCATION_TYPE = re.compile(r'^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$')
+    VALID_FILE_TYPES = [ 'csv', 'xml', 'xls' ]
 
     def __init__( self, *args, **kwargs ):
         self._user = None
@@ -31,19 +36,6 @@ class NewBatchRepoForm( forms.Form ):
 
         super( NewBatchRepoForm, self ).__init__( *args, **kwargs )
 
-    def _sniff_type( self, val ):
-        '''
-            A really stupid and bare-bones approach to data type detection.
-        '''
-        if self.FLOAT_TYPE.match( val ):
-            return 'decimal'
-        elif self.INT_TYPE.match( val ):
-            return 'int'
-        elif self.LOCATION_TYPE.match( val ):
-            return 'geopoint'
-        else:
-            return 'text'
-
     def clean( self ):
         '''
             Run through a final check before creating the new repository:
@@ -54,83 +46,43 @@ class NewBatchRepoForm( forms.Form ):
         username = self._user.username if self._user else self._org.name
 
         if Repository.objects.repo_exists( self.cleaned_data[ 'name' ], username ):
-            raise forms.ValidationError( '''Repository already exists with
-                                            this name''' )
+            raise forms.ValidationError( 'Repository already exists with this name' )
 
         return self.cleaned_data
 
-    def clean_csv_file( self ):
+    def clean_repo_file( self ):
+        '''
+            Determine the file type and check it against our list of valid file
+            types.
+        '''
 
-        data = self.cleaned_data[ 'csv_file' ]
+        data = self.cleaned_data[ 'repo_file' ]
 
+        # Split apart the file name so we can attempt to detect the file type
         name, file_ext = os.path.splitext( data.name )
+        file_ext = file_ext[1:].lower()
 
         # Check that this is a valid CSV file...
-        if file_ext != '.csv':
-            raise forms.ValidationError( 'Please upload a valid CSV file' )
+        if file_ext not in self.VALID_FILE_TYPES:
+            raise forms.ValidationError( 'Please upload a valid CSV, XML, or XLS file' )
 
-        csv_file = csv.reader( data )
-        if csv_file is None:
-            raise forms.ValidationError( 'Please upload a valid CSV file' )
+        # Gleam some repo meta-data from the file
+        self.cleaned_data[ 'file_ext' ] = file_ext
+        self.cleaned_data[ 'name' ] = slugify( name.strip() )
+        self.cleaned_data[ 'desc' ] = 'Automatically created using %s' % ( data.name )
 
-        # Gleam some repo meta-data from the CSV file
-        self.cleaned_data['name'] = slugify( name.strip() )
-        self.cleaned_data['desc'] = 'Automatically created using %s' % ( data.name )
-
-        # Grab the headers and create fields for the new repo
-        headers = csv_file.next()
-        # Used to sniff the data types
-        row_one = csv_file.next()
-
-        self.cleaned_data['headers'] = []
-
-        for idx, header in enumerate( headers ):
-
-            label = header.strip()
-
-            if len( label ) == 0:
-                raise forms.ValidationError( 'Columns headers can not be blank!' )
-
-            header_info = {
-                'name': slugify( unicode( label ) ),
-                'label': label,
-                'type': self._sniff_type( row_one[ idx ] )
-            }
-
-            self.cleaned_data[ 'headers' ].append( header_info )
-
-        # Grab all the rows of the CSV file.
-        self.cleaned_data['new_data'] = []
-        datum = {}
-        for idx, value in enumerate( row_one ):
-
-            if idx >= len( self.cleaned_data[ 'headers' ] ):
-                break
-
-            datum[ self.cleaned_data[ 'headers' ][ idx ][ 'name' ] ] = value.strip()
-
-        self.cleaned_data[ 'new_data' ].append( datum )
-
-        for row in csv_file:
-            datum = {}
-
-            for idx, value in enumerate( row ):
-                if idx >= len( self.cleaned_data[ 'headers' ] ):
-                    break
-
-                datum[ self.cleaned_data[ 'headers' ][ idx ][ 'name' ] ] = value.strip()
-
-            self.cleaned_data[ 'new_data' ].append( datum )
-
-        return None
+        return self.cleaned_data[ 'repo_file' ]
 
     def save( self ):
         '''
-            Creates a new repository using the name & data derived from the
-            uploaded CSV file.
+            Creates a new repository and creates a task to parse the file that
+            was uploaded by the user.
+
+            The task will handle the parsing and addition of fields and data
+            into the repository.
         '''
-        # Use the headers to create the fields for the repo
-        repo = { 'fields': self.cleaned_data[ 'headers' ] }
+        # For now, the repository will have an empty field list.
+        repo = { 'fields': [] }
 
         # Attempt to create and save the new repository
         new_repo = Repository(
@@ -141,9 +93,18 @@ class NewBatchRepoForm( forms.Form ):
                         is_public=False )
         new_repo.save( repo=repo )
 
-        # Attempt to save the data from the CSV file into the repository
-        for datum in self.cleaned_data[ 'new_data' ]:
-            new_repo.add_data( datum, None )
+        # Save the file to our storage bucket to be processed ASAP.
+        if not settings.DEBUG and not settings.TESTING:
+            storage.bucket_name = settings.AWS_TASK_STORAGE_BUCKET_NAME
+
+        s3_url = '%s.%s' % ( new_repo.mongo_id, self.cleaned_data[ 'file_ext' ] )
+        storage.save( s3_url, self.cleaned_data[ 'repo_file' ] )
+
+        # Create a task and go!
+        task = create_repo_from_file.delay( file=s3_url,
+                                            file_type=self.cleaned_data[ 'file_ext' ],
+                                            repo=new_repo.mongo_id )
+        new_repo.add_task( task.task_id, 'create_repo' )
 
         return new_repo
 
