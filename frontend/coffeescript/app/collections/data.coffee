@@ -21,6 +21,10 @@ define( [
             data = {}
             data.offset = @meta.offset + 1
 
+            # Don't load new offsets if we already have all the pages.
+            if @meta.pages? and data.offset > @meta.pages
+                return
+
             # Also add sort details if the list is sorted
             if @sort_data?
                 data.sort = @sort_data.sort
