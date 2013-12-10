@@ -27,17 +27,15 @@ span.error {
 
 label.checkbox {
 
-	color: $theme;
-
 	input[type=checkbox] {
 		float:left;
 		width: 24px;
 		height: 24px;
 	}
+}
 
-	.help-block:before {
-		content: '-';
-	}
+label.help-block {
+	font-weight: normal;
 }
 
 .help-block {
