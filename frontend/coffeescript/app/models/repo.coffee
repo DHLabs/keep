@@ -44,6 +44,8 @@ define( [ 'backbone', 'jquery_cookie' ],
             # private attributes of the Repository.
             if @get( 'user' ) != document.user_id
                 attrs.privacy_icon = 'icon-group'
+            else if @get( 'is_tracker' )
+                attrs.privacy_icon = 'icon-list'
             else if @get( 'is_public' )
                 attrs.privacy_icon = 'icon-unlock'
             else
