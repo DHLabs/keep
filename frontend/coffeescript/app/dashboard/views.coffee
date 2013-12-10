@@ -163,7 +163,7 @@ define( [ 'jquery',
 
             # Manual refresh of the currently selected study
             if event.currentTarget? and $( event.currentTarget ).attr( 'id' ) == 'refresh-repos'
-                study_el   = $( '#studies .selected' )
+                study_el   = $( '#studies .selected > a' )
                 study_id   = $( study_el ).data( 'study' )
                 study_name = $( study_el ).html()
 
