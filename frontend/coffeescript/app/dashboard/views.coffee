@@ -124,10 +124,7 @@ define( [ 'jquery',
             event.stopImmediatePropagation()
 
             # Grab the study that this is for.
-            study = new StudyModel(
-                            id: $( event.currentTarget ).data( 'study' )
-                            name: $( event.currentTarget ).data( 'name' )
-                            )
+            study = @study_view.collection.findWhere( { id: $( event.currentTarget ).data( 'study' ) })
 
             # Create the modal and display it!
             @modalView = new StudySettingsModal(
