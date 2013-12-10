@@ -1,12 +1,14 @@
-define( [ 'backbone' ],
+define( [ 'backbone',
+          'app/models/study' ],
 
-( Backbone ) ->
+( Backbone, StudyModel ) ->
 
     class StudyCollection extends Backbone.Collection
-        initialize: ->
-            @url = '/api/v1/repos/'
+        model: StudyModel
+        url: '/api/v1/studies/'
 
         parse: ( response ) ->
             return response.objects
 
+    return StudyCollection
 )
