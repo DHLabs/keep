@@ -24,24 +24,60 @@
 </script>
 <script type='text/template' id='file-dropped-template'>
 	<div class="bbm-modal__topbar">
-		<h3 class="bbm-modal__title">
-			Uploading <span class='file-type'></span> File
-		</h3>
+		<h3 class="bbm-modal__title">New Data Diary</h3>
 	</div>
 
 	<div class="bbm-modal__section">
-		<div>
-			<div>
+		<form>
+			<div class='control-group'>
+				Creating from:
 				<i class='icon-file-alt'></i>
-				<span class='file-name'></span>
-				(<span class='file-size'></span> KB)
+				<%= file.name %> (<%= file.size %> B)
 			</div>
-		</div>
-    </div>
-    <div class="bbm-modal__bottombar">
-    	<a href="#" class="btn btn-primary">Upload</a>
-    	<a href='#' class='btn btn-cancel'>Cancel</a>
-    </div>
+
+			<div class='control-group'>
+				<input type='text' id='repo-name' class='input large' value='<%= repo_name %>' placeholder='Diary Name'>
+			</div>
+
+			<div class='control-group' style='display:none;'>
+				<label class='radio'>
+					<input type='radio' name='privacy' value='public'>
+					<i class='icon-unlock'></i>
+					<strong>Public</strong>
+					<div class='help-block'>
+						Anyone can see this repository and the data associated
+						with it.
+					</div>
+				</label>
+				<label class='radio' style='clear:both;'>
+					<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
+					<i class='icon-lock'></i>
+					<strong>Private</strong>
+					<div class='help-block'>
+						You choose who can see this repository and the data
+						associated with it.
+					</div>
+				</label>
+			</div>
+
+			<div class='control-group'>
+				<select class='input' name='study'>
+					<option value=''>Not part of a study</option>
+					<optgroup label='Your Studies'>
+						<% _.each( studies, function( study ) { %>
+							<option value='<%= study.get("id") %>'>
+								<%= study.get( "name" ) %>
+							</option>
+						<% }); %>
+					</optgroup>
+				</select>
+			</div>
+		</form>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-primary">Upload</a>
+		<a href='#' class='btn btn-cancel'>Cancel</a>
+	</div>
 </script>
 <script type='text/template' id='study-settings-template'>
 	<div class="bbm-modal__topbar">
@@ -52,10 +88,10 @@
 		<div>
 			<div><a href='#' class='btn study-delete'><i class='icon-trash'></i> Delete Study</a></div>
 		</div>
-    </div>
-    <div class="bbm-modal__bottombar">
-    	<a href="#" class="btn btn-primary">Done</a>
-    </div>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-primary">Done</a>
+	</div>
 </script>
 <script type="text/template" id="new-study-template">
 	<div class="bbm-modal__topbar">
@@ -78,11 +114,11 @@
 				</label>
 			</div>
 		</form>
-    </div>
-    <div class="bbm-modal__bottombar">
-    	<a href="#" class="btn btn-cancel">Cancel</a>
-    	<a href="#" class="btn btn-primary">Create</a>
-    </div>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-cancel">Cancel</a>
+		<a href="#" class="btn btn-primary">Create</a>
+	</div>
   </script>
 {% endblock %}
 

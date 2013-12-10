@@ -5,6 +5,7 @@ import re
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage as storage
 from django.utils.text import slugify
@@ -14,6 +15,7 @@ from openrosa.xform_reader import XFormReader
 
 from .models import Repository
 from api.tasks import create_repo_from_file
+from studies.models import Study
 
 
 class NewBatchRepoForm( forms.Form ):
@@ -22,6 +24,7 @@ class NewBatchRepoForm( forms.Form ):
     '''
 
     repo_file  = forms.FileField( required=True )
+    study      = forms.IntegerField( required=False )
 
     VALID_FILE_TYPES = [ 'csv', 'xml', 'xls' ]
 
@@ -49,6 +52,25 @@ class NewBatchRepoForm( forms.Form ):
             raise forms.ValidationError( 'Repository already exists with this name' )
 
         return self.cleaned_data
+
+    def clean_study( self ):
+        '''
+            Check if the study id that was passed in refers to a valid study.
+
+            1. The study must exist
+            2. The user must have access to this study.
+        '''
+
+        data = self.cleaned_data[ 'study' ]
+        if data == None:
+            return data
+
+        try:
+            study = Study.objects.get( id=data, user=self._user )
+        except ObjectDoesNotExist:
+            raise forms.ValidationError( 'Invalid study' )
+
+        return study
 
     def clean_repo_file( self ):
         '''
@@ -81,12 +103,14 @@ class NewBatchRepoForm( forms.Form ):
             The task will handle the parsing and addition of fields and data
             into the repository.
         '''
+
         # For now, the repository will have an empty field list.
         repo = { 'fields': [] }
 
         # Attempt to create and save the new repository
         new_repo = Repository(
                         name=self.cleaned_data[ 'name' ],
+                        study=self.cleaned_data[ 'study' ],
                         description=self.cleaned_data[ 'desc' ],
                         user=self._user,
                         org=self._org,

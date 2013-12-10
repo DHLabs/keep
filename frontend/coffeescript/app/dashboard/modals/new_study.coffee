@@ -3,11 +3,13 @@ define( [ 'jquery',
           'backbone',
           'marionette',
 
+          'app/models/study',
+
           'backbone_modal',
           'jqueryui',
           'jquery_cookie' ],
 
-( $, _, Backbone, Marionette ) ->
+( $, _, Backbone, Marionette, StudyModel ) ->
 
     class NewStudyModal extends Backbone.Modal
         template: _.template( $( '#new-study-template' ).html() )

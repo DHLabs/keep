@@ -90,15 +90,6 @@ module.exports = ( grunt ) ->
 								   'app/viz/views',
 								   'app/webform/main',
 								   'app/webform/views' ]
-					},{
-						name: 'app/dashboard/main'
-						exclude: [ '../common' ]
-					},{
-						name: 'app/viz/main'
-						exclude: [ '../common' ]
-					},{
-						name: 'app/webform/main'
-						exclude: [ '../common' ]
 					}]
 
 	grunt.loadNpmTasks( 'grunt-bower' )

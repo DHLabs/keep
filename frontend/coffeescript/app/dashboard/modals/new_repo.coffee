@@ -9,7 +9,7 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette ) ->
 
-    class FileDroppedModal extends Backbone.Modal
+    class NewDiaryModal extends Backbone.Modal
 
         template: _.template( $( '#file-dropped-template' ).html() )
         submitEl: '.btn-primary'
@@ -18,8 +18,6 @@ define( [ 'jquery',
         _detect_file_type: () ->
             # Detect the file type and determine what options we present
             # to the user upon uploading the file.
-
-            console.log( @file )
 
             if @file.type == 'text/csv'
                 @file_type = 'CSV'
@@ -34,6 +32,8 @@ define( [ 'jquery',
 
         initialize: ( options ) ->
 
+            @studies = options.studies
+
             # TODO: Handle multiple files?
             @file = options.files[0]
             @_detect_file_type()
@@ -43,16 +43,23 @@ define( [ 'jquery',
 
             @
 
-        onRender: () =>
-            $( '.file-type', @el ).html( @file_type )
-            $( '.file-name', @el ).html( @file.name )
-            $( '.file-size', @el ).html( @file.size )
+        serializeData: () ->
+
+            data =
+                file: @file
+                studies: @studies.models
+                repo_name: @file.name[0..@file.name.length-5]
+
+            return data
 
         submit: () ->
 
             data = new FormData()
             data.append( 'repo_file', @file )
             data.append( 'user', document.user )
+
+            if $( 'select', @el ).val()?
+                data.append( 'study', $( 'select', @el ).val() )
 
             $.ajax(
                 url: '/api/v1/repos/'
@@ -67,5 +74,5 @@ define( [ 'jquery',
                 error: @error_callback
             )
 
-    return FileDroppedModal
+    return NewDiaryModal
 )

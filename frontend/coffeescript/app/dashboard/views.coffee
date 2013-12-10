@@ -7,22 +7,19 @@ define( [ 'jquery',
           'app/collections/views/repo',
           'app/collections/views/study',
           'app/models/repo',
-          'app/models/study',
 
           # Modals/views
-          'app/dashboard/modals/file_dropped',
-          'app/dashboard/modals/study_settings',
+          'app/dashboard/modals/new_repo',
           'app/dashboard/modals/new_study',
+          'app/dashboard/modals/study_settings',
 
           # Plugins, etc.
           'backbone_modal',
           'jqueryui',
           'jquery_cookie' ],
 
-( $, _, Backbone, Marionette,
-    RepoCollectionView, StudyCollectionView,
-    RepoModel, StudyModel,
-    FileDroppedModal, StudySettingsModal, NewStudyModal ) ->
+( $, _, Backbone, Marionette, RepoCollectionView, StudyCollectionView, RepoModel,
+    NewRepoModal, NewStudyModal, StudySettingsModal ) ->
 
     class DashboardView extends Backbone.View
         el: $( '#dashboard' )
@@ -87,19 +84,26 @@ define( [ 'jquery',
             event.stopPropagation()
             event.preventDefault()
 
+            # Pass in the options needed for the modal
             options =
+                # The files dragged into the window
                 files: event.originalEvent.dataTransfer.files
+                # The studies the user has, if they want to include this
+                # file as a new repo in this study.
+                studies: @study_view.collection
+                # Callback when the file is successfully uploaded
                 success: ( data ) ->
 
                     if data.success
                         $( '#refresh-repos' ).trigger( 'click' )
                     else
                         console. log( data )
-
+                # Callback if we receive an error of some sort.
                 error: ( data ) ->
+                    # TODO: Gracefully handle upload error
                     console.log( data )
 
-            @modalView = new FileDroppedModal( options )
+            @modalView = new NewRepoModal( options )
             $( '.modal' ).html( @modalView.render().el )
             $( '#file-drop-overlay' ).hide()
 
