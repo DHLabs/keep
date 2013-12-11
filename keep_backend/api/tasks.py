@@ -7,6 +7,9 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.files.storage import default_storage as storage
 
+from pyxform.xls2json import SurveyReader
+from openrosa.xform_reader import XFormReader
+
 from api.serializers import CSVSerializer
 from repos.models import Repository
 
@@ -61,6 +64,22 @@ def create_repo_from_file( file, file_type, repo ):
         # Add data to repo
         for datum in data:
             repo.add_data( data=datum, files=None )
+
+    elif file_type == 'xml':
+        # This should be an xform.
+        xform = storage.open( file, 'r' )
+        fields = XFormReader( xform )
+        fields = fields.to_json_dict()
+
+        repo.update_fields( fields.get( 'children' ) )
+
+    elif file_type == 'xls':
+        # This should be an xform.
+        xform = storage.open( file, 'r' )
+        fields = SurveyReader( xform )
+        fields = fields.to_json_dict()
+
+        repo.update_fields( fields.get( 'children' ) )
 
     # Remove the task from our list of "tasks"
     repo.remove_task( current_task.request.id )

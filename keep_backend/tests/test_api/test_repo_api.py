@@ -10,6 +10,8 @@ from tests import ApiTestCase
 
 
 BATCH_CSV_DOC = '../_data/test_docs/batch_test_data.csv'
+BATCH_XLS_DOC = '../_data/test_docs/tutorial.xls'
+BATCH_XML_DOC = '../_data/test_docs/tutorial.xml'
 
 
 class RepoApiV1SessionTests( ApiTestCase ):
@@ -25,11 +27,33 @@ class RepoApiV1SessionTests( ApiTestCase ):
     def logout( self ):
         self.client.get( '/accounts/logout/' )
 
-    def test_repo_create( self ):
+    def test_repo_create_csv( self ):
 
         self.login()
 
         with open( BATCH_CSV_DOC, 'rb' ) as batch_file:
+            response = self.client.post( '/api/v1/repos/', { 'repo_file': batch_file } )
+            result = json.loads( response.content )
+            self.assertTrue( result[ 'success' ] )
+
+        self.logout()
+
+    def test_repo_create_xml( self ):
+
+        self.login()
+
+        with open( BATCH_XML_DOC, 'rb' ) as batch_file:
+            response = self.client.post( '/api/v1/repos/', { 'repo_file': batch_file } )
+            result = json.loads( response.content )
+            self.assertTrue( result[ 'success' ] )
+
+        self.logout()
+
+    def test_repo_create_xls( self ):
+
+        self.login()
+
+        with open( BATCH_XLS_DOC, 'rb' ) as batch_file:
             response = self.client.post( '/api/v1/repos/', { 'repo_file': batch_file } )
             result = json.loads( response.content )
             self.assertTrue( result[ 'success' ] )
