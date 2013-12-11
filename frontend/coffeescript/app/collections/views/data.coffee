@@ -85,6 +85,8 @@ define( [ 'jquery',
 
         initialize: (options) ->
             @fields = options.fields
+            @repo   = options.repo
+            @linked = options.linked
 
         template: ( model ) =>
             # Based on the field type, we use a specific formatter for that
@@ -105,7 +107,9 @@ define( [ 'jquery',
 
         clicked: ( event ) =>
             options =
+                repo: @repo
                 model: @model
+                linked: @linked
                 fields: @fields
 
             modalView = new DataDetailsModal( options )
@@ -128,17 +132,11 @@ define( [ 'jquery',
                 </tr>
             ''')
 
-        row_clicked: ( event ) ->
-            if @data_row_clicked_callback?
-
-                # Find the data row that was clicked
-
-
-                @data_row_clicked_callback( event )
-
         initialize: ( options )->
+
             @fields = options.fields
             @repo   = options.repo
+            @linked = options.linked
 
             @collection = new DataCollection( options )
 
@@ -147,7 +145,7 @@ define( [ 'jquery',
             @
 
         buildItemView: ( item, ItemViewType, itemViewOptions ) ->
-            options = _.extend( { model: item, fields: @fields }, itemViewOptions )
+            options = _.extend( { model: item, fields: @fields, repo: @repo, linked: @linked }, itemViewOptions )
             return new ItemViewType( options )
 
 

@@ -129,11 +129,13 @@ define( [ 'jquery',
 
             # Grab the study that this is for.
             study = @study_view.collection.findWhere( { id: $( event.currentTarget ).data( 'study' ) })
+            options =
+                study: study
+                collection: @study_view.collection
+                tracker: @repo_view.collection.where( { study: study.get( 'name' ) } )
 
             # Create the modal and display it!
-            @modalView = new StudySettingsModal(
-                                'collection': @study_view.collection
-                                'study': study )
+            @modalView = new StudySettingsModal( options )
             $('.modal').html( @modalView.render().el )
 
         initialize: ->

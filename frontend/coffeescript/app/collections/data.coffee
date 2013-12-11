@@ -9,7 +9,7 @@ define( [
         model: DataModel
 
         initialize: ( options ) ->
-            @url = "/api/v1/data/#{options.repo}/"
+            @url = "/api/v1/data/#{options.repo.id}/"
             @meta =
                 offset: 0
 

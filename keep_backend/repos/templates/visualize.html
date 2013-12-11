@@ -12,6 +12,7 @@
 {% block js %}
 <script type='text/javascript'>
 	document.repo = {{repo_json|safe}};
+	document.linked_repos = {{linked_json|safe}};
 	document.initial_data = {{data|safe}};
 </script>
 <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
@@ -28,19 +29,35 @@
 	});
 </script>
 <script type='text/template' id='data-detail-template'>
-	<div class="bbm-modal__topbar">
-		<h3 class="bbm-modal__title">
-			Data Details
-		</h3>
-	</div>
+	<div class="bbm-modal__topbar"></div>
 	<div class="bbm-modal__section">
-		<table class='table'>
-			<% _.each( model.attributes.data, function( val, key ) { %>
-				<tr>
-					<td><%= key %></td><td><%= val %></td>
-				</tr>
-			<% }); %>
-		</table>
+		<div class='control-group'>
+			<h4>Details</h4>
+			<table class='table'>
+				<% _.each( attributes, function( val, key ) { %>
+					<tr>
+						<td><%= key %></td><td><%= val %></td>
+					</tr>
+				<% }); %>
+			</table>
+		</div>
+
+		<% if( is_tracker ) { %>
+		<div class='control-group' id='data-links'>
+			<h4>Linked Dairies</h4>
+			<table class='table'>
+				<% _.each( linked, function( repo ) { %>
+					<tr>
+						<td>
+							<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/' target='_blank'>
+								<%= repo.get( 'name' ) %>
+							</a>
+						</td>
+					</tr>
+				<% }); %>
+			</table>
+		</div>
+		<% } %>
 	</div>
 	<div class="bbm-modal__bottombar">
 		<a href="#" class="btn btn-primary">Done</a>

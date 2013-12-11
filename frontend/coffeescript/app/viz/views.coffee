@@ -6,13 +6,15 @@ define( [ 'jquery',
           'app/models/data',
           'app/models/repo',
 
+          'app/collections/repo',
+
           'app/viz/modals/sharing',
           'app/viz/raw_view',
 
           'backbone_modal',
           'jqueryui' ],
 
-( $, _, Backbone, Marionette, DataModel, RepoModel, ShareSettingsModal, DataRawView ) ->
+( $, _, Backbone, Marionette, DataModel, RepoModel, RepoCollection, ShareSettingsModal, DataRawView ) ->
 
 
     class VizActions extends Backbone.Marionette.View
@@ -71,10 +73,11 @@ define( [ 'jquery',
     DataVizApp.addInitializer ( options ) ->
 
         @repo = new RepoModel( document.repo )
+        @linked = new RepoCollection( document.linked_repos )
 
         # Add the different regions
         vizChrome = new VizChrome( { repo: @repo } )
-        rawView   = new DataRawView( { repo: @repo.id, fields: @repo.fields() } )
+        rawView   = new DataRawView( { repo: @repo, linked: @linked, fields: @repo.fields() } )
 
         DataVizApp.addRegions(
                 chrome: vizChrome

@@ -25,12 +25,18 @@ define( [ 'jquery',
             'photo':    _.template( '<img src="<%= data %>" >'  )
 
         initialize: ( options ) ->
-            @model = options.model
+            @model  = options.model
             @fields = options.fields
+            @repo   = options.repo
+            @linked = options.linked
+
+            console.log( @linked )
 
         serializeData: () ->
             # Loop through each data pair and formalize
             attributes = {}
+            filter = null
+
             for field in @fields
                 tdata = { data: @model.attributes.data[ field.name ] }
 
@@ -39,8 +45,14 @@ define( [ 'jquery',
                 else
                     attributes[ field.name ] = @data_templates[ 'text' ]( tdata )
 
+                if field.name == 'id'
+                    filter = attributes[ field.name ]
+
             data =
                 attributes: attributes
+                is_tracker: @repo.get( 'is_tracker' )
+                linked: @linked.models
+                filter: filter
 
             return data
 
