@@ -30,8 +30,6 @@ define( [ 'jquery',
             @repo   = options.repo
             @linked = options.linked
 
-            console.log( @linked )
-
         serializeData: () ->
             # Loop through each data pair and formalize
             attributes = {}
