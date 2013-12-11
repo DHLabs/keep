@@ -5,11 +5,11 @@ define( [ 'jquery',
 
           # Model stuff
           'app/collections/data',
+          'app/viz/modals/data_details',
 
           'backbone_modal' ],
 
-( $, _, Backbone, Marionette, DataCollection ) ->
-
+( $, _, Backbone, Marionette, DataCollection, DataDetailsModal ) ->
 
     class EmptyItemView extends Backbone.Marionette.ItemView
         tagName: 'tr'
@@ -71,18 +71,6 @@ define( [ 'jquery',
             $( 'a', @el ).click( @import_file )
             @
 
-    class DataDetailsModal extends Backbone.Modal
-        template: _.template( $( '#data-detail-template' ).html() )
-        cancelEl: '.btn-primary'
-
-        initialize: ( options ) ->
-            @model = options.model
-
-        serializeData: () ->
-            data =
-                model: @model
-            return data
-
 
     class DataItemView extends Backbone.Marionette.ItemView
         tagName: 'tr'
@@ -118,6 +106,7 @@ define( [ 'jquery',
         clicked: ( event ) =>
             options =
                 model: @model
+                fields: @fields
 
             modalView = new DataDetailsModal( options )
             $( '.modal' ).html( modalView.render().el )
