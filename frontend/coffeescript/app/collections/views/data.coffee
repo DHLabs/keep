@@ -4,7 +4,9 @@ define( [ 'jquery',
           'marionette',
 
           # Model stuff
-          'app/collections/data' ],
+          'app/collections/data',
+
+          'backbone_modal' ],
 
 ( $, _, Backbone, Marionette, DataCollection ) ->
 
@@ -69,9 +71,24 @@ define( [ 'jquery',
             $( 'a', @el ).click( @import_file )
             @
 
+    class DataDetailsModal extends Backbone.Modal
+        template: _.template( $( '#data-detail-template' ).html() )
+        cancelEl: '.btn-primary'
+
+        initialize: ( options ) ->
+            @model = options.model
+
+        serializeData: () ->
+            data =
+                model: @model
+            return data
+
 
     class DataItemView extends Backbone.Marionette.ItemView
         tagName: 'tr'
+
+        events:
+            'click':    'clicked'
 
         data_templates:
             'text':     _.template( '<td><%= data %></td>' )
@@ -98,6 +115,13 @@ define( [ 'jquery',
             templ.push( '<td>&nbsp;</td>' )
             return templ.join( '' )
 
+        clicked: ( event ) =>
+            options =
+                model: @model
+
+            modalView = new DataDetailsModal( options )
+            $( '.modal' ).html( modalView.render().el )
+
 
     class DataCollectionView extends Backbone.Marionette.CollectionView
         el: '#raw-viz #raw_table'
@@ -114,6 +138,14 @@ define( [ 'jquery',
                     <th>&nbsp;</th>
                 </tr>
             ''')
+
+        row_clicked: ( event ) ->
+            if @data_row_clicked_callback?
+
+                # Find the data row that was clicked
+
+
+                @data_row_clicked_callback( event )
 
         initialize: ( options )->
             @fields = options.fields

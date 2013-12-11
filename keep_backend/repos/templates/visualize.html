@@ -27,6 +27,25 @@
 		filepicker.setKey( 'AtFpHahSSegcEhP2STuQAz' )
 	});
 </script>
+<script type='text/template' id='data-detail-template'>
+	<div class="bbm-modal__topbar">
+		<h3 class="bbm-modal__title">
+			Data Details
+		</h3>
+	</div>
+	<div class="bbm-modal__section">
+		<table class='table'>
+			<% _.each( model.attributes.data, function( val, key ) { %>
+				<tr>
+					<td><%= key %></td><td><%= val %></td>
+				</tr>
+			<% }); %>
+		</table>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-primary">Done</a>
+	</div>
+</script>
 <script type='text/template' id='empty-collection'>
 	<td id='filedrag' colspan=255>
 		<div style='padding:16px;font-size:1.2em;'>
