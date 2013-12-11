@@ -35,6 +35,8 @@ module.exports = ( grunt ) ->
 							renamedType = 'js/vendor'
 						else if type == 'css'
 							renamedType = 'css'
+						else if type == 'font'
+							renamedType = 'font'
 						return renamedType
 
 		# Compile all javascript and place into our intermediary folder for
@@ -70,12 +72,6 @@ module.exports = ( grunt ) ->
 				cwd: 'frontend/components'
 				src: [ '**/*.js' ]
 				dest: 'build/js/vendor'
-
-			font:
-				expand: true
-				cwd: 'frontend/font'
-				src: [ '**/*' ]
-				dest: '<%= pkg.static_dir %>/font'
 
 			img:
 				expand: true
@@ -124,7 +120,6 @@ module.exports = ( grunt ) ->
 								   # <static> folder
 								   'copy:components',
 								   'copy:css',
-								   'copy:font',
 								   'copy:img',
 
 								   # Now, begin watching for new changes

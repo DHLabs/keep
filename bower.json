@@ -17,7 +17,8 @@
     "marionette": "~1.1.0",
     "moment": "~2.0.0",
     "requirejs": "~2.1.6",
-    "underscore": "~1.5.1"
+    "underscore": "~1.5.1",
+    "font-awesome": "3.0.2"
   },
   "exportsOverride": {
     "backbone": {
@@ -33,6 +34,10 @@
     },
     "d3": {
       "js": "d3.js"
+    },
+    "font-awesome": {
+      "css": "css/*.min.css",
+      "font": "font/*"
     },
     "jquery": {
       "js": "jquery.js"
