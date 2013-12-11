@@ -81,6 +81,10 @@ define( [ 'jquery',
             @
 
         file_drop: ( event ) =>
+
+            if not event.originalEvent.dataTransfer?
+                return
+
             event.stopPropagation()
             event.preventDefault()
 
