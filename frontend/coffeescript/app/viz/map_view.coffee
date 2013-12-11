@@ -156,6 +156,8 @@ define( [ 'jquery',
             # Instead of appending these views into the DOM, place them in the
             # map instead!
             point = itemView.model.geopoint( collectionView.selected_header )
+            console.log( point )
+
             if not point?
                 return @
 
@@ -165,6 +167,7 @@ define( [ 'jquery',
             # Add marker to our different layers
             collectionView.markers.addLayer( marker )
             collectionView.clusters.addLayer( marker )
+            collectionView.heatmap.addDataPoint( {'lon': point.lng, 'lat': point.lat, 'value': 1 } )
 
         buildItemView: ( item, ItemViewType, itemViewOptions ) ->
             options = _.extend( { model: item, fields: @fields }, itemViewOptions )
