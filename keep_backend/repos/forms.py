@@ -23,8 +23,12 @@ class NewBatchRepoForm( forms.Form ):
         Create a new repo from a CSV file.
     '''
 
-    repo_file  = forms.FileField( required=True )
-    study      = forms.IntegerField( required=False )
+    # File used to create/populate the new repo
+    repo_file   = forms.FileField( required=True )
+    # The study this repo is associated with
+    study       = forms.IntegerField( required=False )
+    # Whether or not this repo is a "tracker" repo.
+    tracker     = forms.BooleanField( required=False )
 
     VALID_FILE_TYPES = [ 'csv', 'xml', 'xls' ]
 
@@ -112,6 +116,7 @@ class NewBatchRepoForm( forms.Form ):
                         name=self.cleaned_data[ 'name' ],
                         study=self.cleaned_data[ 'study' ],
                         description=self.cleaned_data[ 'desc' ],
+                        is_tracker=self.cleaned_data[ 'tracker' ],
                         user=self._user,
                         org=self._org,
                         is_public=False )

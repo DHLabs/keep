@@ -57,6 +57,7 @@ define( [ 'jquery',
             data = new FormData()
             data.append( 'repo_file', @file )
             data.append( 'user', document.user )
+            data.append( 'tracker', $( 'input[name="tracker"]', @el ).is( ':checked' ) )
 
             if $( 'select', @el ).val()?
                 data.append( 'study', $( 'select', @el ).val() )

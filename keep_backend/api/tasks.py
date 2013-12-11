@@ -49,6 +49,12 @@ def create_repo_from_file( file, file_type, repo ):
         # Modify repo's fields.
         repo.update_fields( fields )
 
+        # If the study doesn't already have a tracker, assign the first field
+        # of the repo to be the tracker name
+        if repo.study and len( repo.study.tracker ) == 0:
+            repo.study.tracker = fields[ 0 ].get( 'name' )
+            repo.study.save()
+
         # Add data to repo
         for datum in data:
             repo.add_data( data=datum, files=None )
