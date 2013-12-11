@@ -13,7 +13,7 @@ from repos.models import Repository
 logger = get_task_logger( __name__ )
 
 
-@celery.task
+@celery.task( default_retry_delay=5*60, max_retries=10 )
 def create_repo_from_file( file, file_type, repo ):
     '''
         In this case the file will be turned into an entire repo. The headers
@@ -38,7 +38,10 @@ def create_repo_from_file( file, file_type, repo ):
         storage.bucket_name = settings.AWS_TASK_STORAGE_BUCKET_NAME
 
     if not storage.exists( file ):
-        raise Exception( 'File doesn\'t exist' )
+        try:
+            raise Exception( 'File %s doesn\'t exist' % ( file ) )
+        except Exception as exc:
+            create_repo_from_file.retry( exc=exc )
 
     if file_type == 'csv':
 
