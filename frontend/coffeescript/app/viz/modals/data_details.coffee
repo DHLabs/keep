@@ -14,7 +14,14 @@ define( [ 'jquery',
 
         data_templates:
             'text':     _.template( '<%= data %>' )
-            'geopoint': _.template( '<%= data.coordinates[1] %>, <%= data.coordinates[0] %>' )
+            'geopoint': _.template( '<img src="http://maps.googleapis.com/maps/api/staticmap?
+                                        center=<%= data.coordinates[1] %>,<%= data.coordinates[0] %>
+                                        &zoom=13
+                                        &size=300x100
+                                        &maptype=roadmap
+                                        &markers=color:red%7C<%= data.coordinates[1] %>,<%= data.coordinates[0] %>
+                                        &sensor=false">' )
+
             'photo':    _.template( '<img src="<%= data %>" >'  )
 
         initialize: ( options ) ->
