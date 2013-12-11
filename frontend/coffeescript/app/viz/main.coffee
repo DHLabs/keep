@@ -1,7 +1,7 @@
 define( [ 'require' ],
 ( require ) ->
 
-	require( [ 'app/viz/views', 'jquery', 'jqueryui', 'dataTables', 'bootstrapTables' ],
+	require( [ 'app/viz/views', 'jquery', 'jqueryui' ],
 		( DataVizApp, $ ) ->
 			DataVizApp.start()
 

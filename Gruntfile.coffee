@@ -1,5 +1,7 @@
 module.exports = ( grunt ) ->
 
+	path = require( 'path' )
+
 	grunt.initConfig
 		pkg: grunt.file.readJSON( 'package.json' )
 
@@ -24,8 +26,16 @@ module.exports = ( grunt ) ->
 
 		# Copy the appropriate bower components to our <vendor> folder
 		bower:
-			dev:
-				dest: 'build/js/vendor'
+			install:
+				options:
+					targetDir: '<%= pkg.static_dir %>'
+					layout: (type, component) ->
+						renamedType = type
+						if type == 'js'
+							renamedType = 'js/vendor'
+						else if type == 'css'
+							renamedType = 'css'
+						return renamedType
 
 		# Compile all javascript and place into our intermediary folder for
 		# RequireJS optimization
@@ -92,7 +102,7 @@ module.exports = ( grunt ) ->
 								   'app/webform/views' ]
 					}]
 
-	grunt.loadNpmTasks( 'grunt-bower' )
+	grunt.loadNpmTasks( 'grunt-bower-task' )
 	grunt.loadNpmTasks( 'grunt-contrib-watch' )
 	grunt.loadNpmTasks( 'grunt-contrib-requirejs' )
 	grunt.loadNpmTasks( 'grunt-contrib-coffee' )
@@ -103,15 +113,15 @@ module.exports = ( grunt ) ->
 
 	grunt.registerTask( 'build', [ # Run through javascript compilation process
 								   'bower',
-		 						   'copy:components',
-		 						   'coffee:requirejs',
-		 						   'requirejs',
+								   'copy:components',
+								   'coffee:requirejs',
+								   'requirejs',
 
-		 						   # Compile SCSS
-		 						   'compass:dist',
+								   # Compile SCSS
+								   'compass:dist',
 
-		 						   # Finally copy oher basic components over to
-		 						   # <static> folder
+								   # Finally copy oher basic components over to
+								   # <static> folder
 								   'copy:components',
 								   'copy:css',
 								   'copy:font',
