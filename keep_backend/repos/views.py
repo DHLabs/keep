@@ -17,6 +17,7 @@ from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, rem
 from api.tasks import insert_csv_data
 from backend.db import db, DataSerializer, user_or_organization
 
+from studies.models import StudySerializer
 #from privacy import privatize_geo
 
 from .forms import NewRepoForm, NewBatchRepoForm
@@ -305,7 +306,7 @@ def webform( request, username, repo_name ):
 
 
 @require_GET
-def repo_viz( request, username, repo_name ):
+def repo_viz( request, username, repo_name, filter_param=None ):
     """
         View repo <repo_name> under user <username>.
 
@@ -334,8 +335,18 @@ def repo_viz( request, username, repo_name ):
     if not repo.is_public and 'view_repository' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
+    #----------------------------------------------------------------------
+    #
+    # Query and serialize data from this repository
+    #
+    #----------------------------------------------------------------------
+    data_query = { 'repo': ObjectId( repo.mongo_id ) }
+
+    if repo.study and filter_param:
+        data_query[ 'data.%s' % repo.study.tracker ] = filter_param
+
     # Grab the data for this repository
-    data = db.data.find( { 'repo': ObjectId( repo.mongo_id ) },
+    data = db.data.find( data_query,
                          { 'survey_label': False,
                            'user': False } )\
                   .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
@@ -356,9 +367,17 @@ def repo_viz( request, username, repo_name ):
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
 
+    linked_json = '[]'
+    if repo.study and repo.is_tracker:
+        # If this repo is a tracker and part of a study, grab all repos that
+        # are part of the study so that we can display data links.
+        linked = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
+        linked_json = json.dumps( serializer.serialize( linked ) )
+
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
                                  'repo_json': repo_json,
+                                 'linked_json': linked_json,
                                  'data': json.dumps( data ),
                                  'permissions': permissions,
                                  'account': account,

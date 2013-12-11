@@ -52,6 +52,9 @@ urlpatterns = patterns( 'repos.views',
     url(regex=r'^(?P<username>[-\w]+)/(?P<repo_name>[-\w]+)/$',
         view='repo_viz',
         name='repo_visualize' ),
+    url(regex=r'^(?P<username>[-\w]+)/(?P<repo_name>[-\w]+)/(?P<filter_param>.*)/$',
+        view='repo_viz',
+        name='repo_visualize' ),
 
     # Web form
     url(regex=r'^(?P<username>[-\w]+)/(?P<repo_name>[-\w]+)/webform/$',
