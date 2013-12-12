@@ -2,7 +2,7 @@
   "name": "openkeep",
   "version": "0.0.1",
   "author": "Andrew Huynh",
-  "license": "BSD",
+  "license": "MIT",
   "readmeFilename": "README.md",
   "static_dir": "keep_backend/static",
   "repository": {},
