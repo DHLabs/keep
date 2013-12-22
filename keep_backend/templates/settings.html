@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class='row'>
-	<div class='span12'>
+<div class='container'>
+	<div class='sixteen columns'>
 		<h3>API Keys</h3>
 		<table class='table'>
 			<thead>
@@ -38,6 +38,12 @@
 				{% endfor %}
 			</tbody>
 		</table>
+	</div>
+</div>
+<div class='container'>
+	<div class='sixteen columns' style='padding:16px 0;'>
+		<h3>Two-Factor Auth Code</h3>
+		<img src='{{ auth_token.google_url }}'>
 	</div>
 </div>
 {% endblock %}
