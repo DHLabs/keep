@@ -22,7 +22,7 @@ define( [ 'jquery',
                                         &markers=color:red%7C<%= data.coordinates[1] %>,<%= data.coordinates[0] %>
                                         &sensor=false">' )
 
-            'photo':    _.template( '<img src="<%= data %>" >'  )
+            'photo':    _.template( '<img style="max-width:300px;" src="<%= data %>" >'  )
 
         initialize: ( options ) ->
             @model  = options.model

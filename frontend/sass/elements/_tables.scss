@@ -79,3 +79,23 @@ th {
 	}
 }
 
+// Override table row hover when the table is in a modal.
+.bbm-modal__section {
+
+	tbody {
+		td:first-child {
+			vertical-align: top;
+			text-align: right;
+		}
+
+		tr:hover {
+			background-color: #FFF !important;
+		}
+
+		tr:last-child {
+			border-bottom: none;
+		}
+	}
+
+}
+
