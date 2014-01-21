@@ -18,7 +18,8 @@
     "moment": "~2.0.0",
     "requirejs": "~2.1.6",
     "underscore": "~1.5.1",
-    "font-awesome": "3.0.2"
+    "font-awesome": "3.0.2",
+    "nvd3": "~1.1.14-beta"
   },
   "exportsOverride": {
     "backbone": {
@@ -51,6 +52,10 @@
     },
     "moment": {
       "js": "moment.js"
+    },
+    "nvd3": {
+      "js": "nv.d3.js",
+      "css": "nv.d3.css"
     },
     "requirejs": {
       "js": "require.js"
