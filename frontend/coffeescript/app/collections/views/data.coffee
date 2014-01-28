@@ -106,6 +106,10 @@ define( [ 'jquery',
             return templ.join( '' )
 
         clicked: ( event ) =>
+
+            if event.target == 'a'
+                event.stopPropagation()
+
             options =
                 repo: @repo
                 model: @model
@@ -114,6 +118,8 @@ define( [ 'jquery',
 
             modalView = new DataDetailsModal( options )
             $( '.modal' ).html( modalView.render().el )
+
+            return true
 
 
     class DataCollectionView extends Backbone.Marionette.CollectionView
