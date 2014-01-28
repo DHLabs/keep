@@ -17,6 +17,8 @@ requirejs.config(
 		backbone_modal: 'backbone.modal'
 		marionette: 'marionette'
 
+		nvd3: 'nv.d3'
+
 	shim:
 		jqueryui:
 			deps: [ 'jquery' ]
@@ -41,6 +43,10 @@ requirejs.config(
 
 		'd3':
 			exports: 'd3'
+
+		'nvd3':
+			deps: [ 'd3' ]
+			exports: 'nv'
 
 		# Leaflet & associated plugins
 		leaflet_heatmap:
