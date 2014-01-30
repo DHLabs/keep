@@ -27,11 +27,15 @@ define( [ 'backbone', 'jquery_cookie' ],
             @
 
         sync: ( method, model, options ) =>
+
             options = options || {}
             options.url = "#{@url}#{@get('repo')}/"
 
             if method.toLowerCase() in [ 'create', 'delete', 'patch', 'update' ]
                 options.headers = {'X-CSRFToken': $.cookie( 'csrftoken' )}
+
+            if method.toLowerCase() in [ 'delete' ]
+                options.url = "#{@url}#{@get('repo')}/#{options.id}/"
 
             return Backbone.sync( method, model, options )
 

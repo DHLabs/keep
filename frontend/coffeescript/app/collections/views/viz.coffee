@@ -12,12 +12,10 @@ define( [ 'jquery',
         tagName: 'div'
         template: _.template( '''
                         <svg id='viz-<%= id %>'></svg>
-                        <a href='' class='btn btn-small'>
+                        <a href='#' data-id='<%= id %>' class='btn btn-small btn-delete'>
+                            <i class='icon-trash'></i>
                             Delete
                         </a>&nbsp;
-                        <a href='' class='btn btn-small'>
-                            Edit
-                        </a>
                     ''' )
 
 

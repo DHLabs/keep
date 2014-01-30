@@ -26,6 +26,7 @@ define( [ 'jquery',
 
         events:
             'click .create-new a': 'create_new_viz_event'
+            'click a.btn-delete':  'delete_viz_event'
 
         _on_new_viz: ( model, response, options ) =>
             # Callback function called when a new viz is created through the
@@ -68,7 +69,7 @@ define( [ 'jquery',
         onShow: ->
             $( window ).trigger( 'resize' )
 
-        create_new_viz_event: ->
+        create_new_viz_event: ( event ) ->
 
             # Pass in the current repo, list of fields for this repo,
             # and a callback for successful creation.
@@ -80,6 +81,18 @@ define( [ 'jquery',
             # Create the modal and display it!
             @modalView = new NewVizModal( options )
             $('.modal').html( @modalView.render().el )
+
+            @
+
+        delete_viz_event: ( event ) ->
+
+            viz_id = $( event.currentTarget ).data( 'id' )
+            viz = @viz_view.collection.get( viz_id )
+
+            # If the viz exists, remove from collection view and delete
+            if viz?
+                @viz_view.collection.remove( viz )
+                viz.destroy( {id: viz.id} )
 
             @
 
