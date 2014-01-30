@@ -1,12 +1,14 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
+from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from api.data import DataResource
 from api.repo import RepoResource
 from api.study import StudyResource
 from api.user import UserResource
+from api.viz import VizResource
 from api.vocab import VocabResource
 
 # Register resources to make API available
@@ -16,8 +18,8 @@ v1_api = Api( api_name='v1' )
 v1_api.register( DataResource() )
 v1_api.register( RepoResource() )
 v1_api.register( StudyResource() )
-
 v1_api.register( UserResource() )
+v1_api.register( VizResource() )
 v1_api.register( VocabResource() )
 
 # User views URLs
@@ -39,6 +41,12 @@ urlpatterns = patterns( 'backend.views',
     	 name='user_dashboard' ),
 
 )
+
+if settings.DEBUG:
+    admin.autodiscover()
+    urlpatterns += patterns( '',
+                             ( r'^keep-admin/', include( admin.site.urls )),
+                    )
 
 # Add API urls
 urlpatterns += patterns( '', url(r'^api/', include( v1_api.urls ) ) )
