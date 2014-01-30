@@ -14,7 +14,7 @@ module.exports = ( grunt ) ->
 
 			scripts:
 				files: [ 'frontend/coffeescript/**/*.coffee' ]
-				tasks: [ 'bower', 'copy:components', 'coffee:requirejs', 'requirejs' ]
+				tasks: [ 'copy:components', 'coffee:requirejs', 'requirejs' ]
 
 			styles:
 				files: [ 'frontend/sass/**/*.scss' ]
@@ -93,6 +93,7 @@ module.exports = ( grunt ) ->
 					dir: '<%= pkg.static_dir %>'
 					keepBuildDir: true
 					optimize: 'none'
+					optimizeCss: 'none'
 					modules: [ {
 						name: '../common'
 						include: [ 'jquery',
