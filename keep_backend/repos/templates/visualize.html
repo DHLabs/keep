@@ -4,6 +4,7 @@
 {% block title %}{{ repo.owner }} / {{ repo.name }}{% endblock %}
 
 {% block css %}
+<link rel="stylesheet" type="text/css" href='{% static "css/nv.d3.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.Default.css" %}'>
@@ -13,6 +14,7 @@
 <script type='text/javascript'>
 	document.repo = {{repo_json|safe}};
 	document.linked_repos = {{linked_json|safe}};
+	document.visualizations = {{viz_json|safe}};
 	document.initial_data = {{data|safe}};
 </script>
 <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
@@ -28,6 +30,56 @@
 		filepicker.setKey( 'AtFpHahSSegcEhP2STuQAz' )
 	});
 </script>
+<!--
+//=================================================
+//
+// NEW VISUALIZATION MODAL
+//
+//=================================================
+-->
+<script type='text/template' id='new-viz-template'>
+	<div class="bbm-modal__topbar">
+		<h3 class="bbm-modal__title">New Visualization</h3>
+	</div>
+	<div class="bbm-modal__section">
+		<form>
+			<div class='control-group'>
+				<input type='text' id='viz-name' class='input large' placeholder='Visualization Name'>
+			</div>
+			<div class='control-group'>
+				<label>
+					X-axis
+					<select id='xaxis'>
+						<% _.each( fields, function( field ) { %>
+						<option value='<%= field.name %>'><%= field.name %></option>
+						<% }); %>
+					</select>
+				</label>
+			</div>
+			<div class='control-group'>
+				<label>
+					Y-axis
+					<select id='yaxis'>
+						<% _.each( fields, function( field ) { %>
+						<option value='<%= field.name %>'><%= field.name %></option>
+						<% }); %>
+					</select>
+				</label>
+			</div>
+		</form>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-cancel">Cancel</a>
+		<a href="#" class="btn btn-primary">Create</a>
+	</div>
+</script>
+<!--
+//=================================================
+//
+// DATA DETAIL MODAL
+//
+//=================================================
+-->
 <script type='text/template' id='data-detail-template'>
 	<div class="bbm-modal__topbar"></div>
 	<div class="bbm-modal__section">
@@ -63,6 +115,13 @@
 		<a href="#" class="btn btn-primary">Done</a>
 	</div>
 </script>
+<!--
+//=================================================
+//
+// EMPTY DATASET TEMPLATE
+//
+//=================================================
+-->
 <script type='text/template' id='empty-collection'>
 	<td id='filedrag' colspan=255>
 		<div style='padding:16px;font-size:1.2em;'>
@@ -77,6 +136,13 @@
 		</div>
 	</td>
 </script>
+<!--
+//=================================================
+//
+// DATA SHARING MODAL
+//
+//=================================================
+-->
 <script type='text/template' id='sharing-settings'>
 	<div class="bbm-modal__topbar">
 		<h3 class="bbm-modal__title">Data Sharing Settings</h3>
@@ -249,7 +315,12 @@
 	<!-- Time series analysis -->
 	<div class='viz container' id='analytics-viz'>
 		<div class='sixteen columns'>
-			<h4>Reports &amp; Analytics coming soon.</h4>
+			<div class='create-new'>
+				<a href='#' class='btn btn-primary'>
+					<i class='icon-plus-sign'></i>&nbsp;Create Visualization
+				</a>
+			</div>
+			<div id='analytics-viz-list'></div>
 		</div>
 	</div>
 

@@ -47,11 +47,16 @@ class DataResource( MongoDBResource ):
         authorization = DataAuthorization()
 
     def prepend_urls(self):
-        base_url = '^(?P<resource_name>%s)/' % ( self._meta.resource_name )
+        base_url = '^(?P<resource_name>%s)/(?P<mongo_id>\w+)' % ( self._meta.resource_name )
+
         return [
-            url( regex=r"%s(?P<mongo_id>\w+)/stats/$" % ( base_url ),
-                 view=self.wrap_view('get_statistics'),
-                 name="api_dispatch_statistics") ]
+            url( regex=r"%s/stats/$" % ( base_url ),
+                 view=self.wrap_view( 'get_statistics' ),
+                 name='api_dispatch_statistics' ),
+
+            url( regex=r"%s/sample/$" % ( base_url ),
+                 view=self.wrap_view( 'sample_data' ),
+                 name='api_dispatch_data_sample' ) ]
 
     def _build_filters( self, request ):
         """
@@ -184,6 +189,51 @@ class DataResource( MongoDBResource ):
         except ValueError as e:
             return HttpBadRequest( str( e ) )
 
+    def sample_data( self, request, **kwargs ):
+        '''
+            Run data sampling using the MongoDB aggregate command.
+        '''
+
+        xaxis = request.GET.get( 'x', None )
+        yaxis = request.GET.get( 'y', None )
+
+        if xaxis is None or yaxis is None:
+            return HttpBadRequest( 'x and y params must be set' )
+
+        xaxis = xaxis.split( '.' )
+        yaxis = yaxis.split( '.' )
+
+        if xaxis[0] not in [ 'data', 'timestamp', 'count' ]:
+            return HttpBadRequest( 'invalid x param' )
+
+        if yaxis[0] not in [ 'data', 'timestamp', 'count' ]:
+            return HttpBadRequest( 'invalid y param' )
+
+        x_label = '%s.%s' % ( xaxis[0], xaxis[1] )
+        y_label = '%s.%s' % ( yaxis[0], yaxis[1] )
+
+        # Create the aggregate pipeline needed to do our query
+        match = { '$match': {
+                    'repo': ObjectId( kwargs.get( 'mongo_id' ) ),
+                    x_label: { '$exists': True },
+                    y_label: { '$exists': True } } }
+
+        project = { '$project': {
+                        '_id': 0,
+                        'x': '$%s.%s' % ( xaxis[0], xaxis[1] ),
+                        'y': '$%s.%s' % ( yaxis[0], yaxis[1] ) } }
+
+        sort = { '$sort': { 'x': 1 } }
+
+        aggregate = db.data.aggregate( pipeline=[match, project, sort] )
+
+        results = []
+        for row in aggregate.get( 'result' ):
+            results.append( row )
+
+        return self.create_response( request, results )
+
+
     def get_statistics( self, request, **kwargs ):
         '''
             Get "statistics" aim is to (ultimately) run MapReduce functions on
@@ -212,12 +262,16 @@ class DataResource( MongoDBResource ):
         first = db.data.find_one( repo_filter, sort=[( '_id', pymongo.ASCENDING )] )
         last  = db.data.find_one( repo_filter, sort=[( '_id', pymongo.DESCENDING )] )
 
+        count_by_day = []
         result = db.data.map_reduce( day_map, day_reduce, "myresults", query=repo_filter )
         for doc in result.find():
-            print doc
+            count_by_day.append( {
+                'day':      doc[ '_id' ][ 'day' ],
+                'value':    doc[ 'value' ][ 'count' ] })
 
         stats = {
-            'count': cursor.count(),
+            'total_count': cursor.count(),
+            'count_by_day': count_by_day,
             'first_submission': first,
             'last_submission': last,
         }

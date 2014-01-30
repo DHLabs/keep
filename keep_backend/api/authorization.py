@@ -127,3 +127,11 @@ class RepoAuthorization( Authorization ):
         # Case 4: API call. The object list should already be correct.
         if user is not None and key is not None:
             return True
+
+class VizAuthorization( Authorization ):
+
+    def read_list( self, object_list, bundle ):
+        return object_list
+
+    def read_detail( self, object_detail, bundle ):
+        return True

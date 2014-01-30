@@ -18,6 +18,10 @@ define( [ 'jquery',
 
 
     class VizActions extends Backbone.Marionette.View
+        # VizActions handles all page-wide actions that would result in a
+        # modal being shown.
+        #
+        # In this case, there is only one action the sharing settings modal.
         el: '#viz-actions'
 
         events:
@@ -75,9 +79,15 @@ define( [ 'jquery',
         @repo = new RepoModel( document.repo )
         @linked = new RepoCollection( document.linked_repos )
 
+        options =
+            repo: @repo
+            linked: @linked
+            fields: @repo.fields()
+            visualizations: document.visualizations
+
         # Add the different regions
-        vizChrome = new VizChrome( { repo: @repo } )
-        rawView   = new DataRawView( { repo: @repo, linked: @linked, fields: @repo.fields() } )
+        vizChrome = new VizChrome( options )
+        rawView   = new DataRawView( options )
 
         DataVizApp.addRegions(
                 chrome: vizChrome

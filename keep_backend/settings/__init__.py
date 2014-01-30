@@ -22,6 +22,7 @@ except:
     HOSTNAME = 'localhost'
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -32,11 +33,12 @@ INSTALLED_APPS = (
 
     # KEEP related modules
     'backend',
-    'openrosa',
-    'repos',
-    'studies',
-    'organizations',
-    'vocab',
+    'openrosa',                 # OpenROSA API implementation
+    'repos',                    # Data repository ( "data diary" ) models & views
+    'studies',                  # Studies models & views
+    'organizations',            # Organizations models & views
+    'visualizations',                      # Data Visualization models & views
+    'vocab',                    # Standard Vocab models & views
 
     # Third party modules
     'guardian',                 # Per-object permissions

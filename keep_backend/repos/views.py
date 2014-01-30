@@ -18,6 +18,7 @@ from api.tasks import insert_csv_data
 from backend.db import db, DataSerializer, user_or_organization
 
 from studies.models import StudySerializer
+from visualizations.models import VisualizationSerializer
 #from privacy import privatize_geo
 
 from .forms import NewRepoForm, NewBatchRepoForm
@@ -367,6 +368,7 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
 
+    # Grab linked repos if this repo is a "tracker" and part of study
     linked_json = '[]'
     if repo.study and repo.is_tracker:
         # If this repo is a tracker and part of a study, grab all repos that
@@ -374,11 +376,19 @@ def repo_viz( request, username, repo_name, filter_param=None ):
         linked = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
         linked_json = json.dumps( serializer.serialize( linked ) )
 
+    # Grab the list of visualizations for this repo
+    viz_serializer = VisualizationSerializer()
+    viz_json = json.dumps( viz_serializer.serialize( repo.visualizations.all() ) )
+
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
+
                                  'repo_json': repo_json,
                                  'linked_json': linked_json,
+                                 'viz_json': viz_json,
+
                                  'data': json.dumps( data ),
+
                                  'permissions': permissions,
                                  'account': account,
                                  'users_perms': usePerms },

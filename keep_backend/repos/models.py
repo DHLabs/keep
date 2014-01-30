@@ -378,4 +378,4 @@ class Repository( models.Model ):
         return self.user.username
 
     def __unicode__( self ):
-        return '<Repository %s>' % ( self.name )
+        return '<Repository %s/%s>' % ( self.owner(), self.name )
