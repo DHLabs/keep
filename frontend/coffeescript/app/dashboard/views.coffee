@@ -101,7 +101,7 @@ define( [ 'jquery',
                     if data.success
                         $( '#refresh-repos' ).trigger( 'click' )
                     else
-                        console. log( data )
+                        console.log( data )
                 # Callback if we receive an error of some sort.
                 error: ( data ) ->
                     # TODO: Gracefully handle upload error
