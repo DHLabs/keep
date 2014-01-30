@@ -3,11 +3,13 @@ define( [ 'jquery',
           'backbone',
           'marionette',
 
+          'app/models/viz',
+
           'backbone_modal',
           'jqueryui',
           'jquery_cookie' ],
 
-( $, _, Backbone, Marionette ) ->
+( $, _, Backbone, Marionette, VizModel ) ->
 
     class NewVizModal extends Backbone.Modal
         template: _.template( $( '#new-viz-template' ).html() )
@@ -31,23 +33,16 @@ define( [ 'jquery',
             yaxis = $( '#yaxis', @el ).val()
 
             # TODO:
-            # - UPDATE VIZ COLLECTION
             # - ADD "COUNT" & "TIMESTAMP" TO API
 
             data =
                 name: name
-                x: "data.#{xaxis}"
-                y: "data.#{yaxis}"
+                repo: @repo.id
+                x_axis: "data.#{xaxis}"
+                y_axis: "data.#{yaxis}"
 
-            $.ajax(
-                url: "/api/v1/viz/#{@repo.get('id')}/"
-                data: data
-                headers:
-                    'X-CSRFToken': $.cookie( 'csrftoken' )
-                type: 'POST'
-                success: @success_callback
-                error: @error_callback
-            )
+            new_viz = new VizModel()
+            new_viz.save( data, { success: @success_callback } )
 
             @
 

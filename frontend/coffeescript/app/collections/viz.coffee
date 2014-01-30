@@ -9,7 +9,7 @@ define( [
         model: VizModel
 
         parse: ( response ) ->
-          return response.objects
+            return response.objects
 
     return VizCollection
 )

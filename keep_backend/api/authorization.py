@@ -135,3 +135,6 @@ class VizAuthorization( Authorization ):
 
     def read_detail( self, object_detail, bundle ):
         return True
+
+    def create_detail( self, object_detail, bundle ):
+        return True

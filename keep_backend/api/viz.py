@@ -52,8 +52,7 @@ class VizResource( Resource ):
             return HttpBadRequest( str( e ) )
 
     def post_detail( self, request, **kwargs ):
-
-        # Grab the survey that we're querying survey data for
+        # Grab the repo we're creating a visualization for
         repo_id = kwargs[ 'pk' ]
 
         try:
@@ -63,10 +62,12 @@ class VizResource( Resource ):
             if not self.authorized_create_detail( repo, basic_bundle ):
                 return HttpUnauthorized()
 
-            new_viz = Visualization( name=request.POST.get( 'name' ),
+            params = json.loads( request.body )
+
+            new_viz = Visualization( name=params.get( 'name' ),
                                      repo=repo,
-                                     x_axis=request.POST.get( 'x' ),
-                                     y_axis=request.POST.get( 'y' ) )
+                                     x_axis=params.get( 'x_axis' ),
+                                     y_axis=params.get( 'y_axis' ) )
             new_id = new_viz.save()
             response_data = { 'success': True, 'id': str( new_id ) }
             return self.create_response( request, response_data )
