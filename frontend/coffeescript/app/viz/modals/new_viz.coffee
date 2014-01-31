@@ -32,9 +32,6 @@ define( [ 'jquery',
             xaxis = $( '#xaxis', @el ).val()
             yaxis = $( '#yaxis', @el ).val()
 
-            # TODO:
-            # - ADD "COUNT" & "TIMESTAMP" TO API
-
             data =
                 name: name
                 repo: @repo.id

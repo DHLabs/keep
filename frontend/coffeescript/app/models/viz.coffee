@@ -35,7 +35,7 @@ define( [ 'backbone', 'jquery_cookie' ],
                 options.headers = {'X-CSRFToken': $.cookie( 'csrftoken' )}
 
             if method.toLowerCase() in [ 'delete' ]
-                options.url = "#{@url}#{@get('repo')}/#{options.id}/"
+                options.url += "#{options.id}/"
 
             return Backbone.sync( method, model, options )
 
