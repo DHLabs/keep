@@ -1,10 +1,37 @@
-define( [ 'backbone' ],
+define( [ 'backbone', 'jquery_cookie' ],
 
 ( Backbone ) ->
 
     class RepoModel extends Backbone.Model
 
         url: '/api/v1/repos/'
+
+        _detect_fields: ( root, fields ) ->
+            for field in root
+                if field.type in [ 'group' ]
+                    @_detect_fields( field.children, fields )
+
+                # Don't show notes in the raw data table
+                if field.type not in [ 'note' ] and field.type not in [ 'group' ]
+                    fields.push( field )
+
+        fields: ->
+            fields = []
+            @_detect_fields( @get( 'children' ), fields )
+            return fields
+
+        share: ( options ) ->
+
+            share_url = "/repo/user_share/#{@id}/"
+
+            $.post( share_url,
+                    { username: options.data.user, permissions: options.data.perms },
+                    ( response ) ->
+                        if response == 'success' and options.success?
+                            options.success( response )
+                        else if options.failure?
+                            options.failure( response )
+            )
 
         toJSON: ->
             attrs = _(@attributes).clone()
@@ -15,7 +42,11 @@ define( [ 'backbone' ],
 
             # Figure out which privacy icon will be shown based on the public/
             # private attributes of the Repository.
-            if @get( 'is_public' )
+            if @get( 'user' ) != document.user_id
+                attrs.privacy_icon = 'icon-group'
+            else if @get( 'is_tracker' )
+                attrs.privacy_icon = 'icon-list'
+            else if @get( 'is_public' )
                 attrs.privacy_icon = 'icon-unlock'
             else
                 attrs.privacy_icon = 'icon-lock'

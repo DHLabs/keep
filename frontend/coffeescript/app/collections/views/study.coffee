@@ -25,4 +25,5 @@ define( [ 'jquery',
         selected: ()->
             return $( 'li.selected > a', @el ).data( 'study' )
 
+    return StudyCollectionView
 )

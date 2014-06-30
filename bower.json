@@ -7,14 +7,61 @@
     "components"
   ],
   "devDependencies": {
-    "jquery": "~2.0.2",
     "backbone": "~1.0.0",
-    "underscore": "~1.4.4",
-    "masonry": "~3.0.1",
-    "leaflet": "~0.5.1",
+    "backbone-forms": "v0.12.0",
+    "backbone.modal": "git://github.com/awkward/backbone.modal#~1.0.0",
+    "d3": "~3.3.11",
+    "jquery": "~2.0.2",
+    "jquery.cookie": "~1.4.0",
     "leaflet.markerclusterer": "latest",
+    "marionette": "~1.1.0",
     "moment": "~2.0.0",
     "requirejs": "~2.1.6",
-    "marionette": "~1.1.0"
+    "underscore": "~1.5.1",
+    "font-awesome": "3.0.2",
+    "nvd3": "~1.1.14-beta"
+  },
+  "exportsOverride": {
+    "backbone": {
+      "js": "backbone.js"
+    },
+    "backbone-forms": {
+      "js": [
+        "distribution/backbone-forms.js"
+      ]
+    },
+    "backbone.modal": {
+      "js": "backbone.modal.js"
+    },
+    "d3": {
+      "js": "d3.js"
+    },
+    "font-awesome": {
+      "css": "css/*.min.css",
+      "font": "font/*"
+    },
+    "jquery": {
+      "js": "jquery.js"
+    },
+    "leaflet.markerclusterer": {
+      "js": "dist/leaflet.markercluster.js",
+      "css": "dist/*.css"
+    },
+    "marionette": {
+      "js": "lib/backbone.marionette.js"
+    },
+    "moment": {
+      "js": "moment.js"
+    },
+    "nvd3": {
+      "js": "nv.d3.js",
+      "css": "nv.d3.css"
+    },
+    "requirejs": {
+      "js": "require.js"
+    },
+    "underscore": {
+      "js": "underscore.js"
+    }
   }
 }

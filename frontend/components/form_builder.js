@@ -4,6 +4,7 @@ var currentQuestionName;
 var currentGroupName;
 
 $( function() {
+	jsGUIReady();
 
    if( document.repo ) {
      questionList = document.repo.children;
@@ -19,6 +20,7 @@ $( function() {
      $( '#survey_builder' ).show();
      reloadQuestionListHTML();
      buildSurvey();
+     rebuildFormGUI(document.repo);
    } else {
 
    	var jsonvalue = $("#id_survey_json").val();
@@ -69,7 +71,7 @@ function questionTypeChanged() {
   	}
 }
 
-function closeDialog() {
+function closeEditDialog() {
 	$('#questionEditWindow').dialog( 'close' );
 }
 
@@ -334,7 +336,7 @@ function populateQuestion( questionName ) {
 	$("#groupOptions").hide();
 	$("#formRelationshipSelects").children().hide();
 
-	if( document.getElementById("formRelationship").length > 0 ) {
+	if( document.getElementById("formRelationship") != undefined && document.getElementById("formRelationship").length > 0 ) {
 		$("#formRelationship")[0].selectedIndex = 0;
 	}
 
@@ -571,7 +573,7 @@ function okClicked() {
 		}
 
 		//relationship
-		var relationshipForm = document.getElementById("formRelationship").value;
+		var relationshipForm = ((document.getElementById("formRelationship") != undefined) ? document.getElementById("formRelationship").value : "None");
 		if( relationshipForm != 'None' ) {
 
 			var relationship = new Object();
@@ -689,9 +691,10 @@ function okClicked() {
             }
         }
 
+        jsGUIAddQuestion(question, currentQuestionName);
 		buildSurvey();
 		reloadQuestionListHTML();
-		closeDialog();
+		closeEditDialog();
         currentGroupName = null;
 	}
 }
@@ -710,8 +713,6 @@ function buildQuestionList( listQuestions, formChildren )  {
 			buildQuestionList( listQuestions, question.children );
 		} else if( question.type == 'note' ) {
 			//don't add note
-		} else if( question.type == 'note' ) {
-
 		} else {
 			listQuestions.push( question );
 		}
@@ -814,6 +815,12 @@ function editQuestion(questionName) {
 	$( '#questionEditWindow' ).dialog({
 		'width': 640
 	});
+}
+
+function editRepository() {
+	$( '#repositoryDefaultsWindow' ).dialog({
+		'width': 640
+	})
 }
 
 function sanitizeNameInput(inputElement) {

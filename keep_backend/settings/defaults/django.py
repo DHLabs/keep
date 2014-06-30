@@ -1,4 +1,5 @@
 import os
+
 CURRENT_FILE = os.path.abspath(__file__)
 PROJECT_ROOT = os.path.join( os.path.dirname(CURRENT_FILE), '../..' )
 

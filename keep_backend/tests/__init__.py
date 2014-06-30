@@ -1,11 +1,15 @@
-import json
 import os
 import shlex
 import subprocess
 import urllib
 import urllib2
 
-from django.test import LiveServerTestCase
+from repos.models import Repository
+
+from django.contrib.auth.models import User
+from django.test import Client, LiveServerTestCase, TestCase
+
+from guardian.shortcuts import assign_perm
 
 from selenium import webdriver
 from selenium.webdriver.firefox.webdriver import WebDriver
@@ -36,37 +40,64 @@ class HttpTestCase( LiveServerTestCase ):
         self.selenium.get( '%s%s' % ( self.live_server_url, url ) )
 
 
-class ApiTestCase( LiveServerTestCase ):
+class KeepTestCase( TestCase ):
+    '''
+        KeepTestCase is a superclass that set ups all KEEP related test data fixtures
+        and MongoDB test data.
+    '''
+
+    fixtures = [ '../_data/fixtures/test_data.yaml' ]
+
+    def setUp( cls ):
+        # Make sure the repository objects have the correct permissions
+        user = User.objects.get( id=1 )
+
+        for repo in Repository.objects.all():
+            assign_perm( 'view_repository', user, repo )
 
     @classmethod
     def setUpClass( cls ):
+
+        cls.client = Client()
+
         with open( os.devnull, 'w' ) as devnull:
             testdb = 'mongorestore -d test --drop ../_data/mongo-test/dhlab'
             subprocess.call( shlex.split( testdb ),
                              stdout=devnull,
                              stderr=devnull )
 
-        super( ApiTestCase, cls ).setUpClass()
+        super( KeepTestCase, cls ).setUpClass()
 
-    def openRaw( self, url, params ):
-        final_url = '%s%s' % ( self.live_server_url, url )
-        return urllib2.urlopen( final_url, params ).read()
+class ApiTestCase( KeepTestCase ):
+    '''
+        Extends from KeepTestCase and adds a helper function specifically to
+        easily call and test API requests.
+    '''
 
     def open( self, url, params, method='GET', format='JSON' ):
-        final_url = '%s%s' % ( self.live_server_url, '/api/v1' )
-        final_url += url
-
-        encoded_params = ''
-        if params is not None:
-            encoded_params = urllib.urlencode( params, True )
+        '''
+            A helper function to quickly do API requests.
+        '''
+        final_url = '/api/v1' + url
 
         if method == 'GET':
-            final_url += '?' + encoded_params
-            response = urllib2.urlopen( final_url )
+            return self.client.get( final_url, params )
         else:
-            response = urllib2.urlopen( final_url, encoded_params )
+            return self.client.post( final_url, params )
 
-        if format == 'JSON':
-            return json.load( response )
-        else:
-            return response.read()
+
+class ViewTestCase( KeepTestCase ):
+
+    def login( self, username='admin', password='test' ):
+        '''
+            Helper method to login into the test account.
+        '''
+        self.client.post( '/accounts/login/', { 'username': username,
+                                                'password': password,
+                                                'token': ''} )
+
+    def logout( self ):
+        '''
+            Helper method to logout of the test account
+        '''
+        self.client.get( '/accounts/logout/' )

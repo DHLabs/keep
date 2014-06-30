@@ -16,7 +16,7 @@ from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
 from repos.models import Repository, RepoSerializer
 from studies.models import Study, StudySerializer
-from twofactor.models import UserAPIToken
+from twofactor.models import UserAPIToken, UserAuthToken
 
 
 def home( request ):
@@ -147,7 +147,9 @@ def delete_api_key( request, key ):
 def settings( request ):
 
     api_tokens = UserAPIToken.objects.filter(user=request.user)
+    auth_token = UserAuthToken.objects.get( user=request.user )
 
     return render_to_response( 'settings.html',
-                               {'api_tokens': api_tokens},
+                               {'api_tokens': api_tokens,
+                                'auth_token': auth_token },
                                context_instance=RequestContext(request))

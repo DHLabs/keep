@@ -23,7 +23,7 @@
             max: 0,
             bounds: {}
         };
-        
+
         this._data = [];
 
         this.drawTile = function (tile, tilePoint, zoom) {
@@ -45,6 +45,11 @@
     addData: function(dataset) {
         this._data = dataset;
         this._cache.max = this._calculateMaxValue(dataset);
+    },
+
+    addDataPoint: function( datapoint ) {
+        this._data.push( datapoint );
+        this._cache.max = this._calculateMaxValue( this._data );
     },
 
     _createTileProto: function () {

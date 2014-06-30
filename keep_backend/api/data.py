@@ -1,12 +1,16 @@
-from backend.db import db
-from backend.db import dehydrate_survey
-
-from bson import ObjectId
-
 import pymongo
 
+from backend.db import db
+from backend.db import DataSerializer
+
+from bson import ObjectId
+from bson.code import Code
+
+from django.conf import settings
+from django.conf.urls import url
+
 from tastypie import fields
-from tastypie.authentication import MultiAuthentication, SessionAuthentication, Authentication
+from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.http import HttpUnauthorized, HttpBadRequest
 
 from repos.models import Repository
@@ -37,15 +41,25 @@ class DataResource( MongoDBResource ):
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get' ]
 
-        authentication = Authentication()
-
-        # authentication = MultiAuthentication( SessionAuthentication(),
-        #                                       ApiTokenAuthentication() )
+        authentication = MultiAuthentication( ApiTokenAuthentication(),
+                                              SessionAuthentication() )
 
         authorization = DataAuthorization()
 
+    def prepend_urls(self):
+        base_url = '^(?P<resource_name>%s)/(?P<mongo_id>\w+)' % ( self._meta.resource_name )
+
+        return [
+            url( regex=r"%s/stats/$" % ( base_url ),
+                 view=self.wrap_view( 'get_statistics' ),
+                 name='api_dispatch_statistics' ),
+
+            url( regex=r"%s/sample/$" % ( base_url ),
+                 view=self.wrap_view( 'sample_data' ),
+                 name='api_dispatch_data_sample' ) ]
+
     def _build_filters( self, request ):
-        '''
+        """
             Build filters based on request parameters. Filters are formatted as
             follows:
 
@@ -60,7 +74,7 @@ class DataResource( MongoDBResource ):
             Params
             ------
             request : HttpRequest
-        '''
+        """
 
         filters = {}
         for param in request.GET:
@@ -91,6 +105,21 @@ class DataResource( MongoDBResource ):
 
         return filters
 
+    def _build_sort( self, request ):
+
+        if 'sort' not in request:
+            return None
+
+        sort = {}
+
+        sort[ 'param' ] = 'data.%s' % ( request.get('sort') )
+        sort[ 'type' ] = pymongo.DESCENDING
+
+        if 'sort_type' in request and request.get('sort_type') in [ 'asc', 'ascending' ]:
+            sort[ 'type' ] = pymongo.ASCENDING
+
+        return sort
+
     def get_detail( self, request, **kwargs ):
 
         # Grab the survey that we're querying survey data for
@@ -106,22 +135,41 @@ class DataResource( MongoDBResource ):
             query_parameters = self._build_filters( request )
             query_parameters['repo'] = ObjectId( repo_id )
 
-            # Query the database for the data
+            if 'bbox' in request.GET and 'geofield' in request.GET:
+                # Convert the bounding box into the $box format needed to do
+                # a geospatial search in MongoDB
+                # http://docs.mongodb.org/manual/reference/operator/box/
+                try:
+                    bbox = map( float, request.GET[ 'bbox' ].split( ',' ) )
+                except ValueError:
+                    return HttpBadRequest( 'Invalid bounding box' )
+
+                bbox = [ [ bbox[0], bbox[1] ], [ bbox[2], bbox[3] ] ]
+                geofield = request.GET[ 'geofield' ]
+
+                query_parameters[ 'data.%s' % ( geofield ) ] = {'$geoWithin': {'$box': bbox}}
+
+            # Query data from MongoDB
             cursor = db.data.find( query_parameters )
 
-            if 'sort' in request.GET:
-                sort_parameter = 'data.%s' % ( request.GET['sort'] )
-                sort_type = pymongo.DESCENDING
-                if 'sort_type' in request.GET:
-                    if request.GET['sort_type'] == 'ascending':
-                        sort_type = pymongo.ASCENDING
-                cursor = cursor.sort( sort_parameter, sort_type )
+            sort_params = self._build_sort( request.GET )
+            if sort_params is not None:
+                cursor = cursor.sort( sort_params.get( 'param' ), sort_params.get( 'type' ) )
 
+            # Ensure correct pagination
             offset = max( int( request.GET.get( 'offset', 0 ) ), 0 )
 
+            #
+            # TODO: Smarter way of printing out entire dataset for CSVs
+            # When people download CSVs, make sure we include the entire dataset.
             limit = 50
             if request.GET.get( 'format', None ) == 'csv':
                 limit = cursor.count()
+
+            # Determine the number of pages available.
+            pages = 0
+            if limit > 0:
+                pages = cursor.count() / limit
 
             meta = {
                 'form_name': repo.name,
@@ -129,14 +177,103 @@ class DataResource( MongoDBResource ):
                 'limit': limit,
                 'offset': offset,
                 'count': cursor.count(),
-                'pages': cursor.count() / limit
-            }
+                'pages': pages }
 
+            data_serializer = DataSerializer()
             data = {
                 'meta': meta,
-                'data': dehydrate_survey( cursor.skip( offset * limit ).limit( limit ) ) }
+                'data': data_serializer.dehydrate( cursor.skip( offset * limit ).limit( limit ),
+                                                   repo.fields() ) }
 
             return self.create_response( request, data )
         except ValueError as e:
-            return HttpBadRequest( e )
+            return HttpBadRequest( str( e ) )
 
+    def sample_data( self, request, **kwargs ):
+        '''
+            Run data sampling using the MongoDB aggregate command.
+        '''
+
+        xaxis = request.GET.get( 'x', None )
+        yaxis = request.GET.get( 'y', None )
+
+        if xaxis is None or yaxis is None:
+            return HttpBadRequest( 'x and y params must be set' )
+
+        xaxis = xaxis.split( '.' )
+        yaxis = yaxis.split( '.' )
+
+        if xaxis[0] not in [ 'data', 'timestamp', 'count' ]:
+            return HttpBadRequest( 'invalid x param' )
+
+        if yaxis[0] not in [ 'data', 'timestamp', 'count' ]:
+            return HttpBadRequest( 'invalid y param' )
+
+        x_label = '%s.%s' % ( xaxis[0], xaxis[1] )
+        y_label = '%s.%s' % ( yaxis[0], yaxis[1] )
+
+        # Create the aggregate pipeline needed to do our query
+        match = { '$match': {
+                    'repo': ObjectId( kwargs.get( 'mongo_id' ) ),
+                    x_label: { '$exists': True },
+                    y_label: { '$exists': True } } }
+
+        project = { '$project': {
+                        '_id': 0,
+                        'x': '$%s.%s' % ( xaxis[0], xaxis[1] ),
+                        'y': '$%s.%s' % ( yaxis[0], yaxis[1] ) } }
+
+        sort = { '$sort': { 'x': 1 } }
+
+        aggregate = db.data.aggregate( pipeline=[match, project, sort] )
+
+        results = []
+        for row in aggregate.get( 'result' ):
+            results.append( row )
+
+        return self.create_response( request, results )
+
+
+    def get_statistics( self, request, **kwargs ):
+        '''
+            Get "statistics" aim is to (ultimately) run MapReduce functions on
+            the set of data in a specific repository.
+        '''
+        day_map = Code( '''
+            function() {
+                day = Date.UTC( this.timestamp.getFullYear(), this.timestamp.getMonth(), this.timestamp.getDate() );
+                emit( { day: day }, { count: 1 } )
+            }''')
+
+        day_reduce = Code( '''
+            function( key, values ) {
+                var count = 0;
+                values.forEach( function( v ) {
+                    count += v[ 'count' ];
+                });
+                return {count: count};
+            }''')
+
+        # Grab the survey that we're querying survey data for
+        repo_filter = { 'repo': ObjectId( kwargs.get( 'mongo_id' ) ) }
+
+        cursor = db.data.find( repo_filter )
+
+        first = db.data.find_one( repo_filter, sort=[( '_id', pymongo.ASCENDING )] )
+        last  = db.data.find_one( repo_filter, sort=[( '_id', pymongo.DESCENDING )] )
+
+        count_by_day = []
+        result = db.data.map_reduce( day_map, day_reduce, "myresults", query=repo_filter )
+        for doc in result.find():
+            count_by_day.append( {
+                'day':      doc[ '_id' ][ 'day' ],
+                'value':    doc[ 'value' ][ 'count' ] })
+
+        stats = {
+            'total_count': cursor.count(),
+            'count_by_day': count_by_day,
+            'first_submission': first,
+            'last_submission': last,
+        }
+
+        return self.create_response( request, stats )

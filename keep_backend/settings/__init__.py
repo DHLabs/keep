@@ -1,13 +1,19 @@
 import socket
 
+# Load and initialize Django-celery module.
+import djcelery
+djcelery.setup_loader()
+
+from credentials import SECRET_KEY, TWOFACTOR_ENCRYPTION_KEY
+
 # Django settings for dhlab_backend project.
+from .defaults.celery import *
 from .defaults.database import *
 from .defaults.django import *
 from .defaults.logging import *
 
-from credentials import SECRET_KEY, TWOFACTOR_ENCRYPTION_KEY
-
 DEBUG = True
+TESTING = False
 TEMPLATE_DEBUG = DEBUG
 
 try:
@@ -16,6 +22,7 @@ except:
     HOSTNAME = 'localhost'
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -26,11 +33,12 @@ INSTALLED_APPS = (
 
     # KEEP related modules
     'backend',
-    'openrosa',
-    'repos',
-    'studies',
-    'organizations',
-    'vocab',
+    'openrosa',                 # OpenROSA API implementation
+    'repos',                    # Data repository ( "data diary" ) models & views
+    'studies',                  # Studies models & views
+    'organizations',            # Organizations models & views
+    'visualizations',                      # Data Visualization models & views
+    'vocab',                    # Standard Vocab models & views
 
     # Third party modules
     'guardian',                 # Per-object permissions
@@ -40,7 +48,7 @@ INSTALLED_APPS = (
     'storages',                 # Needed for S3 file storage
     'django_mailgun',           # Easy email API
     'south',                    # Database migrations
-    'raven.contrib.django.raven_compat',    # Smart error logging. See logging.py for raven settings
+    'djcelery',                 # Distributed Task Queue
 )
 
 ANONYMOUS_USER_ID = -1

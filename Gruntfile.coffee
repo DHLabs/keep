@@ -1,5 +1,7 @@
 module.exports = ( grunt ) ->
 
+	path = require( 'path' )
+
 	grunt.initConfig
 		pkg: grunt.file.readJSON( 'package.json' )
 
@@ -12,7 +14,7 @@ module.exports = ( grunt ) ->
 
 			scripts:
 				files: [ 'frontend/coffeescript/**/*.coffee' ]
-				tasks: [ 'bower', 'copy:components', 'coffee:requirejs', 'requirejs' ]
+				tasks: [ 'copy:components', 'coffee:requirejs', 'requirejs' ]
 
 			styles:
 				files: [ 'frontend/sass/**/*.scss' ]
@@ -24,8 +26,18 @@ module.exports = ( grunt ) ->
 
 		# Copy the appropriate bower components to our <vendor> folder
 		bower:
-			dev:
-				dest: 'build/js/vendor'
+			install:
+				options:
+					targetDir: '<%= pkg.static_dir %>'
+					layout: (type, component) ->
+						renamedType = type
+						if type == 'js'
+							renamedType = 'js/vendor'
+						else if type == 'css'
+							renamedType = 'css'
+						else if type == 'font'
+							renamedType = 'font'
+						return renamedType
 
 		# Compile all javascript and place into our intermediary folder for
 		# RequireJS optimization
@@ -61,11 +73,11 @@ module.exports = ( grunt ) ->
 				src: [ '**/*.js' ]
 				dest: 'build/js/vendor'
 
-			font:
+			favicon:
 				expand: true
-				cwd: 'frontend/font'
+				cwd: 'frontend/favicon'
 				src: [ '**/*' ]
-				dest: '<%= pkg.static_dir %>/font'
+				dest: '<%= pkg.static_dir %>/favicon'
 
 			img:
 				expand: true
@@ -81,20 +93,19 @@ module.exports = ( grunt ) ->
 					dir: '<%= pkg.static_dir %>'
 					keepBuildDir: true
 					optimize: 'none'
+					optimizeCss: 'none'
 					modules: [ {
 						name: '../common'
 						include: [ 'jquery',
+								   'app/dashboard/main',
+								   'app/dashboard/views',
 								   'app/viz/main',
-								   'app/webform/main']
-					},{
-						name: 'app/viz/main'
-						exclude: [ '../common' ]
-					},{
-						name: 'app/webform/main'
-						exclude: [ '../common' ]
+								   'app/viz/views',
+								   'app/webform/main',
+								   'app/webform/views' ]
 					}]
 
-	grunt.loadNpmTasks( 'grunt-bower' )
+	grunt.loadNpmTasks( 'grunt-bower-task' )
 	grunt.loadNpmTasks( 'grunt-contrib-watch' )
 	grunt.loadNpmTasks( 'grunt-contrib-requirejs' )
 	grunt.loadNpmTasks( 'grunt-contrib-coffee' )
@@ -105,18 +116,18 @@ module.exports = ( grunt ) ->
 
 	grunt.registerTask( 'build', [ # Run through javascript compilation process
 								   'bower',
-		 						   'copy:components',
-		 						   'coffee:requirejs',
-		 						   'requirejs',
+								   'copy:components',
+								   'coffee:requirejs',
+								   'requirejs',
 
-		 						   # Compile SCSS
-		 						   'compass:dist',
+								   # Compile SCSS
+								   'compass:dist',
 
-		 						   # Finally copy oher basic components over to
-		 						   # <static> folder
+								   # Finally copy oher basic components over to
+								   # <static> folder
 								   'copy:components',
 								   'copy:css',
-								   'copy:font',
+								   'copy:favicon',
 								   'copy:img',
 
 								   # Now, begin watching for new changes

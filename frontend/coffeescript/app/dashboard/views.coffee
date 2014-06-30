@@ -1,67 +1,25 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
-          'marionette'
+          'marionette',
 
           # Model stuff
-          'app/collections/views/repo'
-          'app/collections/views/study'
-          'app/models/repo'
-          'app/models/study'
+          'app/collections/views/repo',
+          'app/collections/views/study',
+          'app/models/repo',
+
+          # Modals/views
+          'app/dashboard/modals/new_repo',
+          'app/dashboard/modals/new_study',
+          'app/dashboard/modals/study_settings',
 
           # Plugins, etc.
           'backbone_modal',
           'jqueryui',
           'jquery_cookie' ],
 
-( $, _, Backbone, Marionette, RepoCollectionView, StudyCollectionView, RepoModel, StudyModel ) ->
-
-    class StudySettingsModal extends Backbone.Modal
-        template: _.template( $( '#study-settings-template' ).html() )
-        cancelEl: '.btn-primary'
-
-        initialize: ( options ) ->
-            @collection = options.collection
-            @study = options.study
-
-        delete_event: ( event ) =>
-            @collection.remove( @study )
-            @study.destroy()
-            @close()
-
-        onRender: () =>
-            $( '.study-name', @el ).html( @study.get( 'name' ) )
-            $( '.study-delete', @el ).click( @delete_event )
-
-
-    class NewStudyModal extends Backbone.Modal
-        template: _.template( $( '#new-study-template' ).html() )
-        submitEl: '.btn-primary'
-        cancelEl: '.btn-cancel'
-
-        clean: () ->
-            values =
-                name: $( '#study-name' ).val().replace( /^\s+|\s+$/g, "" )
-                description: $( '#study-description' ).val().replace( /^\s+|\s+$/g, "" )
-                tracker: $( '#study-tracker' ).is( ':checked' )
-
-            return values
-
-        beforeSubmit: () ->
-
-            @cleaned_data = @clean()
-
-            if @cleaned_data[ 'name' ].length == 0
-                $( '.error', $( '#study-name' ).parent() ).html( 'Please used a valid study name' )
-                return false
-
-        submit: () ->
-            study = new StudyModel()
-            study.save( @cleaned_data,
-                success: ( model, response, options ) =>
-                    model.set( {id: response.id} )
-                    @collection.add( model ) )
-
+( $, _, Backbone, Marionette, RepoCollectionView, StudyCollectionView, RepoModel,
+    NewRepoModal, NewStudyModal, StudySettingsModal ) ->
 
     class DashboardView extends Backbone.View
         el: $( '#dashboard' )
@@ -77,9 +35,11 @@ define( [ 'jquery',
 
             "click #filters li a":              "filter_repos_event"
             "click #studies ul li a":           "refresh_repos_event"
+            "click #repos #refresh-repos":      "refresh_repos_event"
 
         _apply_draggable: () =>
-
+            # When the view is finished rendering or refreshed, add the
+            # droppable event to each study in the study list.
             $( 'li', '#study_list' ).droppable(
                 hoverClass: 'drop-hover'
                 drop: @_drop_on_study )
@@ -102,6 +62,57 @@ define( [ 'jquery',
 
             @
 
+        file_dragleave: ( event ) ->
+
+            @drag_overlay_timer = setTimeout( ()->
+                event.stopPropagation()
+                $( '#file-drop-overlay' ).hide()
+            , 300 )
+
+            @
+
+        file_dragover: ( event ) ->
+
+            clearTimeout( @drag_overlay_timer )
+            event.stopPropagation()
+            event.preventDefault()
+            $( '#file-drop-overlay' ).show();
+
+            @
+
+        file_drop: ( event ) =>
+
+            if not event.originalEvent.dataTransfer?
+                return
+
+            event.stopPropagation()
+            event.preventDefault()
+
+            # Pass in the options needed for the modal
+            options =
+                # The files dragged into the window
+                files: event.originalEvent.dataTransfer.files
+                # The studies the user has, if they want to include this
+                # file as a new repo in this study.
+                studies: @study_view.collection
+                # Callback when the file is successfully uploaded
+                success: ( data ) ->
+
+                    if data.success
+                        $( '#refresh-repos' ).trigger( 'click' )
+                    else
+                        console.log( data )
+                # Callback if we receive an error of some sort.
+                error: ( data ) ->
+                    # TODO: Gracefully handle upload error
+                    console.log( data )
+
+            @modalView = new NewRepoModal( options )
+            $( '.modal' ).html( @modalView.render().el )
+            $( '#file-drop-overlay' ).hide()
+
+            @
+
         filter_repos_event: (event) ->
             $( '.selected', '#filters' ).removeClass( 'selected' )
             $( event.currentTarget ).parent().addClass( 'selected' )
@@ -117,15 +128,14 @@ define( [ 'jquery',
             event.stopImmediatePropagation()
 
             # Grab the study that this is for.
-            study = new StudyModel(
-                            id: $( event.currentTarget ).data( 'study' )
-                            name: $( event.currentTarget ).data( 'name' )
-                            )
+            study = @study_view.collection.findWhere( { id: $( event.currentTarget ).data( 'study' ) })
+            options =
+                study: study
+                collection: @study_view.collection
+                tracker: @repo_view.collection.where( { study: study.get( 'name' ) } )
 
             # Create the modal and display it!
-            @modalView = new StudySettingsModal(
-                                'collection': @study_view.collection
-                                'study': study )
+            @modalView = new StudySettingsModal( options )
             $('.modal').html( @modalView.render().el )
 
         initialize: ->
@@ -140,6 +150,13 @@ define( [ 'jquery',
             @study_view.on( 'after:item:added', @refresh_repos_event )
             @study_view.on( 'item:removed', @refresh_repos_event )
 
+            # TODO: Detect ability to read local files in the browser. This
+            # is a notably HTML5 feature and should be in most if not all browsers
+            # but you never know...
+            $(window).bind( 'dragover', @file_dragover )
+            $(window).bind( 'drop', @file_drop )
+            $( '#file-drop-overlay' ).bind( 'dragleave', @file_dragleave )
+
             $( 'li', '#studies' ).droppable(
                 hoverClass: 'drop-hover'
                 drop: @_drop_on_study )
@@ -147,10 +164,19 @@ define( [ 'jquery',
 
         refresh_repos_event: ( event ) =>
 
-            if event.currentTarget?
+            # Manual refresh of the currently selected study
+            if event.currentTarget? and $( event.currentTarget ).attr( 'id' ) == 'refresh-repos'
+                study_el   = $( '#studies .selected > a' )
+                study_id   = $( study_el ).data( 'study' )
+                study_name = $( study_el ).html()
+
+            # A study was clicked, switch to that study and refresh the screen!
+            else if event.currentTarget?
                 study_el   = event.currentTarget
                 study_id   = $( study_el ).data( 'study' )
                 study_name = $( study_el ).html()
+
+            # A repo/study was removed
             else
                 study_el   = event.el
                 study_id   = event.model.id

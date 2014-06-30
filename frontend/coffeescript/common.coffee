@@ -13,12 +13,11 @@ requirejs.config(
 		jqueryui: 'jquery-ui'
 		jquery_cookie: 'jquery.cookie'
 
-		dataTables: 'jquery.dataTables.min'
-		bootstrapTables: 'bootstrap.dataTables'
-
 		# Backbone plugins
-		backbone_modal: 'backbone.modal.min'
+		backbone_modal: 'backbone.modal'
 		marionette: 'marionette'
+
+		nvd3: 'nv.d3'
 
 	shim:
 		jqueryui:
@@ -45,20 +44,15 @@ requirejs.config(
 		'd3':
 			exports: 'd3'
 
+		'nvd3':
+			deps: [ 'd3' ]
+			exports: 'nv'
+
 		# Leaflet & associated plugins
-		leaflet:
-			deps: [ 'jquery' ]
-			exports: 'L'
 		leaflet_heatmap:
 			deps: [ 'leaflet', 'heatmap' ]
 		leaflet_cluster:
 			deps: [ 'leaflet' ]
-
-		# jQuery DataTables & associated plugins
-		dataTables:
-			deps: [ 'jquery' ]
-		bootstrapTables:
-			deps: [ 'dataTables' ]
 
 		# Form editing stuff
 		'forms/editors/list':

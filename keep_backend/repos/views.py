@@ -14,29 +14,50 @@ from django.views.decorators.http import require_POST, require_GET
 
 from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm
 
-from backend.db import db, dehydrate_survey, user_or_organization
+from api.tasks import insert_csv_data
+from backend.db import db, DataSerializer, user_or_organization
 
+from studies.models import StudySerializer
+from visualizations.models import VisualizationSerializer
 #from privacy import privatize_geo
 
 from .forms import NewRepoForm, NewBatchRepoForm
-from .models import Repository
+from .models import Repository, RepoSerializer
 
 
 @login_required
+@require_POST
+def insert_data_into_repo( request, repo_id ):
+    '''
+        Insert data from a CSV into a repo. This is relayed as a task to a
+        Celery worker.
+    '''
+
+    repo = Repository.objects.get( mongo_id=repo_id )
+
+    # Place the task in the queue
+    task = insert_csv_data.delay( file=request.POST.get( 'file_key' ), repo=repo_id )
+
+    # Save the task id so we can go back and check on the task
+    repo.add_task( task.task_id, 'csv_insert' )
+
+    return HttpResponseRedirect( reverse( 'repo_visualize',
+                                          kwargs={ 'username': request.user.username,
+                                                   'repo_name': repo.name } ) )
+
+
+@login_required
+@require_POST
 def batch_repo( request ):
 
-    if request.method == 'POST':
-        form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
+    form = NewBatchRepoForm( request.POST, request.FILES, user=request.user )
 
-        if form.is_valid():
-            new_repo = form.save()
+    if form.is_valid():
+        new_repo = form.save()
 
-            return HttpResponseRedirect(
-                        reverse( 'repo_visualize',
-                                 kwargs={ 'username': request.user.username,
-                                          'repo_name': new_repo.name } ) )
-
-    return HttpResponseRedirect( '/' )
+        return HttpResponseRedirect( reverse( 'repo_visualize',
+                                              kwargs={ 'username': request.user.username,
+                                                       'repo_name': new_repo.name } ) )
 
 
 @login_required
@@ -54,9 +75,9 @@ def move_repo( request ):
 
 @login_required
 def new_repo( request ):
-    '''
+    """
         Creates a new repo under the currently logged in user.
-    '''
+    """
     # Handle XForm upload
     if request.method == 'POST':
         # Check for a valid XForm and parse the file!
@@ -86,10 +107,10 @@ def new_repo( request ):
 
 @login_required
 def edit_repo( request, repo_id ):
-    '''
+    """
         Edits a data repository
         Takes user to Form Builder
-    '''
+    """
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
     # Check that this user has permission to edit this repo
@@ -139,12 +160,12 @@ def edit_repo( request, repo_id ):
 
 @login_required
 def delete_repo( request, repo_id ):
-    '''
+    """
         Delete a data repository.
 
         Checks if the user is the original owner of the repository and removes
         the repository and the accompaning repo data.
-    '''
+    """
 
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
@@ -162,10 +183,10 @@ def delete_repo( request, repo_id ):
 @require_POST
 @login_required
 def toggle_public( request, repo_id ):
-    '''
+    """
         Toggle's a data repo's "publicness". Only the person who owns the form
         is allowed to make such changes to the form settings.
-    '''
+    """
 
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
@@ -184,11 +205,11 @@ def toggle_public( request, repo_id ):
 @require_POST
 @login_required
 def toggle_form_access( request, repo_id ):
-    '''
+    """
         Toggle's a form's access(Whether someone can view the form and submit data).
         Only the person who owns the form
         is allowed to make such changes to the form settings.
-    '''
+    """
 
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
@@ -205,9 +226,9 @@ def toggle_form_access( request, repo_id ):
 @csrf_exempt
 @login_required
 def share_repo( request, repo_id ):
-    '''
+    """
         Modifies sharing permissions for specific users
-    '''
+    """
 
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
@@ -216,6 +237,8 @@ def share_repo( request, repo_id ):
 
     if request.method == 'POST':
         username = request.POST.get( 'username', None )
+    elif request.method == 'DELETE':
+        username = json.loads( request.body ).get( 'username', None )
     else:
         username = request.GET.get( 'username', None )
 
@@ -227,11 +250,13 @@ def share_repo( request, repo_id ):
     if account == request.user:
         return HttpResponse( status=401 )
 
+    # Remove permissions from user
     if request.method == 'DELETE':
         old_permissions = get_perms( account, repo )
         for old_permission in old_permissions:
             remove_perm( old_permission, account, repo )
         return HttpResponse( 'success', status=204 )
+    # Add certain permissions for a specific user
     else:
         new_permissions = request.POST.get( 'permissions', '' ).split(',')
         for new_permission in new_permissions:
@@ -241,10 +266,10 @@ def share_repo( request, repo_id ):
 
 @csrf_exempt
 def webform( request, username, repo_name ):
-    '''
+    """
         Simply grab the survey data and send it on the webform. The webform
         will handle rendering and submission of the final data to the server.
-    '''
+    """
 
     account = user_or_organization( username )
     if account is None:
@@ -282,13 +307,13 @@ def webform( request, username, repo_name ):
 
 
 @require_GET
-def repo_viz( request, username, repo_name ):
-    '''
+def repo_viz( request, username, repo_name, filter_param=None ):
+    """
         View repo <repo_name> under user <username>.
 
         Does the checks necessary to determine whether the current user has the
         authority to view the current repository.
-    '''
+    """
 
     # Grab the user/organization based on the username
     account = user_or_organization( username )
@@ -311,13 +336,25 @@ def repo_viz( request, username, repo_name ):
     if not repo.is_public and 'view_repository' not in permissions:
         return HttpResponse( 'Unauthorized', status=401 )
 
+    #----------------------------------------------------------------------
+    #
+    # Query and serialize data from this repository
+    #
+    #----------------------------------------------------------------------
+    data_query = { 'repo': ObjectId( repo.mongo_id ) }
+
+    if repo.study and filter_param:
+        data_query[ 'data.%s' % repo.study.tracker ] = filter_param
+
     # Grab the data for this repository
-    data = db.data.find( { 'repo': ObjectId( repo.mongo_id ) },
+    data = db.data.find( data_query,
                          { 'survey_label': False,
                            'user': False } )\
-                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )
+                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
+                  .limit( 50 )
 
-    data = dehydrate_survey( data )
+    data_serializer = DataSerializer()
+    data = data_serializer.dehydrate( data, repo.fields() )
 
     # Is some unknown user looking at this data?
     # TODO: Make the privatizer take into account
@@ -328,17 +365,31 @@ def repo_viz( request, username, repo_name ):
     usePerms = get_users_with_perms( repo, attach_perms=True )
     usePerms.pop( account, None )
 
-    if isinstance( account, User ):
-        account_name = account.username
-    else:
-        account_name = account.name
+    serializer = RepoSerializer()
+    repo_json = json.dumps( serializer.serialize( [repo] )[0] )
+
+    # Grab linked repos if this repo is a "tracker" and part of study
+    linked_json = '[]'
+    if repo.study and repo.is_tracker:
+        # If this repo is a tracker and part of a study, grab all repos that
+        # are part of the study so that we can display data links.
+        linked = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
+        linked_json = json.dumps( serializer.serialize( linked ) )
+
+    # Grab the list of visualizations for this repo
+    viz_serializer = VisualizationSerializer()
+    viz_json = json.dumps( viz_serializer.serialize( repo.visualizations.all() ) )
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
-                                 'sid': repo.mongo_id,
+
+                                 'repo_json': repo_json,
+                                 'linked_json': linked_json,
+                                 'viz_json': viz_json,
+
                                  'data': json.dumps( data ),
+
                                  'permissions': permissions,
                                  'account': account,
-                                 'account_name': account_name,
                                  'users_perms': usePerms },
                                context_instance=RequestContext(request) )

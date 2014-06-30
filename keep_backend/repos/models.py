@@ -1,19 +1,23 @@
+import logging
+
 from bson import ObjectId
 from datetime import datetime
 
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.python import Serializer
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
-from guardian.shortcuts import assign_perm, remove_perm, get_objects_for_user, get_perms, get_users_with_perms
+from guardian.shortcuts import assign_perm, remove_perm, get_objects_for_user
 
 from backend.db import db
 from django.core.files.storage import default_storage as storage
 
-from organizations.models import OrganizationUser
-
 from . import validate_and_format
+
+logger = logging.getLogger( __name__ )
 
 ALL_REPO_PERMISSIONS = [
     ( 'add_repository', 'Add Repo' ),
@@ -30,9 +34,10 @@ ALL_REPO_PERMISSIONS = [
 
 
 class RepoSerializer( Serializer ):
-    '''
+    """
         Converts a QuerySet of Repository objects into a specific JSON format.
-    '''
+    """
+
     def end_object( self, obj ):
         # We want to refer to repos externally according to their mongo_id
         self._current[ 'id' ] = obj.mongo_id
@@ -45,6 +50,9 @@ class RepoSerializer( Serializer ):
         # Convert timestamps into JSON timestamps
         self._current[ 'date_updated' ] = obj.date_updated.strftime( '%Y-%m-%dT%X' )
         self._current[ 'date_created' ] = obj.date_created.strftime( '%Y-%m-%dT%X' )
+
+        # Add reference
+        self._current[ 'children' ] = obj.fields()
 
         # Include the number of submissions for this repo
         self._current[ 'submissions' ]  = obj.submissions()
@@ -78,6 +86,9 @@ class RepositoryManager( models.Manager ):
             List shared & user-owned repositories for a specific user.
         '''
 
+        # Grab all public repositories
+        public_repos = self.filter( is_public=True )
+
         # django-guardian has a quirk where if the user is a superuser, the
         # entire queryset is returned. This is bullshit and we don't need that
         # bullshit.
@@ -91,7 +102,7 @@ class RepositoryManager( models.Manager ):
         if public:
             return repositories.filter( is_public=True )
 
-        return repositories
+        return repositories | public_repos
 
     def get_by_username( self, repo_name, username ):
         user_repo_q = Q( name=repo_name )
@@ -101,7 +112,10 @@ class RepositoryManager( models.Manager ):
         org_repo_q = Q( name=repo_name )
         org_repo_q.add( Q( org__name=username ), Q.AND )
 
-        return self.get( user_repo_q | org_repo_q )
+        try:
+            return self.get( user_repo_q | org_repo_q )
+        except ObjectDoesNotExist as e:
+            return None
 
     def repo_exists( self, repo_name, username ):
         return self.filter(Q(name=repo_name),
@@ -110,9 +124,10 @@ class RepositoryManager( models.Manager ):
 
 
 class Relationship( models.Model ):
-    '''
+    """
         Represents a relationship between two repos
-    '''
+    """
+
     name        = models.CharField( max_length=256, blank=False )
 
     repo_parent = models.ForeignKey( 'repos.Repository',
@@ -130,7 +145,7 @@ class Relationship( models.Model ):
 
 
 class Repository( models.Model ):
-    '''
+    """
         Represents a data repository.
 
         Fields
@@ -165,7 +180,8 @@ class Repository( models.Model ):
         date_created : timestamp : auto
         date_uploaded : timestamp : auto
             Datetime that the repository was created.
-    '''
+    """
+
     objects     = RepositoryManager()
 
     mongo_id    = models.CharField( max_length=24,
@@ -219,19 +235,21 @@ class Repository( models.Model ):
         field_list = []
 
         for field in fields:
+            if field.get( 'type' ) == 'note':
+                continue
 
-            if field.get( 'type' ) == 'group':
+            if 'group' in field.get( 'type' ):
                 field_list.extend( self._flatten( field.get( 'children' ) ) )
                 continue
 
-            field_list.append( field.get( 'name' ) )
+            field_list.append( field )
 
         return field_list
 
     def delete( self ):
-        '''
+        """
             Delete all data & objects related to this object
-        '''
+        """
         # Remove related data from MongoDB
         db.repo.remove( { '_id': ObjectId( self.mongo_id ) } )
         db.data.remove( { 'repo': ObjectId( self.mongo_id ) } )
@@ -275,10 +293,16 @@ class Repository( models.Model ):
         else:
             super( Repository, self ).save( *args, **kwargs )
 
+    def data( self ):
+        '''
+            Does a simple query for data.
+        '''
+        return db.data.find( { 'repo': ObjectId( self.mongo_id ) } )
+
     def add_data( self, data, files ):
-        '''
+        """
             Validate and add a new data record to this repo!
-        '''
+        """
         fields = self.fields()
         validated_data, valid_files = validate_and_format(fields, data, files)
 
@@ -288,12 +312,15 @@ class Repository( models.Model ):
             'data': validated_data,
             'timestamp': datetime.utcnow() }
 
+        logger.info( repo_data )
+
         new_data_id = db.data.insert( repo_data )
 
         # Once we save the repo data, save the files to S3
         if len( valid_files.keys() ) > 0:
             # If we have media data, save it to this repo's data folder
-            storage.bucket_name = 'keep-media'
+            if not settings.DEBUG:
+                storage.bucket_name = settings.AWS_MEDIA_STORAGE_BUCKET_NAME
             for key in valid_files.keys():
 
                 file_to_upload = valid_files.get( key )
@@ -306,19 +333,49 @@ class Repository( models.Model ):
 
         return new_data_id
 
+    def add_task( self, task_id, task_type ):
+        '''
+            Track of tasks id ( and subsequently their results ) on a per repo
+            basis.
+
+            Params
+            ------
+            task_id : integer
+                Task id returned by Celery
+            task_type : string
+                An identifier for this task. ( i.e "csv_upload", etc )
+        '''
+        task_data = {
+            'repo': ObjectId( self.mongo_id ),
+            'task': task_id,
+            'type': task_type }
+
+        task_id = db.task.insert( task_data )
+        return task_id
+
+    def remove_task( self, task_id ):
+        return db.task.remove( { 'task': task_id } )
+
     def flatten_fields( self ):
         return self._flatten( self.fields() )
 
     def fields( self ):
         return db.repo.find_one( ObjectId( self.mongo_id ) )[ 'fields' ]
 
+    def update_fields( self, fields ):
+        db.repo.update( { '_id': ObjectId( self.mongo_id ) },
+                        { '$set': { 'fields': fields } } )
+
     def submissions( self ):
         return db.data.find({ 'repo': ObjectId( self.mongo_id ) } ).count()
+
+    def tasks( self ):
+        return db.task.find( { 'repo': ObjectId( self.mongo_id ) } )
 
     def owner( self ):
         if self.org:
             return self.org.name
-        return self.user.name
+        return self.user.username
 
     def __unicode__( self ):
-        return '<Repository %s>' % ( self.name )
+        return '<Repository %s/%s>' % ( self.owner(), self.name )

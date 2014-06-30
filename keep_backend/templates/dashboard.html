@@ -4,14 +4,16 @@
 {% block title %}{{ user.username }}{% endblock %}
 
 {% block js %}
-<script src='{% static "js/vendor/dashboard.js" %}'></script>
-<script src='{% static "js/vendor/requirejs.js" %}'></script>
-<!-- Used to determine shared versus not shared repos -->
-<script id='user_id'>{{ user.id }}</script>
+<!-- Initial data -->
 <script type='text/javascript'>
+	document.user = "{{ user }}";
+	document.user_id = {{ user.id }};
 	document.repo_list  = {{user_repos|safe}};
 	document.study_list = {{user_studies|safe}};
 </script>
+
+<!-- Load our app -->
+<script src='{% static "js/vendor/requirejs.js" %}'></script>
 <script type="text/javascript">
 	require([ '{% static "js/common.js" %}' ], function (common) {
 		require.config({
@@ -19,6 +21,70 @@
 		});
 		require( [ 'app/dashboard/main' ] );
 	});
+</script>
+<script type='text/template' id='file-dropped-template'>
+	<div class="bbm-modal__topbar">
+		<h3 class="bbm-modal__title">New Data Diary</h3>
+	</div>
+
+	<div class="bbm-modal__section">
+		<form>
+			<div class='control-group'>
+				Creating from:
+				<i class='icon-file-alt'></i>
+				<%= file.name %> (<%= file.size %> B)
+			</div>
+
+			<div class='control-group'>
+				<input type='text' id='repo-name' class='input large' value='<%= repo_name %>' placeholder='Diary Name'>
+			</div>
+
+			<div class='control-group' style='display:none;'>
+				<label class='radio'>
+					<input type='radio' name='privacy' value='public'>
+					<i class='icon-unlock'></i>
+					<strong>Public</strong>
+					<div class='help-block'>
+						Anyone can see this repository and the data associated
+						with it.
+					</div>
+				</label>
+				<label class='radio' style='clear:both;'>
+					<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
+					<i class='icon-lock'></i>
+					<strong>Private</strong>
+					<div class='help-block'>
+						You choose who can see this repository and the data
+						associated with it.
+					</div>
+				</label>
+			</div>
+
+			<div class='control-group'>
+				<select class='input' name='study'>
+					<option value=''>Not part of a study</option>
+					<optgroup label='Your Studies'>
+						<% _.each( studies, function( study ) { %>
+							<option value='<%= study.get("id") %>'>
+								<%= study.get( "name" ) %>
+							</option>
+						<% }); %>
+					</optgroup>
+				</select>
+				<label class='checkbox'>
+					<input type='checkbox' name='tracker'>
+					<strong>Use this diary to track other things in this study</strong>
+					<div class='help-block'>
+						Only valid when pairing this diary with a study
+					</div>
+				</label>
+			</div>
+		</form>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-primary">Upload</a>
+		<a href='#' class='btn btn-cancel'>Cancel</a>
+	</div>
 </script>
 <script type='text/template' id='study-settings-template'>
 	<div class="bbm-modal__topbar">
@@ -29,10 +95,10 @@
 		<div>
 			<div><a href='#' class='btn study-delete'><i class='icon-trash'></i> Delete Study</a></div>
 		</div>
-    </div>
-    <div class="bbm-modal__bottombar">
-    	<a href="#" class="btn btn-primary">Done</a>
-    </div>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-primary">Done</a>
+	</div>
 </script>
 <script type="text/template" id="new-study-template">
 	<div class="bbm-modal__topbar">
@@ -55,35 +121,33 @@
 				</label>
 			</div>
 		</form>
-    </div>
-    <div class="bbm-modal__bottombar">
-    	<a href="#" class="btn btn-cancel">Cancel</a>
-    	<a href="#" class="btn btn-primary">Create</a>
-    </div>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-cancel">Cancel</a>
+		<a href="#" class="btn btn-primary">Create</a>
+	</div>
   </script>
 {% endblock %}
 
 {% block content %}
+<div id='file-drop-overlay'>
+	<div class='center'>
+		<p>
+			<i class='icon-file-alt' style='font-size:64px;'></i>
+			<br/>&nbsp;<br/>
+			Drop your file to upload
+		</p>
+	</div>
+</div>
+<div class='sixteen columns hints'>
+	Did you know? Drag a CSV, JSON, XML, or XLS file onto the page to create a new data diary
+</div>
 <div id='dashboard'>
 	<div class='three columns sidebar'>
 
-		<form id="newform" action='/repo/new/' method='post' enctype='multipart/form-data'>
-			{% csrf_token %}
-			<input type="hidden" id="MAX_FILE_SIZE" name="MAX_FILE_SIZE" value="300000" />
-			<input type="hidden" name="name" />
-			<input type="hidden" name="privacy" value="private" />
-			<input type="file" id="fileselect" name="xform_file" multiple="multiple" style="display: none"/>
-			<div id="filedrag">
-				Drag a File(CSV/JSON/XLS) here to make a repo
-				<div>
-				<a class='btn btn-primary btn-small' id='new_repo_btn' href='{% url "repo_new" %}'>
-					Create From Scratch
-				</a>
-				</div>
-			</div>
-			<input type="submit" name="submission" style="display: none">
-		</form>
-
+		<a class='btn btn-primary btn-block' id='new_repo_btn' href='{% url "repo_new" %}'>
+			<i class='icon-plus-sign'></i>&nbsp;New Data Diary
+		</a>
 
 		<!-- STUDIES & DATA DIARIES -->
 		<div id='studies' class='section'>
@@ -147,18 +211,16 @@
 				{% endif %}
 			</ul>
 		</div>
-
-		<div style='display:none;'>
-			<form action='{% url "repo_batch" %}' method="POST" enctype="multipart/form-data">
-				{% csrf_token %}
-				<input type='file' name='csv_file'>
-				<button type='submit'>Batch</button>
-			</form>
-		</div>
 	</div>
 
 	<!-- REPOSITORIES -->
 	<div id='repos' class='thirteen columns repos'>
+
+		<div style='float:right;'>
+			<a href='#' id='refresh-repos'>
+				<i class='icon-refresh'></i>
+			</a>
+		</div>
 
 		<div>
 			<ul id='filters' class='nav-list nav-inline'>

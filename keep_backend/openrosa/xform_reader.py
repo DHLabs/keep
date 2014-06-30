@@ -418,12 +418,3 @@ class XFormReader():
 
     def __repr__( self ):
         return str( self.xform_dict )
-
-
-def main():
-    survey = XFormReader( open( sys.argv[1], 'rb' ) )
-    return survey
-
-
-if __name__ == '__main__':
-    print main()

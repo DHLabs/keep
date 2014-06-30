@@ -1,6 +1,6 @@
 #map {
-	height: 512px;
-	border: 4px solid #AAA;
+	min-height: 256px;
+	min-width: 256px;
 
 	.leaflet-control {
 		-webkit-border-radius:0px;

@@ -52,7 +52,7 @@ define( [ 'jquery',
             else
                 $( @el ).addClass( 'private' )
 
-            if @model.get( 'org' )? or @model.get( 'user' ) != parseInt( $( '#user_id' ).html() )
+            if @model.get( 'org' )? or @model.get( 'user' ) != parseInt( document.user_id )
                 $( @el ).addClass( 'shared' )
 
             @
