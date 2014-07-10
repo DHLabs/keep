@@ -44,6 +44,7 @@ define( [ 'jquery',
             @currentQuestionIndex = 0
             @numberOfQuestions = document.repo.children.length
 
+            @repopulateForm()
             @
 
         submit: ->
@@ -88,6 +89,66 @@ define( [ 'jquery',
         #   popup = L.popup()
         #   map.on "click", onMapClick
         #   map.invalidateSize false
+
+        queryStringToJSON: (url) ->
+          if (url == '')
+            return ''
+          pairs = (url or location.search).slice(1).split('&')
+          result = {}
+          for idx in pairs
+              pair = idx.split('=')
+              if !!pair[0]
+                  result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] or '')
+          
+          return result
+
+        replaceAll: (find, replace, str) ->
+          return str.replace(new RegExp(find, 'g'), replace)
+
+        repop_multiple: (newstring,object) ->
+          cont = newstring
+          while true
+            index = cont.indexOf(object.name);
+            if index == -1
+                break
+            cont = cont.substring(index, cont.length);
+            andindex = cont.indexOf("&");
+            value = cont.substring(object.name.length+1,andindex)
+            cont = cont.substring( object.name.length+1, cont.length )
+            $('input[value="' + value + '"]').prop('checked', true)
+
+          @
+
+        repopulateForm: ->
+          #contents = document.getElementById('session-data').innerHTML;
+          #contents = "?" + contents.trim();
+          #contents = replaceAll('&amp;','&', contents);
+          result = @queryStringToJSON(null)
+
+          for  i in [0..(document.repo.children.length-1)]
+            obj = document.repo.children[i]
+
+            if obj.type == "group"
+              for j in [0..(obj.children.length-1)]  
+                obj2 = obj.children[j]
+                if obj2.type == 'select all that apply' 
+                  @repop_multiple(location.search,obj2)
+                else if obj2.type == "select one"
+                  $('input[value="' + result[obj2.name] + '"]').prop('checked', true)
+                #else if( obj2.type == "geopoint" )
+                #    handlegeopoint( result[obj2.name] )
+                else
+                  $('#'+obj2.name).val( result[obj2.name] )
+            else 
+              if obj.type == 'select all that apply'
+                @repop_multiple(location.search,obj)
+              else if obj.type == "select one"
+                $('input[value="' + result[obj.name] + '"]').prop('checked', true)
+              #else if obj.type == "geopoint"
+              #handlegeopoint( result[obj.name] )
+              else
+                $('#'+obj.name).val( result[obj.name] )
+          @
 
         # For calculations.  Currently only supporting basic -, +, *, div
         _performCalcluate = (equation) ->
