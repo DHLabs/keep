@@ -79,6 +79,13 @@ def create_repo_from_file( file, file_type, repo ):
         fields = SurveyReader( xform )
         fields = fields.to_json_dict()
 
+        if (not repo.is_tracker) and (repo.study is not None):
+            fields['children'].append( {
+                    'type':'text',
+                    'name':repo.study.tracker,
+                    'label':repo.study.tracker,
+                } )
+
         repo.update_fields( fields.get( 'children' ) )
 
     # Remove the task from our list of "tasks"
