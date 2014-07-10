@@ -11,10 +11,9 @@ define( [ 'jquery',
           'backbone-forms',
           'leaflet',
           'app/webform/models',
-          'app/webform/builder',
           'app/webform/constraints' ],
 
-( $, _, Backbone, Forms, L, xFormModel, build_form, XFormConstraintChecker ) ->
+( $, _, Backbone, Forms, L, xFormModel, XFormConstraintChecker ) ->
 
     class xFormView extends Backbone.View
         # The HTML element where the form will be rendered
@@ -29,96 +28,66 @@ define( [ 'jquery',
             'click #next_btn':          'next_question'
             'click #prev_btn':          'prev_question'
 
-        _fieldsets: []
-        _data:      []
-        _schema:    {}
-        item_dict:  {}
-        input_fields: []
-        renderedForm: null
-        languages:  []
+        # _fieldsets: []
+        # _data:      []
+        # _schema:    {}
+        # item_dict:  {}
+        # input_fields: []
+        # renderedForm: null
+        # languages:  []
 
         initialize: ->
             # Grab the form_id from the page
             @form_id  = $( '#form_id' ).html()
             @user     = $( '#user' ).html()
 
-            # Begin render when the model is finished fetching from the server
-            @listenTo( @model, 'change', @render )
-            @model.fetch( { url: "/api/v1/repos/#{@form_id}/?user=#{@user}&format=json" } )
+            @currentQuestionIndex = 0
+            @numberOfQuestions = document.repo.children.length
 
             @
 
         submit: ->
-            $( @renderedForm.el ).submit()
-
-        recursiveAdd: build_form
+            $( ".form" ).submit()
 
         render: () ->
-            #     groupBegin: '<div class="well"><div><strong>Group: </strong>{{title}}</div></div>'
-            #     groupEnd: '<div><hr></div>'
-
             # Creates submission page, takes care of corner case
-            submitChild =
-              bind:
-                readonly: "true()"
-
-              label: "Form Complete!  Click Submit, or hit Previous to review your answers."
-              name: "knozr563kj04tyn748945"
-              type: "note"
-
-            @model.attributes.children.push submitChild
-
-            # Create the form to render
-            _.each( @model.attributes.children, ( child ) =>
-                @recursiveAdd( child, "/", @model.attributes.default_language )
-            )
-
-            # Create the Form object with the schema we want
-            @renderedForm = new Backbone.Form(
-                schema: @item_dict
-            ).render()
-
-            _.each( @item_dict, ( child, key ) =>
-                child.name = key
-                @input_fields.push( child )
-            )
-
-            # Render it on the page!
-            $('#formDiv').html( @renderedForm.el )
-
-            if (@input_fields[0].bind and @input_fields[0].bind.group_start) or (@input_fields[0].control and @input_fields[0].control.appearance)
-              _groupOperations.apply(@, [0, true])
-            else 
-              $( '.control-group' ).first().show().addClass( 'active' )
-              $( '.active input' ).focus()
+            # submitChild =
+            #   bind:
+            #     readonly: "true()"          
+            
+            # if (@input_fields[0].bind and @input_fields[0].bind.group_start) or (@input_fields[0].control and @input_fields[0].control.appearance)
+            #   _groupOperations.apply(@, [0, true])
+            # else 
+            #   $( '.control-group' ).first().show().addClass( 'active' )
+            #   $( '.active input' ).focus()
 
             @_display_form_buttons( 0 )
 
             # Render additional Geopoint if first question is one
-            _geopointDisplay()  if @_active_question().info.bind and @_active_question().info.bind.map
+            # _geopointDisplay()  if @_active_question().info.bind and @_active_question().info.bind.map
             @
 
-        _geopointDisplay = ->
-          onMapClick = (e) ->
-            popup.setLatLng(e.latlng).setContent("Latitude and Longitude: " + e.latlng.toString()).openOn map
-            $("#" + question).val e.latlng.lat + " " + e.latlng.lng + " 0 0"
-          map = undefined
-          question = ($(".active").data("key"))
-          element = document.getElementById(question + "_map")
-          unless element.classList.contains("map")
-            element.classList.add "map"
-            map = L.map((question + "_map"),
-              center: [36.60, -120.65]
-              zoom: 5
-            )
-            L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png",
-              attribution: "&copy; <a href=\"http://osm.org/copyright\">OpenStreetMap</a> contributors"
-              maxZoom: 18
-              reuseTiles: true
-            ).addTo map
-          popup = L.popup()
-          map.on "click", onMapClick
-          map.invalidateSize false
+        # _geopointDisplay = ->
+        #   onMapClick = (e) ->
+        #     popup.setLatLng(e.latlng).setContent("Latitude and Longitude: " + e.latlng.toString()).openOn map
+        #     $("#" + question).val e.latlng.lat + " " + e.latlng.lng + " 0 0"
+        #   map = undefined
+        #   question = ($(".active").data("key"))
+        #   element = document.getElementById(question + "_map")
+        #   unless element.classList.contains("map")
+        #     element.classList.add "map"
+        #     map = L.map((question + "_map"),
+        #       center: [36.60, -120.65]
+        #       zoom: 5
+        #     )
+        #     L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png",
+        #       attribution: "&copy; <a href=\"http://osm.org/copyright\">OpenStreetMap</a> contributors"
+        #       maxZoom: 18
+        #       reuseTiles: true
+        #     ).addTo map
+        #   popup = L.popup()
+        #   map.on "click", onMapClick
+        #   map.invalidateSize false
 
         # For calculations.  Currently only supporting basic -, +, *, div
         _performCalcluate = (equation) ->
@@ -255,64 +224,71 @@ define( [ 'jquery',
 
           @
 
-
-
         _display_form_buttons: ( question_index ) ->
 
-            if question_index == @input_fields.length - 1
+            if question_index == @numberOfQuestions - 1
                 $( '#prev_btn' ).show()
                 $( '#submit_btn' ).show()
 
                 $( '#next_btn' ).hide()
-                $("html").keydown (e) ->
-                    $("#submit_btn").click()  if e.keyCode is 13
+                # $("html").keydown (e) ->
+                #     $("#submit_btn").click()  if e.keyCode is 13
 
             else if question_index == 0
                 $( '#prev_btn' ).hide()
                 $( '#submit_btn' ).hide()
 
                 $( '#next_btn' ).show()
-                $("#xform_view").keydown (e) ->
-                    $("#next_btn").click()  if e.keyCode is 13
+                # $("#xform_view").keydown (e) ->
+                #     $("#next_btn").click()  if e.keyCode is 13
             else
                 $( '#prev_btn' ).show()
                 $( '#next_btn' ).show()
 
                 $( '#submit_btn' ).hide()
-                $("#xform_view").keydown (e) ->
-                    $("#next_btn").click()  if e.keyCode is 13
+                # $("#xform_view").keydown (e) ->
+                #     $("#next_btn").click()  if e.keyCode is 13
             @
 
-        _active_question: ->
-            # First check constraints on the question we're on
-            question = $( '.active' ).data( 'key' )
-
-            # Check constraints of this question before continuing
-            question_index = -1
-            form_info = _.find( @input_fields, ( child ) ->
-                question_index += 1
-                return child.name == question
-            )
-            return { 'key': question, 'idx': question_index, 'info': form_info }
-
         passes_question_constraints: ->
-            # First check constraints on the question we're on
-            question = @_active_question()
+            #TODO: First check constraints on the question we're on
+            question = document.repo.children[@currentQuestionIndex]
 
             # Pass required?
-            if question.info.bind and question.info.bind.required is "yes"
-                if @renderedForm.getValue()[ question.key ].length == 0
-                    $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
-                    return false
+            # if question.bind and question.bind.required is "yes"
+            #     if @renderedForm.getValue()[ question.key ].length == 0
+            #         $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
+            #         return false
 
             # Pass contraints?
-            if not XFormConstraintChecker.passesConstraint( question.info, @renderedForm.getValue() )
-                $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer doesn't pass constraint:" + question.info.bind.constraint + "</span></div>"
-                return false
+            # if not XFormConstraintChecker.passesConstraint( question, @renderedForm.getValue() )
+            #     $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer doesn't pass constraint:" + question.info.bind.constraint + "</span></div>"
+            #     return false
 
             return true
 
-        switch_question: ( element, forward ) ->
+        get_question_value: ( question_number ) ->
+
+          question = document.repo.children[question_number]
+
+          return ""
+
+        toggle_question: (question, isHide) ->
+          if isHide
+            $('#' + question.name + '_field').hide()
+          else
+            $('#' + question.name + '_field').show()
+
+          if question.type == 'group'
+            for i in [0..(question.children.length -1)]
+              child = question.children[i]
+              toggleQuestion( child, isHide )
+
+          @
+    
+        switch_question: ( next_index, forward ) ->
+
+            #TODO: if in group, test relevance/constraint for all children
 
             # Does the current active question pass our constraints?
             if forward
@@ -320,104 +296,96 @@ define( [ 'jquery',
                     return @
 
             # Current question
-            current_question = @_active_question()
+            current_question = document.repo.children[@currentQuestionIndex]
 
+            @toggle_question(current_question, true)
             # Question to switch to
-            switch_question_key = $( element ).data( 'key' )
+            #switch_question_key = $( element ).data( 'key' )
 
             # Check constraints of this question before continuing
-            question_index = -1
-            form_info = _.find( @input_fields, ( child ) ->
-                question_index += 1
-                return child.name == switch_question_key
-            )
+            #question_index = -1
+            # form_info = _.find( @input_fields, ( child ) ->
+            #     @currentQuestionIndex += 1
+            #     return child.name == switch_question_key
+            # )
 
-            # Is this question relevant?  Or, is this question an equation?
-            if (form_info.bind and form_info.bind.calculate) or not XFormConstraintChecker.isRelevant( form_info, @renderedForm.getValue() )
+            #Is this question relevant?  Or, is this question an equation?
+            if (current_question.bind and current_question.bind.calculate) or not 
+              XFormConstraintChecker.isRelevant( current_question, @get_question_value(current_question) )
                 # If its a calculation, calculate it!
-                $("#" + form_info.name).val _performCalcluate(form_info.bind.calculate)  if form_info.bind and form_info.bind.calculate
+                $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
 
                 # Switch to the next question!
                 if forward
-                    if question_index < @input_fields.length
-                        question_index += 1
+                    if @currentQuestionIndex < @numberOfQuestions
+                        @currentQuestionIndex += 1
                 else
-                    if question_index > 0
-                        question_index -= 1
+                    if @currentQuestionIndex > 0
+                        @currentQuestionIndex -= 1
 
-                @switch_question( $( '.control-group' ).eq( question_index ), forward )
+                @switch_question( -1, forward )
                 return
-
-            # Animate and remove the current question and any possible alerts
-            $(".active").fadeOut 1
-            $(".alert").fadeOut 1
-            $(".active").removeClass "active"
-
-            if form_info.bind and form_info.bind.group_start
-              _groupOperations.apply(@, [question_index, forward])
-
-            else
-              switch_question = $("#" + $($(".control-group").eq(question_index)[0]).data("key") + "_field")
-              form_info = @input_fields[question_index]
-
-              # If there is a query to a previous answer, display that answer
-              subsequent = undefined
-              if (form_info.title and subsequent = form_info.title.indexOf("${")) isnt -1
-                end_subsequent = form_info.title.indexOf("}", subsequent)
-                subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent)
-                switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val())
-          
-              element.fadeIn(1).addClass "active"
             
-            #Start the Geopoint display if geopoint
-            _geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
+            if next_index != -1
+              @currentQuestionIndex = next_index
 
-            @_display_form_buttons( question_index )
+            current_question = document.repo.children[@currentQuestionIndex]
+            @toggle_question(current_question, false)
+            
+            # If there is a query to a previous answer, display that answer
+            # subsequent = undefined
+            # if (form_info.title and subsequent = form_info.title.indexOf("${")) isnt -1
+            #   end_subsequent = form_info.title.indexOf("}", subsequent)
+            #   subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent)
+            #   switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val())
+                    
+            #Start the Geopoint display if geopoint
+            #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
+
+            @_display_form_buttons( @currentQuestionIndex )
 
             @
 
         next_question: () ->
 
-            question = @_active_question()
-            question_index = question.idx
+            #currentQuestion = document.repo.children[@currentQuestionIndex]
 
             # Set up for field lists and grid lists
-            if question.info.control and question.info.control.appearance
-                current_tree = question.info.tree
-                question_index += 1
-                question_index += 1  while @input_fields[question_index].tree is current_tree 
+            # if question.info.control and question.info.control.appearance
+            #     current_tree = question.info.tree
+            #     question_index += 1
+            #     question_index += 1  while @input_fields[question_index].tree is current_tree 
 
             # Attempt to switch to the next question
-            else if question_index < @input_fields.length
-                question_index += 1
+            #if question_index < @input_fields.length
+            #    question_index += 1
 
-            @switch_question( $( '#' + @input_fields[question_index].name + '_field' ), true )
+            @switch_question( @currentQuestionIndex + 1, true )
 
             @
 
         prev_question: () ->
 
-            question = @_active_question()
-            question_index = question.idx
+            # question = @_active_question()
 
-            if question_index <= 0
-                return @
+            # if question_index <= 0
+            #     return @
 
-            current_tree = @input_fields[question_index - 1].tree
+            # current_tree = @input_fields[question_index - 1].tree
 
-            # If we are in a group, check if we are in a field/grid list group
-            unless current_tree is "/"
-              temp_idx = question_index - 1
-              temp_idx -= 1  while temp_idx >= 0 and @input_fields[temp_idx].tree is current_tree
-              temp_idx += 1
-              if @input_fields[temp_idx].control and @input_fields[temp_idx].control.appearance
-                question_index = temp_idx
-              else
-                question_index -= 1
-            else
-              question_index -= 1
+            # # If we are in a group, check if we are in a field/grid list group
+            # unless current_tree is "/"
+            #   temp_idx = question_index - 1
+            #   temp_idx -= 1  while temp_idx >= 0 and @input_fields[temp_idx].tree is current_tree
+            #   temp_idx += 1
+            #   if @input_fields[temp_idx].control and @input_fields[temp_idx].control.appearance
+            #     question_index = temp_idx
+            #   else
+            #     question_index -= 1
+            # else
+            #   question_index -= 1
               
-            @switch_question( $( '#' + @input_fields[question_index].name + '_field' ), false )
+            @switch_question( @currentQuestionIndex - 1, false )
 
             @
 

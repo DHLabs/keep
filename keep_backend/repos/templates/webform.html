@@ -65,6 +65,9 @@
 {% block js %}
 <script id='form_id' type='text/html'>{{ repo_id }}</script>
 <script id='user' type='text/html'>{{ user.username }}</script>
+<script type='text/javascript'>
+	document.repo = {{repo_json|safe}};
+</script>
 
 <script src='{% static 'js/vendor/requirejs.js' %}'></script>
 <script type='text/javascript'>
@@ -147,7 +150,62 @@ $("alert_template .close").click(function(e) {
 		<div id="autofill_list" class='autocomplete-list'></div>
 	  	<div id="xform_view" class="span12">
 	    	<div id="form_fields" class="formbox">
-		  		<div id="formDiv"></div>
+		  		<div id="formDiv">
+		  			<form class="form" method="post" action="." enctype="multipart/form-data">
+		  				{% for field in flat_fields %}
+		  					{% if forloop.counter0 == 0 %}
+		  				<div id="{{ field.name }}_field" class="control-group" style="display: block">
+		  					{% else %}
+		  				<div id="{{ field.name }}_field" class="control-group" style="display: none">
+		  					{% endif %}
+
+		  					<label class="control-label" for="{{ field.name }}">
+		  						{{ field.label }}
+		  					</label>
+
+		  					<div class="controls">
+
+		  					{% if field.type == 'group' %}
+
+		  					{% elif field.type == 'geopoint' %}
+		  						<!-- TODO -->
+		  					{% elif field.type == 'integer' or field.type == 'decimal' or field.type == 'integer' %}
+		  						<span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" type="number" step="any"></span>
+		  					{% elif field.type == 'select one' %}
+		  						<ul id="{{ field.name }}" name="{{ field.name }}">
+		  							{% for choice in field.choices %}
+		  								<li><span data-editor="">
+		  									<input type="radio" name="{{ field.name }}" value="{{ choice.name }}" 
+		  										id="{{ field.name }}-{{ forloop.counter0 }}">
+		  									<label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label }}</label>
+		  									</span>
+		  								</li>	
+		  							{% endfor %}
+		  						</ul>
+                      
+		  					{% elif field.type == 'select all that apply' %}
+		  						<ul id="{{ field.name }}" name="{{ field.name }}">
+		  							{% for choice in field.choices %}
+		  								<li><span data-editor="">
+		  									<input type="checkbox" name="{{ field.name }}" value="{{ choice.name }}" 
+		  										id="{{ field.name }}-{{ forloop.counter0 }}">
+		  									<label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label }}</label>
+		  									</span>
+		  								</li>	
+		  							{% endfor %}
+		  						</ul>
+		  					{% elif field.type == 'text' %}
+		  						<input id="{{ field.name }}" name="{{ field.name }}" type="text">
+		  					{% elif field.type == 'note' %}
+
+		  					{% endif %}
+
+		  					</div>
+		  				</div>
+		  				{% endfor %}
+
+		  			</form>
+		  		</div>
 		  		<div id="alert-placeholder"></div>
 	    	</div>
 	    	<div id='form_actions' style='overflow:auto;'>

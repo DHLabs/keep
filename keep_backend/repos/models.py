@@ -235,9 +235,6 @@ class Repository( models.Model ):
         field_list = []
 
         for field in fields:
-            if field.get( 'type' ) == 'note':
-                continue
-
             if 'group' in field.get( 'type' ):
                 field_list.extend( self._flatten( field.get( 'children' ) ) )
                 continue

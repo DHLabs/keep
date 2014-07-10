@@ -299,8 +299,15 @@ def webform( request, username, repo_name ):
                         reverse( 'organization_dashboard',
                                  kwargs={ 'org': account.name } ) )
 
+
+    serializer = RepoSerializer()
+    repo_json = json.dumps( serializer.serialize( [repo] )[0] )
+    flat_fields = repo.flatten_fields()
+
     return render_to_response( 'webform.html',
                                { 'repo': repo,
+                                 'repo_json': repo_json,
+                                 'flat_fields': flat_fields,
                                  'repo_id': repo.mongo_id,
                                  'account': account },
                                context_instance=RequestContext( request ))
