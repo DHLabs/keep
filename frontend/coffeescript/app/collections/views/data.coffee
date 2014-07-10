@@ -96,7 +96,10 @@ define( [ 'jquery',
                 tdata = { data: model.data[ field.name ] }
 
                 if field.type in [ 'geopoint', 'photo' ]
-                    templ.push( @data_templates[ field.type ]( tdata ) )
+                    if tdata['data']
+                        templ.push( @data_templates[ field.type ]( tdata ) )
+                    else
+                        templ.push( @data_templates[ 'text' ]( tdata ) )
                 else
                     templ.push( @data_templates[ 'text' ]( tdata ) )
 

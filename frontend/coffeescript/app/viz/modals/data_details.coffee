@@ -39,7 +39,10 @@ define( [ 'jquery',
                 tdata = { data: @model.attributes.data[ field.name ] }
 
                 if field.type in [ 'geopoint', 'photo' ]
-                    attributes[ field.name ] = @data_templates[ field.type ]( tdata )
+                    if tdata['data']
+                        attributes[ field.name ] = @data_templates[ field.type ]( tdata )
+                    else
+                        attributes[ field.name ] = @data_templates[ 'text' ]( tdata )
                 else
                     attributes[ field.name ] = @data_templates[ 'text' ]( tdata )
 
