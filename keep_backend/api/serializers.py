@@ -18,7 +18,7 @@ class CSVSerializer( Serializer ):
 
     FLOAT_TYPE = re.compile(r'^(\d+\.\d*|\d*\.\d+)$')
     INT_TYPE   = re.compile(r'^\d+$')
-    LOCATION_TYPE = re.compile(r'^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$')
+    LOCATION_TYPE = re.compile(r'^(\-?\d+(\.\d+)?) \s*(\-?\d+(\.\d+)?) \s*(\d+) \s*(\d+)$')
 
     def _sniff_type( self, val ):
         '''
@@ -98,7 +98,6 @@ class CSVSerializer( Serializer ):
         return raw_data.getvalue()
 
     def from_csv( self, csv_data ):
-
         fields, data = ( [], [] )
 
         csv_file = unicodecsv.DictReader( csv_data )
