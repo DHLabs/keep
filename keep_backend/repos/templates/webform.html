@@ -171,7 +171,17 @@ $("alert_template .close").click(function(e) {
 		  						<!-- TODO -->
 		  					{% elif field.type == 'integer' or field.type == 'decimal' or field.type == 'integer' %}
 		  						<span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" type="number" step="any"></span>
-		  					{% elif field.type == 'select one' %}
+		  					{% elif field.type == 'select one' or field.type == 'select one or specify other' %}
+		  						{% if field.bind and field.bind.appearance == 'dropdown' %}
+		  						<select name="{{ field.name }}">
+		  							{% for choice in field.choices %}
+		  							<option value="{{ choice.name }}">{{ choice.label }}</option>
+		  							{% endfor %}
+		  							{% if field.type == 'select one or specify other' %}
+		  							<option>todo</option>
+		  							{% endif %}
+		  						</select>
+		  						{% else %}
 		  						<ul id="{{ field.name }}" name="{{ field.name }}">
 		  							{% for choice in field.choices %}
 		  								<li><span data-editor="">
@@ -181,9 +191,13 @@ $("alert_template .close").click(function(e) {
 		  									</span>
 		  								</li>	
 		  							{% endfor %}
+		  							{% if field.type == 'select one or specify other' %}
+		  							TODO
+		  							{% endif %}
 		  						</ul>
+		  						{% endif %}
                       
-		  					{% elif field.type == 'select all that apply' %}
+		  					{% elif field.type == 'select all that apply' or field.type == 'select all that apply or specify other'  %}
 		  						<ul id="{{ field.name }}" name="{{ field.name }}">
 		  							{% for choice in field.choices %}
 		  								<li><span data-editor="">
