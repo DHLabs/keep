@@ -42,7 +42,7 @@ define( [ 'jquery',
             @user     = $( '#user' ).html()
 
             @currentQuestionIndex = 0
-            @numberOfQuestions = document.repo.children.length
+            @numberOfQuestions = document.flat_fields.length
 
             @repopulateForm()
             @
@@ -62,7 +62,7 @@ define( [ 'jquery',
             #   $( '.control-group' ).first().show().addClass( 'active' )
             #   $( '.active input' ).focus()
 
-            @_display_form_buttons( 0 )
+            @_display_form_buttons( 0, null )
 
             # Render additional Geopoint if first question is one
             # _geopointDisplay()  if @_active_question().info.bind and @_active_question().info.bind.map
@@ -125,8 +125,8 @@ define( [ 'jquery',
           #contents = replaceAll('&amp;','&', contents);
           result = @queryStringToJSON(null)
 
-          for  i in [0..(document.repo.children.length-1)]
-            obj = document.repo.children[i]
+          for  i in [0..(document.flat_fields.length-1)]
+            obj = document.flat_fields[i]
 
             if obj.type == "group"
               for j in [0..(obj.children.length-1)]  
@@ -285,9 +285,9 @@ define( [ 'jquery',
 
           @
 
-        _display_form_buttons: ( question_index ) ->
+        _display_form_buttons: ( question_index, question ) ->
 
-            if question_index == @numberOfQuestions - 1
+            if question_index == @numberOfQuestions - 1 or ( question_index > 0 and (not question) )
                 $( '#prev_btn' ).show()
                 $( '#submit_btn' ).show()
 
@@ -313,7 +313,7 @@ define( [ 'jquery',
 
         passes_question_constraints: ->
             #TODO: First check constraints on the question we're on
-            question = document.repo.children[@currentQuestionIndex]
+            question = document.flat_fields[@currentQuestionIndex]
 
             # Pass required?
             # if question.bind and question.bind.required is "yes"
@@ -328,13 +328,18 @@ define( [ 'jquery',
 
             return true
 
-        get_question_value: ( question_number ) ->
+        get_question_value: ( question ) ->
 
-          question = document.repo.children[question_number]
+          answers = $( ".form" ).serialize()
+          answerJson = @queryStringToJSON(answers)
 
-          return ""
+          return answerJson[question.name]
 
         toggle_question: (question, isHide) ->
+
+          if not question
+            return false
+
           if isHide
             $('#' + question.name + '_field').hide()
           else
@@ -356,10 +361,16 @@ define( [ 'jquery',
                 if not @passes_question_constraints()
                     return @
 
-            # Current question
-            current_question = document.repo.children[@currentQuestionIndex]
+            previous_question = document.flat_fields[@currentQuestionIndex]
+            if not previous_question
+              @_display_form_buttons( @currentQuestionIndex, current_question )
+              return
 
-            @toggle_question(current_question, true)
+            if previous_question.type == 'group' and next_index != -1
+              #TODO: check if group is field-list or not first
+              if forward
+                next_index = next_index + previous_question.children.length
+
             # Question to switch to
             #switch_question_key = $( element ).data( 'key' )
 
@@ -369,29 +380,37 @@ define( [ 'jquery',
             #     @currentQuestionIndex += 1
             #     return child.name == switch_question_key
             # )
+            current_question = document.flat_fields[next_index]
+            if not forward
+              #is current question within group
+              group = @get_group_for_question(current_question)
+              if group
+                next_index = next_index - group.children.length
+                current_question = document.flat_fields[next_index]
+
+            if not current_question
+              @_display_form_buttons( @currentQuestionIndex, current_question )
+              return
 
             #Is this question relevant?  Or, is this question an equation?
             if (current_question.bind and current_question.bind.calculate) or not 
-              XFormConstraintChecker.isRelevant( current_question, @get_question_value(current_question) )
+              XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()) )
                 # If its a calculation, calculate it!
                 $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
 
                 # Switch to the next question!
                 if forward
-                    if @currentQuestionIndex < @numberOfQuestions
-                        @currentQuestionIndex += 1
+                    if next_index < @numberOfQuestions
+                        next_index += 1
                 else
-                    if @currentQuestionIndex > 0
-                        @currentQuestionIndex -= 1
+                    if next_index > 0
+                        next_index -= 1
 
-                @switch_question( -1, forward )
+                @switch_question( next_index, forward )
                 return
             
-            if next_index != -1
-              @currentQuestionIndex = next_index
-
-            current_question = document.repo.children[@currentQuestionIndex]
-            @toggle_question(current_question, false)
+            if @toggle_question(current_question, false)
+              @toggle_question(previous_question, true)
             
             # If there is a query to a previous answer, display that answer
             # subsequent = undefined
@@ -400,10 +419,11 @@ define( [ 'jquery',
             #   subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent)
             #   switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val())
                     
+            @currentQuestionIndex = next_index
             #Start the Geopoint display if geopoint
             #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
 
-            @_display_form_buttons( @currentQuestionIndex )
+            @_display_form_buttons( @currentQuestionIndex, current_question )
 
             @
 

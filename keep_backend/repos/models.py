@@ -228,7 +228,7 @@ class Repository( models.Model ):
             ( 'edit_data', 'Edit data in Repo' ),
             ( 'delete_data', 'Delete data from Repo' ), )
 
-    def _flatten( self, fields ):
+    def _flatten( self, fields, include_group ):
         '''
             Returns a flat list of fields.
         '''
@@ -236,7 +236,9 @@ class Repository( models.Model ):
 
         for field in fields:
             if 'group' in field.get( 'type' ):
-                field_list.extend( self._flatten( field.get( 'children' ) ) )
+                if include_group:
+                    field_list.append( field )
+                field_list.extend( self._flatten( field.get( 'children' ), include_group ) )
                 continue
 
             field_list.append( field )
@@ -354,7 +356,10 @@ class Repository( models.Model ):
         return db.task.remove( { 'task': task_id } )
 
     def flatten_fields( self ):
-        return self._flatten( self.fields() )
+        return self._flatten( self.fields(), False )
+
+    def flatten_fields_with_group( self ):
+        return self._flatten( self.fields(), True )
 
     def fields( self ):
         return db.repo.find_one( ObjectId( self.mongo_id ) )[ 'fields' ]
