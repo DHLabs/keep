@@ -67,6 +67,7 @@
 <script id='user' type='text/html'>{{ user.username }}</script>
 <script type='text/javascript'>
 	document.repo = {{repo_json|safe}};
+	document.flat_fields = {{ flat_field_json|safe }};
 </script>
 
 <script src='{% static 'js/vendor/requirejs.js' %}'></script>
@@ -80,49 +81,37 @@
 		require( [ 'app/webform/main' ] )
 	});
 </script>
-<script src="{% static 'js/vendor/bootstrap.2.3.1.min.js' %}"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-<script type='text/javascript'>
-	$( function() {
-		console.log( 'loaded' );
-		$(document).on( "focus", ".autofill", function() {
 
-			var repo = $( this ).data( 'repo' );
-			var field = $( this ).data( 'field' );
-
-			if( !$(this).data( 'autocomplete' ) ) {
-
-				$( this ).autocomplete( {
-					appendTo: '#autofill_list',
-					minLength: 2,
-					source: function( request, response ) {
-
-					    $.ajax( {
-					    	url: "/api/v1/data/" + repo,
-					    	data: {
-					    		format: 'json',
-					    		user: $( '#user' ).html()
-					    	},
-							success: function( query ) {
-					    		response( $.map( query.data, function( item ) {
-					        		return { label: item.data[ field ], value: item.data[ field ] }
-					        	}));
-					        }
-					    });
-					},
-	        		select: function( event, ui ) {
-
-	        			console.log( ui.item.value );
-	        		}
-	        	});
-	        }
-		});
-	});
-</script>
-<script>
-$("alert_template .close").click(function(e) {
-	$("alert_template span").remove();
-});
+<!--
+//=================================================
+//
+// Language selection modal
+//
+//=================================================
+-->
+<script type='text/template' id='language-select'>
+	<div class="bbm-modal__topbar">
+		<h3 class="bbm-modal__title">Select Language</h3>
+	</div>
+	<div class="bbm-modal__section">
+		<div class='control-group'>
+			<ul>
+			{% if has_translations == True %}
+			{% for key in flat_fields.0.label %}
+				<li>
+					<input type="radio" name="language" value="{{ key }}" 
+						id="language-{{ forloop.counter0 }}">
+					<label for="language-{{ forloop.counter0 }}">{{ key }}</label>
+				</li>	
+			{% endfor %}
+			{% endif %}
+			</ul>
+		</div>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-cancel">Cancel</a>
+		<a href="#" class="btn btn-primary">Choose</a>
+	</div>
 </script>
 {% endblock %}
 
@@ -132,7 +121,7 @@ $("alert_template .close").click(function(e) {
 {% block content %}
 <div class='container' id='webform'>
 	<div class='row'>
-		<div class='span12'>
+		<div class='fourteen columns'>
 			<h2>
 				{% if account.username and user.is_authenticated %}
 					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>/
@@ -144,6 +133,11 @@ $("alert_template .close").click(function(e) {
 				{% endif %}
 				&nbsp;{{ repo.name }}
 			</h2>
+		</div>
+		<div class="two columns">
+			<a href='#' class='btn' id='language-select-btn'>
+				Select Language
+			</a>
 		</div>
 	</div>
 	<div class="row">

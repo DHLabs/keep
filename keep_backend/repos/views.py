@@ -304,6 +304,12 @@ def webform( request, username, repo_name ):
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
     flat_fields = repo.flatten_fields_with_group()
 
+
+    if isinstance( flat_fields[0]["label"] , basestring):
+        has_translations = False
+    else:
+        has_translations = True
+
     flat_field_json = json.dumps(flat_fields)
 
     return render_to_response( 'webform.html',
@@ -311,6 +317,7 @@ def webform( request, username, repo_name ):
                                  'repo_json': repo_json,
                                  'flat_fields': flat_fields,
                                  'flat_field_json':flat_field_json,
+                                 'has_translations': has_translations,
                                  'repo_id': repo.mongo_id,
                                  'account': account },
                                context_instance=RequestContext( request ))

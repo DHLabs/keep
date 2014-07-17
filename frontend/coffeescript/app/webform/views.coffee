@@ -11,9 +11,10 @@ define( [ 'jquery',
           'backbone-forms',
           'leaflet',
           'app/webform/models',
-          'app/webform/constraints' ],
+          'app/webform/constraints',
+          'app/webform/modals/language' ],
 
-( $, _, Backbone, Forms, L, xFormModel, XFormConstraintChecker ) ->
+( $, _, Backbone, Forms, L, xFormModel, XFormConstraintChecker, LanguageSelectModal ) ->
 
     class xFormView extends Backbone.View
         # The HTML element where the form will be rendered
@@ -27,14 +28,15 @@ define( [ 'jquery',
             'click #form_sidebar > li': 'switch_question'
             'click #next_btn':          'next_question'
             'click #prev_btn':          'prev_question'
+            'click #language-select-btn':'language_select'
 
-        # _fieldsets: []
-        # _data:      []
-        # _schema:    {}
-        # item_dict:  {}
-        # input_fields: []
-        # renderedForm: null
         # languages:  []
+
+        language_select: ( event ) ->
+          @modalView = new LanguageSelectModal( { current: @currentLanguage, view: this } )
+          $('.modal').html( @modalView.render().el )
+          @modalView.onAfterRender( $( '.modal' ) )
+          @
 
         initialize: ->
             # Grab the form_id from the page
@@ -44,8 +46,17 @@ define( [ 'jquery',
             @currentQuestionIndex = 0
             @numberOfQuestions = document.flat_fields.length
 
+            @currentLanguage = null
+            if typeof(document.flat_fields[0].label) != "string"
+              @currentLanguage = _.keys(document.flat_fields[0].label)[0]
+              
             @repopulateForm()
             @
+
+        change_language: (language) ->
+          @currentLanguage = language
+          #TODO: finish this
+          @
 
         submit: ->
             $( ".form" ).submit()
@@ -346,11 +357,23 @@ define( [ 'jquery',
             $('#' + question.name + '_field').show()
 
           if question.type == 'group'
-            for i in [0..(question.children.length -1)]
+            for i in [0..(question.children.length-1)]
               child = question.children[i]
-              toggleQuestion( child, isHide )
+              @toggle_question( child, isHide )
 
-          @
+          return true
+
+        get_group_for_question: (question, fields=document.flat_fields, group=null) ->
+
+          for field in fields
+            if field.type == 'group'
+              thegroup = @get_group_for_question( question, field.children, field )
+              if thegroup
+                return thegroup
+            else if field.name == question.name and group
+              return group
+
+          return null
     
         switch_question: ( next_index, forward ) ->
 
@@ -370,7 +393,7 @@ define( [ 'jquery',
               #TODO: check if group is field-list or not first
               if forward
                 next_index = next_index + previous_question.children.length
-
+            
             # Question to switch to
             #switch_question_key = $( element ).data( 'key' )
 
@@ -408,7 +431,7 @@ define( [ 'jquery',
 
                 @switch_question( next_index, forward )
                 return
-            
+
             if @toggle_question(current_question, false)
               @toggle_question(previous_question, true)
             
@@ -418,7 +441,7 @@ define( [ 'jquery',
             #   end_subsequent = form_info.title.indexOf("}", subsequent)
             #   subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent)
             #   switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val())
-                    
+
             @currentQuestionIndex = next_index
             #Start the Geopoint display if geopoint
             #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
