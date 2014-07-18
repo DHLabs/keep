@@ -57,17 +57,17 @@ class NewStudyForm( forms.Form ):
 
             repo_fields = { 'fields': [] }
 
-            # Add the id field
-            repo_fields[ 'fields' ].append( { 'bind': { 'required': 'yes' },
-                                              'label': new_study.tracker,
-                                              'name': new_study.tracker,
-                                              'type': 'text' } )
-
             # Add a generic "name" field.
             repo_fields[ 'fields' ].append( { 'bind': { 'required': 'yes' },
                                               'label': 'Name',
                                               'name': 'name',
                                               'type': 'text' } )
+
+            # Add the id field
+            repo_fields[ 'fields' ].append( { 'bind': { 'required': 'yes','calculate':'' },
+                                              'label': new_study.tracker,
+                                              'name': new_study.tracker,
+                                              'type': 'calculate' } )
 
             repo_name = '%s-tracker' % ( slugify( new_study.name.lower() ) )
             repo_desc = 'Created to track objects for the %s study' % ( new_study.name )

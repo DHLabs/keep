@@ -211,6 +211,8 @@
 		  						<input id="{{ field.name }}" name="{{ field.name }}" type="text">
 		  					{% elif field.type == 'note' %}
 
+		  					{% elif field.type == 'calculate' %}
+		  						<input id="{{ field.name }}" name="{{ field.name }}" type="hidden">
 		  					{% endif %}
 
 		  					</div>

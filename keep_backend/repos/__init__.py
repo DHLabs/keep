@@ -49,7 +49,10 @@ def validate_and_format( fields, data, files ):
         if ename in data:
             # Convert to integer
             if etype == 'integer':
+              try:
                 valid_data[ ename ] = int( data[ ename ] )
+              except ValueError:
+                pass
 
             elif 'select all' in etype:
 

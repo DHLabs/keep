@@ -10,6 +10,8 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 
+import random
+
 from guardian.shortcuts import assign_perm, remove_perm, get_objects_for_user
 
 from backend.db import db
@@ -329,6 +331,9 @@ class Repository( models.Model ):
         """
         fields = self.fields()
         validated_data, valid_files = validate_and_format(fields, data, files)
+
+        if self.is_tracker:
+            validated_data[self.study.tracker] = random.randrange(100000000,999999999)
 
         repo_data = {
             'label': self.name,
