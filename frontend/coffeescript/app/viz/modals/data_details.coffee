@@ -32,6 +32,7 @@ define( [ 'jquery',
 
         onAfterRender: (modal) ->
             document.data_id = @model.attributes.id
+            document.data_detail = @model.attributes.data
             $( '#edit_data_btn', modal ).click( @editData )
             $( '#delete_data_btn', modal ).click( @deleteData )
             @
@@ -39,6 +40,12 @@ define( [ 'jquery',
         editData: (event) ->
             new_location = '/' + document.repo_owner + '/' +
                 document.repo.name + '/webform/?data_id=' + document.data_id
+
+            for key in _.keys(document.data_detail)
+                new_location += '&' + key + '='
+                #TODO: replace spaces and ampersands in detail string
+                new_location += document.data_detail[key]
+                
             window.location = new_location
             @
 

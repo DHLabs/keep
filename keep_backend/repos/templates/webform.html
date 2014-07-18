@@ -146,6 +146,11 @@
 	    	<div id="form_fields" class="formbox">
 		  		<div id="formDiv">
 		  			<form class="form" method="post" action="." enctype="multipart/form-data">
+
+		  				{% if data_id %}
+		  					<input type='hidden' value='{{ data_id }}' name='detail_data_id'>
+		  				{% endif %}
+
 		  				{% for field in flat_fields %}
 		  					{% if forloop.counter0 == 0 %}
 		  				<div id="{{ field.name }}_field" class="control-group" style="display: block">

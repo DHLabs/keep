@@ -298,6 +298,31 @@ class Repository( models.Model ):
         '''
         return db.data.find( { 'repo': ObjectId( self.mongo_id ) } )
 
+    def update_data( self, data, files ):
+        """
+            Validate and update data record with new data
+        """
+        #TODO: finish this
+        fields = self.fields()
+        validated_data, valid_files = validate_and_format(fields, data, files)
+
+        db.data.update( {"_id":ObjectId( data['detail_data_id'] )},{"$set": { 'data': validated_data, 'timestamp':datetime.utcnow() }} )
+
+        # Once we save the repo data, save the files to S3
+        if len( valid_files.keys() ) > 0:
+            # If we have media data, save it to this repo's data folder
+            if not settings.DEBUG:
+                storage.bucket_name = settings.AWS_MEDIA_STORAGE_BUCKET_NAME
+            for key in valid_files.keys():
+
+                file_to_upload = valid_files.get( key )
+
+                s3_url = '%s/%s/%s' % ( self.mongo_id,
+                                        new_data_id,
+                                        file_to_upload.name )
+
+                storage.save( s3_url, file_to_upload )
+
     def add_data( self, data, files ):
         """
             Validate and add a new data record to this repo!

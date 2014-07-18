@@ -44,10 +44,6 @@ class DataAuthorization( Authorization ):
         #TODO: finish this
         return True
 
-    def put_detail( self, object_detail, bundle ):
-        #TODO: finish this
-        return True
-
 class RepoAuthorization( Authorization ):
 
     def read_list( self, object_list, bundle ):

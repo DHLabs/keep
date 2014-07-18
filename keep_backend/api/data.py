@@ -40,7 +40,7 @@ class DataResource( MongoDBResource ):
         serializer = CSVSerializer()
 
         list_allowed_methos     = []
-        detail_allowed_methods  = [ 'get','put','delete' ]
+        detail_allowed_methods  = [ 'get','delete' ]
 
         authentication = MultiAuthentication( ApiTokenAuthentication(),
                                               SessionAuthentication() )
@@ -120,26 +120,6 @@ class DataResource( MongoDBResource ):
             sort[ 'type' ] = pymongo.ASCENDING
 
         return sort
-
-    def put_detail( self, request, **kwargs ):
-        repo_id = kwargs[ 'pk' ]
-
-        try:
-            basic_bundle = self.build_bundle( request=request )
-            repo = Repository.objects.get( mongo_id=repo_id )
-
-            if not self.authorized_put_detail( repo, basic_bundle ):
-                return HttpUnauthorized()
-
-            data_id = request.get("data_id")
-
-            if not data_id:
-                return HttpResponse( status=404 )
-
-            #TODO: finish this
-
-        except Exception as e:
-            return HttpBadRequest( str( e ) )
 
     def delete_detail( self, request, **kwargs ):
 
