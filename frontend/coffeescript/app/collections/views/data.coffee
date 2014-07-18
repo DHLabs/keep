@@ -83,6 +83,14 @@ define( [ 'jquery',
             'geopoint': _.template( '<td><%= data.coordinates[1] %>, <%= data.coordinates[0] %></td>' )
             'photo':    _.template( '<td><a href="<%= data %>" target="blank">Click to view photo</a></td>'  )
 
+            'forms':    _.template( '''
+                    <td>
+                    <% _.each(document.linked_repos, function(item) { %>
+                        <%= item.name %>
+                    <% }); %>
+                    </td>
+                ''')
+
         initialize: (options) ->
             @fields = options.fields
             @repo   = options.repo
@@ -92,6 +100,10 @@ define( [ 'jquery',
             # Based on the field type, we use a specific formatter for that
             # data type.
             templ = []
+
+            if @repo.attributes.is_tracker
+                templ.push( @data_templates[ 'forms' ]( { linked: @linked } ) )
+
             for field in @fields
                 tdata = { data: model.data[ field.name ] }
 
@@ -133,12 +145,15 @@ define( [ 'jquery',
 
         header_template: _.template( '''
                 <tr>
+                <% if(repo.attributes.is_tracker) { %>
+                    <th>Linked Forms</th>
+                <% }; %>
                 <% _.each( fields, function( item ) { %>
                     <th data-field='<%= item.name %>'>
                         <%= item.name %><i class='sort-me icon-sort'></i>
                     </th>
                 <% }); %>
-                    <th>&nbsp;</th>
+                    <th>&nbsp;</th> 
                 </tr>
             ''')
 
