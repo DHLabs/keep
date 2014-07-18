@@ -51,6 +51,7 @@ define( [ 'jquery',
               @currentLanguage = _.keys(document.flat_fields[0].label)[0]
               
             @repopulateForm()
+            @_display_form_buttons( 0, null )
             @
 
         change_language: (language) ->
@@ -320,6 +321,9 @@ define( [ 'jquery',
                 $( '#submit_btn' ).hide()
                 # $("#xform_view").keydown (e) ->
                 #     $("#next_btn").click()  if e.keyCode is 13
+
+            if document.getElementById( 'detail_data_id' ) != null
+                $( '#submit_btn' ).show()
             @
 
         passes_question_constraints: ->

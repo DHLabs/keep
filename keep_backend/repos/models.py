@@ -302,7 +302,7 @@ class Repository( models.Model ):
         """
             Validate and update data record with new data
         """
-        #TODO: finish this
+        #TODO: maybe remove old files??
         fields = self.fields()
         validated_data, valid_files = validate_and_format(fields, data, files)
 
