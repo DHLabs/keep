@@ -299,11 +299,15 @@ def webform( request, username, repo_name ):
                         reverse( 'organization_dashboard',
                                  kwargs={ 'org': account.name } ) )
 
+    elif request.method == "PUT":
+        #TODO
+        if not request.user.is_authenticated():
+            return render_to_response( 'finish_survey.html' )
 
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
     flat_fields = repo.flatten_fields_with_group()
-
+    
 
     if isinstance( flat_fields[0]["label"] , basestring):
         has_translations = False

@@ -30,6 +30,20 @@ define( [ 'jquery',
             @repo   = options.repo
             @linked = options.linked
 
+        onAfterRender: (modal) ->
+
+            #TODO: setup actions for edit/delete buttons
+
+            @
+
+        editData: () ->
+            #TODO:
+            @
+
+        deleteData: () ->
+            #TODO:
+            @
+
         serializeData: () ->
             # Loop through each data pair and formalize
             attributes = {}

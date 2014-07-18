@@ -40,6 +40,13 @@ class DataAuthorization( Authorization ):
 
         return False
 
+    def delete_detail( self, object_detail, bundle ):
+        #TODO: finish this
+        return True
+
+    def put_detail( self, object_detail, bundle ):
+        #TODO: finish this
+        return True
 
 class RepoAuthorization( Authorization ):
 
