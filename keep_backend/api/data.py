@@ -142,6 +142,7 @@ class DataResource( MongoDBResource ):
             return HttpBadRequest( str( e ) )
 
     def delete_detail( self, request, **kwargs ):
+
         repo_id = kwargs[ 'pk' ]
 
         try:
@@ -151,12 +152,14 @@ class DataResource( MongoDBResource ):
             if not self.authorized_delete_detail( repo, basic_bundle ):
                 return HttpUnauthorized()
 
-            data_id = request.get("data_id")
+            data_id = request.GET['data_id']
 
             if not data_id:
                 return HttpResponse( status=404 )
 
-            #TODO: finish this
+            db.data.remove( { '_id': ObjectId( data_id ) } )
+
+            return HttpResponse( status=200 )
 
         except Exception as e:
             return HttpBadRequest( str( e ) )

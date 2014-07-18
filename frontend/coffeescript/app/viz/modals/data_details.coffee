@@ -31,17 +31,30 @@ define( [ 'jquery',
             @linked = options.linked
 
         onAfterRender: (modal) ->
-
-            #TODO: setup actions for edit/delete buttons
-
+            document.data_id = @model.attributes.id
+            $( '#edit_data_btn', modal ).click( @editData )
+            $( '#delete_data_btn', modal ).click( @deleteData )
             @
 
-        editData: () ->
-            #TODO:
+        editData: (event) ->
+            new_location = '/' + document.repo_owner + '/' +
+                document.repo.name + '/webform/?data_id=' + document.data_id
+            window.location = new_location
             @
 
-        deleteData: () ->
-            #TODO:
+        deleteData: (event) ->
+            the_url = '/api/v1/data/' + document.repo.id + '/?data_id=' + document.data_id
+            $.ajax({ 
+                url: the_url,
+                type:'DELETE', 
+                headers: {
+                    'X-CSRFToken': $.cookie( 'csrftoken' )
+                }
+                })
+            .done(
+                () ->
+                    location.reload()
+            )
             @
 
         serializeData: () ->
