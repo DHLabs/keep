@@ -5,6 +5,8 @@
 {{ repo.name }} Web Entry
 {% endblock %}
 
+{% load repo_extras %}
+
 {% block css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/webform.css' %}">
 
@@ -159,7 +161,7 @@
 		  					{% endif %}
 
 		  					<label class="control-label" for="{{ field.name }}">
-		  						{{ field.label }}
+		  						{{ field.label|parse_label }}
 		  					</label>
 
 		  					<div class="controls">
@@ -174,7 +176,7 @@
 		  						{% if field.bind and field.bind.appearance == 'dropdown' %}
 		  						<select name="{{ field.name }}">
 		  							{% for choice in field.choices %}
-		  							<option value="{{ choice.name }}">{{ choice.label }}</option>
+		  							<option value="{{ choice.name }}">{{ choice.label|parse_label }}</option>
 		  							{% endfor %}
 		  							{% if field.type == 'select one or specify other' %}
 		  							<option>todo</option>
@@ -186,7 +188,7 @@
 		  								<li><span data-editor="">
 		  									<input type="radio" name="{{ field.name }}" value="{{ choice.name }}" 
 		  										id="{{ field.name }}-{{ forloop.counter0 }}">
-		  									<label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label }}</label>
+		  									<label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label|parse_label }}</label>
 		  									</span>
 		  								</li>	
 		  							{% endfor %}
@@ -202,7 +204,7 @@
 		  								<li><span data-editor="">
 		  									<input type="checkbox" name="{{ field.name }}" value="{{ choice.name }}" 
 		  										id="{{ field.name }}-{{ forloop.counter0 }}">
-		  									<label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label }}</label>
+		  									<label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label|parse_label }}</label>
 		  									</span>
 		  								</li>	
 		  							{% endfor %}

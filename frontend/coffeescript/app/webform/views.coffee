@@ -56,8 +56,37 @@ define( [ 'jquery',
 
         change_language: (language) ->
           @currentLanguage = language
-          #TODO: finish this
+
+          #iterate through all the questions and switch the text
+          for question in document.flat_fields
+            #set the label
+            $('label[for="'+question.name+'"]').html( @get_label(question) )
+
+            #change choice labels for select types
+            if question.type.indexOf('select') > -1
+              if question.bind and question.bind.appearance and question.bind.appearance == 'dropdown'
+                for choice in question.choices
+                  $("option[value='"+choice.name+"']").html( @get_label(choice) )
+              else
+                index = 0
+                for choice in question.choices
+                  $("label[for='"+question.name+"-"+index+"']").html( @get_label(choice) )
+                  index++
+
           @
+
+        get_label: (dictionary) ->
+          if typeof dictionary == 'string'
+            return dictionary.label
+          else
+            if @currentLanguage
+              if dictionary.label[@currentLanguage]
+                return dictionary.label[@currentLanguage]
+              else
+                return dictionary
+            else
+              #just return first string if no map for language
+              return _.values(dictonary)[0]
 
         submit: ->
             $( ".form" ).submit()
