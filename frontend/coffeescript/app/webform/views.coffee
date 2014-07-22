@@ -51,7 +51,7 @@ define( [ 'jquery',
               @currentLanguage = _.keys(document.flat_fields[0].label)[0]
               
             @repopulateForm()
-            @_display_form_buttons( 0, null )
+            @_display_form_buttons( 0, document.flat_fields[0] )
             @
 
         change_language: (language) ->
@@ -328,7 +328,7 @@ define( [ 'jquery',
 
         _display_form_buttons: ( question_index, question ) ->
 
-            if question_index == @numberOfQuestions - 1 or ( question_index > 0 and (not question) )
+            if question_index == @numberOfQuestions - 1 or (not question)
                 $( '#prev_btn' ).show()
                 $( '#submit_btn' ).show()
 
@@ -350,6 +350,9 @@ define( [ 'jquery',
                 $( '#submit_btn' ).hide()
                 # $("#xform_view").keydown (e) ->
                 #     $("#next_btn").click()  if e.keyCode is 13
+
+            if @currentQuestionIndex == 0
+              $( '#prev_btn' ).hide()
 
             if document.getElementById( 'detail_data_id' ) != null
                 $( '#submit_btn' ).show()
@@ -449,7 +452,7 @@ define( [ 'jquery',
               return
 
             #Is this question relevant?  Or, is this question an equation?
-            if (current_question.bind and current_question.bind.calculate) or not 
+            if (current_question.bind and current_question.bind.calculate != null) or not 
               XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()) )
                 # If its a calculation, calculate it!
                 $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
