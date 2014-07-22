@@ -3,6 +3,8 @@ from django.utils.text import slugify
 
 from repos.models import Repository
 
+from guardian.shortcuts import assign_perm
+
 from .models import Study
 
 
@@ -50,6 +52,9 @@ class NewStudyForm( forms.Form ):
 
         new_study = Study( **kwargs )
         new_study.save()
+
+        assign_perm( 'delete_study', user, new_study )
+        assign_perm( 'change_study', user, new_study )
 
         if self.cleaned_data[ 'tracker' ]:
             # If the user wants a way to track things using this study, we'll create
