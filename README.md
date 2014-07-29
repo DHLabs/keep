@@ -97,8 +97,20 @@ Run mongod to ensure MongoDB is running
     python keep_backend/manage.py syncdb
     python keep_backend/manage.py migrate
     fab restore_db
+After running these commands, there should be a sqlite file at ./local.db and a mongodb database
+most likely at either /data/db/ or /var/lib/mongodb/.  The mongo database might not be located
+at either location, check the --dbpath in the mongodb.conf file for the general location.
 
 **Note:** on a syncdb command, Django will ask you to create a superuser.  Create one, and use these as your login credentials for the Logging in portion.
+
+### All Server Prereqs
+All the following must be running before starting the server:
+    mongod
+    redis-server
+    python manage.py celeryd worker -E
+If you are editing any static, coffeescript, or javascript files, the following should also be
+running:
+    grunt build
 
 ### Running the Django server
     python keep_backend/manage.py runserver
