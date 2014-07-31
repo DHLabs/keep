@@ -333,7 +333,7 @@ class Repository( models.Model ):
         validated_data, valid_files = validate_and_format(fields, data, files)
 
         if self.is_tracker:
-            validated_data[self.study.tracker] = random.randrange(100000000,999999999)
+            validated_data[self.study.tracker] = str(random.randrange(100000000,999999999))
 
         repo_data = {
             'label': self.name,
