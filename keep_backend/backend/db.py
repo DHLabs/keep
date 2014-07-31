@@ -13,9 +13,10 @@ db = connection[ settings.MONGODB_DBNAME ]
 
 class DataSerializer( object ):
 
-    def dehydrate( self, data, fields ):
+    def dehydrate( self, data, repository, linked=None ):
 
         hydrated = []
+        fields = repository.fields()
         for row in data:
             copy = dict( row )
 
@@ -32,6 +33,20 @@ class DataSerializer( object ):
                                                   fields=fields,
                                                   repo_id=repo,
                                                   data_id=copy[ 'id' ] )
+
+            if repository.is_tracker and repository.study and linked:
+                link_dict = {}
+                tracker_id = 'data.' + repository.study.tracker
+                data_id = dict(row)['data'].get(repository.study.tracker)
+                for linked_repo in linked:
+                    #check if data
+                    num_data = db.data.find( { 'repo': ObjectId( linked_repo.mongo_id ),tracker_id:data_id } ).count()
+                    if num_data > 0:
+                        link_dict[ linked_repo.name ] = True
+                    else:
+                        link_dict[ linked_repo.name ] = False
+
+                copy['linked'] = link_dict
 
             hydrated.append( copy )
 

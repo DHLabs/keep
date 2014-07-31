@@ -385,7 +385,11 @@ def repo_viz( request, username, repo_name, filter_param=None ):
                   .limit( 50 )
 
     data_serializer = DataSerializer()
-    data = data_serializer.dehydrate( data, repo.fields() )
+    if repo.is_tracker and repo.study:
+        linked = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
+        data = data_serializer.dehydrate( data, repo,linked )
+    else:
+        data = data_serializer.dehydrate( data, repo )
 
     # Is some unknown user looking at this data?
     # TODO: Make the privatizer take into account

@@ -204,10 +204,18 @@ class DataResource( MongoDBResource ):
                 'pages': pages }
 
             data_serializer = DataSerializer()
-            data = {
+
+            if repo.is_tracker and repo.study:
+                linked = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
+                data = {
                 'meta': meta,
                 'data': data_serializer.dehydrate( cursor.skip( offset * limit ).limit( limit ),
-                                                   repo.fields() ) }
+                                                   repo, linked ) }
+            else:
+                data = {
+                    'meta': meta,
+                    'data': data_serializer.dehydrate( cursor.skip( offset * limit ).limit( limit ),
+                                                   repo ) }
 
             return self.create_response( request, data )
         except ValueError as e:
