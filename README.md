@@ -80,6 +80,23 @@ Make sure you have the following Python modules installed:
 Ensure that virtualenvwrapper is correctly setup. You should be able to run
 mkvirtualenv_help from the command line.
 
+### Install and Run Redis
+In addition to the Python modules, redis is also a required install for this project.
+
+- redis ( http://redis.io/download )
+
+If it is installed this way, run redis from the installation directory with
+
+    src/redis-server
+
+Or, if you feel comfortable with the command line:
+
+    sudo apt-get install redis-server
+
+Then just run
+
+    redis-server
+
 ### Create your development workspace
     mkvirtualenv dhlab_backend
     pip install -r deps.txt
