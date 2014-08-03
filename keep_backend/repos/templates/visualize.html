@@ -102,12 +102,12 @@
 				<% _.each( linked, function( repo ) { %>
 					<tr>
 						<td>
-               				<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %>' class='btn btn-small' style="width:90px">
+               				<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %><%= "&" + window.location.search.slice(1) %>' class='btn btn-small' style="width:90px">
                     			<i class='icon-pencil'></i> Add Data&nbsp;&nbsp;
                 			</a>
             			</td>
 						<td>
-							<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/' target='_blank'>
+							<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/<%= window.location.search %>' target='_blank'>
 								<%= repo.get( 'name' ) %>
 							</a>
 						</td>
@@ -238,9 +238,16 @@
 </script>
 {% endblock %}
 
+{% if 'delete_repository' not in permissions %}
+
+{{ 'not there' }}
+
+{% endif %}
+
 {% block outerspace %}
 <div id='viz-chrome'>
 	<div id='viz-actions' class='container container-padded'>
+		{% if 'delete_repository' in permissions %}
 		<div id='repo-privacy' class='one columns'>
 			<div>
 				{% if repo.is_public %}
@@ -250,18 +257,13 @@
 				{% endif %}
 			</div>
 		</div>
+		{% endif %}
 		<div id='repo-meta' class='ten columns'>
 			<h4>{{ repo.owner }} / {{ repo.name }}</h4>
-			<div style='margin-bottom: 8px;'>
-				{% if repo.description %}
-					{{ repo.description }}
-				{% else %}
-					<em>No diary description available</em>
-				{% endif %}
-			</div>
 		</div>
 		<div id='repo-actions' class='five columns'>
 			<ul class='nav-list nav-inline'>
+				{% if 'delete_repository' in permissions %}
 				<li>
 					<a id='share-btn' class='btn' href='#'>
 						<i class='icon-group'></i>&nbsp;Share
@@ -272,6 +274,18 @@
 						<i class='icon-download'></i>&nbsp;Download
 					</a>
 				</li>
+				{% endif %}
+				{% if repo.is_tracker %}
+				<li>
+					<a id='add_patient' class='btn' href='#'>Add Patient</a>
+				</li>
+				{% else %}
+					{% if repo.study %}
+					<li>
+						<a id='go_to_list' class='btn' href='#'>Patient List</a>
+					</li>
+					{% endif %}
+				{% endif %}
 			</ul>
 		</div>
 	</div>
@@ -283,6 +297,7 @@
 						<i class='icon-list'></i>&nbsp;Raw
 					</a>
 				</li>
+				{% if 'delete_repository' in permissions %}
 				<li id='map_btn' data-type='map'>
 					<a href='#'>
 						<i class='icon-map-marker'></i>&nbsp;Map
@@ -293,7 +308,7 @@
 						<i class='icon-signal'></i>&nbsp;Analytics
 					</a>
 				</li>
-				{% if 'delete_repository' in permissions %}
+				
 				<li data-type='settings'>
 					<a href='#' data-type='settings'>
 						<i class='icon-cog'></i>&nbsp;Settings
@@ -315,11 +330,12 @@
 		</div>
 	</div>
 
+	
 	<!-- Geospatial view of our data ( if any geopoints exist within the dataset ). -->
 	<div class='viz' id='map-viz'>
 		<div class='sixteen columns' id='map'></div>
 	</div>
-
+	{% if 'delete_repository' in permissions %}
 	<!-- Time series analysis -->
 	<div class='viz container' id='analytics-viz'>
 		<div class='sixteen columns'>
@@ -333,7 +349,7 @@
 	</div>
 
 	<!-- Repository settings -->
-	{% if 'delete_repository' in permissions %}
+	
 	<div class='viz container' id='settings-viz'>
 		<div class='sixteen columns'>
 

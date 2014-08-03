@@ -79,12 +79,21 @@ def create_repo_from_file( file, file_type, repo ):
         fields = SurveyReader( xform )
         fields = fields.to_json_dict()
 
-        if (not repo.is_tracker) and (repo.study is not None) and (repo.study.tracker is not None):
+        if (repo.study is not None) and (repo.study.tracker != ''):
             fields['children'].insert( 0, {
                     'type':'text',
                     'name':repo.study.tracker,
                     'label':repo.study.tracker,
                 } )
+        elif repo.is_tracker:
+            repo.study.tracker = 'id'
+            repo.study.save()
+            fields['children'].insert( 1, {
+                    'type':'calculate',
+                    'name':repo.study.tracker,
+                    'label':repo.study.tracker,
+                } )
+
 
         repo.update_fields( fields.get( 'children' ) )
 

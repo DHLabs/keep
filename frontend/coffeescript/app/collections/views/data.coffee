@@ -100,23 +100,6 @@ define( [ 'jquery',
             @repo   = options.repo
             @linked = options.linked
 
-        check_filled_forms: (id) ->
-
-            #TODO: finish this
-
-            #iterate through linked forms
-            # for form in @linked
-            #     $.getJSON( sample_url, data, ( data ) =>
-            #         @sample_data = data
-            #         callback( data )
-            #     )
-
-            # check if data for each form
-
-            #change class for form tag if data is present
-
-            @
-
         template: ( model ) =>
             # Based on the field type, we use a specific formatter for that
             # data type.
@@ -124,9 +107,6 @@ define( [ 'jquery',
 
             if @repo.attributes.is_tracker
                 templ.push( @data_templates[ 'forms' ]( { model: model } ) )
-
-                #callbacks to check if form is filled out for data
-                @check_filled_forms( model )
 
             for field in @fields
                 tdata = { data: model.data[ field.name ] }

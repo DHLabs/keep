@@ -26,9 +26,18 @@ define( [ 'jquery',
 
         events:
             'click #share-btn': 'sharing_settings'
+            'click #add_patient': 'add_patient'
+            'click #go_to_list': 'go_to_list'
 
         initialize: ( options ) ->
             @options = options
+
+        go_to_list: (event) ->
+            #fix this
+            window.location = '/'
+
+        add_patient: (event) ->
+            window.location = '/' + document.repo_owner + '/' + document.repo.name + '/webform/' + window.location.search
 
         sharing_settings: ( event ) ->
             @modalView = new ShareSettingsModal( @options )

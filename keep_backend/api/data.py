@@ -159,6 +159,12 @@ class DataResource( MongoDBResource ):
             query_parameters = self._build_filters( request )
             query_parameters['repo'] = ObjectId( repo_id )
 
+            if 'doctor_id' in request.GET:
+                query_parameters['data.doctor_id'] = request.GET['doctor_id']
+            else:
+                if request.user.username == 'AnonymousUser':
+                    query_parameters['data.aaaaa'] = 'blahblah'
+
             if 'bbox' in request.GET and 'geofield' in request.GET:
                 # Convert the bounding box into the $box format needed to do
                 # a geospatial search in MongoDB

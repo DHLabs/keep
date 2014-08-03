@@ -24,6 +24,8 @@ from visualizations.models import VisualizationSerializer
 from .forms import NewRepoForm, NewBatchRepoForm
 from .models import Repository, RepoSerializer
 
+from api.authentication import ApiTokenAuthentication
+
 
 @login_required
 @require_POST
@@ -363,9 +365,16 @@ def repo_viz( request, username, repo_name, filter_param=None ):
         for org in request.user.organization_users.all():
             permissions.extend( get_perms( org, repo ) )
 
-    # Check to see if the user has access to view this survey
-    if not repo.is_public and 'view_repository' not in permissions:
+    apiauth = ApiTokenAuthentication()
+
+    if (not request.user.is_authenticated()) and (not apiauth.is_authenticated( request )):
         return HttpResponse( 'Unauthorized', status=401 )
+
+    # Check to see if the user has access to view this survey
+    # if not repo.is_public and 'view_repository' not in permissions:
+    #     print request.user
+    #     print permissions
+    #     return HttpResponse( 'Unauthorized', status=401 )
 
     #----------------------------------------------------------------------
     #
@@ -373,6 +382,11 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     #
     #----------------------------------------------------------------------
     data_query = { 'repo': ObjectId( repo.mongo_id ) }
+
+    if 'doctor_id' in request.GET:
+        data_query['data.doctor_id'] = request.GET['doctor_id']
+    elif (not request.user.is_authenticated()):
+        return HttpResponse( 'Unauthorized', status=401 )
 
     if repo.study and filter_param:
         data_query[ 'data.%s' % repo.study.tracker ] = filter_param

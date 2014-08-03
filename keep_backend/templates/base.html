@@ -18,6 +18,7 @@
 </head>
 <body>
     {% block topbar %}
+    {% if user.is_authenticated %}
     <div class='topbar-wrapper'>
         <div class='container'>
             <div class='logo'>
@@ -28,15 +29,15 @@
                 </div>
             </div>
             <div class='topbar'>
-                {% if user.is_authenticated %}
+                
 
                 {% block searchbar %}
 
-                <div class='six columns search-bar'>
+                <!--div class='six columns search-bar'>
                     <div style='padding-top:16px;'>
                         <input type='text' style='margin:0;width:100%;' placeholder='Search Data Diaries'>
                     </div>
-                </div>
+                </div-->
 
                 {% endblock %}
 
@@ -49,10 +50,11 @@
                         Logout
                     </a>
                 </div>
-                {% endif %}
+                
             </div>
         </div>
     </div>
+    {% endif %}
     {% endblock %}
 
     <div class='modal'></div>
@@ -64,12 +66,6 @@
         {{ content|safe }}
         {% endblock %}
     </div>
-    {% endblock %}
-
-    {% block footer %}
-
-    {% include "footer.html" %}
-
     {% endblock %}
 
     <!-- EVIL TRACKER -->
