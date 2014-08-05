@@ -108,10 +108,7 @@
 <script src="{% static 'js/vendor/jquery.js' %}"></script>
 <script src="{% static 'js/vendor/jquery-ui.js' %}"></script>
 <script src="{% static 'js/vendor/jquery.center.js' %}"></script>
-<script src="{% static 'js/vendor/jquery.ui.touch-punch.min.js' %}"></script>
-<script src="{% static 'js/vendor/jquery.jsPlumb-1.4.1-all-min.js' %}"></script>
 <script src="{% static 'js/vendor/form_builder.js' %}"></script>
-<script src="{% static 'js/vendor/form_gui.js' %}"></script>
 <script id='form_id' type='text/javascript'>
     {% if repo_json %}
     document.repo = {{ repo_json | safe }};
@@ -162,7 +159,7 @@
 {% block searchbar %}
 <div class='six columns search-bar'>
     <div style='font-size:.9em; padding-top:16px;'>
-        <a href="#" class='btn' onclick="jsGUIAddWindow(10, 10);">
+        <!--a href="#" class='btn' onclick="jsGUIAddWindow(10, 10);">
             <i class='icon-plus'></i>&nbsp;Add Screen
         </a>&nbsp;
 
@@ -190,7 +187,6 @@
 {% block content %}
 <div class='fourteen columns offset-by-one'>
     <!-- Modal view for editing repository settings -->
-    <div id='repositoryDefaultsWindow' title='New Repository' style='display:none;'>
 
         <form id='repoEditForm' action='.' method='post' enctype='multipart/form-data'>
             {% csrf_token %}
@@ -210,6 +206,8 @@
             {{ form.desc.errors }}
             <input id='registrationType' onchange="buildSurvey()" type="checkbox">
             <label for='registrationType'>Registration Form</label>
+            <label for='xform_file'>XLSForm: </label>
+            {{ form.xform_file }}
             <hr />
             Privacy Settings:
             <label class='radio'>
@@ -231,11 +229,9 @@
                 </div>
             </label>
             <hr />
+            <input type='submit' value='Submit'>
 
         </form>
-
-        <a href="#" data-toggle="modal" class="btn" onclick="closeNameDialog();">Close</a>
-    </div>
 
     <!-- Modal View for editing group settings -->
     <div id='groupSettingsWindow' title="Screen Settings" style="display:none;">

@@ -1,8 +1,10 @@
 import json
 import pymongo
+import os
 
 from bson import ObjectId
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -11,6 +13,10 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
+from django.core.files.storage import default_storage as storage
+
+from pyxform.xls2json import SurveyReader
+from openrosa.xform_reader import XFormReader
 
 from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm
 
@@ -121,14 +127,34 @@ def edit_repo( request, repo_id ):
 
     if request.method == 'POST':
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
+        #print form.cleaned_data
         repo.name = request.POST['name'].replace( ' ','_' )
         repo.description = request.POST['desc']
         repo.save()
-        data_repo = db.repo.find_one( ObjectId( repo_id ) )
-        newJSON = json.loads( request.POST['survey_json'].strip() )
-        newfields = newJSON['children']
-        formType = newJSON['type']
-        db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields, 'type': formType}} )
+
+        data = request.FILES[ 'xform_file' ]
+
+        # Split apart the file name so we can attempt to detect the file type
+        name, file_ext = os.path.splitext( data.name )
+        file_ext = file_ext[1:].lower()
+
+        if not settings.DEBUG and not settings.TESTING:
+            storage.bucket_name = settings.AWS_TASK_STORAGE_BUCKET_NAME
+
+        s3_url = '%s.%s' % ( repo.mongo_id, file_ext )
+        storage.save( s3_url, data )
+
+        xform = storage.open( s3_url, 'r' )
+        fields = SurveyReader( xform )
+        fields = fields.to_json_dict()
+
+        repo.update_fields( fields.get( 'children' ) )
+
+        #data_repo = db.repo.find_one( ObjectId( repo_id ) )
+        #newJSON = json.loads( request.POST['survey_json'].strip() )
+        #newfields = newJSON['children']
+        #formType = newJSON['type']
+        #db.repo.update( {"_id":ObjectId( repo_id )},{"$set": {'fields': newfields, 'type': formType}} )
         return HttpResponseRedirect( '/' )
     else:
         form = NewRepoForm()
