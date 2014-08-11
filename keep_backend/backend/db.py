@@ -63,6 +63,7 @@ class DataSerializer( object ):
             # Convert strings into a unicode representation.
             if field.get( 'type' ) in [ 'text', 'note' ]:
                 val = unicode( val ).encode( 'utf-8' )
+                copy[ key ] = val
 
             # Give a full URL for media
             elif field.get( 'type' ) in [ 'photo' ]:
@@ -73,16 +74,24 @@ class DataSerializer( object ):
                     host = settings.AWS_S3_MEDIA_DOMAIN
 
                 val = 'http://%s/%s/%s/%s' % ( host, repo_id, data_id, val )
+                copy[ key ] = val
 
             # Correctly recurse through groups
             elif field.get( 'type' ) == 'group':
+
 
                 val = self.serialize_data( data=data,
                                             fields=field.get( 'children' ),
                                             repo_id=repo_id,
                                             data_id=data_id )
 
-            copy[ key ] = val
+                for k in val:
+                    copy[ k ] = val[ k ]
+
+            else:
+                copy[key] = val
+
+            
 
         return copy
 
