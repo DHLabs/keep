@@ -85,16 +85,21 @@ def validate_and_format( fields, data, files ):
                                 'accuracy': 0,
                                 'comment': '' }}
 
-                # TODO: Handle potential errors parsing the string?
-                coords = data.get( ename )
-                coords = coords.split( ' ' )
-                # If the row doesn't have a geopoint, set to None
                 try:
-                  geodata[ 'coordinates' ] = [ float( coords[1] ), float( coords[0] ) ]
-                except ValueError:
-                  geodata[ 'coordinates' ] = [ None, None ]
 
-                valid_data[ ename ] = geodata
+                  # TODO: Handle potential errors parsing the string?
+                  coords = data.get( ename )
+                  coords = coords.split( ' ' )
+                  # If the row doesn't have a geopoint, set to None
+                  try:
+                    geodata[ 'coordinates' ] = [ float( coords[1] ), float( coords[0] ) ]
+                  except ValueError:
+                    geodata[ 'coordinates' ] = [ None, None ]
+
+                  valid_data[ ename ] = geodata
+
+                except Exception:
+                  pass
 
             else:
                 # Otherwise treat the piece of data as whatever it came in as.
