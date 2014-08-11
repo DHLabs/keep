@@ -83,7 +83,7 @@ define( [ 'jquery',
                 if not geopoint?
                     return null
 
-                geopoint = [geopoint.coordinates[0],geopoint.coordinates[1]]
+                geopoint = [geopoint.coordinates[1],geopoint.coordinates[0]]
 
                 if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
                     return null
