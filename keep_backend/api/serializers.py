@@ -58,7 +58,7 @@ class CSVSerializer( Serializer ):
             # Converts geopoints into an X,Y coordinate string
             coords = field_value.get( 'coordinates' )
             props = field_value.get( 'properties' )
-            return '%s %s %s %s' % ( str( coords[0] ), str( coords[1], str(props['altitude'], str(props['accuracy'])) ) )
+            return '%s %s %s %s' % ( str( coords[0] ), str( coords[1]), str(props['altitude']), str(props['accuracy']) )
 
         elif 'select all' in field_type:
             # Converts a list into a comma-seperated list of values
