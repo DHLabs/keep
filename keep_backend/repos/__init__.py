@@ -90,7 +90,7 @@ def validate_and_format( fields, data, files ):
                 coords = coords.split( ' ' )
                 # If the row doesn't have a geopoint, set to None
                 try:
-                  geodata[ 'coordinates' ] = [ float( coords[0] ), float( coords[1] ) ]
+                  geodata[ 'coordinates' ] = [ float( coords[1] ), float( coords[0] ) ]
                 except ValueError:
                   geodata[ 'coordinates' ] = [ None, None ]
 
