@@ -76,21 +76,24 @@ define( [ 'jquery',
 
             geopoint = undefined
 
-            if @selected_header.location?
+            if @selected_header.name?
 
-                geopoint = datum.get( 'data' )[ @selected_header.location.name ]
+                geopoint = datum.get( 'data' )[ @selected_header.name ]
 
                 if not geopoint?
                     return null
 
-                geopoint = geopoint.split( ' ' )[0..2]
+                geopoint = [geopoint.coordinates[0],geopoint.coordinates[1]]
 
                 if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
                     return null
 
             else
-                geopoint = [ datum.get( 'data' )[ @selected_header.lat.name ],
-                             datum.get( 'data' )[ @selected_header.lng.name ] ]
+
+                return null
+
+                #geopoint = [ datum.get( 'data' )[ @selected_header.lat.name ],
+                #             datum.get( 'data' )[ @selected_header.lng.name ] ]
 
             geopoint[0] = parseFloat( geopoint[0] )
             geopoint[1] = parseFloat( geopoint[1] )
@@ -98,7 +101,52 @@ define( [ 'jquery',
             if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
                 return null
 
+            while geopoint[1] > 180
+                geopoint[1] = geopoint[1] - 360
+
+            while geopoint[1] < -180
+                geopoint[1] = geopoint[1] + 360
+
             return geopoint
+
+        render: () ->
+            last_marker = undefined
+
+            for datum in @collection.models
+                geopoint = @_geopoint( datum )
+
+                if not geopoint?
+                    continue
+
+                marker = L.marker( [geopoint[0], geopoint[1]], {icon: mapIcon} )
+                #marker.data = datum.get( 'data' )
+                #marker.timestamp = new Date( datum.get( 'timestamp' ) )
+
+                # if last_marker?
+                #     day = 1000 * 60 * 60 * 24
+                #     if marker.timestamp.getTime() - last_marker.timestamp.getTime() < day
+                #         pline = [ marker.getLatLng(), last_marker.getLatLng() ]
+                #         @connections.addLayer( L.polyline( pline ) )
+
+                #     last_marker = marker
+                # else
+                #     last_marker = marker
+
+                html = ''
+                for key, value of datum.get( 'data' )#marker.data
+                    html += "<div><strong>#{key}:</strong> #{value}</div>"
+                marker.bindPopup( html )
+
+                @markers.addLayer( marker )
+                @clusters.addLayer( marker )
+
+                if datum.get( 'data' ).value?
+                    heatmap_value = datum.get( 'data' ).value
+
+                #heatmapData.push(
+                #    lat: geopoint[0]
+                #    lon: geopoint[1]
+                #    value: heatmap_value )
 
         _resize_map: () =>
             $( '#map' ).css( { 'height': ( @$el.parent().height() - 20 ) + 'px' } )
@@ -187,6 +235,7 @@ define( [ 'jquery',
             # Everytime we move around, grab new data from the server and
             # refresh the viewport!
             bounds = event.target.getBounds()
+
             @collection.fetch(
                 reset: true
                 data:
