@@ -162,6 +162,9 @@
 
 		  					<label class="control-label" for="{{ field.name }}">
 		  						{{ field.label|parse_label }}
+		  						{% if 'hint' in field %}
+		  							<span title="{{ field.hint }}"><i class="icon-question-sign"></i></span>
+		  						{% endif %}
 		  					</label>
 
 		  					<div class="controls">
