@@ -452,7 +452,7 @@ define( [ 'jquery',
               return
 
             #Is this question relevant?  Or, is this question an equation?
-            if (current_question.bind and current_question.bind.calculate != null) or not 
+            if (current_question.bind and current_question.bind.calculate != null) or current_question.type == 'calculate' or not 
               XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()) )
                 # If its a calculation, calculate it!
                 $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
