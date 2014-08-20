@@ -52,6 +52,11 @@ define( [ 'jquery',
               
             @repopulateForm()
             @_display_form_buttons( 0, document.flat_fields[0] )
+
+            $(document).tooltip({
+              content: () ->
+                return $(this).prop('title')
+                })
             @
 
         change_language: (language) ->

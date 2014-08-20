@@ -50,6 +50,18 @@
 		text-align: left;
 	}
 
+	.ui-tooltip {
+	padding: 8px;
+	position: absolute;
+	z-index: 9999;
+	max-width: 300px;
+	-webkit-box-shadow: 0 0 5px #aaa;
+	box-shadow: 0 0 5px #aaa;
+	}
+	body .ui-tooltip {
+		border-width: 2px;
+	}
+
 	input[type="radio"] {
 		width: auto;
 	}
@@ -70,6 +82,7 @@
 <script type='text/javascript'>
 	document.repo = {{repo_json|safe}};
 	document.flat_fields = {{ flat_field_json|safe }};
+
 </script>
 
 <script src='{% static 'js/vendor/requirejs.js' %}'></script>
@@ -137,9 +150,9 @@
 			</h2>
 		</div>
 		<div class="two columns">
-			<a href='#' class='btn' id='language-select-btn'>
+			<!--a href='#' class='btn' id='language-select-btn'>
 				Select Language
-			</a>
+			</a-->
 		</div>
 	</div>
 	<div class="row">
@@ -163,7 +176,7 @@
 		  					<label class="control-label" for="{{ field.name }}">
 		  						{{ field.label|parse_label }}
 		  						{% if 'hint' in field %}
-		  							<span title="{{ field.hint }}"><i class="icon-question-sign"></i></span>
+		  							<span title="{{ field.hint }}"><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
 		  						{% endif %}
 		  					</label>
 
