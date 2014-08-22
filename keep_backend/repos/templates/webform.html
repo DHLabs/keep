@@ -8,6 +8,7 @@
 {% load repo_extras %}
 
 {% block css %}
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="{% static 'css/webform.css' %}">
 
 <style type='text/css'>
@@ -50,6 +51,14 @@
 		text-align: left;
 	}
 
+	.progress .bar {
+		-webkit-transition: width 2s ease-in-out;
+		-moz-transition: width 2s ease-in-out;
+		-ms-transition: width 2s ease-in-out;
+		-o-transition: width 2s ease-in-out;
+		transition: width 2s ease-in-out;
+	}
+
 	.ui-tooltip {
 	padding: 8px;
 	position: absolute;
@@ -71,9 +80,11 @@
 	}
 
 </style>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
 
 <!-- For Geopoint option -->
 <link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
+
 {% endblock %}
 
 {% block js %}
@@ -154,6 +165,16 @@
 				Select Language
 			</a-->
 		</div>
+		
+	</div>
+	<div class="row">
+		<div class="sixteen columns">
+			<div id="progress-bar">
+  			<div class="progress">
+    			<div id="form_progress" class="progress-bar progress-bar-success" role="progressbar" style="width: 0%;"></div>
+  			</div>
+  		</div>
+		</div>
 	</div>
 	<div class="row">
 		<div id="autofill_list" class='autocomplete-list'></div>
@@ -173,7 +194,7 @@
 		  				<div id="{{ field.name }}_field" class="control-group" style="display: none">
 		  					{% endif %}
 
-		  					<label class="control-label" for="{{ field.name }}">
+		  					<label id="{{ field.name }}_mainlabel" class="control-label" for="{{ field.name }}">
 		  						{{ field.label|parse_label }}
 		  						{% if 'hint' in field %}
 		  							<span title="{{ field.hint }}"><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>

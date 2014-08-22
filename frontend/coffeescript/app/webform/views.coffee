@@ -53,6 +53,10 @@ define( [ 'jquery',
             @repopulateForm()
             @_display_form_buttons( 0, document.flat_fields[0] )
 
+            @setup_accordians()
+
+            $('.ui-accordian').css( "display", "none" )
+
             $(document).tooltip({
               content: () ->
                 return $(this).prop('title')
@@ -79,6 +83,34 @@ define( [ 'jquery',
                   index++
 
           @
+
+        setup_accordians: () ->
+          for question in document.flat_fields
+            if question.type == "group"
+              if question.control and question.control.appearance == "accordian"
+
+                accordian_name = question.name + "_accordian"
+
+                $('#'+question.name+'_field').after( "<div id="+accordian_name+">" )
+
+                for child in question.children
+                  $( "#"+accordian_name ).append( $( "#"+child.name+"_field" ) )
+                  #move label before field div
+                  header = "<h3>" + child.label + "</h3>"
+                  $( "#"+child.name+"_field" ).before( header )
+                  $( "#"+child.name+"_mainlabel" ).hide()
+
+                #last = question.children[question.children.length-1]
+                #$("#"+last.name).after( "</div>" )
+
+
+
+                #call accordian start function
+                $( "#"+accordian_name ).accordion()
+
+                $("#"+accordian_name).css( "display", "none" )
+
+                @
 
         get_label: (dictionary) ->
           if typeof dictionary == 'string'
@@ -336,6 +368,7 @@ define( [ 'jquery',
             if question_index == @numberOfQuestions - 1 or (not question)
                 $( '#prev_btn' ).show()
                 $( '#submit_btn' ).show()
+                $('#form_progress').width("100%")
 
                 $( '#next_btn' ).hide()
                 # $("html").keydown (e) ->
@@ -361,6 +394,7 @@ define( [ 'jquery',
 
             if document.getElementById( 'detail_data_id' ) != null
                 $( '#submit_btn' ).show()
+                $('#form_progress').width("100%")
             @
 
         passes_question_constraints: ->
@@ -398,6 +432,15 @@ define( [ 'jquery',
             $('#' + question.name + '_field').show()
 
           if question.type == 'group'
+
+            if question.control and question.control.appearance == 'accordian'
+              if isHide
+                $( '#'+question.name+'_accordian' ).css( "display", "none" )
+                return true
+              else
+                $( '#'+question.name+'_accordian' ).css( "display", "inline" )
+                return true
+
             for i in [0..(question.children.length-1)]
               child = question.children[i]
               @toggle_question( child, isHide )
@@ -456,9 +499,11 @@ define( [ 'jquery',
               @_display_form_buttons( @currentQuestionIndex, current_question )
               return
 
+            is_relevant = XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()))
+
             #Is this question relevant?  Or, is this question an equation?
-            if (current_question.bind and current_question.bind.calculate != null) or current_question.type == 'calculate' or not 
-              XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()) )
+            if (current_question.bind and current_question.bind.calculate) or current_question.type == 'calculate' or ( not 
+              is_relevant )
                 # If its a calculation, calculate it!
                 $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
 
@@ -476,6 +521,9 @@ define( [ 'jquery',
             if @toggle_question(current_question, false)
               @toggle_question(previous_question, true)
             
+            newWidthPercentage = (next_index / @numberOfQuestions) * 100
+            $('#form_progress').width(newWidthPercentage.toString() + "%")
+
             # If there is a query to a previous answer, display that answer
             # subsequent = undefined
             # if (form_info.title and subsequent = form_info.title.indexOf("${")) isnt -1
