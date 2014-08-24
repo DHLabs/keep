@@ -252,10 +252,10 @@
 			</div>
 		</div>
 		{% endif %}
-		<div id='repo-meta' class='ten columns'>
+		<div id='repo-meta' class='eight columns'>
 			<h4>{{ repo.owner }} / {{ repo.name }}</h4>
 		</div>
-		<div id='repo-actions' class='five columns'>
+		<div id='repo-actions' class='seven columns'>
 			<ul class='nav-list nav-inline'>
 				{% if 'delete_repository' in permissions %}
 				<li>
@@ -269,6 +269,9 @@
 					</a>
 				</li>
 				{% endif %}
+				<li>
+					<a id='return_to_home' class='btn' href='#'>Return to 0by25 Home</a>
+				</li>
 				{% if repo.is_tracker %}
 				<li>
 					<a id='add_patient' class='btn' href='#'>Add Patient</a>

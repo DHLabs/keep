@@ -314,6 +314,9 @@ def webform( request, username, repo_name ):
             
             repo.update_data( request.POST, request.FILES )
 
+            if 'async' in request.POST:
+                return HttpResponse( 'success', status=200 )
+
             return HttpResponseRedirect(
                         reverse( 'repo_visualize',
                                   kwargs={ 'username': account.username,
@@ -321,7 +324,10 @@ def webform( request, username, repo_name ):
         else:
 
             # Do validation of the data and add to repo!
-            repo.add_data( request.POST, request.FILES )
+            new_data_id = repo.add_data( request.POST, request.FILES )
+
+            if 'async' in request.POST:
+                return HttpResponse( new_data_id, status=200 )
 
             # Return to organization/user dashboard based on where the "New Repo"
             # button was clicked.  Send Non-users to thank-you page
@@ -443,6 +449,8 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
 
+    flat_fields = json.dumps(repo.flatten_fields())
+
     # Grab linked repos if this repo is a "tracker" and part of study
     linked_json = '[]'
     if repo.study and repo.is_tracker:
@@ -458,6 +466,7 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
 
+                                 'flat_fields': flat_fields,
                                  'repo_json': repo_json,
                                  'linked_json': linked_json,
                                  'viz_json': viz_json,

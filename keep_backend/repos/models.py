@@ -308,6 +308,11 @@ class Repository( models.Model ):
         fields = self.fields()
         validated_data, valid_files = validate_and_format(fields, data, files)
 
+        if self.is_tracker:
+            #original data
+            orig_data = db.data.find(  {"_id":ObjectId( data['detail_data_id'] )} )[0]
+            validated_data[self.study.tracker] = orig_data['data'][self.study.tracker]
+
         db.data.update( {"_id":ObjectId( data['detail_data_id'] )},{"$set": { 'data': validated_data, 'timestamp':datetime.utcnow() }} )
 
         # Once we save the repo data, save the files to S3

@@ -37,13 +37,17 @@ def validate_and_format( fields, data, files ):
     for element in fields:
 
         etype = element[ 'type' ]
-        ename = element[ 'name' ]
 
         # Flatten groups by making a recursive call
         if 'group' in etype:
             temp_data = validate_and_format( element[ 'children' ], data, files )
             valid_data.update( temp_data[0] )
             valid_files.update( temp_data[1] )
+            continue
+        try: 
+          ename = element[ 'name' ]
+        except Exception as e:
+          continue
 
         # Do type conversions
         if ename in data:
