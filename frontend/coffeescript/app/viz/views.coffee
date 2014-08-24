@@ -28,6 +28,7 @@ define( [ 'jquery',
             'click #share-btn': 'sharing_settings'
             'click #add_patient': 'add_patient'
             'click #go_to_list': 'go_to_list'
+            'click #return_to_home': 'return_to_home'
 
         initialize: ( options ) ->
             @options = options
@@ -35,6 +36,9 @@ define( [ 'jquery',
         go_to_list: (event) ->
             #fix this
             window.location = '/'
+
+        return_to_home: (event) ->
+            window.location = 'http://www.0by25.org/accounts/login'
 
         add_patient: (event) ->
             window.location = '/' + document.repo_owner + '/' + document.repo.name + '/webform/' + window.location.search
