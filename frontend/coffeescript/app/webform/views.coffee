@@ -175,7 +175,8 @@ define( [ 'jquery',
           if (url == '')
             return ''
 
-          url = '?' + url
+          if url
+            url = '?' + url
           pairs = (url or location.search).slice(1).split('&')
           result = {}
           for idx in pairs
@@ -416,9 +417,10 @@ define( [ 'jquery',
             if question.type == 'group' and question.control
               if question.control.appearance == 'accordian' or question.control.appearance == 'field-list'
                 for child in question.children
-                  if (not form_values[question.name]) or form_values[ child.name ].length == 0
-                    alert( "Question is required. Please respond before you can move on." )
-                    return false
+                  if child.bind and child.bind.required is "yes"
+                    if (not form_values[child.name]) or form_values[ child.name ].length == 0
+                      alert( "Question is required. Please respond before you can move on." )
+                      return false
                 
             else if question.bind and question.bind.required is "yes"
               if (not form_values[question.name]) or form_values[ question.name ].length == 0

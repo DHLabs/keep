@@ -80,7 +80,7 @@ define( [ 'jquery',
                 else
                     attributes[ field.name ] = @data_templates[ 'text' ]( tdata )
 
-                if field.name == 'id'
+                if field.name == 'patient_id'
                     filter = attributes[ field.name ]
 
             data =
