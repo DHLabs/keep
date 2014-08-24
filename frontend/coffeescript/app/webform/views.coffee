@@ -126,7 +126,10 @@ define( [ 'jquery',
               return _.values(dictonary)[0]
 
         submit: ->
-            $( ".form" ).submit()
+          #is finished tag so server knows that the end of the form was reached
+          html = "<input type='hidden' id='is_finished' value='true' name='is_finished'>"
+          $(".form").append( html )
+          $( ".form" ).submit()
 
         render: () ->
             # Creates submission page, takes care of corner case
@@ -171,6 +174,8 @@ define( [ 'jquery',
         queryStringToJSON: (url) ->
           if (url == '')
             return ''
+
+          url = '?' + url
           pairs = (url or location.search).slice(1).split('&')
           result = {}
           for idx in pairs
@@ -392,27 +397,62 @@ define( [ 'jquery',
             if @currentQuestionIndex == 0
               $( '#prev_btn' ).hide()
 
-            if document.getElementById( 'detail_data_id' ) != null
-                $( '#submit_btn' ).show()
-                $('#form_progress').width("100%")
+            #if document.getElementById( 'detail_data_id' ) != null
+                #$( '#submit_btn' ).show()
+                #$('#form_progress').width("100%")
             @
 
-        passes_question_constraints: ->
+        passes_question_constraints: (questionIndex) ->
             #TODO: First check constraints on the question we're on
-            question = document.flat_fields[@currentQuestionIndex]
+            question = document.flat_fields[questionIndex]
+
+            serialized = $( ".form" ).serialize()
+            form_values = @queryStringToJSON( serialized )
+
+            if not XFormConstraintChecker.isRelevant( question, form_values)
+              return true
 
             # Pass required?
-            # if question.bind and question.bind.required is "yes"
-            #     if @renderedForm.getValue()[ question.key ].length == 0
-            #         $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
-            #         return false
+            if question.type == 'group' and question.control
+              if question.control.appearance == 'accordian' or question.control.appearance == 'field-list'
+                for child in question.children
+                  if (not form_values[question.name]) or form_values[ child.name ].length == 0
+                    alert( "Question is required. Please respond before you can move on." )
+                    return false
+                
+            else if question.bind and question.bind.required is "yes"
+              if (not form_values[question.name]) or form_values[ question.name ].length == 0
+                #$("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
+                alert( "Question is required. Please respond before you can move on." )
+                return false
 
-            # Pass contraints?
-            # if not XFormConstraintChecker.passesConstraint( question, @renderedForm.getValue() )
-            #     $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer doesn't pass constraint:" + question.info.bind.constraint + "</span></div>"
-            #     return false
+            #Pass contraints?
+            if not XFormConstraintChecker.passesConstraint( question, form_values )
+                #$("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer doesn't pass constraint:" + question.info.bind.constraint + "</span></div>"
+                alert( "Question does not pass constraints" )
+                return false
 
             return true
+
+        success_save = (the_data, textStatus, jqXHR) ->
+          console.log(the_data)
+          if the_data != 'success'
+            added_field = "<input type='hidden' id='detail_data_id' value='"+the_data+"' name='detail_data_id'>"
+            $(".form").append( added_field )
+
+          return
+
+        background_save: () ->
+          data_to_send = $( ".form" ).serialize() + "&async=true"
+
+          $.ajax({
+              type: 'POST',
+              url: '.',
+              success: success_save,
+              data: data_to_send
+            })
+
+          return
 
         get_question_value: ( question ) ->
 
@@ -465,7 +505,7 @@ define( [ 'jquery',
 
             # Does the current active question pass our constraints?
             if forward
-                if not @passes_question_constraints()
+                if not @passes_question_constraints( @currentQuestionIndex )
                     return @
 
             previous_question = document.flat_fields[@currentQuestionIndex]
@@ -536,6 +576,8 @@ define( [ 'jquery',
             #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
 
             @_display_form_buttons( @currentQuestionIndex, current_question )
+
+            @background_save()
 
             @
 
