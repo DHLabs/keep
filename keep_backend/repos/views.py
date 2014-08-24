@@ -32,6 +32,8 @@ from .models import Repository, RepoSerializer
 
 from api.authentication import ApiTokenAuthentication
 
+from twofactor.models import UserAPIToken
+
 
 @login_required
 @require_POST
@@ -316,6 +318,15 @@ def webform( request, username, repo_name ):
 
             if 'async' in request.POST:
                 return HttpResponse( 'success', status=200 )
+
+            if 'doctor_id' in request.POST:
+                url_send = '/' + account.username + '/' + repo_name + '/'
+                token = UserAPIToken.objects.filter( user=account )[0]
+
+                url_send = url_send + '?key=' + token.key + '&user=' + username
+                url_send = url_send + '&doctor_id=' + request.POST['doctor_id']
+
+                return HttpResponseRedirect( url_send )
 
             return HttpResponseRedirect(
                         reverse( 'repo_visualize',
