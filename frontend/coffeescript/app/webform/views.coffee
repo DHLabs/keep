@@ -189,18 +189,16 @@ define( [ 'jquery',
         replaceAll: (find, replace, str) ->
           return str.replace(new RegExp(find, 'g'), replace)
 
-        repop_multiple: (newstring,object) ->
-          cont = newstring
-          while true
-            index = cont.indexOf(object.name);
-            if index == -1
-                break
-            cont = cont.substring(index, cont.length);
-            andindex = cont.indexOf("&");
-            value = cont.substring(object.name.length+1,andindex)
-            cont = cont.substring( object.name.length+1, cont.length )
-            $('input[value="' + value + '"]').prop('checked', true)
+        repop_multiple: (values,object) ->
+          quest_values = values[object.name]
 
+          if quest_values.indexOf(',') != -1
+            values = quest_values.split(',')
+            for value in values
+              $('input[value="' + value + '"]').prop('checked', true)
+          else
+            $('input[value="' + quest_values + '"]').prop('checked', true)
+          
           @
 
         repopulateForm: ->
@@ -216,7 +214,7 @@ define( [ 'jquery',
               for j in [0..(obj.children.length-1)]  
                 obj2 = obj.children[j]
                 if obj2.type == 'select all that apply' 
-                  @repop_multiple(location.search,obj2)
+                  @repop_multiple(result,obj2)
                 else if obj2.type == "select one"
                   $('input[value="' + result[obj2.name] + '"]').prop('checked', true)
                 #else if( obj2.type == "geopoint" )
@@ -225,7 +223,7 @@ define( [ 'jquery',
                   $('#'+obj2.name).val( result[obj2.name] )
             else 
               if obj.type == 'select all that apply'
-                @repop_multiple(location.search,obj)
+                @repop_multiple(result,obj)
               else if obj.type == "select one"
                 $('input[value="' + result[obj.name] + '"]').prop('checked', true)
               #else if obj.type == "geopoint"
@@ -437,7 +435,6 @@ define( [ 'jquery',
             return true
 
         success_save = (the_data, textStatus, jqXHR) ->
-          console.log(the_data)
           if the_data != 'success'
             added_field = "<input type='hidden' id='detail_data_id' value='"+the_data+"' name='detail_data_id'>"
             $(".form").append( added_field )
