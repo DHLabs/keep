@@ -164,7 +164,9 @@
 			<!--a href='#' class='btn' id='language-select-btn'>
 				Select Language
 			</a-->
-			<a href='#' class='btn' id='patient-list'>Return To Patient List</a>
+			{% if repo.study %}
+				<a href='#' class='btn' id='patient-list'>Return To Patient List</a>
+			{% endif %}
 		</div>
 		
 	</div>
