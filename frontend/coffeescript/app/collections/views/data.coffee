@@ -111,6 +111,9 @@ define( [ 'jquery',
                 templ.push( @data_templates[ 'forms' ]( { model: model } ) )
 
             for field in @fields
+                if window.location.search.indexOf('doctor_id') != -1 and field.name == 'doctor_id'
+                    continue
+
                 tdata = { data: model.data[ field.name ] }
 
                 if field.type in [ 'geopoint', 'photo' ]
@@ -164,9 +167,14 @@ define( [ 'jquery',
                     <th>Linked Forms</th>
                 <% }; %>
                 <% _.each( fields, function( item ) { %>
+
+                    <% if( window.location.search.indexOf('doctor_id') != -1 && item.name == 'doctor_id' ) { %>
+                        
+                    <% } else { %>
                     <th data-field='<%= item.name %>'>
                         <%= item.name %><i class='sort-me icon-sort'></i>
                     </th>
+                    <% }; %>
                 <% }); %>
                     <th>&nbsp;</th> 
                 </tr>
