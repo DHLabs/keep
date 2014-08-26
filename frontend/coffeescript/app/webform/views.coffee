@@ -29,8 +29,13 @@ define( [ 'jquery',
             'click #next_btn':          'next_question'
             'click #prev_btn':          'prev_question'
             'click #language-select-btn':'language_select'
+            'click #patient-list': 'go_to_patient_list'
 
         # languages:  []
+
+        go_to_patient_list: (event) ->
+          window.location = '/' + $('#user')[0].text + '/patient_list/' + window.location.search
+          @
 
         language_select: ( event ) ->
           @modalView = new LanguageSelectModal( { current: @currentLanguage, view: this } )

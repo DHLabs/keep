@@ -147,7 +147,7 @@
 {% block content %}
 <div class='container' id='webform'>
 	<div class='row'>
-		<div class='fourteen columns'>
+		<div class='thirteen columns'>
 			<h2>
 				{% if account.username and user.is_authenticated %}
 					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>/
@@ -160,10 +160,11 @@
 				&nbsp;{{ repo.name }}
 			</h2>
 		</div>
-		<div class="two columns">
+		<div class="three columns">
 			<!--a href='#' class='btn' id='language-select-btn'>
 				Select Language
 			</a-->
+			<a href='#' class='btn' id='patient-list'>Return To Patient List</a>
 		</div>
 		
 	</div>
