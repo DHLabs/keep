@@ -34,7 +34,6 @@ define( [ 'jquery',
             @options = options
 
         go_to_list: (event) ->
-            #fix this
             window.location = '/' + document.repo_owner + '/demographics/' + window.location.search
 
         return_to_home: (event) ->

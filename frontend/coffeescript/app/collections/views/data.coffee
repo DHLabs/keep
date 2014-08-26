@@ -68,7 +68,9 @@ define( [ 'jquery',
             @
 
         onRender: ->
-            $( 'a', @el ).click( @import_file )
+            $( 'a', @el ).click( () ->
+                window.location = '/' + document.repo_owner + '/demographics/webform/' + window.location.search
+                )
             @
 
 
@@ -171,9 +173,9 @@ define( [ 'jquery',
                     <% if( window.location.search.indexOf('doctor_id') != -1 && item.name == 'doctor_id' ) { %>
                         
                     <% } else { %>
-                    <th data-field='<%= item.name %>'>
-                        <%= item.name %><i class='sort-me icon-sort'></i>
-                    </th>
+                        <th data-field='<%= item.name %>'>
+                            <%= item.name %><i class='sort-me icon-sort'></i>
+                        </th>
                     <% }; %>
                 <% }); %>
                     <th>&nbsp;</th> 
