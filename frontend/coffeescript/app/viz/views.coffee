@@ -34,7 +34,7 @@ define( [ 'jquery',
             @options = options
 
         go_to_list: (event) ->
-            window.location = '/' + document.repo_owner + '/demographics/' + window.location.search
+            window.location = '/' + document.repo_owner + '/patient_list/' + window.location.search
 
         return_to_home: (event) ->
             window.location = 'http://www.0by25.org/accounts/login'

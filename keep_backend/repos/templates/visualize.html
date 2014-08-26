@@ -100,6 +100,11 @@
 			<h4>Linked Forms</h4>
 			<table class='table'>
 				<% _.each( linked, function( repo ) { %>
+
+					<% if( repo.get("name") != 'demographics' && !can_continue ) { %>
+
+					<% } else { %>
+
 					<tr>
 						<td>
                				<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %><%= "&" + window.location.search.slice(1) %>' class='btn btn-small' style="width:90px">
@@ -112,6 +117,7 @@
 							</a>
 						</td>
 					</tr>
+					<% }; %>
 				<% }); %>
 			</table>
 		</div>

@@ -85,6 +85,7 @@ define( [ 'jquery',
 
             data =
                 attributes: attributes
+                can_continue: @model.attributes.can_continue
                 is_tracker: @repo.get( 'is_tracker' )
                 linked: @linked.models
                 filter: filter

@@ -38,6 +38,17 @@ class DataSerializer( object ):
                 link_dict = {}
                 tracker_id = 'data.' + repository.study.tracker
                 data_id = dict(row)['data'].get(repository.study.tracker)
+
+                demo_datas = db.data.find( { 'label': 'demographics',tracker_id:data_id } )
+
+                copy['can_continue'] = False
+                if demo_datas.count() > 0:
+                    demo_data = demo_datas[0]['data']
+                    print demo_data
+                    if 'chronic_dial' in demo_data and 'func_transplant' in demo_data and demo_data['chronic_dial'] == 'no' and demo_data['func_transplant'] == 'no':
+                        if 'aki_criteria' in demo_data and demo_data['aki_criteria'] != 'no':
+                            copy['can_continue'] = True
+
                 for linked_repo in linked:
                     #check if data
                     num_data = db.data.find( { 'repo': ObjectId( linked_repo.mongo_id ),tracker_id:data_id } )

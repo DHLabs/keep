@@ -69,7 +69,7 @@ define( [ 'jquery',
 
         onRender: ->
             $( 'a', @el ).click( () ->
-                window.location = '/' + document.repo_owner + '/demographics/webform/' + window.location.search
+                window.location = '/' + document.repo_owner + '/patient_list/webform/' + window.location.search
                 )
             @
 
