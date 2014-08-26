@@ -191,7 +191,8 @@ define( [ 'jquery',
 
         repop_multiple: (values,object) ->
           quest_values = values[object.name]
-
+          if not quest_values
+            return
           if quest_values.indexOf(',') != -1
             values = quest_values.split(',')
             for value in values
