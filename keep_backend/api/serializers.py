@@ -52,19 +52,20 @@ class CSVSerializer( Serializer ):
 
         # If the field_value is None, simply return an empty string.
         if field_value is None:
-            return ''
+            return ''.encode('utf-8')
 
         if field_type == 'geopoint':
             # Converts geopoints into an X,Y coordinate string
             coords = field_value.get( 'coordinates' )
             props = field_value.get( 'properties' )
-            return '%s %s %s %s' % ( str( coords[1] ), str( coords[0]), str(props['altitude']), str(props['accuracy']) )
+            value = '%s %s %s %s' % ( str( coords[1] ), str( coords[0]), str(props['altitude']), str(props['accuracy']) )
+            return value.encode('utf-8')
 
         elif 'select all' in field_type:
             # Converts a list into a comma-seperated list of values
-            return ','.join( field_value )
+            return ','.join( field_value ).encode('utf-8')
         else:
-            return str( field_value )
+            return field_value.encode('utf-8')
 
     def to_csv( self, data, options=None ):
         '''
