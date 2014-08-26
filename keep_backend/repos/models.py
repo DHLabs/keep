@@ -313,7 +313,11 @@ class Repository( models.Model ):
             orig_data = db.data.find(  {"_id":ObjectId( data['detail_data_id'] )} )[0]
             validated_data[self.study.tracker] = orig_data['data'][self.study.tracker]
 
-        db.data.update( {"_id":ObjectId( data['detail_data_id'] )},{"$set": { 'data': validated_data, 'timestamp':datetime.utcnow() }} )
+        is_finished = False
+        if 'is_finished' in data:
+            is_finished = True 
+
+        db.data.update( {"_id":ObjectId( data['detail_data_id'] )},{"$set": { 'data': validated_data,'is_finished':is_finished, 'timestamp':datetime.utcnow() }} )
 
         # Once we save the repo data, save the files to S3
         if len( valid_files.keys() ) > 0:
@@ -340,11 +344,16 @@ class Repository( models.Model ):
         if self.is_tracker:
             validated_data[self.study.tracker] = str(random.randrange(100000000,999999999))
 
+        is_finished = False
+        if 'is_finished' in data:
+            is_finished = True
+
         repo_data = {
             'label': self.name,
             'repo': ObjectId( self.mongo_id ),
             'data': validated_data,
-            'timestamp': datetime.utcnow() }
+            'timestamp': datetime.utcnow(),
+            'is_finished': is_finished }
 
         logger.info( repo_data )
 

@@ -356,6 +356,7 @@ def webform( request, username, repo_name ):
 
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
+
     flat_fields = repo.flatten_fields_with_group()
     
     if isinstance( flat_fields[0]["label"] , basestring):
@@ -366,8 +367,11 @@ def webform( request, username, repo_name ):
     flat_field_json = json.dumps(flat_fields)
 
     data_id = None
+    is_finished = False
     if 'data_id' in request.GET:
         data_id = request.GET['data_id']
+        orig_data = db.data.find(  {"_id":ObjectId( data_id )} )[0]
+        is_finished = orig_data['is_finished']
 
     return render_to_response( 'webform.html',
                                { 'repo': repo,
@@ -377,7 +381,8 @@ def webform( request, username, repo_name ):
                                  'has_translations': has_translations,
                                  'repo_id': repo.mongo_id,
                                  'account': account,
-                                 'data_id': data_id
+                                 'data_id': data_id,
+                                 'is_finished': is_finished
                                   },
                                context_instance=RequestContext( request ))
 

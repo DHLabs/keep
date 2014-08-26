@@ -86,8 +86,10 @@ define( [ 'jquery',
             'forms':    _.template( '''
                     <td>
                     <% _.each(document.linked_repos, function(item) { %>
-                        <% if( model.linked[item.name]) { %>
+                        <% if( model.linked[item.name] == 'finished') { %>
                             <span style="color:#00ff00"><%= item.name %></span>
+                        <% } else if( model.linked[item.name] == 'incomplete' ) { %>
+                            <span style="color:#ffff00"><%= item.name %></span>
                         <% } else { %>
                             <span style="color:#ff0000"><%= item.name %></span>
                         <% }; %>&nbsp;&nbsp;
@@ -123,6 +125,15 @@ define( [ 'jquery',
             # the tds before it fixed.
             templ.push( '<td>&nbsp;</td>' )
             return templ.join( '' )
+
+        onRender: () ->
+            if @model.attributes.is_finished
+                $(this.el).css( 'border-color', '#00ff00' )
+                $(this.el).css( 'border-width', '1px 1px 1px 1px' )
+            else
+                $(this.el).css( 'border-color', '#ffff00' )
+                $(this.el).css( 'border-width', '1px 1px 1px 1px' )
+            return
 
         clicked: ( event ) =>
 

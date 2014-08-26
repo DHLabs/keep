@@ -40,11 +40,16 @@ class DataSerializer( object ):
                 data_id = dict(row)['data'].get(repository.study.tracker)
                 for linked_repo in linked:
                     #check if data
-                    num_data = db.data.find( { 'repo': ObjectId( linked_repo.mongo_id ),tracker_id:data_id } ).count()
-                    if num_data > 0:
-                        link_dict[ linked_repo.name ] = True
+                    num_data = db.data.find( { 'repo': ObjectId( linked_repo.mongo_id ),tracker_id:data_id } )
+                    if num_data.count() > 1:
+                        link_dict[ linked_repo.name ] = 'finished'
+                    elif num_data.count() == 1:
+                        if num_data[0]['is_finished']:
+                            link_dict[ linked_repo.name ] = 'finished'
+                        else:
+                            link_dict[ linked_repo.name ] = 'incomplete'
                     else:
-                        link_dict[ linked_repo.name ] = False
+                        link_dict[ linked_repo.name ] = 'empty'
 
                 copy['linked'] = link_dict
 
