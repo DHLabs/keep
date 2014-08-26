@@ -99,16 +99,13 @@ define( [ 'jquery',
                 $('#'+question.name+'_field').after( "<div id="+accordian_name+">" )
 
                 for child in question.children
-                  $( "#"+accordian_name ).append( $( "#"+child.name+"_field" ) )
-                  #move label before field div
-                  header = "<h3>" + child.label + "</h3>"
-                  $( "#"+child.name+"_field" ).before( header )
-                  $( "#"+child.name+"_mainlabel" ).hide()
 
-                #last = question.children[question.children.length-1]
-                #$("#"+last.name).after( "</div>" )
-
-
+                  if child.control and child.control.appearance == "accordian"
+                    $( "#"+accordian_name ).append( $( "#"+child.name+"_field" ) )
+                    #move label before field div
+                    header = "<h3>" + child.label + "</h3>"
+                    $( "#"+child.name+"_field" ).before( header )
+                    $( "#"+child.name+"_mainlabel" ).hide()
 
                 #call accordian start function
                 $( "#"+accordian_name ).accordion()
@@ -201,9 +198,9 @@ define( [ 'jquery',
           if quest_values.indexOf(',') != -1
             values = quest_values.split(',')
             for value in values
-              $('input[value="' + value + '"]').prop('checked', true)
+              $('#'+object.name+'_field input[value="' + value + '"]').prop('checked', true)
           else
-            $('input[value="' + quest_values + '"]').prop('checked', true)
+            $('#'+object.name+'_field input[value="' + quest_values + '"]').prop('checked', true)
           
           @
 
@@ -222,7 +219,7 @@ define( [ 'jquery',
                 if obj2.type == 'select all that apply' 
                   @repop_multiple(result,obj2)
                 else if obj2.type == "select one"
-                  $('input[value="' + result[obj2.name] + '"]').prop('checked', true)
+                  $('#'+obj2.name+'_field input[value="' + result[obj2.name] + '"]').prop('checked', true)
                 #else if( obj2.type == "geopoint" )
                 #    handlegeopoint( result[obj2.name] )
                 else
@@ -231,7 +228,7 @@ define( [ 'jquery',
               if obj.type == 'select all that apply'
                 @repop_multiple(result,obj)
               else if obj.type == "select one"
-                $('input[value="' + result[obj.name] + '"]').prop('checked', true)
+                $('#'+obj.name+'_field input[value="' + result[obj.name] + '"]').prop('checked', true)
               #else if obj.type == "geopoint"
               #handlegeopoint( result[obj.name] )
               else
@@ -481,13 +478,13 @@ define( [ 'jquery',
             if question.control and question.control.appearance == 'accordian'
               if isHide
                 $( '#'+question.name+'_accordian' ).css( "display", "none" )
-                return true
               else
                 $( '#'+question.name+'_accordian' ).css( "display", "inline" )
-                return true
 
             for i in [0..(question.children.length-1)]
               child = question.children[i]
+              if child.control and child.control.appearance == 'accordian'
+                continue
               @toggle_question( child, isHide )
 
           return true
