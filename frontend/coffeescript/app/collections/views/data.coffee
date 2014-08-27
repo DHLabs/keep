@@ -87,15 +87,29 @@ define( [ 'jquery',
 
             'forms':    _.template( '''
                     <td>
+
+                    <% var showForms = false; %>
                     <% _.each(document.linked_repos, function(item) { %>
-                        <% if( model.linked[item.name] == 'finished') { %>
-                            <span style="color:#00ff00"><%= item.name %></span>
-                        <% } else if( model.linked[item.name] == 'incomplete' ) { %>
-                            <span style="color:#ffff00"><%= item.name %></span>
-                        <% } else { %>
-                            <span style="color:#ff0000"><%= item.name %></span>
-                        <% }; %>&nbsp;&nbsp;
+                        <% if( model.linked[item.name] != 'empty' ) { %>
+                            <% showForms = true; %>
+                        <% }; %>
                     <% }); %>
+
+                    <% if( showForms ) { %>
+                        <% _.each(document.linked_repos, function(item) { %>
+                            <% if( model.linked[item.name] == 'finished') { %>
+                                <span class="linked-form" style="background-color:#56B156"><%= item.name %></span>
+                            <% } else if( model.linked[item.name] == 'incomplete' ) { %>
+                                <span class="linked-form" style="background-color:#F3A047"><%= item.name %></span>
+                            <% } else { %>
+                                <span class="linked-form" style="background-color:#FF3A3A"><%= item.name %></span>
+                            <% }; %><br />
+                        <% }); %>
+                    <% } else { %>
+                        <span class="linked-form" style="background-color:#AAA">Click to Add Data</span>
+                    <% }; %>
+
+                    
                     </td>
                 ''')
 

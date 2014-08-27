@@ -321,10 +321,12 @@ def webform( request, username, repo_name ):
 
             if 'doctor_id' in request.POST:
                 url_send = '/' + account.username + '/' + repo_name + '/'
-                token = UserAPIToken.objects.filter( user=account )[0]
 
-                url_send = url_send + '?key=' + token.key + '&user=' + username
-                url_send = url_send + '&doctor_id=' + request.POST['doctor_id']
+                if not request.user.is_authenticated():
+                    token = UserAPIToken.objects.filter( user=account )[0]
+
+                    url_send = url_send + '?key=' + token.key + '&user=' + username
+                    url_send = url_send + '&doctor_id=' + request.POST['doctor_id']
 
                 return HttpResponseRedirect( url_send )
 
@@ -368,9 +370,36 @@ def webform( request, username, repo_name ):
 
     data_id = None
     is_finished = False
-    if 'data_id' in request.GET:
-        data_id = request.GET['data_id']
-        orig_data = db.data.find(  {"_id":ObjectId( data_id )} )[0]
+
+    request.GET = request.GET.copy()
+
+    orig_data = None
+    if 'patient_id' in request.GET and not 'data_id' in request.GET:
+        #check if there's data for this patient
+        patient_datas = db.data.find( { "label":repo.name, "data.patient_id":request.GET['patient_id'] } )
+        if patient_datas.count() > 0:
+            orig_data = patient_datas[0]
+            #add all data to query string
+            url_to_send = request.get_full_path()
+
+            if url_to_send[ len(url_to_send) - 1 ] == "&":
+                url_to_send = url_to_send[:(len(url_to_send)-2)]
+
+            url_to_send = url_to_send + "&data_id=" + str(orig_data['_id'])
+
+            #do a redirect to new get url
+            for key in orig_data['data']:
+                url_to_send = url_to_send + '&' + key + "="
+                url_to_send = url_to_send + str(orig_data['data'][key]).encode('utf-8')
+
+            return HttpResponseRedirect( url_to_send )
+
+    if not orig_data:
+        if 'data_id' in request.GET:
+            data_id = request.GET['data_id']
+            orig_data = db.data.find(  {"_id":ObjectId( data_id )} )[0]
+
+    if orig_data:
         is_finished = orig_data['is_finished']
 
     return render_to_response( 'webform.html',

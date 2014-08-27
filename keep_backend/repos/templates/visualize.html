@@ -8,6 +8,16 @@
 <link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.css" %}'>
 <link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.Default.css" %}'>
+<style type='text/css'>
+.linked-form {
+  margin: 3px 5px;
+  padding: 5px 10px;
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 3px;
+  display: inline-block;
+  font-weight: bold;
+}
+</style>
 {% endblock %}
 
 {% block js %}
@@ -112,7 +122,7 @@
                 			</a>
             			</td>
 						<td>
-							<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/<%= window.location.search %>' target='_blank'>
+							<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/<%= window.location.search %>'>
 								<%= repo.get( 'name' ) %>
 							</a>
 						</td>
