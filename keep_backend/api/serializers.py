@@ -76,7 +76,14 @@ class CSVSerializer( Serializer ):
         '''
         options = options or {}
 
-        #data = self.to_simple( data, options )
+        data = self.to_simple( data, options )
+
+        if 'meta' not in data:
+            if 'data' in data:
+                data = data['data']
+            else:
+                return "poo"
+
         raw_data = StringIO.StringIO()
 
         writer = unicodecsv.DictWriter( raw_data,
