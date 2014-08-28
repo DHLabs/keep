@@ -208,7 +208,7 @@
 		  					{% endif %}
 
 		  					<label id="{{ field.name }}_mainlabel" class="control-label" for="{{ field.name }}">
-		  						{{ field.label|parse_label }}
+		  						{{ field.label|parse_label|safe }}
 		  						{% if 'hint' in field %}
 		  							<span title="{{ field.hint }}"><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
 		  						{% endif %}
