@@ -68,7 +68,7 @@ class CSVSerializer( Serializer ):
             # Converts a list into a comma-seperated list of values
             return ','.join( field_value ).encode('utf-8')
         else:
-            return field_value.encode('utf-8')
+            return str(field_value).encode('utf-8')
 
     def to_csv( self, data, options=None ):
         '''
@@ -77,12 +77,6 @@ class CSVSerializer( Serializer ):
         options = options or {}
 
         data = self.to_simple( data, options )
-
-        if 'meta' not in data:
-            if 'data' in data:
-                data = data['data']
-            else:
-                return "poo"
 
         raw_data = StringIO.StringIO()
 
