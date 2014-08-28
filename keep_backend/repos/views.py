@@ -397,7 +397,14 @@ def webform( request, username, repo_name ):
             #do a redirect to new get url
             for key in orig_data['data']:
                 url_to_send = url_to_send + '&' + key + "="
-                url_to_send = url_to_send + str(orig_data['data'][key]).encode('utf-8')
+
+                value = orig_data['data'][key]
+                if isinstance( value, list ):
+                    #put values together
+                    new_val = ",".join( value )
+                    url_to_send = url_to_send + str(new_val).encode('utf-8')
+                else:
+                    url_to_send = url_to_send + str(value).encode('utf-8')
 
             return HttpResponseRedirect( url_to_send )
 
