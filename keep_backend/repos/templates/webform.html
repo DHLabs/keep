@@ -149,6 +149,8 @@
 	<div class='row'>
 		<div class='thirteen columns'>
 			<h2>
+
+				{% if repo.study %}
 				{% if account.username and user.is_authenticated %}
 					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>/
 				{% elif user.is_authenticated %}
@@ -158,6 +160,10 @@
 
 				{% endif %}
 				&nbsp;{{ repo.name }}
+
+				{% else %}
+					{{ repo.description }}
+				{% endif %}
 			</h2>
 		</div>
 		<div class="three columns">
