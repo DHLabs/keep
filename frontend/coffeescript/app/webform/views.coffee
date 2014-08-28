@@ -52,8 +52,9 @@ define( [ 'jquery',
             @numberOfQuestions = document.flat_fields.length
 
             @currentLanguage = null
-            if typeof(document.flat_fields[0].label) != "string"
-              @currentLanguage = _.keys(document.flat_fields[0].label)[0]
+            if document.flat_fields[0].label
+              if typeof(document.flat_fields[0].label) != "string"
+                @currentLanguage = _.keys(document.flat_fields[0].label)[0]
               
             @repopulateForm()
             @_display_form_buttons( 0, document.flat_fields[0] )
@@ -66,6 +67,8 @@ define( [ 'jquery',
               content: () ->
                 return $(this).prop('title')
                 })
+
+            @toggle_question( document.flat_fields[@currentQuestionIndex], false )
             @
 
         change_language: (language) ->
@@ -422,7 +425,7 @@ define( [ 'jquery',
                     if (not form_values[child.name]) or form_values[ child.name ].length == 0
                       alert( "Question is required. Please respond before you can move on." )
                       return false
-                
+
             else if question.bind and question.bind.required is "yes"
               if (not form_values[question.name]) or form_values[ question.name ].length == 0
                 #$("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
