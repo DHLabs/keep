@@ -521,7 +521,8 @@ define( [ 'jquery',
             if previous_question.type == 'group' and next_index != -1
               #TODO: check if group is field-list or not first
               if forward
-                next_index = next_index + previous_question.children.length
+                if ( next_index - @currentQuestionIndex ) == 1
+                  next_index = next_index + previous_question.children.length
             
             # Question to switch to
             #switch_question_key = $( element ).data( 'key' )

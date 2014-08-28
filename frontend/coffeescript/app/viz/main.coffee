@@ -5,6 +5,9 @@ define( [ 'require' ],
 		( DataVizApp, $ ) ->
 			DataVizApp.start()
 
+			if document.patient_id
+				$("td:contains('" +document.patient_id+ "')").click()
+
 			$( '#share_username' ).autocomplete(
 				appendTo: '#autofill_list'
 				minLength: 1

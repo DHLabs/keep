@@ -27,6 +27,9 @@
 	document.visualizations = {{viz_json|safe}};
 	document.initial_data = {{data|safe}};
 	document.repo_owner = '{{repo.owner}}';
+	{% if patient_id %}
+	document.patient_id = '{{ patient_id }}';
+	{% endif %}
 </script>
 <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
 <script src='{% static 'js/vendor/requirejs.js' %}'></script>
@@ -118,7 +121,7 @@
 					<tr>
 						<td>
                				<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %><%= "&" + window.location.search.slice(1) %>' class='btn btn-small' style="width:90px">
-                    			<i class='icon-pencil'></i> Add Data&nbsp;&nbsp;
+                    			<i class='icon-pencil'></i> Edit Data&nbsp;&nbsp;
                 			</a>
             			</td>
 						<td>
@@ -285,7 +288,7 @@
 				</li>
 				{% if repo.is_tracker %}
 				<li>
-					<a id='add_patient' class='btn' href='#'>Add Patient</a>
+					<a id='add_patient' class='btn' href='#'>Add New Patient</a>
 				</li>
 				{% else %}
 					{% if repo.study %}

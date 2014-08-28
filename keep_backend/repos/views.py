@@ -320,14 +320,21 @@ def webform( request, username, repo_name ):
                 return HttpResponse( 'success', status=200 )
 
             if 'doctor_id' in request.POST:
-                url_send = '/' + account.username + '/' + repo_name + '/'
+                url_send = '/' + account.username + '/patient_list/'
+
+                 #get patient id
+                patient_id = db.data.find( {"label": repo_name, "_id":ObjectId(request.POST['detail_data_id'])} )[0]['data']['patient_id']
+
 
                 if not request.user.is_authenticated():
                     token = UserAPIToken.objects.filter( user=account )[0]
 
                     url_send = url_send + '?key=' + token.key + '&user=' + username
                     url_send = url_send + '&doctor_id=' + request.POST['doctor_id']
-
+                    url_send = url_send + "&patient_id=" + patient_id
+                else:
+                    url_send = url_send + "?patient_id=" + patient_id
+               
                 return HttpResponseRedirect( url_send )
 
             return HttpResponseRedirect(
@@ -411,8 +418,8 @@ def webform( request, username, repo_name ):
                                  'repo_id': repo.mongo_id,
                                  'account': account,
                                  'data_id': data_id,
-                                 'is_finished': is_finished
-                                  },
+                                 'is_finished': is_finished                                  
+                                },
                                context_instance=RequestContext( request ))
 
 
@@ -508,6 +515,10 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     viz_serializer = VisualizationSerializer()
     viz_json = json.dumps( viz_serializer.serialize( repo.visualizations.all() ) )
 
+    patient_id = None
+    if 'patient_id' in request.GET:
+        patient_id = request.GET['patient_id']
+
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
 
@@ -520,5 +531,7 @@ def repo_viz( request, username, repo_name, filter_param=None ):
 
                                  'permissions': permissions,
                                  'account': account,
-                                 'users_perms': usePerms },
+                                 'users_perms': usePerms,
+                                 'patient_id': patient_id
+                               },
                                context_instance=RequestContext(request) )

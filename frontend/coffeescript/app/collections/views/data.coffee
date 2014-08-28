@@ -147,11 +147,11 @@ define( [ 'jquery',
 
         onRender: () ->
             if @model.attributes.is_finished
-                $(this.el).css( 'border-color', '#00ff00' )
-                $(this.el).css( 'border-width', '1px 1px 1px 1px' )
+                #$(this.el).css( 'border-color', '#00ff00' )
+                #$(this.el).css( 'border-width', '1px 1px 1px 1px' )
             else
-                $(this.el).css( 'border-color', '#ffff00' )
-                $(this.el).css( 'border-width', '1px 1px 1px 1px' )
+                $(this.el).css( 'background-color', '#FFFFDF' )
+                #$(this.el).css( 'border-width', '1px 1px 1px 1px' )
             return
 
         clicked: ( event ) =>
