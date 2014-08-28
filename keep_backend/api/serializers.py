@@ -13,7 +13,7 @@ class CSVSerializer( Serializer ):
     content_types = {
         'json': 'application/json',
         'jsonp': 'text/javascript',
-        'csv': 'text/csv',
+        'csv': 'application/json',
     }
 
     FLOAT_TYPE = re.compile(r'^(\d+\.\d*|\d*\.\d+)$')
