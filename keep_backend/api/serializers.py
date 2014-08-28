@@ -79,28 +79,33 @@ class CSVSerializer( Serializer ):
         #data = self.to_simple( data, options )
         raw_data = StringIO.StringIO()
 
-        writer = unicodecsv.DictWriter( raw_data,
-                                        [ x[ 'name' ] for x in data[ 'meta' ][ 'fields' ] ],
-                                        extrasaction='ignore')
-        writer.writeheader()
+        try:
 
-        for item in data.get( 'data', [] ):
+            writer = unicodecsv.DictWriter( raw_data,
+                                            [ x[ 'name' ] for x in data[ 'meta' ][ 'fields' ] ],
+                                            extrasaction='ignore')
+            writer.writeheader()
 
-            # Loops through the field list and format each data value according to
-            # the type.
-            row = {}
-            for field in data[ 'meta' ][ 'fields' ]:
+            for item in data.get( 'data', [] ):
 
-                # Grab the field details and convert the field into a string.
-                field_name = field.get( 'name' )
-                field_type = field.get( 'type' )
-                field_value = item.get( 'data' ).get( field_name, None )
+                # Loops through the field list and format each data value according to
+                # the type.
+                row = {}
+                for field in data[ 'meta' ][ 'fields' ]:
 
-                row[ field_name ] = self._format_data( field_type, field_value )
+                    # Grab the field details and convert the field into a string.
+                    field_name = field.get( 'name' )
+                    field_type = field.get( 'type' )
+                    field_value = item.get( 'data' ).get( field_name, None )
 
-            writer.writerow( row )
+                    row[ field_name ] = self._format_data( field_type, field_value )
 
-        return raw_data.getvalue()
+                writer.writerow( row )
+
+            return raw_data.getvalue()
+
+        except Exception as e:
+            return data
 
     def from_csv( self, csv_data ):
         fields, data = ( [], [] )
