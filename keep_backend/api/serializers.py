@@ -13,7 +13,7 @@ class CSVSerializer( Serializer ):
     content_types = {
         'json': 'application/json',
         'jsonp': 'text/javascript',
-        'csv': 'application/json',
+        'csv': 'text/csv',
     }
 
     FLOAT_TYPE = re.compile(r'^(\d+\.\d*|\d*\.\d+)$')
@@ -79,33 +79,28 @@ class CSVSerializer( Serializer ):
         #data = self.to_simple( data, options )
         raw_data = StringIO.StringIO()
 
-        try:
+        writer = unicodecsv.DictWriter( raw_data,
+                                        [ x[ 'name' ] for x in data[ 'meta' ][ 'fields' ] ],
+                                        extrasaction='ignore')
+        writer.writeheader()
 
-            writer = unicodecsv.DictWriter( raw_data,
-                                            [ x[ 'name' ] for x in data[ 'meta' ][ 'fields' ] ],
-                                            extrasaction='ignore')
-            writer.writeheader()
+        for item in data.get( 'data', [] ):
 
-            for item in data.get( 'data', [] ):
+            # Loops through the field list and format each data value according to
+            # the type.
+            row = {}
+            for field in data[ 'meta' ][ 'fields' ]:
 
-                # Loops through the field list and format each data value according to
-                # the type.
-                row = {}
-                for field in data[ 'meta' ][ 'fields' ]:
+                # Grab the field details and convert the field into a string.
+                field_name = field.get( 'name' )
+                field_type = field.get( 'type' )
+                field_value = item.get( 'data' ).get( field_name, None )
 
-                    # Grab the field details and convert the field into a string.
-                    field_name = field.get( 'name' )
-                    field_type = field.get( 'type' )
-                    field_value = item.get( 'data' ).get( field_name, None )
+                row[ field_name ] = self._format_data( field_type, field_value )
 
-                    row[ field_name ] = self._format_data( field_type, field_value )
+            writer.writerow( row )
 
-                writer.writerow( row )
-
-            return raw_data.getvalue()
-
-        except Exception as e:
-            return data
+        return raw_data.getvalue()
 
     def from_csv( self, csv_data ):
         fields, data = ( [], [] )
