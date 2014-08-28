@@ -56,10 +56,13 @@ class CSVSerializer( Serializer ):
 
         if field_type == 'geopoint':
             # Converts geopoints into an X,Y coordinate string
-            coords = field_value.get( 'coordinates' )
-            props = field_value.get( 'properties' )
-            value = '%s %s %s %s' % ( str( coords[1] ), str( coords[0]), str(props['altitude']), str(props['accuracy']) )
-            return value.encode('utf-8')
+            try:
+                coords = field_value.get( 'coordinates' )
+                props = field_value.get( 'properties' )
+                value = '%s %s %s %s' % ( str( coords[1] ), str( coords[0]), str(props['altitude']), str(props['accuracy']) )
+                return value.encode('utf-8')
+            except Exception as e:
+                return "".encode('utf-8')
 
         elif 'select all' in field_type:
             # Converts a list into a comma-seperated list of values
