@@ -413,7 +413,7 @@ def webform( request, username, repo_name ):
             data_id = request.GET['data_id']
             orig_data = db.data.find(  {"_id":ObjectId( data_id )} )[0]
 
-    if orig_data:
+    if orig_data and 'is_finished' in orig_data:
         is_finished = orig_data['is_finished']
 
     return render_to_response( 'webform.html',
