@@ -104,14 +104,14 @@
 			<h4>Forms</h4>
 
 			<% var linkedguys = model.attributes.linked; var message = null; console.log( model );%>
-			<% if( linkedguys['demographics'] == 'finished' ) { %>
-				<% message = "Please proceed to fill out clinical_data when ready."; %>
-			<% } else if( linkedguys['clinical_data'] == 'finished' ) { %>
-				<% message = "Please proceed to fill out diagnostic_treatment when ready."; %>
+			<% if( linkedguys['outcomes'] == 'finished' ) { %>
+
 			<% } else if( linkedguys['diagnostic_treatment'] == 'finished' ) { %>
 				<% message = "Please proceed to fill out outcomes when ready."; %>
-			<% } else if( linkedguys['outcomes'] == 'finished' ) { %>
-
+			<% } else if( linkedguys['clinical_data'] == 'finished' ) { %>
+				<% message = "Please proceed to fill out diagnostic_treatment when ready."; %>
+			<% } else if( linkedguys['demographic'] == 'finished' ) { %>
+				<% message = "Please proceed to fill out clinical_data when ready."; %>
 			<% }; %>
 			<% if( message != null && can_continue ) { %>
 				<h5><%= message %></h5>
