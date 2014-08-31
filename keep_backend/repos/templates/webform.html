@@ -176,6 +176,41 @@
 		</div>
 		
 	</div>
+
+	{% if repo.name == 'demographics' %}
+	<div class="row">
+		<div class="sixteen columns">
+			<h3>
+				This is the screening demographic information form. Please fill this out according to the data that was available to you when you first suspected the patient had AKI.
+			</h3>
+		</div>
+	</div>
+	{% elif repo.name == 'clinical_data' %}
+	<div class="row">
+		<div class="sixteen columns">
+			<h3>
+				This is the clinical data form where you should fill out questions regarding the clinical information available to you on AKI confirmation day.
+			</h3>
+		</div>
+	</div>
+	{% elif repo.name == 'diagnostic_treatment' %}
+	<div class="row">
+		<div class="sixteen columns">
+			<h3>
+				This is the diagnosis and treatment form where you should fill out questions regarding the diagnosis and treatment information that was available to you on AKI confirmation day.
+			</h3>
+		</div>
+	</div>
+	{% elif repo.name == 'outcomes' %}
+	<div class="row">
+		<div class="sixteen columns">
+			<h3>
+				This is the outcomes form where you should fill out questions regarding the outcome of the patient with the information available to you 7 days after AKI confirmation day. If the patient is no longer under your care 7 days after AKI confirmation, please fill the questions out to the best of your knowledge with the information that was available to you on you last observation
+			</h3>
+		</div>
+	</div>
+	{% endif %}
+
 	<div class="row">
 		<div class="sixteen columns">
 			<div id="progress-bar">

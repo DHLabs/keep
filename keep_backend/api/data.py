@@ -160,7 +160,10 @@ class DataResource( MongoDBResource ):
             query_parameters['repo'] = ObjectId( repo_id )
 
             if 'doctor_id' in request.GET:
-                query_parameters['data.doctor_id'] = request.GET['doctor_id']
+                if request.GET['doctor_id'] == '':
+                    query_parameters['data.aaaaa'] = 'blahblah'
+                else:
+                    query_parameters['data.doctor_id'] = request.GET['doctor_id']
             else:
                 if request.user.username == 'AnonymousUser':
                     query_parameters['data.aaaaa'] = 'blahblah'

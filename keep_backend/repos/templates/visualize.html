@@ -97,21 +97,29 @@
 <script type='text/template' id='data-detail-template'>
 	<div class="bbm-modal__topbar"></div>
 	<div class="bbm-modal__section">
-		<div class='control-group'>
-			<h4>Details</h4>
-			<table class='table'>
-				<% _.each( attributes, function( val, key ) { %>
-					<tr>
-						<td><%= key %></td><td><%= val %></td>
-					</tr>
-				<% }); %>
-			</table>
-		</div>
+		
 
 		<% if( is_tracker ) { %>
 		<div class='control-group' id='data-links'>
-			<h4>Linked Forms</h4>
+			<h4>Forms</h4>
+
+			<% var linkedguys = model.attributes.linked; var message = null; console.log( model );%>
+			<% if( linkedguys['demographics'] == 'finished' ) { %>
+				<% message = "Please proceed to fill out clinical_data when ready."; %>
+			<% } else if( linkedguys['clinical_data'] == 'finished' ) { %>
+				<% message = "Please proceed to fill out diagnostic_treatment when ready."; %>
+			<% } else if( linkedguys['diagnostic_treatment'] == 'finished' ) { %>
+				<% message = "Please proceed to fill out outcomes when ready."; %>
+			<% } else if( linkedguys['outcomes'] == 'finished' ) { %>
+
+			<% }; %>
+			<% if( message != null && can_continue ) { %>
+				<h5><%= message %></h5>
+			<% };%>
 			<table class='table'>
+
+				<% var swaper = linked[0]; linked[0] = linked[1]; linked[1] = swaper; %>
+
 				<% _.each( linked, function( repo ) { %>
 
 					<% if( repo.get("name") != 'demographics' && !can_continue ) { %>
@@ -121,7 +129,7 @@
 					<tr>
 						<td>
                				<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %><%= "&" + window.location.search.slice(1) %>' class='btn btn-small' style="width:90px">
-                    			<i class='icon-pencil'></i> Edit Data&nbsp;&nbsp;
+                    			<i class='icon-pencil'></i><% if( model.attributes.linked[repo.get("name")] == 'empty' ) { %> Add Data&nbsp;&nbsp;<% } else { %>Edit Data&nbsp;&nbsp;<% }; %>
                 			</a>
             			</td>
 						<td>
@@ -135,6 +143,17 @@
 			</table>
 		</div>
 		<% } %>
+		<div class='control-group'>
+			<h4>Details</h4>
+			<table class='table'>
+				<% _.each( attributes, function( val, key ) { %>
+					<tr>
+						<td><%= key %></td><td><%= val %></td>
+					</tr>
+				<% }); %>
+			</table>
+		</div>
+
 	</div>
 	<div class="bbm-modal__bottombar">
 		<a href="#" id="edit_data_btn" style="text-align: left" class="btn">Edit Data</a>&nbsp;&nbsp;&nbsp;

@@ -396,6 +396,8 @@ def webform( request, username, repo_name ):
 
             #do a redirect to new get url
             for key in orig_data['data']:
+                if key == 'patient_id' and "patient_id" in url_to_send:
+                    continue
                 url_to_send = url_to_send + '&' + key + "="
 
                 value = orig_data['data'][key]

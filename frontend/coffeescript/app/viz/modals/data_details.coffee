@@ -84,6 +84,7 @@ define( [ 'jquery',
                     filter = attributes[ field.name ]
 
             data =
+                model: @model
                 attributes: attributes
                 can_continue: @model.attributes.can_continue
                 is_tracker: @repo.get( 'is_tracker' )
