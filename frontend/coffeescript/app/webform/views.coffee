@@ -30,11 +30,26 @@ define( [ 'jquery',
             'click #prev_btn':          'prev_question'
             'click #language-select-btn':'language_select'
             'click #patient-list': 'go_to_patient_list'
+            'click input[name="aki_criteria"]': 'process_constraint_aki'
+
 
         # languages:  []
 
+        process_constraint_aki: (event) ->
+          if event.target.value == 'no'
+            $( "#aki_criteria-0" ).prop('checked',false)
+            $( "#aki_criteria-1" ).prop('checked',false)
+            $( "#aki_criteria-2" ).prop('checked',false)
+          else
+            $( "#aki_criteria-3" ).prop('checked',false)
+          @
+
         go_to_patient_list: (event) ->
-          window.location = '/' + $('#user')[0].text + '/patient_list/' + window.location.search
+          url = ""
+          query_params = @queryStringToJSON(null)
+          if query_params['key'] and query_params['doctor_id'] and query_params['user']
+            url = "?key=" + query_params['key'] + "&doctor_id=" + query_params['doctor_id'] + "&user=" + query_params['user']
+          window.location = 'http://' + location.host + '/' + $('#user')[0].text + '/patient_list/' + window.location.search
           @
 
         language_select: ( event ) ->
@@ -111,7 +126,7 @@ define( [ 'jquery',
                     $( "#"+child.name+"_mainlabel" ).hide()
 
                 #call accordian start function
-                $( "#"+accordian_name ).accordion()
+                $( "#"+accordian_name ).accordion({collapsible:true})
 
                 $("#"+accordian_name).css( "display", "none" )
 
@@ -419,12 +434,21 @@ define( [ 'jquery',
 
             # Pass required?
             if question.type == 'group' and question.control
-              if question.control.appearance == 'accordian' or question.control.appearance == 'field-list'
+              if question.control.appearance == 'field-list'
                 for child in question.children
                   if child.bind and child.bind.required is "yes"
                     if (not form_values[child.name]) or form_values[ child.name ].length == 0
                       alert( "Question is required. Please respond before you can move on." )
                       return false
+              if question.control.appearance == 'accordian'
+                can_pass = false
+                for child in question.children
+                  if not( (not form_values[child.name]) or form_values[ child.name ].length == 0)
+                    can_pass = true
+                    break
+                if not can_pass
+                  alert( "Question is required. Please respond before you can move on." )
+                  return false
 
             else if question.bind and question.bind.required is "yes"
               if (not form_values[question.name]) or form_values[ question.name ].length == 0

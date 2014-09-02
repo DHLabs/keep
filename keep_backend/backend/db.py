@@ -46,8 +46,9 @@ class DataSerializer( object ):
                     demo_data = demo_datas[0]['data']
                     print demo_data
                     if 'chronic_dial' in demo_data and 'func_transplant' in demo_data and demo_data['chronic_dial'] == 'no' and demo_data['func_transplant'] == 'no':
-                        if 'aki_criteria' in demo_data and demo_data['aki_criteria'] != 'no':
-                            copy['can_continue'] = True
+                        if 'incarcerated' in demo_data and demo_data['incarcerated'] == 'no':
+                            if 'aki_criteria' in demo_data and demo_data['aki_criteria'] != 'no':
+                                copy['can_continue'] = True
 
                 for linked_repo in linked:
                     #check if data

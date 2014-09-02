@@ -63,7 +63,7 @@
 	padding: 8px;
 	position: absolute;
 	z-index: 9999;
-	max-width: 300px;
+	max-width: 400px;
 	-webkit-box-shadow: 0 0 5px #aaa;
 	box-shadow: 0 0 5px #aaa;
 	}
@@ -254,7 +254,7 @@
 		  					{% if field.type == 'group' %}
 
 		  					{% elif field.type == 'geopoint' %}
-		  						<!-- TODO -->
+
 		  					{% elif field.type == 'integer' or field.type == 'decimal' or field.type == 'integer' %}
 		  						<span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" type="number" step="any"></span>
 		  					{% elif field.type == 'select one' or field.type == 'select one or specify other' %}
@@ -264,7 +264,7 @@
 		  							<option value="{{ choice.name }}">{{ choice.label|parse_label }}</option>
 		  							{% endfor %}
 		  							{% if field.type == 'select one or specify other' %}
-		  							<!--option>todo</option-->
+
 		  							{% endif %}
 		  						</select>
 		  						{% else %}
@@ -278,7 +278,7 @@
 		  								</li>	
 		  							{% endfor %}
 		  							{% if field.type == 'select one or specify other' %}
-		  							<!-->TODO<-->
+
 		  							{% endif %}
 		  						</ul>
 		  						{% endif %}

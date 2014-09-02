@@ -34,19 +34,44 @@ define( [ 'jquery',
             @options = options
 
         go_to_list: (event) ->
-            window.location = '/' + document.repo_owner + '/patient_list/' + window.location.search
+            window.location = 'http://' + location.host + '/' + document.repo_owner + '/patient_list/' + @sanitize_search()
 
         return_to_home: (event) ->
             window.location = 'http://www.0by25.org/accounts/login'
 
         add_patient: (event) ->
-            window.location = '/' + document.repo_owner + '/' + document.repo.name + '/webform/' + window.location.search
+            window.location = 'http://' + location.host + '/' + document.repo_owner + '/' + document.repo.name + '/webform/' + @sanitize_search()
 
         sharing_settings: ( event ) ->
             @modalView = new ShareSettingsModal( @options )
             $('.modal').html( @modalView.render().el )
             @modalView.onAfterRender( $( '.modal' ) )
 
+        sanitize_search: () ->
+            new_url = "?"
+            query = @queryStringToJSON(null)
+            if query['key']
+                new_url = new_url + "key=" + query['key']
+            if query['doctor_id']
+                new_url = new_url + "&doctor_id=" + query['doctor_id']
+            if query['user']
+                new_url = new_url + "&user=" + query['user']
+            return new_url
+
+        queryStringToJSON: (url) ->
+          if (url == '')
+            return ''
+
+          if url
+            url = '?' + url
+          pairs = (url or location.search).slice(1).split('&')
+          result = {}
+          for idx in pairs
+              pair = idx.split('=')
+              if !!pair[0]
+                  result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] or '')
+          
+          return result
 
     class VizTabs extends Backbone.Marionette.View
         el: '#viz-options'
