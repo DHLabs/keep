@@ -89,7 +89,7 @@
 
 {% block js %}
 <script id='form_id' type='text/html'>{{ repo_id }}</script>
-<script id='user' type='text/html'>{{ user.username }}</script>
+<script id='user' type='text/html'>{{ account.username }}</script>
 <script type='text/javascript'>
 	document.repo = {{repo_json|safe}};
 	document.flat_fields = {{ flat_field_json|safe }};

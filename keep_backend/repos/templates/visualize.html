@@ -118,10 +118,6 @@
 			<% };%>
 			<table class='table'>
 
-				<% if( linked[0].name != 'demographics' ) { %>
-				<% var swaper = linked[0]; linked[0] = linked[1]; linked[1] = swaper; %>
-				<% }; %>
-
 				<% _.each( linked, function( repo ) { %>
 
 					<% if( repo.get("name") != 'demographics' && !can_continue ) { %>
@@ -156,7 +152,11 @@
 		</div>
 		<% } %>
 		<div class='control-group'>
-			<h4>Details</h4>
+			{% if repo.name == "patient_list" %}
+				<h4>Patient Information Details</h4>
+			{% else %}
+				<h4><Details/h4>
+			{% endif %}
 			<table class='table'>
 				<% _.each( attributes, function( val, key ) { %>
 					<tr>

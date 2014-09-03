@@ -518,7 +518,11 @@ def repo_viz( request, username, repo_name, filter_param=None ):
         # If this repo is a tracker and part of a study, grab all repos that
         # are part of the study so that we can display data links.
         linked = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
-        linked_json = json.dumps( serializer.serialize( linked ) )
+        linked_list = list(linked)
+        linkone = linked_list[0]
+        linked_list[0] = linked_list[1]
+        linked_list[1] = linkone
+        linked_json = json.dumps( serializer.serialize( linked_list ) )
 
     # Grab the list of visualizations for this repo
     viz_serializer = VisualizationSerializer()
