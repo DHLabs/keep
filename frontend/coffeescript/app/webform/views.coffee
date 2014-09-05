@@ -31,6 +31,7 @@ define( [ 'jquery',
             'click #language-select-btn':'language_select'
             'click #patient-list': 'go_to_patient_list'
             'click input[name="aki_criteria"]': 'process_constraint_aki'
+            'click input[name="other_organ_failures"]': 'process_constraint_organ'
 
 
         # languages:  []
@@ -43,6 +44,16 @@ define( [ 'jquery',
           else
             $( "#aki_criteria-3" ).prop('checked',false)
           @
+
+        process_constraint_organ: (event) ->
+          if event.target.value == 'none'
+            $( "#other_organ_failures-0" ).prop('checked',false)
+            $( "#other_organ_failures-1" ).prop('checked',false)
+            $( "#other_organ_failures-2" ).prop('checked',false)
+            $( "#other_organ_failures-3" ).prop('checked',false)
+            $( "#other_organ_failures-4" ).prop('checked',false)
+          else
+            $( "#other_organ_failures-5" ).prop('checked',false)
 
         go_to_patient_list: (event) ->
           url = ""
@@ -126,7 +137,7 @@ define( [ 'jquery',
                     $( "#"+child.name+"_mainlabel" ).hide()
 
                 #call accordian start function
-                $( "#"+accordian_name ).accordion({collapsible:true})
+                $( "#"+accordian_name ).accordion({collapsible:true,active:false})
 
                 $("#"+accordian_name).css( "display", "none" )
 
