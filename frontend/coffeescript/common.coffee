@@ -15,7 +15,7 @@ requirejs.config(
 
 		# Backbone plugins
 		backbone_modal: 'backbone.modal'
-		marionette: 'marionette'
+		marionette: 'backbone.marionette'
 
 		nvd3: 'nv.d3'
 
