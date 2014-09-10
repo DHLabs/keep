@@ -3,7 +3,7 @@
 	margin-top:16px;
 }
 
-#raw_table {
+.raw_table {
 
 	table-layout: fixed;
 
@@ -29,6 +29,24 @@
 		border-left: 1px solid #EEE;
 	}
 
+}
+
+.patient_list {
+  table-layout: auto;
+
+  th, td {
+    width: auto;
+    min-width: 0;
+  }
+
+}
+
+table.fixed {
+	th, td {
+		width: auto;
+		min-width: 0;
+		max-width: auto;
+	}
 }
 
 .card {

@@ -364,11 +364,11 @@
 <div id='viz-data'>
 	<!-- Raw data list -->
 	<div class='viz viz-active' id='raw-viz'>
-		<div id='fixed-header'>
-			<table class='table fixed'><tr></tr></table>
-		</div>
+		<!--div id='fixed-header'>
+			<table class='table fixed raw_table{% if repo.name == 'patient_list' %} patient_list{%endif%}'><tr></tr></table>
+		</div-->
 		<div id='raw_list' class='sixteen columns active'>
-			<table id='raw_table' class='table fixed'><tbody></tbody></table>
+			<table id='raw_table' class='table fixed raw_table{% if repo.name == 'patient_list' %} patient_list{%endif%}'><tbody></tbody></table>
 		</div>
 	</div>
 
