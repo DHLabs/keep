@@ -185,6 +185,8 @@ define( [ 'jquery',
             @controls = L.control.layers( null, layers, { collapsed: false } )
             @controls.addTo( @map )
 
+            @data_offset = 0
+
             # Listen to events
             @map.on( 'moveend', @refresh_viewport )
 
@@ -225,6 +227,21 @@ define( [ 'jquery',
           # invalidateSize() doesn't work.
           @map._onResize()
 
+        get_next_page: () ->
+
+            @data_offset = @data_offset + 1
+            selfie = @
+            @collection.fetch(
+                reset: false
+                data:
+                    geofield: @selected_header.name
+                    bbox: @bounds.toBBoxString() 
+                    offset: @data_offset
+                success: (collection, response, options) ->
+                    if response.meta.pages > selfie.data_offset
+                        selfie.get_next_page()
+            )
+
         refresh_viewport: ( event ) =>
             # If we could not find any geofields or the user has not
             # specified an existing one, don't do anything with the
@@ -232,15 +249,23 @@ define( [ 'jquery',
             if not @selected_header?
                 return
 
+            @data_offset = 0
+
             # Everytime we move around, grab new data from the server and
             # refresh the viewport!
-            bounds = event.target.getBounds()
+            @bounds = event.target.getBounds()
+
+            selfie = @
 
             @collection.fetch(
                 reset: true
                 data:
                     geofield: @selected_header.name
-                    bbox: bounds.toBBoxString() )
+                    bbox: @bounds.toBBoxString() 
+                success: (collection, response, options) ->
+                    if response.meta.pages > 0 
+                        selfie.get_next_page()
+            )
 
     return DataMapView
 )
