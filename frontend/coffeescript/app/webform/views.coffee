@@ -32,9 +32,78 @@ define( [ 'jquery',
             'click #patient-list': 'go_to_patient_list'
             'click input[name="aki_criteria"]': 'process_constraint_aki'
             'click input[name="other_organ_failures"]': 'process_constraint_organ'
+            'click input[name="age_unit"]': 'change_age_cons'
+            'click input[name="height_unit"]': 'change_height_cons'
+            'click input[name="weight_unit"]': 'change_weight_cons'
+            'click input[name="bun_unit"]': 'change_bun_cons'
+            'click input[name="creatinine_unit"]': 'change_creat_cons'
+            'keyup input[type="number"]': 'check_max_min'
+            'click input[name="risk_factors"]': 'process_risk_factors'
+            'click input[name="renal_replacement"]': 'process_renal_replacement'
+            'click input[name="starting_indications"]': 'process_starting_indications'
 
+        check_max_min: (event) ->
+          numstring = event.target.value
+          min = document.getElementById( event.target.id ).getAttribute("min")
+          max = document.getElementById( event.target.id ).getAttribute("max")
+          if (not min) or (not max)
+            return
+          minnum = parseFloat( min )
+          maxnum = parseFloat( max )
+          try
+            num = parseFloat( numstring )
+            if num > maxnum
+              event.target.value = maxnum
+            else if num < minnum
+              event.target.value = minnum
+            else if isNaN( num )
+              event.target.value = minnum
+          catch error
+            event.target.value = minnum
 
         # languages:  []
+        change_bun_cons: (event) ->
+          if event.target.value == "mg_dl"
+            document.getElementById("bun").setAttribute("max", 400)
+            document.getElementById("bun").setAttribute("min", 1)
+          else
+            document.getElementById("bun").setAttribute("max", 150)
+            document.getElementById("bun").setAttribute("min", 1)
+
+        change_creat_cons: (event) ->
+          if event.target.value == "mg_dl"
+            document.getElementById("creatinine").setAttribute("max", 90)
+            document.getElementById("creatinine").setAttribute("min", 0.1)
+          else
+            document.getElementById("creatinine").setAttribute("max", 8000)
+            document.getElementById("creatinine").setAttribute("min", 1)
+
+        change_age_cons: (event) ->
+          if event.target.value == "years"
+            document.getElementById("age").setAttribute("max", 120)
+            document.getElementById("age").setAttribute("min", 1)
+          else if event.target.value == "months"
+            document.getElementById("age").setAttribute("max", 36)
+            document.getElementById("age").setAttribute("min", 1)
+          else
+            document.getElementById("age").setAttribute("max", 30)
+            document.getElementById("age").setAttribute("min", 1)
+
+        change_weight_cons: (event) ->
+          if event.target.value == "lb"
+            document.getElementById("weight").setAttribute("max", 1000)
+            document.getElementById("weight").setAttribute("min", 0.1)
+          else
+            document.getElementById("weight").setAttribute("max", 450)
+            document.getElementById("weight").setAttribute("min", 0.1)
+
+        change_height_cons: (event) ->
+          if event.target.value == "inch"
+            document.getElementById("height").setAttribute("max", 100)
+            document.getElementById("height").setAttribute("min", 5)
+          else
+            document.getElementById("height").setAttribute("max", 250)
+            document.getElementById("height").setAttribute("min", 10)
 
         process_constraint_aki: (event) ->
           if event.target.value == 'no'
@@ -44,6 +113,47 @@ define( [ 'jquery',
           else
             $( "#aki_criteria-3" ).prop('checked',false)
           @
+
+          process_starting_indications: (event) ->
+          if event.target.value == 'n_a'
+            $( "#starting_indications-0" ).prop('checked',false)
+            $( "#starting_indications-1" ).prop('checked',false)
+            $( "#starting_indications-2" ).prop('checked',false)
+            $( "#starting_indications-3" ).prop('checked',false)
+            $( "#starting_indications-4" ).prop('checked',false)
+          else
+            $( "#starting_indications-5" ).prop('checked',false)
+
+          process_renal_replacement: (event) ->
+          if event.target.value == 'unknown'
+            $( "#renal_replacement-0" ).prop('checked',false)
+            $( "#renal_replacement-1" ).prop('checked',false)
+            $( "#renal_replacement-2" ).prop('checked',false)
+            $( "#renal_replacement-3" ).prop('checked',false)
+            $( "#renal_replacement-4" ).prop('checked',false)
+            $( "#renal_replacement-5" ).prop('checked',false)
+          else
+            $( "#renal_replacement-6" ).prop('checked',false)
+
+        process_risk_factors: (event) ->
+          if event.target.value == 'none'
+            $( "#risk_factors-0" ).prop('checked',false)
+            $( "#risk_factors-1" ).prop('checked',false)
+            $( "#risk_factors-2" ).prop('checked',false)
+            $( "#risk_factors-3" ).prop('checked',false)
+            $( "#risk_factors-4" ).prop('checked',false)
+            $( "#risk_factors-5" ).prop('checked',false)
+            $( "#risk_factors-7" ).prop('checked',false)
+          else if event.target.value == "unknown"
+            $( "#risk_factors-0" ).prop('checked',false)
+            $( "#risk_factors-1" ).prop('checked',false)
+            $( "#risk_factors-2" ).prop('checked',false)
+            $( "#risk_factors-3" ).prop('checked',false)
+            $( "#risk_factors-4" ).prop('checked',false)
+            $( "#risk_factors-5" ).prop('checked',false)
+            $( "#risk_factors-6" ).prop('checked',false)
+          else
+            $( "#risk_factors-6" ).prop('checked',false)
 
         process_constraint_organ: (event) ->
           if event.target.value == 'none'
@@ -88,6 +198,16 @@ define( [ 'jquery',
             @setup_accordians()
 
             $('.ui-accordian').css( "display", "none" )
+
+            urine_output = document.getElementById( "urine_output" )
+            if urine_output
+              urine_output.setAttribute("max", 20000)
+              urine_output.setAttribute("min", 1)
+
+            fluid_change = document.getElementById( "fluid_change" )
+            if fluid_change
+              fluid_change.setAttribute("max", 50)
+              fluid_change.setAttribute("min", -50)
 
             $(document).tooltip({
               content: () ->
