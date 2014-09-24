@@ -63,7 +63,11 @@
 	padding: 8px;
 	position: absolute;
 	z-index: 9999;
-	max-width: 400px;
+	{% if repo.name == 'demographics' %}
+	min-width: 700px;
+	width: 700px;
+	{% endif %}
+	max-width: 800px;
 	-webkit-box-shadow: 0 0 5px #aaa;
 	box-shadow: 0 0 5px #aaa;
 	}
@@ -190,6 +194,7 @@
 		<div class="sixteen columns">
 			<h3>
 				This is the clinical data form where you should fill out questions regarding the clinical information available to you on AKI confirmation day.
+				<span title='What is “Confirmed AKI”: A patient has “Confirmed AKI” if they meet at least one of the modified KDIGO Criteria<br />a) Increase or decrease in serum creatinine >0.3 mg/dl from reference<br />b) Increase or decrease in serum creatinine > 50% from reference<br /> c) Urine output <400 ml/day for adults or approximately < 0.5ml/kg/hr over 24 hrs<br /><br />This Case Report Form should be filled with the data that was available to you on “AKI Confirmation Day”<br /><br />For additional information on this topic, please refer to protocol'><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
 			</h3>
 		</div>
 	</div>
@@ -198,6 +203,7 @@
 		<div class="sixteen columns">
 			<h3>
 				This is the diagnosis and treatment form where you should fill out questions regarding the diagnosis and treatment information that was available to you on AKI confirmation day.
+				<span title='What is “Confirmed AKI”: A patient has “Confirmed AKI” if they meet at least one of the modified KDIGO Criteria<br />a) Increase or decrease in serum creatinine >0.3 mg/dl from reference<br />b) Increase or decrease in serum creatinine > 50% from reference<br /> c) Urine output <400 ml/day for adults or approximately < 0.5ml/kg/hr over 24 hrs<br /><br />This Case Report Form should be filled with the data that was available to you on “AKI Confirmation Day”<br /><br />For additional information on this topic, please refer to protocol"'><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
 			</h3>
 		</div>
 	</div>
@@ -206,6 +212,7 @@
 		<div class="sixteen columns">
 			<h3>
 				This is the outcomes form where you should fill out questions regarding the outcome of the patient with the information available to you 7 days after AKI confirmation day. If the patient is no longer under your care 7 days after AKI confirmation, please fill the questions out to the best of your knowledge with the information that was available to you on you last observation
+				<span title='“Confirmed AKI” day is the day that the patient meets at least one of the following criteria: <br />1- An increase or decrease in serum creatinine of greater than 0.3 mg/dl (> 26.5 micromol/L)<br /> 2- An increase or decrease in serum creatinine greater than or equal to 50% from baseline<br />3- Documented oliguria UO < 400 ml per day or <0.5 ml/kg/h for the last 24 hours<br /><br />We ask that you fill out this Case Report Form to the best of your knowledge with the last data available to you closest to 7 days after “Confirmed AKI”.'><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
 			</h3>
 		</div>
 	</div>
