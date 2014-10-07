@@ -35,6 +35,22 @@ from api.authentication import ApiTokenAuthentication
 from twofactor.models import UserAPIToken
 
 
+#just for input stuff
+def parse_provider_ids():
+    prov_file = open( 'provider_ids.txt', 'r' )
+    for line in prov_file:
+        
+        cmps = line.split( ", " )
+        prov_email = cmps[0].strip()
+        prov_id = cmps[1].strip()
+
+        if db.data.find( { "data.email": prov_email } ).count() > 0:
+            new_data = db.data.find( { "data.email": prov_email } )[0]["data"]
+            new_data["provider_id"] = prov_id
+
+            db.data.update( {"data.email":prov_email },{"$set": { 'data': new_data }} )
+
+
 @login_required
 @require_POST
 def insert_data_into_repo( request, repo_id ):
