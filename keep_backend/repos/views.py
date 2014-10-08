@@ -48,7 +48,7 @@ def parse_provider_ids():
             new_data = db.data.find( { "data.email": prov_email, "label":"snapshot_registration" } )[0]["data"]
             new_data["provider_id"] = prov_id
 
-            db.data.update( {"data.email":prov_email },{"$set": { 'data': new_data }} )
+            db.data.update( {"data.email":prov_email, "label":"snapshot_registration" },{"$set": { 'data': new_data }} )
 
 
 @login_required
