@@ -44,7 +44,7 @@ def parse_provider_ids():
         prov_email = cmps[0].strip()
         prov_id = cmps[1].strip()
 
-        if db.data.find( { "data.email", "label":"snapshot_registration": prov_email } ).count() > 0:
+        if db.data.find( { "data.email": prov_email, "label":"snapshot_registration" } ).count() > 0:
             new_data = db.data.find( { "data.email": prov_email, "label":"snapshot_registration" } )[0]["data"]
             new_data["provider_id"] = prov_id
 
