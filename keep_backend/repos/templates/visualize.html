@@ -103,6 +103,8 @@
 		<div class='control-group' id='data-links'>
 			<h4>Forms</h4>
 
+			<% document.filter = filter; %>
+
 			<% var linkedguys = model.attributes.linked; var message = null; console.log( model );%>
 			<% if( linkedguys['outcomes'] == 'finished' ) { %>
 
@@ -126,7 +128,7 @@
 
 					<tr>
 						<td>
-               				<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %><%= "&" + window.location.search.slice(1) %>' class='btn btn-small' style="width:90px">
+               				<a data-link='repo' href='#' data-repo='<%= repo.get( "name" ) %>' class='btn btn-small' style="width:90px">
                     			<i class='icon-pencil'></i><% if( model.attributes.linked[repo.get("name")] == 'empty' ) { %> Add Data&nbsp;&nbsp;<% } else { %>Edit Data&nbsp;&nbsp;<% }; %>
                 			</a>
             			</td>
