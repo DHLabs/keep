@@ -51,6 +51,39 @@ def parse_provider_ids():
             db.data.update( {"data.email":prov_email, "label":"snapshot_registration" },{"$set": { 'data': new_data }} )
 
 
+def add_countries():
+
+    patients = db.data.find( { "label":"patient_list"} )
+
+    for patient in patients:
+
+        provider_id = patient['data']['doctor_id']
+
+        if provider_id:
+
+            provider = db.data.find( { 'label':'snapshot_registration', 'data.provider_id':provider_id } )
+
+            if provider.count() > 0:
+                country = provider[0]['data']['country']
+                patient['data']['country'] = country
+                db.data.update( { "_id":patient['_id'] }, {"$set": { 'data': patient['data'] } } )
+
+    patients = db.data.find( { "label":"demographics"} )   
+
+    for patient in patients:
+
+        provider_id = patient['data']['doctor_id']
+
+        if provider_id:
+
+            provider = db.data.find( { 'label':'snapshot_registration', 'data.provider_id':provider_id } )
+
+            if provider.count() > 0:
+                country = provider[0]['data']['country']
+                patient['data']['country'] = country
+                db.data.update( { "_id":patient['_id'] }, {"$set": { 'data': patient['data'] } } )
+    
+
 @login_required
 @require_POST
 def insert_data_into_repo( request, repo_id ):

@@ -317,6 +317,16 @@ class Repository( models.Model ):
         if 'is_finished' in data:
             is_finished = True 
 
+        if self.name == 'demographics' or self.name == 'patient_list':
+            doctor_id = validated_data['doctor_id']
+            if doctor_id:
+                provider_data = db.data.find( {"provider_id":doctor_id,"label":"snapshot_registration"} )
+                if provider_data.count() > 0:
+                    provider_country = provider_data[0]['data']['country']
+                    if provider_country:
+                        validated_data['country'] = provider_country
+
+
         db.data.update( {"_id":ObjectId( data['detail_data_id'] )},{"$set": { 'data': validated_data,'is_finished':is_finished, 'timestamp':datetime.utcnow() }} )
 
         # Once we save the repo data, save the files to S3
