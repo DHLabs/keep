@@ -126,11 +126,12 @@ class DataResource( MongoDBResource ):
         repo_id = kwargs[ 'pk' ]
 
         try:
+
             basic_bundle = self.build_bundle( request=request )
             repo = Repository.objects.get( mongo_id=repo_id )
 
-            if not self.authorized_delete_detail( repo, basic_bundle ):
-                return HttpUnauthorized()
+            #if not self.authorized_delete_detail( repo, basic_bundle ):
+            #    return HttpUnauthorized()
 
             data_id = request.GET['data_id']
 
