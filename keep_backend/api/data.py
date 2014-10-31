@@ -215,7 +215,7 @@ class DataResource( MongoDBResource ):
 
             data_serializer = DataSerializer()
 
-            if repo.is_tracker and repo.study and request.GET.get( 'format', None ) == 'csv':
+            if repo.is_tracker and repo.study and request.GET.get( 'format', None ) != 'csv':
                 linked = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
                 data = {
                 'meta': meta,
