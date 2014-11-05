@@ -8,6 +8,9 @@ from twofactor.models import UserAPIToken
 class ApiTokenAuthentication( Authentication ):
     def is_authenticated( self, request, **kwargs ):
 
+        if request.user.is_authenticated():
+            return True
+
         if request.method == 'POST':
             username = request.POST.get( 'user', None )
             key = request.POST.get( 'key', None )
