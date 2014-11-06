@@ -35,7 +35,43 @@ define( [ 'jquery',
             document.data_detail = @model.attributes.data
             $( '#edit_data_btn', modal ).click( @editData )
             $( '#delete_data_btn', modal ).click( @deleteData )
+            $( 'a[data-link="repo"]', modal ).click( @edit_patient_data )
             @
+
+        sanitize_search: () ->
+            new_url = "?"
+            query = @queryStringToJSON(null)
+            if query['key']
+                new_url = new_url + "key=" + query['key']
+            if query['doctor_id']
+                new_url = new_url + "&doctor_id=" + query['doctor_id']
+            if query['user']
+                new_url = new_url + "&user=" + query['user']
+            return new_url
+
+        edit_patient_data: (event) ->
+
+            pairs = location.search.slice(1).split('&')
+            result = {}
+            for idx in pairs
+              pair = idx.split('=')
+              if !!pair[0]
+                  result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] or '')
+          
+            new_url = "?"
+            query = result
+            if query['key']
+                new_url = new_url + "key=" + query['key']
+            if query['doctor_id']
+                new_url = new_url + "&doctor_id=" + query['doctor_id']
+            if query['user']
+                new_url = new_url + "&user=" + query['user']
+
+            url_to_go = 'http://' + location.host + '/' + document.repo_owner + '/' + event.target.getAttribute("data-repo") + '/webform/'
+            url_to_go = url_to_go + new_url
+            url_to_go = url_to_go + "&patient_id=" + document.filter
+
+            window.location = url_to_go
 
         editData: (event) ->
             new_location = '/' + document.repo_owner + '/' +
@@ -50,7 +86,16 @@ define( [ 'jquery',
             @
 
         deleteData: (event) ->
+
+            pairs = location.search.slice(1).split('&')
+            result = {}
+            for idx in pairs
+              pair = idx.split('=')
+              if !!pair[0]
+                  result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] or '')
+
             the_url = '/api/v1/data/' + document.repo.id + '/?data_id=' + document.data_id
+            the_url += '&key=' + result['key'] + '&user=' + result['user']
             $.ajax({ 
                 url: the_url,
                 type:'DELETE', 

@@ -16,12 +16,12 @@ define( [ 'jquery',
     mapIcon = L.icon(
                 iconUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon.png'
                 iconRetinaUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-icon@2x.png'
-                iconSize: [25, 41]
-                iconAnchor: [12, 41]
-                popupAnchor: [1, -34]
+                iconSize: [10, 20]
+                iconAnchor: [10, 20]
+                popupAnchor: [1, -17]
                 shadowUrl: '//keep-static.s3.amazonaws.com/img/leaflet/marker-shadow.png'
-                shadowSize: [41, 41]
-                shadowAnchor: [15, 41] )
+                shadowSize: [20, 20]
+                shadowAnchor: [7, 20] )
 
     class MarkerItemView extends Backbone.Marionette.ItemView
         initialize: (options) ->
@@ -132,9 +132,10 @@ define( [ 'jquery',
                 # else
                 #     last_marker = marker
 
-                html = ''
+                html = '<div style="overflow:scroll; height:200px">'
                 for key, value of datum.get( 'data' )#marker.data
                     html += "<div><strong>#{key}:</strong> #{value}</div>"
+                html += '</div>'
                 marker.bindPopup( html )
 
                 @markers.addLayer( marker )
@@ -166,7 +167,7 @@ define( [ 'jquery',
             # TODO: Pick a smart default location to look at. Maybe the user's
             # current location?
             @map = L.map( 'map' ).setView( [ 0, 0 ], 5 )
-            L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            L.tileLayer( 'http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
                          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
                          maxZoom: 18 }).addTo( @map )
 

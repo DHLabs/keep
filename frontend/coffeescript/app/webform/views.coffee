@@ -37,10 +37,30 @@ define( [ 'jquery',
             'click input[name="weight_unit"]': 'change_weight_cons'
             'click input[name="bun_unit"]': 'change_bun_cons'
             'click input[name="creatinine_unit"]': 'change_creat_cons'
-            'keyup input[type="number"]': 'check_max_min'
+            'focusout input[type="number"]': 'check_max_min'
             'click input[name="risk_factors"]': 'process_risk_factors'
             'click input[name="renal_replacement"]': 'process_renal_replacement'
             'click input[name="starting_indications"]': 'process_starting_indications'
+            'click input[type="checkbox"]': 'handle_factor_autocomplete'
+            'click #most_important': 'show_autocomplete'
+            'keyup #most_important': 'show_autocomplete'
+
+
+        show_autocomplete: (event) ->
+          $('#most_important').autocomplete("search","")
+          event.preventDefault()
+
+        handle_factor_autocomplete: (event) ->
+          question = document.flat_fields[@currentQuestionIndex]
+          if question.control and question.control.appearance == "accordian"
+            if event.target.checked
+              code = $("label[for='"+event.target.id+"']").html()
+              @most_source.push( code )
+            else
+              code = $("label[for='"+event.target.id+"']").html()
+              @most_source = _.without( @most_source, code )
+
+          return
 
         check_max_min: (event) ->
           numstring = event.target.value
@@ -53,32 +73,44 @@ define( [ 'jquery',
           try
             num = parseFloat( numstring )
             if num > maxnum
-              event.target.value = maxnum
+              alert( 'Number is greater than allowed maximum of ' + maxnum + '. Please reenter value' )
+              #event.target.value = maxnum
             else if num < minnum
-              event.target.value = minnum
+              alert( 'Number is smaller than allowed minimum of ' + minnum + '. Please reenter value' )
+              #event.target.value = minnum
             else if isNaN( num )
-              event.target.value = minnum
+              alert( 'The value entered is not a number. Please enter a number' )
+              #event.target.value = minnum
           catch error
             event.target.value = minnum
 
         # languages:  []
         change_bun_cons: (event) ->
+          $("#bun").prop('disabled', false)
           if event.target.value == "mg_dl"
             document.getElementById("bun").setAttribute("max", 400)
             document.getElementById("bun").setAttribute("min", 1)
+          else if event.target.value == "n_a"
+            $("#bun").prop('disabled', true)
+            $("#bun").val( "" )
           else
             document.getElementById("bun").setAttribute("max", 150)
             document.getElementById("bun").setAttribute("min", 1)
 
         change_creat_cons: (event) ->
+          $("#creatinine").prop('disabled', false)
           if event.target.value == "mg_dl"
-            document.getElementById("creatinine").setAttribute("max", 90)
+            document.getElementById("creatinine").setAttribute("max", 30)
             document.getElementById("creatinine").setAttribute("min", 0.1)
+          else if event.target.value == "n_a" or event.target.value == "unknown"
+            $("#creatinine").prop('disabled', true)
+            $("#creatinine").val( "" )
           else
-            document.getElementById("creatinine").setAttribute("max", 8000)
+            document.getElementById("creatinine").setAttribute("max", 2700)
             document.getElementById("creatinine").setAttribute("min", 1)
 
         change_age_cons: (event) ->
+          $("#age").prop('disabled', false)
           if event.target.value == "years"
             document.getElementById("age").setAttribute("max", 120)
             document.getElementById("age").setAttribute("min", 1)
@@ -90,17 +122,25 @@ define( [ 'jquery',
             document.getElementById("age").setAttribute("min", 1)
 
         change_weight_cons: (event) ->
+          $("#weight").prop('disabled', false)
           if event.target.value == "lb"
             document.getElementById("weight").setAttribute("max", 1000)
             document.getElementById("weight").setAttribute("min", 0.1)
+          else if event.target.value == "n_a"
+            $("#weight").prop('disabled', true)
+            $("#weight").val( "" )
           else
             document.getElementById("weight").setAttribute("max", 450)
             document.getElementById("weight").setAttribute("min", 0.1)
 
         change_height_cons: (event) ->
+          $("#height").prop('disabled', false)
           if event.target.value == "inch"
             document.getElementById("height").setAttribute("max", 100)
             document.getElementById("height").setAttribute("min", 5)
+          else if event.target.value == "n_a"
+            $("#height").prop('disabled', true)
+            $("#height").val( "" )
           else
             document.getElementById("height").setAttribute("max", 250)
             document.getElementById("height").setAttribute("min", 10)
@@ -154,6 +194,7 @@ define( [ 'jquery',
             $( "#risk_factors-6" ).prop('checked',false)
           else
             $( "#risk_factors-6" ).prop('checked',false)
+            $( "#risk_factors-7" ).prop('checked',false)
 
         process_constraint_organ: (event) ->
           if event.target.value == 'none'
@@ -170,7 +211,7 @@ define( [ 'jquery',
           query_params = @queryStringToJSON(null)
           if query_params['key'] and query_params['doctor_id'] and query_params['user']
             url = "?key=" + query_params['key'] + "&doctor_id=" + query_params['doctor_id'] + "&user=" + query_params['user']
-          window.location = 'http://' + location.host + '/' + $('#user')[0].text + '/patient_list/' + window.location.search
+          window.location = 'http://' + location.host + '/' + $('#user')[0].text + '/patient_list/' + url
           @
 
         language_select: ( event ) ->
@@ -192,6 +233,7 @@ define( [ 'jquery',
               if typeof(document.flat_fields[0].label) != "string"
                 @currentLanguage = _.keys(document.flat_fields[0].label)[0]
               
+            @most_source = []
             @repopulateForm()
             @_display_form_buttons( 0, document.flat_fields[0] )
 
@@ -208,6 +250,16 @@ define( [ 'jquery',
             if fluid_change
               fluid_change.setAttribute("max", 50)
               fluid_change.setAttribute("min", -50)
+
+            thisobject = @
+
+            if $("#most_important")
+              $("#most_important").autocomplete({
+                source: @most_source
+                minLength: 0
+                response: (event, ui) ->
+                  ui.content = thisobject.most_source
+                })
 
             $(document).tooltip({
               content: () ->
@@ -341,15 +393,24 @@ define( [ 'jquery',
           return str.replace(new RegExp(find, 'g'), replace)
 
         repop_multiple: (values,object) ->
-          quest_values = values[object.name]
+          quest_values = values[object.name.toLowerCase()]
           if not quest_values
             return
           if quest_values.indexOf(',') != -1
             values = quest_values.split(',')
             for value in values
               $('#'+object.name+'_field input[value="' + value + '"]').prop('checked', true)
+              if object.control and object.control.appearance == "accordian"
+                for choice in object.choices
+                  if choice.name == value
+                    @most_source.push( choice.label )
+                
           else
             $('#'+object.name+'_field input[value="' + quest_values + '"]').prop('checked', true)
+            if object.control and object.control.appearance == "accordian"
+              for choice in object.choices
+                if choice.name == quest_values
+                  @most_source.push( choice.label )
           
           @
 
@@ -553,6 +614,24 @@ define( [ 'jquery',
                 #$('#form_progress').width("100%")
             @
 
+        check_numeric_constraints: (question, value) ->
+          if question.type == 'decimal' or question.type == 'integer'
+            max = document.getElementById( question.name ).getAttribute('max')
+            min = document.getElementById( question.name ).getAttribute('min')
+
+            if max and min and value
+              try
+                number_value = parseFloat( value )
+                if number_value > parseFloat(max)
+                  return false
+                if number_value < parseFloat(min)
+                  return false
+              catch e
+                return false
+              
+            return true
+          return true
+
         passes_question_constraints: (questionIndex) ->
             #TODO: First check constraints on the question we're on
             question = document.flat_fields[questionIndex]
@@ -563,14 +642,44 @@ define( [ 'jquery',
             if not XFormConstraintChecker.isRelevant( question, form_values)
               return true
 
+            if question.name == "factors" and question.control and question.control.appearance == "accordian"
+              if not _.contains( @most_source, $("#most_important").val() )
+                alert( "Please type in a factor from the ones you have selected" )
+                return false
+
             # Pass required?
             if question.type == 'group' and question.control
               if question.control.appearance == 'field-list'
                 for child in question.children
+
+                  if not @check_numeric_constraints( child, form_values[child.name] )
+                    alert( 'Number is outside of allowed bounds, please enter a different value.' )
+                    return false
+
                   if child.bind and child.bind.required is "yes"
                     if (not form_values[child.name]) or form_values[ child.name ].length == 0
                       alert( "Question is required. Please respond before you can move on." )
                       return false
+                  else if child.name == 'creatinine'
+                    if form_values['creatinine_unit'] != 'n_a' and form_values['creatinine_unit'] != 'unknown'
+                      if (not form_values[child.name]) or form_values[ child.name ].length == 0
+                        alert( "Question is required. Please respond before you can move on." )
+                        return false
+                  else if child.name == 'height'
+                    if form_values['height_unit'] != 'n_a'
+                      if (not form_values[child.name]) or form_values[ child.name ].length == 0
+                        alert( "Question is required. Please respond before you can move on." )
+                        return false
+                  else if child.name == 'weight'
+                    if form_values['weight_unit'] != 'n_a'
+                      if (not form_values[child.name]) or form_values[ child.name ].length == 0
+                        alert( "Question is required. Please respond before you can move on." )
+                        return false
+                  else if child.name == 'bun'
+                    if form_values['bun_unit'] != 'n_a'
+                      if (not form_values[child.name]) or form_values[ child.name ].length == 0
+                        alert( "Question is required. Please respond before you can move on." )
+                        return false
               if question.control.appearance == 'accordian'
                 can_pass = false
                 for child in question.children
@@ -582,6 +691,9 @@ define( [ 'jquery',
                   return false
 
             else if question.bind and question.bind.required is "yes"
+              if not @check_numeric_constraints( question, form_values[question.name] )
+                alert( 'Number is outside of allowed bounds, please enter a different value.' )
+                return false
               if (not form_values[question.name]) or form_values[ question.name ].length == 0
                 #$("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
                 alert( "Question is required. Please respond before you can move on." )
