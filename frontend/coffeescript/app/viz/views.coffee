@@ -10,12 +10,13 @@ define( [ 'jquery',
 
           'app/viz/modals/sharing',
           'app/viz/raw_view',
+          'app/viz/map_view',
+          'app/viz/chart_view' ]
 
-          'backbone_modal',
-          'jqueryui' ],
+( $, _, Backbone, Marionette, DataModel, RepoModel, RepoCollection, ShareSettingsModal, DataRawView, DataMapView, DataChartView ) ->
 
-( $, _, Backbone, Marionette, DataModel, RepoModel, RepoCollection, ShareSettingsModal, DataRawView ) ->
-
+    class DataSettingsView extends Backbone.Marionette.View
+        el: '#settings-viz'
 
     class VizActions extends Backbone.Marionette.View
         # VizActions handles all page-wide actions that would result in a
@@ -70,6 +71,42 @@ define( [ 'jquery',
 
             @attachView( @vizTabs )
 
+    class VizContainer extends Backbone.Marionette.Region
+        el: '#viz-container'
+
+        initialize: (options) ->
+            # Initialize the different available views.
+            @rawView = new DataRawView(options)
+            @mapView = new DataMapView(options)
+            @chartView = new DataChartView(options)
+            @settingsView = new DataSettingsView(options)
+
+            @views =
+                raw: @rawView
+                map: @mapView
+                line: @chartView
+                settings: @settingsView
+            @attachView( @rawView )
+
+            # FIXME: need to remove coupling, and make rendering automatic
+            $( '#raw-viz' ).show()
+            @rawView.render()
+
+
+        switch_view: ( view ) ->
+            # Hide the currently selected view
+            @currentView.$el.hide()
+
+            # Attach the new view and render it
+            @attachView( @views[ view ] )
+            @currentView.$el.show()
+
+            # Call the onShow handler if it exists in the view
+            if @currentView.onShow? then @currentView.onShow()
+
+            @
+
+
 
     # Instantiate and startup the new process.
     DataVizApp = new Backbone.Marionette.Application
@@ -86,25 +123,23 @@ define( [ 'jquery',
             visualizations: document.visualizations
 
         # Add the different regions
-        vizChrome = new VizChrome( options )
-        rawView   = new DataRawView( options )
+        vizChrome    = new VizChrome( options )
+        vizContainer = new VizContainer(options)
 
-        DataVizApp.addRegions(
-                chrome: vizChrome
-                viz: rawView )
+        DataVizApp.addRegions(chrome: vizChrome, viz: vizContainer)
 
         # Handle application wide events
         vizChrome.currentView.on( 'switch:raw', () ->
-            rawView.switch_view( 'raw' ) )
+            vizContainer.switch_view( 'raw' ) )
 
         vizChrome.currentView.on( 'switch:map', () ->
-            rawView.switch_view( 'map' ) )
+            vizContainer.switch_view( 'map' ) )
 
         vizChrome.currentView.on( 'switch:line', () ->
-            rawView.switch_view( 'line' ) )
+            vizContainer.switch_view( 'line' ) )
 
         vizChrome.currentView.on( 'switch:settings', () ->
-            rawView.switch_view( 'settings' ) )
+            vizContainer.switch_view( 'settings' ) )
 
         @
 

@@ -12,24 +12,24 @@
 
 {% block js %}
 <script type='text/javascript'>
-	document.repo = {{repo_json|safe}};
-	document.linked_repos = {{linked_json|safe}};
-	document.visualizations = {{viz_json|safe}};
-	document.initial_data = {{data|safe}};
-	document.repo_owner = '{{repo.owner}}';
+  document.repo = {{repo_json|safe}};
+  document.linked_repos = {{linked_json|safe}};
+  document.visualizations = {{viz_json|safe}};
+  document.initial_data = {{data|safe}};
+  document.repo_owner = '{{repo.owner}}';
 </script>
 <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
 <script src='{% static 'js/vendor/requirejs.js' %}'></script>
 <script type='text/javascript'>
-	require([ '{% static "js/common.js" %}' ], function (common) {
-		require.config({
-			baseUrl: '{% static "js/vendor" %}'
-		});
+  require([ '{% static "js/common.js" %}' ], function (common) {
+    require.config({
+      baseUrl: '{% static "js/vendor" %}'
+    });
 
-		require( [ 'app/viz/main' ] )
+    require( [ 'app/viz/main' ] )
 
-		filepicker.setKey( 'AtFpHahSSegcEhP2STuQAz' )
-	});
+    filepicker.setKey( 'AtFpHahSSegcEhP2STuQAz' )
+  });
 </script>
 <!--
 //=================================================
@@ -39,40 +39,40 @@
 //=================================================
 -->
 <script type='text/template' id='new-viz-template'>
-	<div class="bbm-modal__topbar">
-		<h3 class="bbm-modal__title">New Visualization</h3>
-	</div>
-	<div class="bbm-modal__section">
-		<form>
-			<div class='control-group'>
-				<input type='text' id='viz-name' class='input large' placeholder='Visualization Name'>
-			</div>
-			<div class='control-group'>
-				<label>
-					X-axis
-					<select id='xaxis'>
-						<% _.each( fields, function( field ) { %>
-						<option value='<%= field.name %>'><%= field.name %></option>
-						<% }); %>
-					</select>
-				</label>
-			</div>
-			<div class='control-group'>
-				<label>
-					Y-axis
-					<select id='yaxis'>
-						<% _.each( fields, function( field ) { %>
-						<option value='<%= field.name %>'><%= field.name %></option>
-						<% }); %>
-					</select>
-				</label>
-			</div>
-		</form>
-	</div>
-	<div class="bbm-modal__bottombar">
-		<a href="#" class="btn btn-cancel">Cancel</a>
-		<a href="#" class="btn btn-primary">Create</a>
-	</div>
+  <div class="bbm-modal__topbar">
+    <h3 class="bbm-modal__title">New Visualization</h3>
+  </div>
+  <div class="bbm-modal__section">
+    <form>
+      <div class='control-group'>
+        <input type='text' id='viz-name' class='input large' placeholder='Visualization Name'>
+      </div>
+      <div class='control-group'>
+        <label>
+          X-axis
+          <select id='xaxis'>
+            <% _.each( fields, function( field ) { %>
+            <option value='<%= field.name %>'><%= field.name %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+      <div class='control-group'>
+        <label>
+          Y-axis
+          <select id='yaxis'>
+            <% _.each( fields, function( field ) { %>
+            <option value='<%= field.name %>'><%= field.name %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+    </form>
+  </div>
+  <div class="bbm-modal__bottombar">
+    <a href="#" class="btn btn-cancel">Cancel</a>
+    <a href="#" class="btn btn-primary">Create</a>
+  </div>
 </script>
 <!--
 //=================================================
@@ -82,46 +82,46 @@
 //=================================================
 -->
 <script type='text/template' id='data-detail-template'>
-	<div class="bbm-modal__topbar"></div>
-	<div class="bbm-modal__section">
-		<div class='control-group'>
-			<h4>Details</h4>
-			<table class='table'>
-				<% _.each( attributes, function( val, key ) { %>
-					<tr>
-						<td><%= key %></td><td><%= val %></td>
-					</tr>
-				<% }); %>
-			</table>
-		</div>
+  <div class="bbm-modal__topbar"></div>
+  <div class="bbm-modal__section">
+    <div class='control-group'>
+      <h4>Details</h4>
+      <table class='table'>
+        <% _.each( attributes, function( val, key ) { %>
+          <tr>
+            <td><%= key %></td><td><%= val %></td>
+          </tr>
+        <% }); %>
+      </table>
+    </div>
 
-		<% if( is_tracker ) { %>
-		<div class='control-group' id='data-links'>
-			<h4>Linked Dairies</h4>
-			<table class='table'>
-				<% _.each( linked, function( repo ) { %>
-					<tr>
-						<td>
-               				<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %>' class='btn btn-small' style="width:90px">
-                    			<i class='icon-pencil'></i> Add Data&nbsp;&nbsp;
-                			</a>
-            			</td>
-						<td>
-							<a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/' target='_blank'>
-								<%= repo.get( 'name' ) %>
-							</a>
-						</td>
-					</tr>
-				<% }); %>
-			</table>
-		</div>
-		<% } %>
-	</div>
-	<div class="bbm-modal__bottombar">
-		<a href="#" id="edit_data_btn" style="text-align: left" class="btn">Edit Data</a>&nbsp;&nbsp;&nbsp;
-		<a href="#" id="delete_data_btn" style="text-align: left"  class="btn">Delete Entry</a>&nbsp;&nbsp;&nbsp;
-		<a href="#" class="btn btn-primary">Done</a>
-	</div>
+    <% if( is_tracker ) { %>
+    <div class='control-group' id='data-links'>
+      <h4>Linked Dairies</h4>
+      <table class='table'>
+        <% _.each( linked, function( repo ) { %>
+          <tr>
+            <td>
+                      <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %>' class='btn btn-small' style="width:90px">
+                          <i class='icon-pencil'></i> Add Data&nbsp;&nbsp;
+                      </a>
+                  </td>
+            <td>
+              <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/' target='_blank'>
+                <%= repo.get( 'name' ) %>
+              </a>
+            </td>
+          </tr>
+        <% }); %>
+      </table>
+    </div>
+    <% } %>
+  </div>
+  <div class="bbm-modal__bottombar">
+    <a href="#" id="edit_data_btn" style="text-align: left" class="btn">Edit Data</a>&nbsp;&nbsp;&nbsp;
+    <a href="#" id="delete_data_btn" style="text-align: left"  class="btn">Delete Entry</a>&nbsp;&nbsp;&nbsp;
+    <a href="#" class="btn btn-primary">Done</a>
+  </div>
 </script>
 <!--
 //=================================================
@@ -131,18 +131,18 @@
 //=================================================
 -->
 <script type='text/template' id='empty-collection'>
-	<td id='filedrag' colspan=255>
-		<div style='padding:16px;font-size:1.2em;'>
-			<form action='{% url "repo_insert" repo_id=repo.mongo_id %}' method='post' enctype='multipart/form-data'>
-				{% csrf_token %}
-				<input type='hidden' id='file_key'  name='file_key' value=''>
-				<input type='hidden' id='file_size' name='file_size' value=''>
-				<a href='#'>
-					<i class='icon-file'></i>&nbsp;&nbsp;Already have data somewhere? Click to import!
-				</a>
-			</form>
-		</div>
-	</td>
+  <td id='filedrag' colspan=255>
+    <div style='padding:16px;font-size:1.2em;'>
+      <form action='{% url "repo_insert" repo_id=repo.mongo_id %}' method='post' enctype='multipart/form-data'>
+        {% csrf_token %}
+        <input type='hidden' id='file_key'  name='file_key' value=''>
+        <input type='hidden' id='file_size' name='file_size' value=''>
+        <a href='#'>
+          <i class='icon-file'></i>&nbsp;&nbsp;Already have data somewhere? Click to import!
+        </a>
+      </form>
+    </div>
+  </td>
 </script>
 <!--
 //=================================================
@@ -152,237 +152,242 @@
 //=================================================
 -->
 <script type='text/template' id='sharing-settings'>
-	<div class="bbm-modal__topbar">
-		<h3 class="bbm-modal__title">Data Sharing Settings</h3>
-	</div>
-	<div class="bbm-modal__section">
-		<form>
-			<div class='control-group squaredThree'>
-				<label class='checkbox'>
-					<input id='sharing_toggle' class='input large' type='checkbox' {% if repo.is_public %}checked='checked'{% endif %}>
-					Public Data
-					<span class='help-block'>
-						- Checking this box will make the data in this repository completely public.
-					</span>
-				</label>
-			</div>
-			<div class='control-group'>
-				<label class='checkbox'>
-					<input id='form_access_toggle' class='input large' type='checkbox' {% if repo.is_form_public %}checked='checked'{% endif %}>
-					Public Form
-					<span class='help-block'>
-						- Checking this box will allow anyone to view the form and submit data for it.
-					</span>
-				</label>
-			</div>
-		</form>
-		<div>
-			<h5>Who has access?</h5>
-			<table id='shared-users-list' class='table compressed'>
-				<tr>
-					<td>
-						<input id='sharing-user' class='small' type='text' placeholder='Username' />
-						<span id='sharing_user_list' class='autocomplete-list'></span>
-					</td>
-					<td>
-						<select id='sharing-perms' class='small'>
-							<option value='view_repository'>
-								See Repo
-							</option>
-							<option value='add_data,view_repository'>
-								Add Data
-							</option>
-							<option value='view_data,add_data,view_repository'>
-								View Data
-							</option>
-							<option value='change_repository,view_data,add_data,view_repository'>
-								Edit Repo
-							</option>
-						</select>
-					</td>
-					<td style='text-align:center;'>
-						<a href='#' class='btn' id='add-share'>
-							<i class='icon-plus'></i>
-						</a>
-					</td>
-				</tr>
-				{% for user, value in users_perms.items %}
-				<tr data-user='{{ user }}'>
-					<td>
-						{{ user }}
-					</td>
-					<td>
-						{% if 'change_repository' in value %}
-							Can Edit Repo
-						{% elif 'view_data' in value %}
-							Can View Data
-						{% elif 'add_data' in value %}
-							Can Add Data
-						{% else %}
-							Can See Repo
-						{% endif %}
-					</td>
-					<td style='text-align:center;'>
-						<a href='#' class='btn btn-delete'>
-							<i class='icon-trash'></i>
-						</a>
-					</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-	</div>
+  <div class="bbm-modal__topbar">
+    <h3 class="bbm-modal__title">Data Sharing Settings</h3>
+  </div>
+  <div class="bbm-modal__section">
+    <form>
+      <div class='control-group squaredThree'>
+        <label class='checkbox'>
+          <input id='sharing_toggle' class='input large' type='checkbox' {% if repo.is_public %}checked='checked'{% endif %}>
+          Public Data
+          <span class='help-block'>
+            - Checking this box will make the data in this repository completely public.
+          </span>
+        </label>
+      </div>
+      <div class='control-group'>
+        <label class='checkbox'>
+          <input id='form_access_toggle' class='input large' type='checkbox' {% if repo.is_form_public %}checked='checked'{% endif %}>
+          Public Form
+          <span class='help-block'>
+            - Checking this box will allow anyone to view the form and submit data for it.
+          </span>
+        </label>
+      </div>
+    </form>
+    <div>
+      <h5>Who has access?</h5>
+      <table id='shared-users-list' class='table compressed'>
+        <tr>
+          <td>
+            <input id='sharing-user' class='small' type='text' placeholder='Username' />
+            <span id='sharing_user_list' class='autocomplete-list'></span>
+          </td>
+          <td>
+            <select id='sharing-perms' class='small'>
+              <option value='view_repository'>
+                See Repo
+              </option>
+              <option value='add_data,view_repository'>
+                Add Data
+              </option>
+              <option value='view_data,add_data,view_repository'>
+                View Data
+              </option>
+              <option value='change_repository,view_data,add_data,view_repository'>
+                Edit Repo
+              </option>
+            </select>
+          </td>
+          <td style='text-align:center;'>
+            <a href='#' class='btn' id='add-share'>
+              <i class='icon-plus'></i>
+            </a>
+          </td>
+        </tr>
+        {% for user, value in users_perms.items %}
+        <tr data-user='{{ user }}'>
+          <td>
+            {{ user }}
+          </td>
+          <td>
+            {% if 'change_repository' in value %}
+              Can Edit Repo
+            {% elif 'view_data' in value %}
+              Can View Data
+            {% elif 'add_data' in value %}
+              Can Add Data
+            {% else %}
+              Can See Repo
+            {% endif %}
+          </td>
+          <td style='text-align:center;'>
+            <a href='#' class='btn btn-delete'>
+              <i class='icon-trash'></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
     <div class="bbm-modal__bottombar">
-    	<a href="#" class="btn btn-primary">Done</a>
+      <a href="#" class="btn btn-primary">Done</a>
     </div>
 </script>
 {% endblock %}
 
 {% block outerspace %}
 <div id='viz-chrome'>
-	<div id='viz-actions' class='container container-padded'>
-		<div id='repo-privacy' class='one columns'>
-			<div>
-				{% if repo.is_public %}
-					<i class='icon-unlock'></i>
-				{% else %}
-					<i class='icon-lock'></i>
-				{% endif %}
-			</div>
-		</div>
-		<div id='repo-meta' class='ten columns'>
-			<h4>{{ repo.owner }} / {{ repo.name }}</h4>
-			<div style='margin-bottom: 8px;'>
-				{% if repo.description %}
-					{{ repo.description }}
-				{% else %}
-					<em>No diary description available</em>
-				{% endif %}
-			</div>
-		</div>
-		<div id='repo-actions' class='five columns'>
-			<ul class='nav-list nav-inline'>
-				<li>
-					<a id='share-btn' class='btn' href='#'>
-						<i class='icon-group'></i>&nbsp;Share
-					</a>
-				</li>
-				<li>
-					<a class='btn btn-primary' href='/api/v1/data/{{ repo.mongo_id }}?format=csv'>
-						<i class='icon-download'></i>&nbsp;Download
-					</a>
-				</li>
-			</ul>
-		</div>
-	</div>
-	<div class='container'>
-		<div class='sixteen columns'>
-			<ul id='viz-options' class='nav-list nav-inline'>
-				<li id='raw_btn' class='active' data-type='raw'>
-					<a href='#'>
-						<i class='icon-list'></i>&nbsp;Raw
-					</a>
-				</li>
-				<li id='map_btn' data-type='map'>
-					<a href='#'>
-						<i class='icon-map-marker'></i>&nbsp;Map
-					</a>
-				</li>
-				<li id='line_btn' data-type='line'>
-					<a href='#'>
-						<i class='icon-signal'></i>&nbsp;Analytics
-					</a>
-				</li>
-				{% if 'delete_repository' in permissions %}
-				<li data-type='settings'>
-					<a href='#' data-type='settings'>
-						<i class='icon-cog'></i>&nbsp;Settings
-					</a>
-				</li>
-				{% endif %}
-			</ul>
-		</div>
-	</div>
+  <div id='viz-actions' class='container container-padded'>
+    <div id='repo-privacy' class='one columns'>
+      <div>
+        {% if repo.is_public %}
+          <i class='icon-unlock'></i>
+        {% else %}
+          <i class='icon-lock'></i>
+        {% endif %}
+      </div>
+    </div>
+    <div id='repo-meta' class='ten columns'>
+      <h4>{{ repo.owner }} / {{ repo.name }}</h4>
+      <div style='margin-bottom: 8px;'>
+        {% if repo.description %}
+          {{ repo.description }}
+        {% else %}
+          <em>No diary description available</em>
+        {% endif %}
+      </div>
+    </div>
+    <div id='repo-actions' class='five columns'>
+      <ul class='nav-list nav-inline'>
+        <li>
+          <a id='share-btn' class='btn' href='#'>
+            <i class='icon-group'></i>&nbsp;Share
+          </a>
+        </li>
+        <li>
+          <a class='btn btn-primary' href='/api/v1/data/{{ repo.mongo_id }}?format=csv'>
+            <i class='icon-download'></i>&nbsp;Download
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class='container'>
+    <div class='sixteen columns'>
+      <ul id='viz-options' class='nav-list nav-inline'>
+        <li id='raw_btn' class='active' data-type='raw'>
+          <a href='#'>
+            <i class='icon-list'></i>&nbsp;Raw
+          </a>
+        </li>
+        <li id='map_btn' data-type='map'>
+          <a href='#'>
+            <i class='icon-map-marker'></i>&nbsp;Map
+          </a>
+        </li>
+        <li id='line_btn' data-type='line'>
+          <a href='#'>
+            <i class='icon-signal'></i>&nbsp;Analytics
+          </a>
+        </li>
+        <li id='filter_btn' data-type='filter'>
+          <a href='#'>
+            <i class='icon-filter'></i>&nbsp;Filters
+          </a>
+        </li>
+        {% if 'delete_repository' in permissions %}
+        <li data-type='settings'>
+          <a href='#' data-type='settings'>
+            <i class='icon-cog'></i>&nbsp;Settings
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
 </div>
-<div id='viz-data'>
-	<!-- Raw data list -->
-	<div class='viz viz-active' id='raw-viz'>
-		<div id='fixed-header'>
-			<table class='table fixed'><tr></tr></table>
-		</div>
-		<div id='raw_list' class='sixteen columns active'>
-			<table id='raw_table' class='table fixed'><tbody></tbody></table>
-		</div>
-	</div>
+<div id="vizContainer">
+  <!-- Raw data list -->
+  <div class='viz' id='raw-viz'>
+    <div id='fixed-header'>
+      <table class='table fixed'><tr></tr></table>
+    </div>
+    <div id='raw_list' class='sixteen columns active'>
+      <table id='raw_table' class='table fixed'><tbody></tbody></table>
+    </div>
+  </div>
 
-	<!-- Geospatial view of our data ( if any geopoints exist within the dataset ). -->
-	<div class='viz' id='map-viz'>
-		<div class='sixteen columns' id='map'></div>
-	</div>
+  <!-- Geospatial view of our data ( if any geopoints exist within the dataset ). -->
+  <div class='viz' id='map-viz'>
+    <div class='sixteen columns' id='map'></div>
+  </div>
 
-	<!-- Time series analysis -->
-	<div class='viz container' id='analytics-viz'>
-		<div class='sixteen columns'>
-			<div class='create-new'>
-				<a href='#' class='btn btn-primary'>
-					<i class='icon-plus-sign'></i>&nbsp;Create Visualization
-				</a>
-			</div>
-			<div id='analytics-viz-list'></div>
-		</div>
-	</div>
+  <!-- Time series analysis -->
+  <div class='viz container' id='analytics-viz'>
+    <div class='sixteen columns'>
+      <div class='create-new'>
+        <a href='#' class='btn btn-primary'>
+          <i class='icon-plus-sign'></i>&nbsp;Create Visualization
+        </a>
+      </div>
+      <div id='analytics-viz-list'></div>
+    </div>
+  </div>
 
-	<!-- Repository settings -->
-	{% if 'delete_repository' in permissions %}
-	<div class='viz container' id='settings-viz'>
-		<div class='sixteen columns'>
+  <!-- Repository settings -->
+  {% if 'delete_repository' in permissions %}
+  <div class='viz container' id='settings-viz'>
+    <div class='sixteen columns'>
 
-			<h4>Administration</h4>
+      <h4>Administration</h4>
 
-			<div class='row'>
-				<div class='six columns'>
-					<strong>Edit this data repository</strong>
-				</div>
-				<div class='ten columns' style='text-align:right;'>
-					<a href='{% url "repo_edit" repo_id=repo.mongo_id %}' class='btn btn-medium'>
-						Edit Repository
-					</a>
-				</div>
-			</div>
+      <div class='row'>
+        <div class='six columns'>
+          <strong>Edit this data repository</strong>
+        </div>
+        <div class='ten columns' style='text-align:right;'>
+          <a href='{% url "repo_edit" repo_id=repo.mongo_id %}' class='btn btn-medium'>
+            Edit Repository
+          </a>
+        </div>
+      </div>
 
-			<div class='row'>
-				<div class='six columns'>
-					<strong>Delete this data repository</strong>
-					<div class='help-block'>
-						Once you delete a repository, <strong>ALL</strong> data will
-						be removed.
-					</div>
-				</div>
-				<div class='ten columns' style='text-align:right;'>
-					<a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'>
-						<i class='icon-trash'></i> Delete Repository
-					</a>
-				</div>
-			</div>
+      <div class='row'>
+        <div class='six columns'>
+          <strong>Delete this data repository</strong>
+          <div class='help-block'>
+            Once you delete a repository, <strong>ALL</strong> data will
+            be removed.
+          </div>
+        </div>
+        <div class='ten columns' style='text-align:right;'>
+          <a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'>
+            <i class='icon-trash'></i> Delete Repository
+          </a>
+        </div>
+      </div>
 
-			<h4>Diary Backup</h4>
+      <h4>Diary Backup</h4>
 
-			<div class='row'>
-				<div class='sixteen columns'>
-					<div>
-						<a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=json'>
-							Download Diary as JSON
-						</a>
-					</div>
-					<div style='margin-top:16px;'>
-						<a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=xform'>
-							Download Diary as XForm
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	{% endif %}
+      <div class='row'>
+        <div class='sixteen columns'>
+          <div>
+            <a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=json'>
+              Download Diary as JSON
+            </a>
+          </div>
+          <div style='margin-top:16px;'>
+            <a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=xform'>
+              Download Diary as XForm
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

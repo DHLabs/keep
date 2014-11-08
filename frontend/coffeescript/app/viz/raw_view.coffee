@@ -3,19 +3,13 @@ define( [ 'jquery',
           'backbone'
           'marionette',
 
-          'app/collections/views/data',
-          'app/viz/map_view',
-          'app/viz/chart_view' ],
+          'app/collections/views/data' ],
 
-( $, _, Backbone, Marionette, DataCollectionView, DataMapView, DataChartView ) ->
+( $, _, Backbone, Marionette, DataCollectionView) ->
 
 
-    class DataSettingsView extends Backbone.Marionette.View
-        el: '#settings-viz'
 
-
-    class DataRawView extends Backbone.Marionette.Region
-        el: '#viz-data'
+    class DataRawView extends DataCollectionView
 
         detect_scroll: ( event ) ->
 
@@ -138,22 +132,13 @@ define( [ 'jquery',
             )
             @
 
-        switch_view: ( view ) ->
-            $( '#fixed-header' ).hide()
+        onShow: ->
+            $( '#fixed-header' ).show()
 
-            # Hide the currently selected view
-            @currentView.$el.hide()
 
-            # Attach the new view and render it
-            @attachView( @views[ view ] )
-            @currentView.$el.show()
+        initialize: () ->
+            DataCollectionView::initialize.apply(@, arguments)
 
-            # Call the onShow handler if it exists in the view
-            if @currentView.onShow? then @currentView.onShow()
-
-            @
-
-        initialize: ( options ) ->
             # Bind scroll event to handle the fixed-header rendering.
             $( @el ).scroll( { view: @ }, @detect_scroll )
             # Bind scroll event to handle pagination ( scrolling to the end of the
@@ -167,24 +152,11 @@ define( [ 'jquery',
                 $( @el ).css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
             )
 
-            # Initialize the different available views.
-            @rawView = new DataCollectionView( options )
-            @mapView = new DataMapView( options )
-            @chartView = new DataChartView( options )
-            @settingsView = new DataSettingsView( options )
-
-            @views =
-                raw: @rawView
-                map: @mapView
-                line: @chartView
-                settings: @settingsView
-            @attachView( @rawView )
-
             # Attach events where necessary.
-            @rawView.on( 'render', @detect_sort )
+            @.on( 'render', @detect_sort )
 
             # Load up the intial set of data to render.
-            @rawView.collection.reset( document.initial_data )
+            @collection.reset( document.initial_data )
 
     return DataRawView
 )
