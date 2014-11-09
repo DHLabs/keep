@@ -135,6 +135,13 @@ define( [ 'jquery',
         onShow: ->
             $( '#fixed-header' ).show()
 
+        showView: ->
+            ($ '#raw-viz').show()
+
+        hideView: ->
+            ($ '#raw-viz').hide()
+
+
 
         initialize: () ->
             DataCollectionView::initialize.apply(@, arguments)

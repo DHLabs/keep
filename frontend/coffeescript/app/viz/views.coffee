@@ -88,18 +88,18 @@ define( [ 'jquery',
                 settings: @settingsView
             @attachView( @rawView )
 
-            # FIXME: need to remove coupling, and make rendering automatic
-            $( '#raw-viz' ).show()
-            @rawView.render()
+            @currentView.render()
+            if @currentView.showView? then @currentView.showView()
+            if @currentView.onShow? then @currentView.onShow()
 
 
         switch_view: ( view ) ->
             # Hide the currently selected view
-            @currentView.$el.hide()
+            if @currentView.hideView? then @currentView.hideView() else @currentView.$el.hide()
 
             # Attach the new view and render it
             @attachView( @views[ view ] )
-            @currentView.$el.show()
+            if @currentView.showView? then @currentView.showView() else @currentView.$el.show()
 
             # Call the onShow handler if it exists in the view
             if @currentView.onShow? then @currentView.onShow()
