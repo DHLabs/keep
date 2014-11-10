@@ -3,13 +3,13 @@ define( [ 'jquery',
           'backbone'
           'marionette',
 
-          'app/collections/views/data' ],
+          'app/collections/views/table' ],
 
-( $, _, Backbone, Marionette, DataCollectionView) ->
+( $, _, Backbone, Marionette, DataTableView) ->
 
 
 
-    class DataRawView extends DataCollectionView
+    class DataRawView extends DataTableView
 
         detect_scroll: ( event ) ->
 
@@ -144,7 +144,7 @@ define( [ 'jquery',
 
 
         initialize: () ->
-            DataCollectionView::initialize.apply(@, arguments)
+            DataTableView::initialize.apply(@, arguments)
 
             # Bind scroll event to handle the fixed-header rendering.
             $( @el ).scroll( { view: @ }, @detect_scroll )
