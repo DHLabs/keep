@@ -7,11 +7,9 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette, DataTableView) ->
 
+    class DataFiltersView extends DataTableView
 
-
-    class DataRawView extends DataTableView
-
-        el: '#raw-viz .DataTable'
+        el: '#filters-viz .DataTable'
 
         detect_scroll: ( event ) ->
 
@@ -135,37 +133,35 @@ define( [ 'jquery',
             @
 
         onShow: ->
-            $( '#fixed-header' ).show()
+            ($ '.fixed-header' ).show()
 
         showView: ->
-            ($ '#raw-viz').show()
+            ($ '#filters-viz').show()
 
         hideView: ->
-            ($ '#raw-viz').hide()
+            ($ '#filters-viz').hide()
 
 
 
         initialize: () ->
             DataTableView::initialize.apply(@, arguments)
 
-            # Bind scroll event to handle the fixed-header rendering.
-            $( @el ).scroll( { view: @ }, @detect_scroll )
-            # Bind scroll event to handle pagination ( scrolling to the end of the
-            # page. )
-            $( @el ).scroll( { view: @ }, @detect_pagination )
+            # Bind scroll event to handle the fixed-header rendering, and
+            # lazy-loading of data
+            @$el.scroll( { view: @ }, @detect_scroll )
+            @$el.scroll( { view: @ }, @detect_pagination )
 
             # Set the location of the data div and change it when we resize
             # the window.
-            $( @el ).css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
-            $( window ).resize( ( event ) =>
-                $( @el ).css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
+            @$el.css('top', $( '#viz-chrome' ).height() + 1 + 'px')
+            $(window).resize( ( event ) =>
+                @$el.css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
             )
 
-            # Attach events where necessary.
-            @.on( 'render', @detect_sort )
+            @.on('render', @detect_sort)
 
             # Load up the intial set of data to render.
-            @collection.reset( document.initial_data )
+            @collection.reset(document.initial_data)
 
-    return DataRawView
+    return DataFiltersView
 )

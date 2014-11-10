@@ -11,9 +11,11 @@ define( [ 'jquery',
           'app/viz/modals/sharing',
           'app/viz/raw_view',
           'app/viz/map_view',
-          'app/viz/chart_view' ]
+          'app/viz/chart_view',
+          'app/viz/filters_view',
+      ]
 
-( $, _, Backbone, Marionette, DataModel, RepoModel, RepoCollection, ShareSettingsModal, DataRawView, DataMapView, DataChartView ) ->
+( $, _, Backbone, Marionette, DataModel, RepoModel, RepoCollection, ShareSettingsModal, DataRawView, DataMapView, DataChartView, DataFiltersView ) ->
 
     class DataSettingsView extends Backbone.Marionette.View
         el: '#settings-viz'
@@ -79,16 +81,19 @@ define( [ 'jquery',
             @rawView = new DataRawView(options)
             @mapView = new DataMapView(options)
             @chartView = new DataChartView(options)
+            @filtersView = new DataFiltersView(options)
             @settingsView = new DataSettingsView(options)
 
             @views =
                 raw: @rawView
                 map: @mapView
                 line: @chartView
+                filters: @filtersView
                 settings: @settingsView
             @attachView( @rawView )
 
             @currentView.render()
+            @filtersView.render()
             if @currentView.showView? then @currentView.showView()
             if @currentView.onShow? then @currentView.onShow()
 
@@ -137,6 +142,9 @@ define( [ 'jquery',
 
         vizChrome.currentView.on( 'switch:line', () ->
             vizContainer.switch_view( 'line' ) )
+
+        vizChrome.currentView.on( 'switch:filters', () ->
+            vizContainer.switch_view( 'filters' ) )
 
         vizChrome.currentView.on( 'switch:settings', () ->
             vizContainer.switch_view( 'settings' ) )
