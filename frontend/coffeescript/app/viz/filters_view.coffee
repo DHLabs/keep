@@ -141,10 +141,44 @@ define( [ 'jquery',
         hideView: ->
             ($ '#filters-viz').hide()
 
+        _refresh_data: (url_params) ->
+            # 1. change url
+            # 2. reset table view
+            @collection.url = @base_url + url_params
+            @collection.reset()
+
+        _setup_filters: ->
+            example_filters = [
+              {
+                column_name: 'country'
+                filter_type: 'eq'
+                filter_value: 'France'
+              },
+              {
+                column_name: 'willing_to_enroll'
+                filter_type: 'eq'
+                filter_value: 'yes'
+              },
+              {
+                column_name: 'num_participants'
+                filter_type: 'lt'
+                filter_value: '5'
+              }
+            ]
+
+
+            console.log 'initializing filters'
+            @filters_collection = new FilterCollection(example_filters)
+            @filter_views = new FiltersView(collection: @filters_collection)
+            @filter_views.render()
+            console.log 'finished setting up filters'
 
 
         initialize: () ->
             DataTableView::initialize.apply(@, arguments)
+
+            # Save base url to use with filtering
+            @base_url = @url
 
             # Bind scroll event to handle the fixed-header rendering, and
             # lazy-loading of data
@@ -158,10 +192,104 @@ define( [ 'jquery',
                 @$el.css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
             )
 
-            @.on('render', @detect_sort)
+            @on('render', @detect_sort)
+            @on('filters:refresh_data', '_refresh_data')
+
+            # Set up controls to manage filters
+            @_setup_filters()
 
             # Load up the intial set of data to render.
             @collection.reset(document.initial_data)
+
+
+    class Filter extends Backbone.Model
+        defaults:
+            column_name: ''
+            filter_type: ''
+            filter_value: ''
+
+        validate: (attrs) ->
+            errors = []
+
+            for attr in attrs
+                if attrs == ''
+                    errors.append "Error: #{attr} cannot be blank!"
+
+            unless _.isEmpty(errors)
+                for error in errors
+                    console.log(error)
+                return errors
+
+
+    class FilterCollection extends Backbone.Collection
+        model: Filter
+
+        # Flattens filters collection into querystring params
+        url_params: ->
+            query_string = "?"
+            for f in @models
+              query_string += "&data__#{f.get 'column_name'}=#{f.get 'filter_value'}"
+            return query_string
+
+        render: ->
+          console.log 'calling render in FilterCollection'
+          Backbone.Collection::render.apply(@, arguments)
+
+
+    class FilterView extends Backbone.Marionette.ItemView
+        template: '#filter-template'
+
+        remove_filter: ->
+            console.log 'triggering remove:filter'
+            @trigger('filters:remove', @model)
+
+        events:
+          'click .js-remove': 'remove_filter'
+
+        initialize: ->
+            @listenTo(@model, 'destroy', @remove_filter)
+
+
+    class FiltersView extends Backbone.Marionette.CollectionView
+        el: '.activeFilters'
+        itemView: FilterView
+        emptyView: _.template('<div></div>')
+
+        add_filter: (event) ->
+            console.log 'add filter called'
+            params =
+              column_name: (@$ '.columnName').value()
+              filter_type: (@$ '.filterType').value()
+              filter_value: (@$ '.filterValue').value()
+
+            new_filter = new Filter(params)
+            # TODO: verify inputs are valid
+            # TODO: clear inputs on success
+            @collection.add(new_filter)
+            @trigger('filters:refresh_data', @collection.url_params)
+
+        remove_filter: (event) ->
+            console.log 'remove:filter heard'
+            @collection.remove(event)
+            @trigger('filters:refresh_data', @collection.url_params)
+
+        _populate_column_names: ->
+            console.log('populating here')
+            $db_columns = $ @column_names
+            for field in @collection.column_names
+                $db_columns.append(field)
+
+        childEvents:
+            'filters:remove': @remove_filter
+
+        events:
+            'click .js-add': 'add_filter'
+
+        initialize: (options) ->
+            Backbone.Marionette.CollectionView::initialize.apply(@, arguments)
+
+            # select options
+            @_populate_column_names
 
     return DataFiltersView
 )
