@@ -250,17 +250,19 @@ define( [ 'jquery',
             @listenTo(@model, 'destroy', @remove_filter)
 
 
-    class FiltersView extends Backbone.Marionette.CollectionView
-        el: '.activeFilters'
+    class FiltersView extends Backbone.Marionette.CompositeView
+        el: '#filterControls'
+        template: '#filter-controls'
         itemView: FilterView
+        itemViewContainer: '.activeFilters'
         emptyView: _.template('<div></div>')
 
         add_filter: (event) ->
             console.log 'add filter called'
             params =
-              column_name: (@$ '.columnName').value()
-              filter_type: (@$ '.filterType').value()
-              filter_value: (@$ '.filterValue').value()
+                column_name: (@$ '.columnName').value()
+                filter_type: (@$ '.filterType').value()
+                filter_value: (@$ '.filterValue').value()
 
             new_filter = new Filter(params)
             # TODO: verify inputs are valid

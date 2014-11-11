@@ -36,7 +36,6 @@ define( [ 'jquery',
                     <% }); %>
                     </td>
                 '''
-
         initialize: (options) ->
             @fields = options.fields
             @repo   = options.repo
@@ -102,7 +101,7 @@ define( [ 'jquery',
                         <%= item.name %><i class='sort-me icon-sort'></i>
                     </th>
                 <% }); %>
-                    <th>&nbsp;</th> 
+                    <th>&nbsp;</th>
                 </tr>
             '''
 
