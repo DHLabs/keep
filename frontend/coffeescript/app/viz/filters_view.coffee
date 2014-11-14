@@ -141,44 +141,33 @@ define( [ 'jquery',
         hideView: ->
             ($ '#filters-viz').hide()
 
+        # Refresh table data according to filters
         _refresh_data: (url_params) ->
             # 1. change url
             # 2. reset table view
             @collection.url = @base_url + url_params
-            @collection.reset()
+            console.log "new collection url: #{@collection.url}"
+            @collection.fetch(reset: true)
 
         _setup_filters: ->
-            example_filters = [
-              {
-                column_name: 'country'
-                filter_type: 'eq'
-                filter_value: 'France'
-              },
-              {
-                column_name: 'willing_to_enroll'
-                filter_type: 'eq'
-                filter_value: 'yes'
-              },
-              {
-                column_name: 'num_participants'
-                filter_type: 'lt'
-                filter_value: '5'
-              }
-            ]
-
-
-            console.log 'initializing filters'
-            @filters_collection = new FilterCollection(example_filters)
+            saved_filters = []
+            @filters_collection = new FilterCollection(saved_filters)
             @filter_views = new FiltersView(collection: @filters_collection)
             @filter_views.render()
-            console.log 'finished setting up filters'
+
+
+            # FIXME: filter views should be able to render at initialization
+            # using a templateHelper method but I can't figure out how to
+            # bind an instance variable (the set of column names) in the right scope
+            @filter_views.set_columns(@column_names)
+
+            # Listen to filters collection for changes
+            @listenTo(@filter_views, 'filters:refresh_data', @_refresh_data)
+
 
 
         initialize: () ->
             DataTableView::initialize.apply(@, arguments)
-
-            # Save base url to use with filtering
-            @base_url = @url
 
             # Bind scroll event to handle the fixed-header rendering, and
             # lazy-loading of data
@@ -193,13 +182,18 @@ define( [ 'jquery',
             )
 
             @on('render', @detect_sort)
-            @on('filters:refresh_data', '_refresh_data')
+
+            # Need to pass column names along to FiltersView for dropdown
+            @column_names = _.map(@fields, (field) -> field.label)
+
+            # Save base url to use with filtering
+            @base_url = @collection.url
 
             # Set up controls to manage filters
             @_setup_filters()
 
             # Load up the intial set of data to render.
-            @collection.reset(document.initial_data)
+            @_refresh_data(@filter_views.collection.url_params())
 
 
     class Filter extends Backbone.Model
@@ -232,7 +226,6 @@ define( [ 'jquery',
             return query_string
 
         render: ->
-          console.log 'calling render in FilterCollection'
           Backbone.Collection::render.apply(@, arguments)
 
 
@@ -240,7 +233,6 @@ define( [ 'jquery',
         template: '#filter-template'
 
         remove_filter: ->
-            console.log 'triggering remove:filter'
             @trigger('filters:remove', @model)
 
         events:
@@ -255,43 +247,38 @@ define( [ 'jquery',
         template: '#filter-controls'
         itemView: FilterView
         itemViewContainer: '.activeFilters'
-        emptyView: _.template('<div></div>')
 
         add_filter: (event) ->
-            console.log 'add filter called'
             params =
-                column_name: (@$ '.columnName').value()
-                filter_type: (@$ '.filterType').value()
-                filter_value: (@$ '.filterValue').value()
+                column_name: ($ '.columnName').val()
+                filter_type: ($ '.filterType').val()
+                filter_value: ($ '.filterValue').val()
 
             new_filter = new Filter(params)
             # TODO: verify inputs are valid
             # TODO: clear inputs on success
             @collection.add(new_filter)
-            @trigger('filters:refresh_data', @collection.url_params)
+            @trigger('filters:refresh_data', @collection.url_params())
 
         remove_filter: (event) ->
-            console.log 'remove:filter heard'
-            @collection.remove(event)
-            @trigger('filters:refresh_data', @collection.url_params)
-
-        _populate_column_names: ->
-            console.log('populating here')
-            $db_columns = $ @column_names
-            for field in @collection.column_names
-                $db_columns.append(field)
-
-        childEvents:
-            'filters:remove': @remove_filter
+            @collection.remove(event.model)
+            @trigger('filters:refresh_data', @collection.url_params())
 
         events:
             'click .js-add': 'add_filter'
 
+        set_columns: (columns) ->
+            les_options = _.map(columns, (column_name) ->
+              "<option value='#{column_name}'>#{column_name}</option>"
+            )
+            $('.columnName').html(les_options.join(''))
+
+
         initialize: (options) ->
             Backbone.Marionette.CollectionView::initialize.apply(@, arguments)
 
-            # select options
-            @_populate_column_names
+            @on('itemview:filters:remove', @remove_filter)
+
 
     return DataFiltersView
 )

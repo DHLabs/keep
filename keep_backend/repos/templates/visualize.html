@@ -247,15 +247,13 @@
 <script id="filter-controls" type="text/template">
     <!-- TODO: remove inline styling -->
     <!-- Filtering controls -->
-    <div class="fooBar" style="text-align: center">
+    <div style="text-align: center">
       <h4>Add filters to create a subset of your data</h4>
       <div class="filterInputBar">
         Filter
-          <select id="" name="filterColumnName" style="display:inline;">
-            <option value="">column_name</option>
-          </select>
+          <select id="" class="columnName" style="display:inline;"></select>
         to values
-          <select id="" name="filterType" style="display:inline; width: auto;">
+          <select id="" class="filterType" style="display:inline; width: auto;">
             <option value="eq">equal to</option>
             <option value="gt">&gt;</option>
             <option value="gte">&geq;</option>

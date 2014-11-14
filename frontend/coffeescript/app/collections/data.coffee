@@ -9,6 +9,7 @@ define( [
         model: DataModel
 
         initialize: ( options ) ->
+            @column_names = _.map(options.fields, (field) -> field.label)
             @url = "/api/v1/data/#{options.repo.id}/"
             @meta =
                 offset: 0
