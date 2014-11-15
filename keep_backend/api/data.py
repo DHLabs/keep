@@ -199,6 +199,8 @@ class DataResource( MongoDBResource ):
             limit = 50
             if request.GET.get( 'format', None ) == 'csv':
                 limit = cursor.count()
+            if 'doctor_id' in request.GET:
+                limit = cursor.count()
 
             # Determine the number of pages available.
             pages = 0

@@ -138,7 +138,7 @@
 								<%= repo.get( 'name' ) %>
 							</a>
 						<% } else if(linkedguys[repo.get("name")] == 'empty') { %>
-							<d style="background-color:#FF3A3A" href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/<%= window.location.search %>' class="linked-form">
+							<a style="background-color:#FF3A3A" href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/<%= window.location.search %>' class="linked-form">
 								<%= repo.get( 'name' ) %>
 							</a>
 						<% } else { %>
