@@ -533,6 +533,11 @@
 /* Intrinsic widths
    ========================================================================== */
 
+.u-widthAuto {
+  width: auto !important;
+}
+
+
 /**
  * Make an element shrink wrap its content.
  */

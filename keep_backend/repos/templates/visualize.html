@@ -237,31 +237,30 @@
     </div>
 </script>
 
+<!-- Filter Templates -->
 <script id="filter-template" type="text/template">
   <li class="appliedFilters">
     <strong><%= column_name %></strong> to values <strong><%= filter_type %> <%= filter_value %></strong>
     <a href="#" class="js-remove"><i class="icon-trash"></i>
   </li>
 </script>
-
 <script id="filter-controls" type="text/template">
-    <!-- TODO: remove inline styling -->
     <!-- Filtering controls -->
-    <div style="text-align: center">
+    <div class="u-textCenter">
       <h4>Add filters to create a subset of your data</h4>
       <div class="filterInputBar">
         Filter
-          <select id="" class="columnName" style="display:inline;"></select>
+          <select id="" class="columnName u-inline"></select>
         to values
-          <select id="" class="filterType" style="display:inline; width: auto;">
+          <select id="" class="filterType u-inline u-widthAuto">
             <option value="eq">equal to</option>
             <option value="gt">&gt;</option>
             <option value="gte">&geq;</option>
             <option value="lt">&lt;</option>
             <option value="lte">&geq;</option>
           </select>
-        <input class="filterValue" type="" style="display:inline;">
-        <a href="#" class="btn btn-primary js-add" style="margin-left: 20px;">Apply</a>
+        <input class="filterValue u-inline" type="">
+        <a href="#" class="btn btn-primary js-add">Apply</a>
       </div>
         <a href="#" class="btn js-download">Download as CSV</a>
     </div>
