@@ -143,10 +143,11 @@ define( [ 'jquery',
 
         # Refresh table data according to filters
         _refresh_data: (url_params) ->
-            # 1. change url
+            # 1. change data table's url
             # 2. reset table view
+            # 3. update CSV download link
             @collection.url = @base_url + url_params
-            console.log "new collection url: #{@collection.url}"
+            ($ '#filters-viz .js-download').attr('href', @collection.url + '&format=csv')
             @collection.fetch(reset: true)
 
         _setup_filters: ->
@@ -272,7 +273,6 @@ define( [ 'jquery',
               "<option value='#{column_name}'>#{column_name}</option>"
             )
             $('.columnName').html(les_options.join(''))
-
 
         initialize: (options) ->
             Backbone.Marionette.CollectionView::initialize.apply(@, arguments)
