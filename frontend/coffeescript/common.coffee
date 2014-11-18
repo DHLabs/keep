@@ -7,7 +7,7 @@ requirejs.config(
 
 		# Leaflet plugins
 		leaflet_heatmap: 'heatmap-leaflet'
-		leaflet_cluster: 'leaflet.markerclusterer'
+		leaflet_cluster: 'leaflet.markercluster'
 
 		# jQuery plugins
 		jqueryui: 'jquery-ui'
@@ -15,7 +15,7 @@ requirejs.config(
 
 		# Backbone plugins
 		backbone_modal: 'backbone.modal'
-		marionette: 'marionette'
+		marionette: 'backbone.marionette'
 
 		nvd3: 'nv.d3'
 
