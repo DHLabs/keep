@@ -352,7 +352,12 @@ class Repository( models.Model ):
         validated_data, valid_files = validate_and_format(fields, data, files)
 
         if self.is_tracker:
-            validated_data[self.study.tracker] = str(random.randrange(100000000,999999999))
+
+            while True:
+                validated_data[self.study.tracker] = str(random.randrange(100000000,999999999))
+
+                if db.data.find( { "data.patient_id": validated_data[self.study.tracker] } ).count() == 0:
+                    break
 
         is_finished = False
         if 'is_finished' in data:
