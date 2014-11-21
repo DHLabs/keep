@@ -25,17 +25,33 @@ define( [ 'jquery',
             'geopoint': _.template( '<td><%= data.coordinates[1] %>, <%= data.coordinates[0] %></td>' )
             'photo':    _.template( '<td><a href="<%= data %>" target="blank">Click to view photo</a></td>'  )
 
-            'forms':    _.template '''
+            'forms':    _.template( '''
                     <td>
+
+                    <% var showForms = false; %>
                     <% _.each(document.linked_repos, function(item) { %>
-                        <% if( model.linked[item.name]) { %>
-                            <span style="color:#00ff00"><%= item.name %></span>
-                        <% } else { %>
-                            <span style="color:#ff0000"><%= item.name %></span>
-                        <% }; %>&nbsp;&nbsp;
+                        <% if( model.linked[item.name] != 'empty' ) { %>
+                            <% showForms = true; %>
+                        <% }; %>
                     <% }); %>
+
+                    <% if( showForms ) { %>
+                        <% _.each(document.linked_repos, function(item) { %>
+                            <% if( model.linked[item.name] == 'finished') { %>
+                                <span class="linked-form" style="background-color:#56B156"><%= item.name %></span>
+                            <% } else if( model.linked[item.name] == 'incomplete' ) { %>
+                                <span class="linked-form" style="background-color:#F3A047"><%= item.name %></span>
+                            <% } else { %>
+                                <span class="linked-form" style="background-color:#FF3A3A"><%= item.name %></span>
+                            <% }; %><br />
+                        <% }); %>
+                    <% } else { %>
+                        <span class="linked-form" style="background-color:#AAA">Click to Add Data</span>
+                    <% }; %>
+
+                    
                     </td>
-                '''
+                ''')
         initialize: (options) ->
             @fields = options.fields
             @repo   = options.repo
@@ -50,7 +66,7 @@ define( [ 'jquery',
                 templ.push( @data_templates[ 'forms' ]( { model: model } ) )
 
                 #callbacks to check if form is filled out for data
-                @check_filled_forms( model )
+                #@check_filled_forms( model )
 
             for field in @fields
                 tdata = { data: model.data[ field.name ] }
@@ -67,6 +83,15 @@ define( [ 'jquery',
             # the tds before it fixed.
             templ.push( '<td>&nbsp;</td>' )
             return templ.join( '' )
+
+        onRender: () ->
+            if @model.attributes.is_finished
+                #$(this.el).css( 'border-color', '#00ff00' )
+                #$(this.el).css( 'border-width', '1px 1px 1px 1px' )
+            else
+                $(this.el).css( 'background-color', '#FFFFDF' )
+                #$(this.el).css( 'border-width', '1px 1px 1px 1px' )
+            return
 
         clicked: (event) =>
 
@@ -91,19 +116,24 @@ define( [ 'jquery',
         itemView: TableRowView
         emptyView: EmptyTableView
 
-        header_template: _.template '''
+        header_template: _.template( '''
                 <tr>
                 <% if(repo.attributes.is_tracker) { %>
                     <th>Linked Forms</th>
                 <% }; %>
                 <% _.each( fields, function( item ) { %>
-                    <th data-field='<%= item.name %>'>
-                        <%= item.name %><i class='sort-me icon-sort'></i>
-                    </th>
+
+                    <% if( window.location.search.indexOf('doctor_id') != -1 && item.name == 'doctor_id' ) { %>
+                        
+                    <% } else { %>
+                        <th data-field='<%= item.name %>'>
+                            <%= item.name %><i class='sort-me icon-sort'></i>
+                        </th>
+                    <% }; %>
                 <% }); %>
-                    <th>&nbsp;</th>
+                    <th>&nbsp;</th> 
                 </tr>
-            '''
+            ''')
 
         initialize: (options)->
 

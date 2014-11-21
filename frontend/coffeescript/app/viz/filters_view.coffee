@@ -52,17 +52,17 @@ define( [ 'jquery',
             if @page_loading? and @page_loading
                 return
 
-            currentView = event.data.view.currentView
+            le_view = event.data.view.$el
 
-            if $( currentView.el ).is( ':hidden' )
+            if le_view.is(':hidden')
                 return
 
-            view_height = currentView.$el.height()
+            view_height = le_view.height()
             scroll_height = $( event.currentTarget ).scrollTop() + $( event.currentTarget ).height()
 
             if scroll_height + 100 > view_height
                 @page_loading = true
-                currentView.collection.next( success: ()=>
+                event.data.view.collection.next( success: ()=>
                     @page_loading = false )
 
             @
@@ -172,8 +172,7 @@ define( [ 'jquery',
 
             # Bind scroll event to handle the fixed-header rendering, and
             # lazy-loading of data
-            @$el.scroll( { view: @ }, @detect_scroll )
-            @$el.scroll( { view: @ }, @detect_pagination )
+            $('#vizContainer').scroll( { view: @ }, @detect_pagination )
 
             # Set the location of the data div and change it when we resize
             # the window.
@@ -185,7 +184,7 @@ define( [ 'jquery',
             @on('render', @detect_sort)
 
             # Need to pass column names along to FiltersView for dropdown
-            @column_names = _.map(@fields, (field) -> field.label)
+            @column_names = _.map(@fields, (field) -> field.name)
 
             # Save base url to use with filtering
             @base_url = @collection.url
