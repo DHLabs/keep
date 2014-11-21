@@ -538,7 +538,7 @@ def repo_viz( request, username, repo_name, filter_param=None ):
                          { 'survey_label': False,
                            'user': False } )\
                   .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
-                  .limit( 50 )
+                  .limit( 25 )
 
     data_serializer = DataSerializer()
     if repo.is_tracker and repo.study:

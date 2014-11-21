@@ -196,10 +196,8 @@ class DataResource( MongoDBResource ):
             #
             # TODO: Smarter way of printing out entire dataset for CSVs
             # When people download CSVs, make sure we include the entire dataset.
-            limit = 50
+            limit = 25
             if request.GET.get( 'format', None ) == 'csv':
-                limit = cursor.count()
-            if 'doctor_id' in request.GET:
                 limit = cursor.count()
 
             # Determine the number of pages available.
