@@ -53,7 +53,7 @@ def parse_provider_ids():
 
 def add_countries():
 
-    patients = db.data.find( { "label":"patient_list"} )
+    patients = db.data.find( { "label":"patient_list", "data.country":""} )
 
     for patient in patients:
 
@@ -68,7 +68,7 @@ def add_countries():
                 patient['data']['country'] = country
                 db.data.update( { "_id":patient['_id'] }, {"$set": { 'data': patient['data'] } } )
 
-    patients = db.data.find( { "label":"demographics"} )   
+    patients = db.data.find( { "label":"demographics", "data.country":""} )   
 
     for patient in patients:
 
