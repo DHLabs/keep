@@ -41,11 +41,15 @@ class DataSerializer( object ):
 
                 repo_datas = db.data.find( { tracker_id:data_id, 'data.doctor_id':copy['data']['doctor_id'] } )
 
+                repo_datas_array = []
+                for data_in in repo_datas:
+                    repo_datas_array.append( data_in )
+
                 copy['can_continue'] = False
 
                 #get the demographics form
                 demo_data = None
-                for repo_data in repo_datas:
+                for repo_data in repo_datas_array:
                     if repo_data['label'] == 'demographics':
                         demo_data = repo_data['data']
                         break
@@ -62,9 +66,9 @@ class DataSerializer( object ):
                     num_data = None#db.data.find( { 'repo': ObjectId( linked_repo.mongo_id ),tracker_id:data_id } )
 
                     #get the form for name
-                    for repo_data in repo_datas:
-                        if repo_data['label'] == linked_repo.name:
-                            num_data = repo_data
+                    for the_data in repo_datas_array:
+                        if the_data['label'] == linked_repo.name:
+                            num_data = the_data
                             break
 
                     if num_data:
