@@ -39,24 +39,36 @@ class DataSerializer( object ):
                 tracker_id = 'data.' + repository.study.tracker
                 data_id = dict(row)['data'].get(repository.study.tracker)
 
-                demo_datas = db.data.find( { 'label': 'demographics',tracker_id:data_id } )
+                repo_datas = db.data.find( { tracker_id:data_id, 'data.doctor_id':copy['data']['doctor_id'] } )
 
                 copy['can_continue'] = False
-                if demo_datas.count() > 0:
-                    demo_data = demo_datas[0]['data']
 
+                #get the demographics form
+                demo_data = None
+                for repo_data in repo_datas:
+                    if repo_data['label'] == 'demographics':
+                        demo_data = repo_data['data']
+                        break
+
+                if demo_data:
                     if 'chronic_dial' in demo_data and 'func_transplant' in demo_data and demo_data['chronic_dial'] == 'no' and demo_data['func_transplant'] == 'no':
                         if 'incarcerated' in demo_data and demo_data['incarcerated'] == 'no':
                             if 'aki_criteria' in demo_data and demo_data['aki_criteria'] != 'no':
                                 copy['can_continue'] = True
 
                 for linked_repo in linked:
+                    
                     #check if data
-                    num_data = db.data.find( { 'repo': ObjectId( linked_repo.mongo_id ),tracker_id:data_id } )
-                    if num_data.count() > 1:
-                        link_dict[ linked_repo.name ] = 'finished'
-                    elif num_data.count() == 1:
-                        if num_data[0]['is_finished']:
+                    num_data = None#db.data.find( { 'repo': ObjectId( linked_repo.mongo_id ),tracker_id:data_id } )
+
+                    #get the form for name
+                    for repo_data in repo_datas:
+                        if repo_data['label'] == linked_repo.name:
+                            num_data = repo_data
+                            break
+
+                    if num_data:
+                        if num_data['is_finished']:
                             link_dict[ linked_repo.name ] = 'finished'
                         else:
                             link_dict[ linked_repo.name ] = 'incomplete'
