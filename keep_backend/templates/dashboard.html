@@ -4,248 +4,148 @@
 {% block title %}{{ user.username }}{% endblock %}
 
 {% block js %}
-<!-- Initial data -->
-<script type='text/javascript'>
-	document.user = "{{ user }}";
-	document.user_id = {{ user.id }};
-	document.repo_list  = {{user_repos|safe}};
-	document.study_list = {{user_studies|safe}};
-</script>
-
-<!-- Load our app -->
-<script src='{% static "js/vendor/requirejs.js" %}'></script>
-<script type="text/javascript">
-	require([ '{% static "js/common.js" %}' ], function (common) {
-		require.config({
-			baseUrl: '{% static "js/vendor" %}'
-		});
-		require( [ 'app/dashboard/main' ] );
-	});
-</script>
-<script type='text/template' id='file-dropped-template'>
-	<div class="bbm-modal__topbar">
-		<h3 class="bbm-modal__title">New Data Diary</h3>
-	</div>
-
-	<div class="bbm-modal__section">
-		<form>
-			<div class='control-group'>
-				Creating from:
-				<i class='icon-file-alt'></i>
-				<%= file.name %> (<%= file.size %> B)
-			</div>
-
-			<div class='control-group'>
-				<input type='text' id='repo-name' class='input large' value='<%= repo_name %>' placeholder='Diary Name'>
-			</div>
-
-			<div class='control-group' style='display:none;'>
-				<label class='radio'>
-					<input type='radio' name='privacy' value='public'>
-					<i class='icon-unlock'></i>
-					<strong>Public</strong>
-					<div class='help-block'>
-						Anyone can see this repository and the data associated
-						with it.
-					</div>
-				</label>
-				<label class='radio' style='clear:both;'>
-					<input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
-					<i class='icon-lock'></i>
-					<strong>Private</strong>
-					<div class='help-block'>
-						You choose who can see this repository and the data
-						associated with it.
-					</div>
-				</label>
-			</div>
-
-			<div class='control-group'>
-				<select class='input' name='study'>
-					<option value=''>Not part of a study</option>
-					<optgroup label='Your Studies'>
-						<% _.each( studies, function( study ) { %>
-							<option value='<%= study.get("id") %>'>
-								<%= study.get( "name" ) %>
-							</option>
-						<% }); %>
-					</optgroup>
-				</select>
-				<label class='checkbox'>
-					<input type='checkbox' name='tracker'>
-					<strong>Use this diary to track other things in this study</strong>
-					<div class='help-block'>
-						Only valid when pairing this diary with a study
-					</div>
-				</label>
-			</div>
-		</form>
-	</div>
-	<div class="bbm-modal__bottombar">
-		<a href="#" class="btn btn-primary">Upload</a>
-		<a href='#' class='btn btn-cancel'>Cancel</a>
-	</div>
-</script>
-<script type='text/template' id='study-settings-template'>
-	<div class="bbm-modal__topbar">
-		<h3 class="bbm-modal__title"><span class='study-name'></span> Settings</h3>
-	</div>
-
-	<div class="bbm-modal__section">
-		<div>
-			<div><a href='#' class='btn study-delete'><i class='icon-trash'></i> Delete Study</a></div>
-		</div>
-	</div>
-	<div class="bbm-modal__bottombar">
-		<a href="#" class="btn btn-primary">Done</a>
-	</div>
-</script>
-<script type="text/template" id="new-study-template">
-	<div class="bbm-modal__topbar">
-		<h3 class="bbm-modal__title">New Study</h3>
-	</div>
-
-	<div class="bbm-modal__section">
-		<form>
-			<div class='control-group'>
-				<input type='text' id='study-name' class='input large' placeholder='Study name'>
-				<span class='error'></span>
-			</div>
-			<div class='control-group'>
-				<input type='text' id='study-description' class='input large' placeholder='What is this for?'>
-			</div>
-			<div class='control-group'>
-				<label>
-					<input type='checkbox' id='study-tracker' class='input large'>
-					Include a way to keep track of things inside this study.
-				</label>
-			</div>
-		</form>
-	</div>
-	<div class="bbm-modal__bottombar">
-		<a href="#" class="btn btn-cancel">Cancel</a>
-		<a href="#" class="btn btn-primary">Create</a>
-	</div>
+  <!-- Initial data -->
+  <script type='text/javascript'>
+    document.user = "{{ user }}";
+    document.user_id = {{ user.id }};
+    document.repo_list  = {{user_repos|safe}};
+    document.study_list = {{user_studies|safe}};
   </script>
+
+  <!-- Load our app -->
+  <script src='{% static "js/vendor/requirejs.js" %}'></script>
+  <script type="text/javascript">
+    require([ '{% static "js/common.js" %}' ], function (common) {
+      require.config({
+        baseUrl: '{% static "js/vendor" %}'
+      });
+      require( [ 'app/dashboard/main' ] );
+    });
+  </script>
+
+  <!-- Include JS Templates -->
+  {% include 'js_templates/_file_upload.html' %}
+  {% include 'js_templates/_study_settings.html' %}
+  {% include 'js_templates/_new_study.html' %}
 {% endblock %}
 
 {% block content %}
-<div id='file-drop-overlay'>
-	<div class='center'>
-		<p>
-			<i class='icon-file-alt' style='font-size:64px;'></i>
-			<br/>&nbsp;<br/>
-			Drop your file to upload
-		</p>
-	</div>
-</div>
-<div class='sixteen columns hints'>
-	Did you know? Drag a CSV, JSON, XML, or XLS file onto the page to create a new data diary
-</div>
-<div id='dashboard'>
-	<div class='three columns sidebar'>
+  <div id='file-drop-overlay'>
+    <div class='center'>
+      <p>
+        <i class='icon-file-alt' style='font-size:64px;'></i>
+        <br/>&nbsp;<br/>
+        Drop your file to upload
+      </p>
+    </div>
+  </div>
+  <div class='sixteen columns hints'>
+    Did you know? Drag a CSV, JSON, XML, or XLS file onto the page to create a new data diary
+  </div>
+  <div id='dashboard'>
+    <div class='three columns sidebar'>
 
-		<a class='btn btn-primary btn-block' id='new_repo_btn' href='{% url "repo_new" %}'>
-			<i class='icon-plus-sign'></i>&nbsp;New Data Diary
-		</a>
+      <a class='btn btn-primary btn-block' id='new_repo_btn' href='{% url "repo_new" %}'>
+        <i class='icon-plus-sign'></i>&nbsp;New Data Diary
+      </a>
 
-		<!-- STUDIES & DATA DIARIES -->
-		<div id='studies' class='section'>
+      <!-- STUDIES & DATA DIARIES -->
+      <div id='studies' class='section'>
 
-			{% if not is_other_user %}
-			<div class='create-new'>
-				<a href='#' class='btn btn-primary btn-small'>
-					<i class='icon-plus-sign'></i>&nbsp;New
-				</a>
-			</div>
-			{% endif %}
+        {% if not is_other_user %}
+        <div class='create-new'>
+          <a href='#' class='btn btn-primary btn-small'>
+            <i class='icon-plus-sign'></i>&nbsp;New
+          </a>
+        </div>
+        {% endif %}
 
-			<h4>Studies</h4>
-			<ul class='nav-list' style='margin-bottom:0px;'>
-				<li class='selected'>
-					<a href='#'>All Diaries</a>
-				</li>
-			</ul>
-			<ul class='nav-list' id='study_list'></ul>
-		</div>
+        <h4>Studies</h4>
+        <ul class='nav-list' style='margin-bottom:0px;'>
+          <li class='selected'>
+            <a href='#'>All Diaries</a>
+          </li>
+        </ul>
+        <ul class='nav-list' id='study_list'></ul>
+      </div>
 
-		<!-- ORGANIZATIONS -->
-		<div class='section'>
-			{% if not is_other_user %}
-			<div style='float:left;'>
-				<a href='{% url "organization_new" %}' class='btn btn-primary btn-small' id='create_org_btn'>
-					<i class='icon-plus-sign'></i>
-					&nbsp;New
-				</a>
-			</div>
-			{% endif %}
+      <!-- ORGANIZATIONS -->
+      <div class='section'>
+        {% if not is_other_user %}
+        <div style='float:left;'>
+          <a href='{% url "organization_new" %}' class='btn btn-primary btn-small' id='create_org_btn'>
+            <i class='icon-plus-sign'></i>
+            &nbsp;New
+          </a>
+        </div>
+        {% endif %}
 
-			<h4>Org<span class='widescreen-only'>anization</span>s</h4>
+        <h4>Org<span class='widescreen-only'>anization</span>s</h4>
 
-			<ul id='org-list'>
-				{% if organizations|length == 0 %}
-					<li style='font-size:0.8em;color:#AAA;'>
-						What are organizations?<br/><a href='#'>Learn more.</a>
-					</li>
-				{% else %}
-					{% for org in organizations %}
-					<li>
-						<a href='{% url "organization_dashboard" org=org.organization.name %}'>
-							<img width='20' src='{{ org.organization.icon }}' class='account-icon'>
-							&nbsp;{{ org.organization.name }}
-						</a>
-						{% if org.pending and not is_other_user %}
-						<div style='margin-top:4px;'>
-							<a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
-							   class='btn btn-small btn-primary'>
-								Join
-							</a>&nbsp;
-							<a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
-							   class='btn btn-small'>
-							   Ignore
-							</a>
-						</div>
-						{% endif %}
-					</li>
-					{% endfor %}
-				{% endif %}
-			</ul>
-		</div>
-	</div>
+        <ul id='org-list'>
+          {% if organizations|length == 0 %}
+            <li style='font-size:0.8em;color:#AAA;'>
+              What are organizations?<br/><a href='#'>Learn more.</a>
+            </li>
+          {% else %}
+            {% for org in organizations %}
+            <li>
+              <a href='{% url "organization_dashboard" org=org.organization.name %}'>
+                <img width='20' src='{{ org.organization.icon }}' class='account-icon'>
+                &nbsp;{{ org.organization.name }}
+              </a>
+              {% if org.pending and not is_other_user %}
+              <div style='margin-top:4px;'>
+                <a href='{% url "organization_member_accept" org=org.organization.name user=account.username %}'
+                  class='btn btn-small btn-primary'>
+                  Join
+                </a>&nbsp;
+                <a href='{% url "organization_member_ignore" org=org.organization.name user=account.username %}'
+                  class='btn btn-small'>
+                  Ignore
+                </a>
+              </div>
+              {% endif %}
+            </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+    </div>
 
-	<!-- REPOSITORIES -->
-	<div id='repos' class='thirteen columns repos'>
+    <!-- REPOSITORIES -->
+    <div id='repos' class='thirteen columns repos'>
 
-		<div style='float:right;'>
-			<a href='#' id='refresh-repos'>
-				<i class='icon-refresh'></i>
-			</a>
-		</div>
+      <div style='float:right;'>
+        <a href='#' id='refresh-repos'>
+          <i class='icon-refresh'></i>
+        </a>
+      </div>
 
-		<div>
-			<ul id='filters' class='nav-list nav-inline'>
-				<li>
-					<h4 id='study_name' style='display:inline;'>All Diaries</h4>
-				</li>
+      <div>
+        <ul id='filters' class='nav-list nav-inline'>
+          <li>
+            <h4 id='study_name' style='display:inline;'>All Diaries</h4>
+          </li>
 
-				<li class='selected'>
-					<a href='#' data-filter='all' style='font-size: 85%;'>All</a>
-				</li>
-				<li>
-					<a href='#' data-filter='public' style='font-size: 85%;'>Public</a>
-				</li>
-				<li>
-					<a href='#' data-filter='private' style='font-size: 85%;'>Private</a>
-				</li>
-				<li>
-					<a href='#' data-filter='shared' style='font-size: 85%;'>Shared with me</a>
-				</li>
-			</ul>
-		</div>
+          <li class='selected'>
+            <a href='#' data-filter='all' style='font-size: 85%;'>All</a>
+          </li>
+          <li>
+            <a href='#' data-filter='public' style='font-size: 85%;'>Public</a>
+          </li>
+          <li>
+            <a href='#' data-filter='private' style='font-size: 85%;'>Private</a>
+          </li>
+          <li>
+            <a href='#' data-filter='shared' style='font-size: 85%;'>Shared with me</a>
+          </li>
+        </ul>
+      </div>
 
-		<table id='repo_list' class='table diary-list'>
-			<tbody></tbody>
-		</table>
-	</div>
-</div>
+      <table id='repo_list' class='table diary-list'>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 {% endblock %}

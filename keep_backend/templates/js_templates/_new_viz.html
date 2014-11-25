@@ -1,0 +1,36 @@
+<script type='text/template' id='new-viz-template'>
+  <div class="bbm-modal__topbar">
+    <h3 class="bbm-modal__title">New Visualization</h3>
+  </div>
+  <div class="bbm-modal__section">
+    <form>
+      <div class='control-group'>
+        <input type='text' id='viz-name' class='input large' placeholder='Visualization Name'>
+      </div>
+      <div class='control-group'>
+        <label>
+          X-axis
+          <select id='xaxis'>
+            <% _.each( fields, function( field ) { %>
+            <option value='<%= field.name %>'><%= field.name %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+      <div class='control-group'>
+        <label>
+          Y-axis
+          <select id='yaxis'>
+            <% _.each( fields, function( field ) { %>
+            <option value='<%= field.name %>'><%= field.name %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+    </form>
+  </div>
+  <div class="bbm-modal__bottombar">
+    <a href="#" class="btn btn-cancel">Cancel</a>
+    <a href="#" class="btn btn-primary">Create</a>
+  </div>
+</script>

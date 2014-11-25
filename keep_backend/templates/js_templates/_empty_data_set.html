@@ -1,0 +1,14 @@
+<script type='text/template' id='empty-collection'>
+  <td id='filedrag' colspan=255>
+    <div style='padding:16px;font-size:1.2em;'>
+      <form action='{% url "repo_insert" repo_id=repo.mongo_id %}' method='post' enctype='multipart/form-data'>
+        {% csrf_token %}
+        <input type='hidden' id='file_key'  name='file_key' value=''>
+        <input type='hidden' id='file_size' name='file_size' value=''>
+        <a href='#'>
+          <i class='icon-file'></i>&nbsp;&nbsp;Already have data somewhere? Click to import!
+        </a>
+      </form>
+    </div>
+  </td>
+</script>

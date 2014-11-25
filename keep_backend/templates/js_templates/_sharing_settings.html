@@ -1,0 +1,85 @@
+<script type='text/template' id='sharing-settings'>
+  <div class="bbm-modal__topbar">
+    <h3 class="bbm-modal__title">Data Sharing Settings</h3>
+  </div>
+  <div class="bbm-modal__section">
+    <form>
+      <div class='control-group squaredThree'>
+        <label class='checkbox'>
+          <input id='sharing_toggle' class='input large' type='checkbox' {% if repo.is_public %}checked='checked'{% endif %}>
+          Public Data
+          <span class='help-block'>
+            - Checking this box will make the data in this repository completely public.
+          </span>
+        </label>
+      </div>
+      <div class='control-group'>
+        <label class='checkbox'>
+          <input id='form_access_toggle' class='input large' type='checkbox' {% if repo.is_form_public %}checked='checked'{% endif %}>
+          Public Form
+          <span class='help-block'>
+            - Checking this box will allow anyone to view the form and submit data for it.
+          </span>
+        </label>
+      </div>
+    </form>
+    <div>
+      <h5>Who has access?</h5>
+      <table id='shared-users-list' class='table compressed'>
+        <tr>
+          <td>
+            <input id='sharing-user' class='small' type='text' placeholder='Username' />
+            <span id='sharing_user_list' class='autocomplete-list'></span>
+          </td>
+          <td>
+            <select id='sharing-perms' class='small'>
+              <option value='view_repository'>
+                See Repo
+              </option>
+              <option value='add_data,view_repository'>
+                Add Data
+              </option>
+              <option value='view_data,add_data,view_repository'>
+                View Data
+              </option>
+              <option value='change_repository,view_data,add_data,view_repository'>
+                Edit Repo
+              </option>
+            </select>
+          </td>
+          <td style='text-align:center;'>
+            <a href='#' class='btn' id='add-share'>
+              <i class='icon-plus'></i>
+            </a>
+          </td>
+        </tr>
+        {% for user, value in users_perms.items %}
+        <tr data-user='{{ user }}'>
+          <td>
+            {{ user }}
+          </td>
+          <td>
+            {% if 'change_repository' in value %}
+              Can Edit Repo
+            {% elif 'view_data' in value %}
+              Can View Data
+            {% elif 'add_data' in value %}
+              Can Add Data
+            {% else %}
+              Can See Repo
+            {% endif %}
+          </td>
+          <td style='text-align:center;'>
+            <a href='#' class='btn btn-delete'>
+              <i class='icon-trash'></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+    <div class="bbm-modal__bottombar">
+      <a href="#" class="btn btn-primary">Done</a>
+    </div>
+</script>
