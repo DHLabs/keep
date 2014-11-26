@@ -185,7 +185,7 @@ define( [ 'jquery',
             @on('render', @detect_sort)
 
             # Need to pass column names along to FiltersView for dropdown
-            @column_names = _.map(@fields, (field) -> field.label)
+            @column_names = _.map(@fields, (field) -> field.name)
 
             # Save base url to use with filtering
             @base_url = @collection.url
