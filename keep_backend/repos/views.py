@@ -50,6 +50,21 @@ def parse_provider_ids():
 
             db.data.update( {"data.email":prov_email, "label":"snapshot_registration" },{"$set": { 'data': new_data }} )
 
+def remove_cruft( repo_name ):
+
+    repo_datas = db.data.find( { "label" : repo_name } )
+
+    for repo_data in repo_datas:
+
+        patient_id = repo_data['data']['patient_id']
+        doctor_id =  repo_data['data']['doctor_id']
+
+        patient_data = db.data.find( { "label":"patient_list", "data.patient_id":patient_id, "data.doctor_id": doctor_id } )
+
+        if patient_data.count() == 0:
+            #delete the entry
+            db.data.remove( { "_id": repo_data["_id"] } )
+
 
 def add_countries():
 
