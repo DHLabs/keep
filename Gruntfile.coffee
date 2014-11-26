@@ -1,134 +1,134 @@
 module.exports = ( grunt ) ->
 
-	path = require( 'path' )
+  path = require( 'path' )
 
-	grunt.initConfig
-		pkg: grunt.file.readJSON( 'package.json' )
+  grunt.initConfig
+    pkg: grunt.file.readJSON( 'package.json' )
 
-		# Watch files and run the appropriate task on that file when it is
-		# changed.
-		watch:
-			components:
-				files: [ 'frontend/components/**/*.js' ]
-				tasks: [ 'copy:components', 'coffee:requirejs', 'requirejs' ]
+    # Watch files and run the appropriate task on that file when it is
+    # changed.
+    watch:
+      components:
+        files: [ 'frontend/components/**/*.js' ]
+        tasks: [ 'copy:components', 'coffee:requirejs', 'requirejs' ]
 
-			scripts:
-				files: [ 'frontend/coffeescript/**/*.coffee' ]
-				tasks: [ 'copy:components', 'coffee:requirejs', 'requirejs' ]
+      scripts:
+        files: [ 'frontend/coffeescript/**/*.coffee' ]
+        tasks: [ 'copy:components', 'coffee:requirejs', 'requirejs' ]
 
-			styles:
-				files: [ 'frontend/sass/**/*.scss' ]
-				tasks: [ 'compass:dist' ]
+      styles:
+        files: [ 'frontend/sass/**/*.scss' ]
+        tasks: [ 'compass:dist' ]
 
-			images:
-				files: [ 'frontend/img/**/*' ]
-				tasks: [ 'copy:img' ]
+      images:
+        files: [ 'frontend/img/**/*' ]
+        tasks: [ 'copy:img' ]
 
-		# Copy the appropriate bower components to our <vendor> folder
-		bower:
-			install:
-				options:
-					targetDir: '<%= pkg.static_dir %>'
-					layout: (type, component) ->
-						renamedType = type
-						if type == 'js'
-							renamedType = 'js/vendor'
-						else if type == 'css'
-							renamedType = 'css'
-						else if type == 'font'
-							renamedType = 'font'
-						return renamedType
+    # Copy the appropriate bower components to our <vendor> folder
+    bower:
+      install:
+        options:
+          targetDir: '<%= pkg.static_dir %>'
+          layout: (type, component) ->
+            renamedType = type
+            if type == 'js'
+              renamedType = 'js/vendor'
+            else if type == 'css'
+              renamedType = 'css'
+            else if type == 'font'
+              renamedType = 'font'
+            return renamedType
 
-		# Compile all javascript and place into our intermediary folder for
-		# RequireJS optimization
-		coffee:
-			requirejs:
-				options:
-					bare: true
-				expand: true
-				cwd: 'frontend/coffeescript'
-				src: [ '**/*.coffee' ]
-				dest: 'build/js'
-				ext: '.js'
+    # Compile all javascript and place into our intermediary folder for
+    # RequireJS optimization
+    coffee:
+      requirejs:
+        options:
+          bare: true
+        expand: true
+        cwd: 'frontend/coffeescript'
+        src: [ '**/*.coffee' ]
+        dest: 'build/js'
+        ext: '.js'
 
-		compass:
-			dist:
-				options:
-					sassDir: 'frontend/sass'
-					cssDir: '<%= pkg.static_dir %>/css'
-					outputStyle: 'compressed'
+    compass:
+      dist:
+        options:
+          sassDir: 'frontend/sass'
+          cssDir: '<%= pkg.static_dir %>/css'
+          outputStyle: 'compressed'
 
-		copy:
-			css:
-				expand: true
-				cwd: 'frontend/css'
-				src: [ '**/*' ]
-				dest: '<%= pkg.static_dir %>/css'
+    copy:
+      css:
+        expand: true
+        cwd: 'frontend/css'
+        src: [ '**/*' ]
+        dest: '<%= pkg.static_dir %>/css'
 
-			# Javascript components specifically go into an intermediary folder
-			# due to a two-stage build-process with Require-JS
-			components:
-				expand: true
-				cwd: 'frontend/components'
-				src: [ '**/*.js' ]
-				dest: 'build/js/vendor'
+      # Javascript components specifically go into an intermediary folder
+      # due to a two-stage build-process with Require-JS
+      components:
+        expand: true
+        cwd: 'frontend/components'
+        src: [ '**/*.js' ]
+        dest: 'build/js/vendor'
 
-			favicon:
-				expand: true
-				cwd: 'frontend/favicon'
-				src: [ '**/*' ]
-				dest: '<%= pkg.static_dir %>/favicon'
+      favicon:
+        expand: true
+        cwd: 'frontend/favicon'
+        src: [ '**/*' ]
+        dest: '<%= pkg.static_dir %>/favicon'
 
-			img:
-				expand: true
-				cwd: 'frontend/img'
-				src: [ '**/*.png', '**/*.jpg' ]
-				dest: '<%= pkg.static_dir %>/img'
+      img:
+        expand: true
+        cwd: 'frontend/img'
+        src: [ '**/*.png', '**/*.jpg' ]
+        dest: '<%= pkg.static_dir %>/img'
 
-		requirejs:
-			compile:
-				options:
-					appDir: 'build'
-					mainConfigFile: 'build/js/common.js'
-					dir: '<%= pkg.static_dir %>'
-					keepBuildDir: true
-					optimize: 'none'
-					optimizeCss: 'none'
-					modules: [ {
-						name: '../common'
-						include: [ 'jquery',
-								   'app/dashboard/main',
-								   'app/dashboard/views',
-								   'app/viz/main',
-								   'app/viz/views',
-								   'app/webform/main',
-								   'app/webform/views' ]
-					}]
+    requirejs:
+      compile:
+        options:
+          appDir: 'build'
+          mainConfigFile: 'build/js/common.js'
+          dir: '<%= pkg.static_dir %>'
+          keepBuildDir: true
+          optimize: if grunt.option('target') and grunt.option('target') is 'prod' then 'uglify' else 'none'
+          optimizeCss: 'none'
+          modules: [ {
+            name: '../common'
+            include: [ 'jquery',
+                   'app/dashboard/main',
+                   'app/dashboard/views',
+                   'app/viz/main',
+                   'app/viz/views',
+                   'app/webform/main',
+                   'app/webform/views' ]
+          }]
 
-	grunt.loadNpmTasks( 'grunt-bower-task' )
-	grunt.loadNpmTasks( 'grunt-contrib-watch' )
-	grunt.loadNpmTasks( 'grunt-contrib-requirejs' )
-	grunt.loadNpmTasks( 'grunt-contrib-coffee' )
-	grunt.loadNpmTasks( 'grunt-contrib-compass' )
-	grunt.loadNpmTasks( 'grunt-contrib-copy' )
 
-	grunt.registerTask( 'default', [ 'watch' ] )
+  grunt.loadNpmTasks( 'grunt-bower-task' )
+  grunt.loadNpmTasks( 'grunt-contrib-watch' )
+  grunt.loadNpmTasks( 'grunt-contrib-requirejs' )
+  grunt.loadNpmTasks( 'grunt-contrib-coffee' )
+  grunt.loadNpmTasks( 'grunt-contrib-compass' )
+  grunt.loadNpmTasks( 'grunt-contrib-copy' )
 
-	grunt.registerTask( 'build', [ # Run through javascript compilation process
-								   'bower',
-								   'copy:components',
-								   'coffee:requirejs',
-								   'requirejs',
+  grunt.registerTask( 'default', [ 'watch' ] )
 
-								   # Compile SCSS
-								   'compass:dist',
+  # Run through Javascript/CSS compilation process,
+  # add --target=prod to minify Javascript assets.
+  grunt.registerTask( 'build', [
+                   'bower',
+                   'copy:components',
+                   'coffee:requirejs',
+                   'requirejs',
 
-								   # Finally copy oher basic components over to
-								   # <static> folder
-								   'copy:components',
-								   'copy:css',
-								   'copy:favicon',
-								   'copy:img',
+                   # Compile SCSS
+                   'compass:dist',
 
-								   # Now, begin watching for new changes
-								   'watch' ] )
+                   # Finally copy oher basic components over to
+                   # <static> folder
+                   'copy:components',
+                   'copy:css',
+                   'copy:favicon',
+                   'copy:img' ] )
