@@ -105,6 +105,14 @@ define( [ 'jquery',
                 </tr>
             '''
 
+        # Indicate loading by applying opacity to table
+        show_loading: ->
+          @$el.css('opacity', 0.5)
+
+        # Remove loading indicator (opacity)
+        hide_loading: ->
+          @$el.removeAttr 'style'
+
         initialize: (options)->
 
             @fields = options.fields
@@ -114,6 +122,12 @@ define( [ 'jquery',
             @collection = new DataCollection(options)
 
             @$el.append @header_template(options)
+
+            # Setup loading indicators:
+            # 1. apply opacity when request is fired
+            # 2. remove opacity when collection synced
+            @listenTo(@collection, 'request', @show_loading)
+            @listenTo(@collection, 'sync', @hide_loading)
 
             @
 

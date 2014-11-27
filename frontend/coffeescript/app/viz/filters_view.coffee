@@ -13,27 +13,26 @@ define( [ 'jquery',
 
         detect_scroll: ( event ) ->
 
-            currentView = event.data.view.currentView
+            return if @$el.is ':hidden'
 
-            if $( currentView.el ).is( ':hidden' )
-                return
-
-            scrollTop = $( event.currentTarget ).scrollTop()
+            scrollTop  = $( event.currentTarget ).scrollTop()
             scrollLeft = $( event.currentTarget ).scrollLeft()
 
-            offsetTop = $( currentView.el ).position().top
+            offsetTop = @$el.position().top
 
             # Copy the header row of the table into the scroller div.
-            header = $( '#fixed-header' )
-            header_row = $( 'tr:first-child', currentView.el )
-            $( 'table tr', header ).empty().append( header_row.html() )
+            header     = $('#fixed-header')
+            header_row = $('tr:first-child', @el)
+            $('table tr', header)
+              .empty()
+              .append header_row.html()
             header.css( 'width', header_row.width() )
 
             # Make sure our sorting still works
-            event.data.view.detect_sort(
+            @detect_sort(
                     fixed_el: header
-                    el: event.data.view.currentView.el
-                    collection: event.data.view.currentView.collection )
+                    el: @el
+                    collection: @collection )
 
             # If we've scrolled past the header row of the table, make our
             # fixed header visible
@@ -46,24 +45,20 @@ define( [ 'jquery',
             @
 
         detect_pagination: ( event ) ->
-
             # Don't load another page while the page is being requested from the
             # server
             if @page_loading? and @page_loading
                 return
 
-            currentView = event.data.view.currentView
+            return if @$el.is ':hidden'
+            console.log 'detected pagination in filter view'
 
-            if $( currentView.el ).is( ':hidden' )
-                return
-
-            view_height = currentView.$el.height()
+            view_height = @$el.height()
             scroll_height = $( event.currentTarget ).scrollTop() + $( event.currentTarget ).height()
 
             if scroll_height + 100 > view_height
                 @page_loading = true
-                currentView.collection.next( success: ()=>
-                    @page_loading = false )
+                @collection.next( success: => @page_loading = false )
 
             @
 
@@ -170,10 +165,11 @@ define( [ 'jquery',
         initialize: () ->
             DataTableView::initialize.apply(@, arguments)
 
-            # Bind scroll event to handle the fixed-header rendering, and
-            # lazy-loading of data
-            @$el.scroll( { view: @ }, @detect_scroll )
-            @$el.scroll( { view: @ }, @detect_pagination )
+            # Bind events to handle fixed-header rendering, sorting, and pagination
+            # FIXME: scroll events should be bound to $el, not parent container
+            $('#vizContainer').scroll( { view: @ }, (event) => @detect_scroll(event) )
+            $('#vizContainer').scroll( { view: @ }, (event) => @detect_pagination(event) )
+            @.on( 'render', @detect_sort )
 
             # Set the location of the data div and change it when we resize
             # the window.
