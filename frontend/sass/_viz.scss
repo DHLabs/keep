@@ -34,20 +34,20 @@ div#viz-data-controls {
 	padding: 4px 8px;
 }
 
-div#viz-data {
+div#vizContainer {
 	position:absolute;
 	top:184px;
 	bottom:0px;
 
 	width:100%;
 	overflow:scroll;
+}
 
-	#fixed-header {
-		position: fixed;
-		top: 184px;
-		display: none;
-		box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
-	}
+#raw-viz #fixed-header {
+  position: fixed;
+  top: 184px;
+  display: none;
+  box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
 }
 
 .active {
@@ -65,9 +65,6 @@ div#viz-data {
 
 .viz { display: none; }
 
-.viz-active {
-	display: block !important;
-}
 
 #viz-options {
 

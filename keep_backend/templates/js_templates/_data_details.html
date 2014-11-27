@@ -1,0 +1,42 @@
+<script type='text/template' id='data-detail-template'>
+  <div class="bbm-modal__topbar"></div>
+  <div class="bbm-modal__section">
+    <div class='control-group'>
+      <h4>Details</h4>
+      <table class='table'>
+        <% _.each( attributes, function( val, key ) { %>
+          <tr>
+            <td><%= key %></td><td><%= val %></td>
+          </tr>
+        <% }); %>
+      </table>
+    </div>
+
+    <% if( is_tracker ) { %>
+    <div class='control-group' id='data-links'>
+      <h4>Linked Dairies</h4>
+      <table class='table'>
+        <% _.each( linked, function( repo ) { %>
+          <tr>
+            <td>
+                      <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %>' class='btn btn-small' style="width:90px">
+                          <i class='icon-pencil'></i> Add Data&nbsp;&nbsp;
+                      </a>
+                  </td>
+            <td>
+              <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/' target='_blank'>
+                <%= repo.get( 'name' ) %>
+              </a>
+            </td>
+          </tr>
+        <% }); %>
+      </table>
+    </div>
+    <% } %>
+  </div>
+  <div class="bbm-modal__bottombar">
+    <a href="#" id="edit_data_btn" style="text-align: left" class="btn">Edit Data</a>&nbsp;&nbsp;&nbsp;
+    <a href="#" id="delete_data_btn" style="text-align: left"  class="btn">Delete Entry</a>&nbsp;&nbsp;&nbsp;
+    <a href="#" class="btn btn-primary">Done</a>
+  </div>
+</script>
