@@ -51,7 +51,6 @@ define( [ 'jquery',
                 return
 
             return if @$el.is ':hidden'
-            console.log 'detected pagination in filter view'
 
             view_height = @$el.height()
             scroll_height = $( event.currentTarget ).scrollTop() + $( event.currentTarget ).height()
