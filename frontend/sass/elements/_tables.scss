@@ -99,3 +99,10 @@ th {
 
 }
 
+
+.DataTable-fixedHeader {
+  position: fixed;
+  top: 184px;
+  display: none;
+  box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+}

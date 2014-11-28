@@ -18,7 +18,7 @@ define( [ 'jquery',
 ( $, _, Backbone, Marionette, DataModel, RepoModel, RepoCollection, ShareSettingsModal, DataRawView, DataMapView, DataChartView, DataFiltersView ) ->
 
     class DataSettingsView extends Backbone.Marionette.View
-        el: '#settings-viz'
+        el: '#settings-viz .DataTable'
 
     class VizActions extends Backbone.Marionette.View
         # VizActions handles all page-wide actions that would result in a
@@ -81,7 +81,7 @@ define( [ 'jquery',
             @rawView = new DataRawView(options)
             @mapView = new DataMapView(options)
             @chartView = new DataChartView(options)
-            #@filtersView = new DataFiltersView(options)
+            @filtersView = new DataFiltersView(options)
             @settingsView = new DataSettingsView(options)
 
             @views =
@@ -93,7 +93,7 @@ define( [ 'jquery',
             @attachView( @rawView )
 
             @currentView.render()
-            #@filtersView.render()
+            @filtersView.render()
             if @currentView.showView? then @currentView.showView()
             if @currentView.onShow? then @currentView.onShow()
 

@@ -41,32 +41,27 @@ define( [ 'jquery',
           @collection.sort_fetch( field: field, order: sort_order )
 
 
-        detect_scroll: ( event ) ->
+        # Handles hiding/showing fixed header
+        detect_scroll: (event) ->
 
-            return if @$el.is ':hidden'
+          return if @$el.is ':hidden'
 
-            scrollTop  = $( event.currentTarget ).scrollTop()
-            scrollLeft = $( event.currentTarget ).scrollLeft()
+          header_row   = @$('.DataTable-table thead')
+          fixed_header = @$('.DataTable-fixedHeader')
 
-            offsetTop = @$el.position().top
+          # Copy the header row of the table into the fixed header
+          @$('.DataTable-fixedHead thead')
+            .empty()
+            .append header_row.html()
 
-            # Copy the header row of the table into the scroller div.
-            header     = $('#fixed-header')
-            header_row = $('tr:first-child', @el)
-            $('table tr', header)
-              .empty()
-              .append header_row.html()
-            header.css( 'width', header_row.width() )
+          # If we've scrolled past the header row of the table, make our
+          # fixed header visible
+          scrollTop  = $(event.currentTarget).scrollTop()
+          offsetTop  = @$el.position().top
 
-            # If we've scrolled past the header row of the table, make our
-            # fixed header visible
-            if scrollTop > offsetTop
-                header.css( { left: "-#{scrollLeft}px" } ).show()
-            else
-                # Otherwise just hide the sucker.
-                header.hide()
+          if scrollTop > offsetTop then fixed_header.show() else fixed_header.hide()
 
-            @
+          @
 
         detect_pagination: ( event ) ->
             # Don't load another page while the page is being requested from the
@@ -85,15 +80,11 @@ define( [ 'jquery',
 
             @
 
-
-        onShow: ->
-            $( '#fixed-header' ).show()
-
         showView: ->
-            ($ '#raw-viz').show()
+          ($ '#raw-viz').show()
 
         hideView: ->
-            ($ '#raw-viz').hide()
+          ($ '#raw-viz').hide()
 
 
         initialize: () ->
@@ -110,7 +101,6 @@ define( [ 'jquery',
             $( window ).resize( ( event ) =>
                 $( @el ).css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
             )
-
 
             # Load up the intial set of data to render.
             @collection.reset( document.initial_data )
