@@ -97,7 +97,7 @@ define( [ 'jquery',
                     <th>Linked Forms</th>
                 <% }; %>
                 <% _.each( fields, function( item ) { %>
-                    <th data-field='<%= item.name %>'>
+                    <th class="js-sort" data-field='<%= item.name %>'>
                         <%= item.name %><i class='sort-me icon-sort'></i>
                     </th>
                 <% }); %>

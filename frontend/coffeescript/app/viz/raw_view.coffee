@@ -145,9 +145,9 @@ define( [ 'jquery',
 
             # Bind events to handle fixed-header rendering, sorting, and pagination
             # FIXME: scroll events should be bound to $el, not parent container
-            $('#vizContainer').scroll( { view: @ }, (event) => @detect_scroll(event) )
-            $('#vizContainer').scroll( { view: @ }, (event) => @detect_pagination(event) )
-            @.on( 'render', @detect_sort )
+            #$('#vizContainer').scroll( { view: @ }, (event) => @detect_scroll(event) )
+            #$('#vizContainer').scroll( { view: @ }, (event) => @detect_pagination(event) )
+            #@.on( 'render', @detect_sort )
 
             # Set the location of the data div and change it when we resize
             # the window.
