@@ -33,6 +33,7 @@
 </script>
 
 <!-- include JS Templates -->
+{% include 'js_templates/_data_table.html' %}
 {% include 'js_templates/_data_details.html' %}
 {% include 'js_templates/_empty_data_set.html' %}
 {% include 'js_templates/_filters.html' %}
@@ -114,14 +115,7 @@
 </div>
 <div id="vizContainer">
   <!-- Raw data list -->
-  <div class='viz' id='raw-viz'>
-    <div id='fixed-header'>
-      <table class='table fixed'><tr></tr></table>
-    </div>
-    <div class='sixteen columns active'>
-      <table class='table fixed DataTable'><tbody></tbody></table>
-    </div>
-  </div>
+  <div id="raw-viz" class="viz"></div>
 
   <!-- Geospatial view of our data ( if any geopoints exist within the dataset ). -->
   <div class='viz' id='map-viz'>

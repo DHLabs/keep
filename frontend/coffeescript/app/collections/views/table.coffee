@@ -86,10 +86,13 @@ define( [ 'jquery',
             return true
 
 
-    class DataTableView extends Backbone.Marionette.CollectionView
+    class DataTableView extends Backbone.Marionette.CompositeView
         el: '.DataTable'
         itemView: TableRowView
         emptyView: EmptyTableView
+        template: '#DataTable-template'
+
+        itemViewContainer: '.DataTable-table table'
 
         header_template: _.template '''
                 <tr>
@@ -107,11 +110,11 @@ define( [ 'jquery',
 
         # Indicate loading by applying opacity to table
         show_loading: ->
-          @$el.css('opacity', 0.5)
+          @$el.addClass('u-fade50')
 
         # Remove loading indicator (opacity)
         hide_loading: ->
-          @$el.removeAttr 'style'
+          @$el.removeClass('u-fade50')
 
         initialize: (options)->
 
@@ -129,7 +132,6 @@ define( [ 'jquery',
             @listenTo(@collection, 'request', @show_loading)
             @listenTo(@collection, 'sync', @hide_loading)
 
-            @
 
         buildItemView: (item, ItemViewType, itemViewOptions) ->
             options = _.extend( { model: item, fields: @fields, repo: @repo, linked: @linked }, itemViewOptions )

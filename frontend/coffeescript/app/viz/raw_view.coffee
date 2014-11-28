@@ -10,7 +10,7 @@ define( [ 'jquery',
 
     class DataRawView extends DataTableView
 
-        el: '#raw-viz .DataTable'
+        el: '#raw-viz'
 
         events:
           'click .js-sort': 'sort_table'
@@ -69,7 +69,6 @@ define( [ 'jquery',
             @
 
         detect_pagination: ( event ) ->
-
             # Don't load another page while the page is being requested from the
             # server
             if @page_loading? and @page_loading
@@ -95,7 +94,6 @@ define( [ 'jquery',
 
         hideView: ->
             ($ '#raw-viz').hide()
-
 
 
         initialize: () ->
