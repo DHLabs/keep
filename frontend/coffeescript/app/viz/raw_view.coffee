@@ -8,10 +8,38 @@ define( [ 'jquery',
 ( $, _, Backbone, Marionette, DataTableView) ->
 
 
-
     class DataRawView extends DataTableView
 
         el: '#raw-viz .DataTable'
+
+        events:
+          'click .js-sort': 'sort_table'
+
+        sort_table: ->
+          console.log 'sort table event fired'
+          column = $(event.target)
+
+          field = column.data 'field'
+          sort_order = column.data('order') or 'none'
+
+          sort_icon = $('i', column)
+
+          # Set the new sort order.
+          # Sort order changes from None -> Descending -> Ascending
+          if sort_order is 'none'
+            sort_order = 'desc'
+            sort_icon.removeClass('icon-sort icon-sort-up').addClass('icon-sort-down')
+          else if sort_order is 'desc'
+            sort_order = 'asc'
+            sort_icon.removeClass('icon-sort-down').addClass('icon-sort-up')
+          else if sort_order is 'asc'
+            sort_order = null
+            sort_icon.removeClass('icon-sort-up').addClass('icon-sort')
+
+          column.data('order', sort_order )
+
+          @collection.sort_fetch( field: field, order: sort_order )
+
 
         detect_scroll: ( event ) ->
 
@@ -29,12 +57,6 @@ define( [ 'jquery',
               .empty()
               .append header_row.html()
             header.css( 'width', header_row.width() )
-
-            # Make sure our sorting still works
-            @detect_sort(
-                    fixed_el: header
-                    el: @el
-                    collection: @collection )
 
             # If we've scrolled past the header row of the table, make our
             # fixed header visible
@@ -64,70 +86,6 @@ define( [ 'jquery',
 
             @
 
-        detect_sort: ( options ) ->
-
-            event_data = {}
-
-            if options.el?
-                headers = $( 'th', options.fixed_el )
-
-                event_data =
-                    collection: options.collection
-                    headers: $( 'th', options.el )
-            else
-                headers = $( 'th', @el )
-
-                event_data =
-                    collection: @collection
-
-            # Unbind any existing events
-            headers.unbind( 'click' )
-            headers.click( event_data, (event) ->
-
-                el = $( event.currentTarget )
-
-                field = el.data( 'field' )
-                order = el.data( 'order' )
-
-                # Update both the fixed and real table header if the click was
-                # detected on the fixed header. Since the fixed header is a
-                # completely separate table, we have to do a little jQuery magic
-                # to select both tables.
-                if event.data.headers?
-                    other_el = $( event.data.headers ).filter( ()->
-                                return $( @ ).data( 'field' ) == field )
-
-                # Create the selector that includes both the real & fixed header
-                # table header.
-                if other_el?
-                    els = $().add( 'i', el ).add( 'i', other_el )
-                else
-                    els = $( 'i', el )
-
-                # Permutate through the ordering options for the sort.
-                if not order?
-                    order = 'desc'
-                    els.removeClass( 'icon-sort icon-sort-up' ).addClass( 'icon-sort-down' )
-
-                else if order == 'desc'
-                    order = 'asc'
-                    els.removeClass( 'icon-sort-down' ).addClass( 'icon-sort-up' )
-
-                else if order == 'asc'
-                    order = null
-                    els.removeClass( 'icon-sort-up' ).addClass( 'icon-sort' )
-
-                # Update the order for both the real & fixed table
-                el.data( 'order', order )
-                other_el.data( 'order', order ) if other_el?
-
-                # Sort the sucker! The view should automatically refresh when
-                # the sort results are finally received.
-                event.data.collection.sort_fetch(
-                                field: field
-                                order: order )
-            )
-            @
 
         onShow: ->
             $( '#fixed-header' ).show()
@@ -145,9 +103,8 @@ define( [ 'jquery',
 
             # Bind events to handle fixed-header rendering, sorting, and pagination
             # FIXME: scroll events should be bound to $el, not parent container
-            #$('#vizContainer').scroll( { view: @ }, (event) => @detect_scroll(event) )
-            #$('#vizContainer').scroll( { view: @ }, (event) => @detect_pagination(event) )
-            #@.on( 'render', @detect_sort )
+            $('#vizContainer').scroll( { view: @ }, (event) => @detect_scroll(event) )
+            $('#vizContainer').scroll( { view: @ }, (event) => @detect_pagination(event) )
 
             # Set the location of the data div and change it when we resize
             # the window.
