@@ -27,34 +27,34 @@ define( [ 'jquery',
             @collection.fetch(reset: true)
 
         _setup_filters: ->
-            saved_filters = []
-            @filters_collection = new FilterCollection(saved_filters)
-            @filter_views = new FiltersView(collection: @filters_collection)
-            @filter_views.render()
+          # Save base url to use with filtering
+          @base_url = @collection.url
 
+          # TODO: allow filters to be saved
+          saved_filters = []
+          @filters_collection = new FilterCollection(saved_filters)
+          @filter_views = new FiltersView(collection: @filters_collection)
+          @filter_views.render()
 
-            # FIXME: filter views should be able to render at initialization
-            # using a templateHelper method but I can't figure out how to
-            # bind an instance variable (the set of column names) in the right scope
-            @filter_views.set_columns(@column_names)
+          # FIXME: filter views should be able to render at initialization
+          # using a templateHelper method but I can't figure out how to
+          # bind an instance variable (the set of column names) in the right scope
+          @filter_views.set_columns(@column_names)
 
-            # Listen to filters collection for changes
-            @listenTo(@filter_views, 'filters:refresh_data', @_refresh_data)
+          # Listen to filters collection for changes
+          @listenTo(@filter_views, 'filters:refresh_data', @_refresh_data)
 
-        initialize: () ->
-            DataTableView::initialize.apply(@, arguments)
+        initialize: (options) ->
+          super options
 
-            # Need to pass column names along to FiltersView for dropdown
-            @column_names = _.map(@fields, (field) -> field.name)
+          # Need to pass column names along to FiltersView for dropdown
+          @column_names = _.map(@fields, (field) -> field.name)
 
-            # Save base url to use with filtering
-            @base_url = @collection.url
+          # Set up controls to manage filters
+          @_setup_filters()
 
-            # Set up controls to manage filters
-            @_setup_filters()
-
-            # Load up the intial set of data to render.
-            @_refresh_data(@filter_views.collection.url_params())
+          # Load up the intial set of data to render.
+          @_refresh_data(@filter_views.collection.url_params())
 
 
     class Filter extends Backbone.Model
@@ -134,10 +134,8 @@ define( [ 'jquery',
             )
             $('.columnName').html(les_options.join(''))
 
-        initialize: (options) ->
-            Backbone.Marionette.CollectionView::initialize.apply(@, arguments)
-
-            @on('itemview:filters:remove', @remove_filter)
+        onRender: ->
+          @on('itemview:filters:remove', @remove_filter)
 
 
     return DataFiltersView

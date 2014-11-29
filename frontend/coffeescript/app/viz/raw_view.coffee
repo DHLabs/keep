@@ -7,26 +7,23 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette, DataTableView) ->
 
+  class DataRawView extends DataTableView
+      el: '#raw-viz'
 
-    class DataRawView extends DataTableView
+      showView: ->
+        ($ '#raw-viz').show()
 
-        el: '#raw-viz'
+      hideView: ->
+        ($ '#raw-viz').hide()
 
-        showView: ->
-          ($ '#raw-viz').show()
+      onRender: =>
+        @$('.DataTable').addClass('DataTable--fitContainer')
+        super
 
-        hideView: ->
-          ($ '#raw-viz').hide()
+      # Load up the intial set of data to render.
+      initialize: (options) ->
+        super options
+        @collection.reset(document.initial_data)
 
-        onRender: =>
-          @$('.DataTable').addClass('DataTable--fitContainer')
-          super
-
-        initialize: () ->
-            DataTableView::initialize.apply(@, arguments)
-
-            # Load up the intial set of data to render.
-            @collection.reset( document.initial_data )
-
-    return DataRawView
+  return DataRawView
 )
