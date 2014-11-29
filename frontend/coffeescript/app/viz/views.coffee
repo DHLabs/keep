@@ -18,7 +18,7 @@ define( [ 'jquery',
 ( $, _, Backbone, Marionette, DataModel, RepoModel, RepoCollection, ShareSettingsModal, DataRawView, DataMapView, DataChartView, DataFiltersView ) ->
 
     class DataSettingsView extends Backbone.Marionette.View
-        el: '#settings-viz'
+        el: '#settings-viz .DataTable'
 
     class VizActions extends Backbone.Marionette.View
         # VizActions handles all page-wide actions that would result in a

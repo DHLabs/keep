@@ -99,3 +99,24 @@ th {
 
 }
 
+
+.DataTable {
+  overflow: scroll;
+  max-height: 400px;
+}
+
+.DataTable--fitContainer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  max-height: none;
+}
+
+.DataTable-fixedHeader {
+  position: fixed;
+  top: 0;
+  display: none;
+  box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+}
