@@ -107,9 +107,42 @@ define( [ 'jquery',
                 </tr>
             '''
 
+        events:
+          'click .js-sort': 'sort_table'
+
+        sort_table: ->
+          console.log 'sort table event fired'
+          column = $(event.target)
+
+          field = column.data 'field'
+          sort_order = column.data('order') or 'none'
+
+          sort_icon = $('i', column)
+
+          # Set the new sort order.
+          # Sort order changes from None -> Descending -> Ascending
+          if sort_order is 'none'
+            sort_order = 'desc'
+            sort_icon.removeClass('icon-sort icon-sort-up').addClass('icon-sort-down')
+          else if sort_order is 'desc'
+            sort_order = 'asc'
+            sort_icon.removeClass('icon-sort-down').addClass('icon-sort-up')
+          else if sort_order is 'asc'
+            sort_order = null
+            sort_icon.removeClass('icon-sort-up').addClass('icon-sort')
+
+          column.data('order', sort_order )
+
+          @collection.sort_fetch( field: field, order: sort_order )
+
         onRender: =>
+          # Populate table headers
           @$('.DataTable-table thead').append @header_template(fields: @fields, repo: @repo)
           @$('.DataTable-fixedHeader thead').append @header_template(fields: @fields, repo: @repo)
+
+          # Bind events to handle fixed-header rendering and pagination
+          @$('.DataTable').scroll( { view: @ }, (event) => @detect_pagination(event) )
+          @$('.DataTable').scroll( { view: @ }, (event) => @detect_scroll(event) )
 
         # Indicate loading by applying opacity to table
         show_loading: ->
@@ -122,18 +155,70 @@ define( [ 'jquery',
 
         initialize: (options)->
 
-            @fields = options.fields
-            @repo   = options.repo
-            @linked = options.linked
+          @fields = options.fields
+          @repo   = options.repo
+          @linked = options.linked
 
-            @collection = new DataCollection(options)
+          @collection = new DataCollection(options)
 
-            # Setup loading indicators:
-            # 1. apply opacity when request is fired
-            # 2. remove opacity when collection synced
-            @listenTo(@collection, 'request', @show_loading)
-            @listenTo(@collection, 'sync', @hide_loading)
+          # Setup loading indicators:
+          # 1. apply opacity when request is fired
+          # 2. remove opacity when collection synced
+          @listenTo(@collection, 'request', @show_loading)
+          @listenTo(@collection, 'sync', @hide_loading)
 
+          @
+
+
+        # Handles hiding/showing fixed header
+        detect_scroll: (event) ->
+
+          return if @$el.is ':hidden'
+
+          header_row   = @$('.DataTable-table thead')
+          fixed_header = @$('.DataTable-fixedHeader')
+
+          # Copy the header row of the table into the fixed header
+          @$('.DataTable-fixedHead thead')
+            .empty()
+            .append header_row.html()
+
+          console.log 'detecting scroll event'
+
+          # If we've scrolled at all in the table, make the fixed header visible
+          scrollTop = @$('.DataTable').scrollTop()
+          if scrollTop > 0
+            fixed_header.show()
+            fixed_header.css('position', 'fixed').css('top', @_calculate_dist_from_top '.DataTable')
+          else
+            fixed_header.hide()
+
+          @
+
+        _calculate_dist_from_top: (elem) ->
+          scrollTop = $(window).scrollTop()
+          elementOffset = @$(elem).offset().top
+          return elementOffset - scrollTop
+
+        detect_pagination: (event) ->
+          # Don't load another page while the page is being requested from the
+          # server
+          return if @page_loading
+
+          return if @$el.is ':hidden'
+
+          view_height   = @$('.DataTable').height()
+          table_height  = @$('.DataTable-table').height()
+          scroll_height = @$(event.currentTarget).scrollTop()
+          scroll_distance = scroll_height + view_height
+
+          # if you've scrolled all the way to the bottom, load more results
+          if scroll_distance >= table_height
+            console.log 'triggering pagination event'
+            @page_loading = true
+            @collection.next( success: => @page_loading = false )
+
+          @
 
 
         buildItemView: (item, ItemViewType, itemViewOptions) ->

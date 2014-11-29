@@ -29,18 +29,17 @@
 
 }
 
-div#viz-data-controls {
+#viz-data-controls {
 	background-color:#eee;
 	padding: 4px 8px;
 }
 
-div#vizContainer {
+#vizContainer {
 	position:absolute;
-	top:184px;
-	bottom:0px;
-
-	width:100%;
-	overflow:scroll;
+	top: 184px;
+  right: 0;
+	bottom: 0;
+  left: 0;
 }
 
 .active {

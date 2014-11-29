@@ -9,51 +9,7 @@ define( [ 'jquery',
 
     class DataFiltersView extends DataTableView
 
-        el: '#filters-viz .DataTable'
-
-        events:
-          'click .js-sort': 'sort_table'
-
-        sort_table: ->
-          column = $(event.target)
-
-          field = column.data 'field'
-          sort_order = column.data('order') or 'none'
-
-          sort_icon = $('i', column)
-
-          # Set the new sort order.
-          # Sort order changes from None -> Descending -> Ascending
-          if sort_order is 'none'
-            sort_order = 'desc'
-            sort_icon.removeClass('icon-sort icon-sort-up').addClass('icon-sort-down')
-          else if sort_order is 'desc'
-            sort_order = 'asc'
-            sort_icon.removeClass('icon-sort-down').addClass('icon-sort-up')
-          else if sort_order is 'asc'
-            sort_order = null
-            sort_icon.removeClass('icon-sort-up').addClass('icon-sort')
-
-          column.data('order', sort_order )
-
-          @collection.sort_fetch( field: field, order: sort_order )
-
-
-        detect_pagination: (event) ->
-          # Don't load another page while the page is being requested from the
-          # server
-          return if @page_loading
-
-          return if @$el.is ':hidden'
-
-          view_height = @$el.height()
-          scroll_height = $( event.currentTarget ).scrollTop() + $( event.currentTarget ).height()
-
-          if scroll_height + 100 > view_height
-              @page_loading = true
-              @collection.next( success: => @page_loading = false )
-
-          @
+        el: '#filteredData'
 
         showView: ->
             ($ '#filters-viz').show()
@@ -85,20 +41,8 @@ define( [ 'jquery',
             # Listen to filters collection for changes
             @listenTo(@filter_views, 'filters:refresh_data', @_refresh_data)
 
-
-
         initialize: () ->
             DataTableView::initialize.apply(@, arguments)
-
-            # Bind events to handle pagination
-            $('#vizContainer').scroll( { view: @ }, (event) => @detect_pagination(event) )
-
-            # Set the location of the data div and change it when we resize
-            # the window.
-            @$el.css('top', $( '#viz-chrome' ).height() + 1 + 'px')
-            $(window).resize( ( event ) =>
-                @$el.css( 'top', $( '#viz-chrome' ).height() + 1 + 'px' )
-            )
 
             # Need to pass column names along to FiltersView for dropdown
             @column_names = _.map(@fields, (field) -> field.name)
