@@ -11,12 +11,6 @@ define( [ 'jquery',
 
         el: '#filteredData'
 
-        showView: ->
-            ($ '#filters-viz').show()
-
-        hideView: ->
-            ($ '#filters-viz').hide()
-
         # Refresh table data according to filters
         _refresh_data: (url_params) ->
             # 1. change data table's url

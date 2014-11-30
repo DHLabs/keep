@@ -10,12 +10,6 @@ define( [ 'jquery',
   class DataRawView extends DataTableView
       el: '#raw-viz'
 
-      showView: ->
-        ($ '#raw-viz').show()
-
-      hideView: ->
-        ($ '#raw-viz').hide()
-
       onRender: =>
         @$('.DataTable').addClass('DataTable--fitContainer')
         super
