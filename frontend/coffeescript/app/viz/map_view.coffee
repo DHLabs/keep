@@ -172,8 +172,10 @@ define( [ 'jquery',
             options = _.extend( { model: item, fields: @fields }, itemViewOptions )
             return new ItemViewType( options )
 
-        onShow: () ->
-            @map.invalidateSize( false )
+        onShow: =>
+          # For some reason map.getSize() is cached and returns 0, so
+          # invalidateSize() doesn't work.
+          @map._onResize()
 
         refresh_viewport: ( event ) =>
             # If we could not find any geofields or the user has not
