@@ -112,7 +112,12 @@ define( [ 'jquery',
 
         sort_table: ->
           console.log 'sort table event fired'
-          column = $(event.target)
+
+          # Sort if clicking the icon or the column
+          if @$(event.target).is 'i'
+            column = @$(event.target.parentElement)
+          else
+            column = @$(event.target)
 
           field = column.data 'field'
           sort_order = column.data('order') or 'none'
@@ -132,6 +137,13 @@ define( [ 'jquery',
             sort_icon.removeClass('icon-sort-up').addClass('icon-sort')
 
           column.data('order', sort_order )
+
+          # Copy the new header into the fixed header (or vice versa)
+          parents = @$(event.target).parents()
+          if _.contains(parents, @$('.DataTable-table')[0] )
+            @$('.DataTable-fixedHeader thead').empty().append @$('.DataTable-table thead').html()
+          else
+            @$('.DataTable-table thead').empty().append @$('.DataTable-fixedHeader thead').html()
 
           @collection.sort_fetch( field: field, order: sort_order )
 
