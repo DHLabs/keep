@@ -143,54 +143,30 @@
   <!-- Repository settings -->
   {% if 'delete_repository' in permissions %}
   <div class='viz container' id='settings-viz'>
-    <div class='sixteen columns'>
+    <div class='row'>
 
-      <h4>Administration</h4>
-
-      <div class='row'>
-        <div class='six columns'>
-          <strong>Edit this data repository</strong>
+      <div class='six columns offset-by-one'>
+        <h4>Administration</h4>
+        <div><strong>Edit this data repository</strong></div>
+        <div><a href='{% url "repo_edit" repo_id=repo.mongo_id %}' class='btn btn-medium'>Edit Repository</a></div>
+        <br>
+        <strong>Delete this data repository</strong>
+        <div class='help-block'>
+          Once you delete a repository, <strong>ALL</strong> data will
+          be removed.
         </div>
-        <div class='ten columns' style='text-align:right;'>
-          <a href='{% url "repo_edit" repo_id=repo.mongo_id %}' class='btn btn-medium'>
-            Edit Repository
-          </a>
-        </div>
+        <div><a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'><i class='icon-trash'></i> Delete Repository</a></div>
       </div>
 
-      <div class='row'>
-        <div class='six columns'>
-          <strong>Delete this data repository</strong>
-          <div class='help-block'>
-            Once you delete a repository, <strong>ALL</strong> data will
-            be removed.
-          </div>
-        </div>
-        <div class='ten columns' style='text-align:right;'>
-          <a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'>
-            <i class='icon-trash'></i> Delete Repository
-          </a>
-        </div>
+      <div class="six columns">
+        <h4>Diary Backup</h4>
+        <div><a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=json'>Download Diary as JSON</a></div>
+        <br>
+        <div><a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=xform'>Download Diary as XForm</a></div>
       </div>
 
-      <h4>Diary Backup</h4>
-
-      <div class='row'>
-        <div class='sixteen columns'>
-          <div>
-            <a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=json'>
-              Download Diary as JSON
-            </a>
-          </div>
-          <div style='margin-top:16px;'>
-            <a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=xform'>
-              Download Diary as XForm
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    </div><!-- /.row -->
+  </div><!-- /.container -->
   {% endif %}
 </div>
 {% endblock %}
