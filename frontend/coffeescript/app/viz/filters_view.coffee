@@ -7,54 +7,54 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette, DataTableView) ->
 
-    class DataFiltersView extends DataTableView
+    # Manages the data table and filter controls
+    class DataFiltersView extends Backbone.Marionette.View
+        el: '#filters-viz'
 
+        initialize: (options) ->
+          @filtered_data = new FilteredDataView(options)
+          @filtered_data.render()
+
+          # TODO: allow filters to be saved
+          saved_filters = []
+          @filters_collection = new FilterCollection(saved_filters)
+          @filter_views = new FiltersView(collection: @filters_collection)
+
+          # Set column names in dropdown
+          @filter_views.render()
+          @column_names = _.map(options.fields, (field) -> field.name)
+          @filter_views.set_columns(@column_names)
+
+          # Listen to filters collection for changes
+          @listenTo(@filter_views, 'filters:refresh_data', @_refresh_data)
+
+          # Load up the intial set of data to render.
+          @_refresh_data('')
+
+        _refresh_data: ->
+          # 1. update table data
+          # 2. update CSV download link
+          @filtered_data.filter_data(@filters_collection.url_params())
+          @$('.js-download').attr('href', @filtered_data.url + '&format=csv')
+
+
+    # Table that holds the filtered data
+    class FilteredDataView extends DataTableView
         el: '#filteredData'
 
-        showView: ->
-            ($ '#filters-viz').show()
+        initialize: (options) ->
+          super options
+          @base_url = @collection.url
 
-        hideView: ->
-            ($ '#filters-viz').hide()
+        url: ->
+          return @collection.url
 
-        # Refresh table data according to filters
-        _refresh_data: (url_params) ->
-            # 1. change data table's url
-            # 2. reset table view
-            # 3. update CSV download link
-            @collection.url = @base_url + url_params
-            ($ '#filters-viz .js-download').attr('href', @collection.url + '&format=csv')
-            @collection.fetch(reset: true)
-
-        _setup_filters: ->
-            saved_filters = []
-            @filters_collection = new FilterCollection(saved_filters)
-            @filter_views = new FiltersView(collection: @filters_collection)
-            @filter_views.render()
-
-
-            # FIXME: filter views should be able to render at initialization
-            # using a templateHelper method but I can't figure out how to
-            # bind an instance variable (the set of column names) in the right scope
-            @filter_views.set_columns(@column_names)
-
-            # Listen to filters collection for changes
-            @listenTo(@filter_views, 'filters:refresh_data', @_refresh_data)
-
-        initialize: () ->
-            DataTableView::initialize.apply(@, arguments)
-
-            # Need to pass column names along to FiltersView for dropdown
-            @column_names = _.map(@fields, (field) -> field.name)
-
-            # Save base url to use with filtering
-            @base_url = @collection.url
-
-            # Set up controls to manage filters
-            @_setup_filters()
-
-            # Load up the intial set of data to render.
-            @_refresh_data(@filter_views.collection.url_params())
+        # update table with filtered data
+        filter_data: (url_params) ->
+          # 1. change data table's url
+          # 2. reset table view (calls server for new data)
+          @collection.url = @base_url + url_params
+          @collection.fetch(reset: true)
 
 
     class Filter extends Backbone.Model
@@ -134,10 +134,8 @@ define( [ 'jquery',
             )
             $('.columnName').html(les_options.join(''))
 
-        initialize: (options) ->
-            Backbone.Marionette.CollectionView::initialize.apply(@, arguments)
-
-            @on('itemview:filters:remove', @remove_filter)
+        onRender: ->
+          @on('itemview:filters:remove', @remove_filter)
 
 
     return DataFiltersView

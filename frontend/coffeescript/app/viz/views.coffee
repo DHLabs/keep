@@ -18,7 +18,7 @@ define( [ 'jquery',
 ( $, _, Backbone, Marionette, DataModel, RepoModel, RepoCollection, ShareSettingsModal, DataRawView, DataMapView, DataChartView, DataFiltersView ) ->
 
     class DataSettingsView extends Backbone.Marionette.View
-        el: '#settings-viz .DataTable'
+        el: '#settings-viz'
 
     class VizActions extends Backbone.Marionette.View
         # VizActions handles all page-wide actions that would result in a
@@ -90,27 +90,17 @@ define( [ 'jquery',
                 line: @chartView
                 filters: @filtersView
                 settings: @settingsView
-            @attachView( @rawView )
 
-            @currentView.render()
-            @filtersView.render()
-            if @currentView.showView? then @currentView.showView()
-            if @currentView.onShow? then @currentView.onShow()
-
-
-        switch_view: ( view ) ->
-            # Hide the currently selected view
-            if @currentView.hideView? then @currentView.hideView() else @currentView.$el.hide()
-
-            # Attach the new view and render it
-            @attachView( @views[ view ] )
-            if @currentView.showView? then @currentView.showView() else @currentView.$el.show()
-
-            # Call the onShow handler if it exists in the view
-            if @currentView.onShow? then @currentView.onShow()
+            # Attach and show initial view
+            @show(@rawView)
+            @currentView.$el.show()
 
             @
 
+        switch_view: (view) ->
+          @currentView.$el.hide()
+          @show(@views[view], preventClose: true)
+          @currentView.$el.show()
 
 
     # Instantiate and startup the new process.
@@ -134,20 +124,10 @@ define( [ 'jquery',
         DataVizApp.addRegions(chrome: vizChrome, viz: vizContainer)
 
         # Handle application wide events
-        vizChrome.currentView.on( 'switch:raw', () ->
-            vizContainer.switch_view( 'raw' ) )
-
-        vizChrome.currentView.on( 'switch:map', () ->
-            vizContainer.switch_view( 'map' ) )
-
-        vizChrome.currentView.on( 'switch:line', () ->
-            vizContainer.switch_view( 'line' ) )
-
-        vizChrome.currentView.on( 'switch:filters', () ->
-            vizContainer.switch_view( 'filters' ) )
-
-        vizChrome.currentView.on( 'switch:settings', () ->
-            vizContainer.switch_view( 'settings' ) )
+        views = ['raw', 'map', 'line', 'filters', 'settings']
+        _.each(views, (view) ->
+          vizChrome.currentView.on( "switch:#{view}", -> vizContainer.switch_view view )
+        )
 
         @
 
