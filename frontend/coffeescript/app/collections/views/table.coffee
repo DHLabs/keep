@@ -111,8 +111,6 @@ define( [ 'jquery',
           'click .js-sort': 'sort_table'
 
         sort_table: ->
-          console.log 'sort table event fired'
-
           # Sort if clicking the icon or the column
           if @$(event.target).is 'i'
             column = @$(event.target.parentElement)
@@ -195,7 +193,6 @@ define( [ 'jquery',
             .empty()
             .append header_row.html()
 
-          console.log 'detecting scroll event'
 
           # If we've scrolled at all in the table, make the fixed header visible
           scrollTop = @$('.DataTable').scrollTop()
@@ -226,7 +223,6 @@ define( [ 'jquery',
 
           # if you've scrolled all the way to the bottom, load more results
           if scroll_distance >= table_height
-            console.log 'triggering pagination event'
             @page_loading = true
             @collection.next( success: => @page_loading = false )
 
