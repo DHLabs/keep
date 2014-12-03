@@ -53,7 +53,7 @@ define( [ 'backbone', 'jquery_cookie' ],
             return attrs
 
         sync: ( method, model, options ) ->
-            options = options || {};
+            options or= {}
 
             if method.toLowerCase() in [ 'patch', 'update', 'delete' ]
                 options.url = "#{@url}#{model.id}/"

@@ -50,7 +50,7 @@ define( [ 'jquery',
                 templ.push( @data_templates[ 'forms' ]( { model: model } ) )
 
                 #callbacks to check if form is filled out for data
-                @check_filled_forms( model )
+                #@check_filled_forms( model )
 
             for field in @fields
                 tdata = { data: model.data[ field.name ] }
