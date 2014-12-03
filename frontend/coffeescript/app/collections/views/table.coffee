@@ -187,8 +187,6 @@ define( [ 'jquery',
         # Handles hiding/showing fixed header
         detect_scroll: (event) ->
 
-          return if @$el.is ':hidden'
-
           header_row   = @$('.DataTable-table thead')
           fixed_header = @$('.DataTable-fixedHeader')
 
@@ -197,12 +195,15 @@ define( [ 'jquery',
             .empty()
             .append header_row.html()
 
-
           # If we've scrolled at all in the table, make the fixed header visible
           scrollTop = @$('.DataTable').scrollTop()
           if scrollTop > 0
-            fixed_header.show()
             fixed_header.css('position', 'fixed').css('top', @_calculate_dist_from_top '.DataTable')
+
+            # We have to shift the fixed header left to align with the table's columns
+            scrollLeft = @$('.DataTable').scrollLeft()
+            fixed_header.css('left', "-#{scrollLeft}px")
+            fixed_header.show()
           else
             fixed_header.hide()
 
