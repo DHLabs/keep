@@ -100,7 +100,7 @@ define( [ 'jquery',
                 <% }; %>
                 <% _.each( fields, function( item ) { %>
                     <th class="js-sort" data-field='<%= item.name %>'>
-                        <%= item.name %><i class='sort-me icon-sort'></i>
+                        <%= item.name %><i class='icon-sort DataTable-sortIcon'></i>
                     </th>
                 <% }); %>
                     <th>&nbsp;</th>

@@ -83,3 +83,32 @@ label.help-block {
 		background-color: $theme;
 	}
 }
+
+/**
+ * Linked form status indicators
+ *
+ * 1. incompleteRequired indicates a form that is empty but should not be
+ * 2. incomplete indicates some data, whereas empty indicates no data
+ */
+.linkedForm {
+  display: inline-block;
+
+  margin: 3px 5px;
+  padding: 5px 10px;
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 3px;
+  font-weight: bold;
+  background-color: #AAA;
+
+  &.linkedForm--complete {
+    background-color: #56B156;
+  }
+  &.linkedForm--incomplete {
+    background-color: #F3A047;
+  }
+  &.linkedForm--incompleteRequired { /* 1 */
+    background-color: #FF3A3A;
+  }
+  &.linkedForm--empty { /* 2 */
+  }
+}
