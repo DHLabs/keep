@@ -24,22 +24,21 @@ define( [ 'jquery',
             'text':     _.template( '<td><%= data %></td>' )
             'geopoint': _.template( '<td><%= data.coordinates[1] %>, <%= data.coordinates[0] %></td>' )
             'photo':    _.template( '<td><a href="<%= data %>" target="blank">Click to view photo</a></td>'  )
+            'forms': _.template $('#DT-linked-form-tpl').html()
 
-            'forms':    _.template '''
-                    <td>
-                    <% _.each(document.linked_repos, function(item) { %>
-                        <% if( model.linked[item.name]) { %>
-                            <span style="color:#00ff00"><%= item.name %></span>
-                        <% } else { %>
-                            <span style="color:#ff0000"><%= item.name %></span>
-                        <% }; %>&nbsp;&nbsp;
-                    <% }); %>
-                    </td>
-                '''
+
         initialize: (options) ->
             @fields = options.fields
             @repo   = options.repo
             @linked = options.linked
+
+        css_class: (status) ->
+          if status is 'empty'
+            'linkedForm--empty'
+          else if status is 'complete'
+            'linkedForm--complete'
+          else
+            'linkedForm--incomplete'
 
         template: ( model ) =>
             # Based on the field type, we use a specific formatter for that
