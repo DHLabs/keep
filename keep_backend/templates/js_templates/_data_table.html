@@ -16,11 +16,8 @@
 <script id="DT-linked-form-tpl" type="text/template">
   <td>
   <% _.each(document.linked_repos, function(repo) { %>
-      <% if( model.linked[repo.name]) { %>
-          <span style="color:#00ff00"><%= repo.name %></span>
-      <% } else { %>
-          <span style="color:#ff0000"><%= repo.name %></span>
-      <% }; %>&nbsp;&nbsp;
+        <% css_color = model.form_css(model.linked[repo.name]); %>
+        <span class="linkedForm <%= css_color %>"><%= repo.name %></span>
   <% }); %>
   </td>
 </script>

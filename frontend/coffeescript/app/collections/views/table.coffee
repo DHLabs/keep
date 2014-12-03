@@ -32,13 +32,18 @@ define( [ 'jquery',
             @repo   = options.repo
             @linked = options.linked
 
-        css_class: (status) ->
+        linked_form_css: (status) ->
           if status is 'empty'
             'linkedForm--empty'
           else if status is 'complete'
             'linkedForm--complete'
           else
             'linkedForm--incomplete'
+
+        serializeData: ->
+          data = @model.attributes
+          data.form_css = (form_status) => @linked_form_css(form_status)
+          data
 
         template: ( model ) =>
             # Based on the field type, we use a specific formatter for that
