@@ -86,7 +86,7 @@ class DataSerializer( object ):
             # Correctly recurse through groups
             elif field.get( 'type' ) == 'group':
 
-                val = self._serialize_data( data=data,
+                val = self.serialize_data( data=data,
                                             fields=field.get( 'children' ),
                                             repo_id=repo_id,
                                             data_id=data_id )
