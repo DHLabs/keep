@@ -12,6 +12,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+from guardian.shortcuts import get_objects_for_group
+
 from organizations.models import OrganizationUser
 from registration.models import RegistrationProfile
 from repos.models import Repository, RepoSerializer
@@ -112,6 +114,12 @@ def user_dashboard( request, username ):
         user_repos = Repository.objects.list_by_user( user=user,
                                                       organizations=organizations )
         user_studies = Study.objects.filter( user=user )
+
+        # Get repos shared with orgs user is a member of
+        orgs = OrganizationUser.objects.filter(user=user)
+        orgs = map(lambda ou: ou.organization, orgs)
+        for org in orgs:
+            user_repos = user_repos|get_objects_for_group(org, 'view_repository', Repository)
 
 
     serializer = RepoSerializer()

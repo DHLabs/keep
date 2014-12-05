@@ -18,7 +18,7 @@ define( [ 'jquery',
                     <td><%= user %></td>
                     <td><%= perm %></td>
                     <td style='text-align:center'>
-                        <a href='#' class='btn'>
+                        <a href='#' class='btn-delete'>
                             <i class='icon-trash'></i>
                         </a>
                     </td>
@@ -64,6 +64,7 @@ define( [ 'jquery',
                     perms: perms
                 success: ( response ) =>
                     $( '#shared-users-list' ).append( @shared_user( {user: user, perm: perms} ) )
+                    $('.btn-delete').click( @remove_share )
             )
             @
 
