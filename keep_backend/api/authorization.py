@@ -3,6 +3,8 @@ from backend.db import user_or_organization
 from django.contrib.auth.models import AnonymousUser, User
 from django.db.models import Q
 
+from guardian.shortcuts import get_perms
+from organizations.models import OrganizationUser
 from tastypie.authorization import Authorization
 
 
@@ -52,6 +54,11 @@ class RepoAuthorization( Authorization ):
         user = bundle.request.GET.get( 'user', None )
         key  = bundle.request.GET.get( 'key', None )
 
+
+        # Get the orgs that the users is a member of
+        org_users = OrganizationUser.objects.filter(user=user)
+        orgs = map(lambda ou: ou.organization, org_users)
+
         # A user query is provided and this is not an API call. Only
         # show public repositories for this user or repos that are shared to
         # the logged in user.
@@ -62,6 +69,13 @@ class RepoAuthorization( Authorization ):
             for repo in object_list:
                 if repo.is_public or repo.is_form_public or logged_in_user.has_perm( 'view_repository', repo ):
                     filtered.append( repo )
+
+                # Check if the repo is shared with any of the user's orgs
+                elif orgs:
+                    for org in orgs:
+                        if 'view_repository' in get_perms(org, repo):
+                            filtered.append( repo )
+
 
             return filtered
 

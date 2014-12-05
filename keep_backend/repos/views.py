@@ -283,7 +283,7 @@ def webform( request, username, repo_name ):
     if request.method == 'POST':
 
         if 'detail_data_id' in request.POST:
-            
+
             repo.update_data( request.POST, request.FILES )
 
             return HttpResponseRedirect(
@@ -312,7 +312,7 @@ def webform( request, username, repo_name ):
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
     flat_fields = repo.flatten_fields_with_group()
-    
+
     if isinstance( flat_fields[0]["label"] , basestring):
         has_translations = False
     else:
@@ -408,7 +408,17 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     if repo.study and repo.is_tracker:
         # If this repo is a tracker and part of a study, grab all repos that
         # are part of the study so that we can display data links.
-        linked = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
+        linked = []
+        study_repos = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
+        orgs = request.user.organization_users.all()
+        for r in study_repos:
+            if repo.is_public or repo.is_form_public or request.user.has_perm( 'view_repository', repo ):
+                linked.append(r)
+            else:
+                for org in orgs:
+                    if 'view_repository' in get_perms(org, r):
+                        linked.append(r)
+
         linked_json = json.dumps( serializer.serialize( linked ) )
 
     # Grab the list of visualizations for this repo

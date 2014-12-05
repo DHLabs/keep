@@ -12,6 +12,7 @@ from tastypie.http import HttpUnauthorized, HttpNotFound
 from tastypie.resources import ModelResource
 from tastypie.utils.mime import build_content_type
 
+from organizations.models import OrganizationUser
 from repos.forms import NewBatchRepoForm
 from repos.models import Repository, RepoSerializer
 from openrosa.serializer import XFormSerializer
