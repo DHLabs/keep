@@ -83,7 +83,10 @@ define( [ 'jquery',
         url_params: ->
             query_string = "?"
             for f in @models
-              query_string += "&data__#{f.get 'column_name'}=#{f.get 'filter_value'}"
+              query_string += "&data__#{f.get 'column_name'}"
+              query_string +=  "=" if f.get 'filter_type' is 'eq'
+              query_string +=  "__#{f.get 'filter_type'}=" if f.get('filter_type') isnt 'eq'
+              query_string += "#{f.get 'filter_value'}"
             return query_string
 
         render: ->
