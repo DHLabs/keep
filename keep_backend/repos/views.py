@@ -238,7 +238,7 @@ def share_repo( request, repo_id ):
     if request.method == 'POST':
         username = request.POST.get( 'username', None )
     elif request.method == 'DELETE':
-        username = json.loads( request.body ).get( 'username', None )
+        username = request.GET.get( 'username', None )
     else:
         username = request.GET.get( 'username', None )
 
