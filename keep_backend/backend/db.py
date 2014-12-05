@@ -38,13 +38,20 @@ class DataSerializer( object ):
                 link_dict = {}
                 tracker_id = 'data.' + repository.study.tracker
                 data_id = dict(row)['data'].get(repository.study.tracker)
+
+                # Create list of results
+                repo_datas = db.data.find( { tracker_id: data_id } )
+                repo_dict = dict( (repo['label'], repo) for repo in repo_datas )
+
+                # Check if data is complete or not
                 for linked_repo in linked:
-                    #check if data
-                    num_data = db.data.find( { 'repo': ObjectId( linked_repo.mongo_id ),tracker_id:data_id } ).count()
-                    if num_data > 0:
-                        link_dict[ linked_repo.name ] = True
+                    if linked_repo in repo_dict:
+                        if repo_dict[linked_repo]['is_finished']:
+                            link_dict[ linked_repo.name ] = 'finished'
+                        else:
+                            link_dict[ linked_repo.name ] = 'incomplete'
                     else:
-                        link_dict[ linked_repo.name ] = False
+                        link_dict[ linked_repo.name ] = 'empty'
 
                 copy['linked'] = link_dict
 
@@ -63,6 +70,7 @@ class DataSerializer( object ):
             # Convert strings into a unicode representation.
             if field.get( 'type' ) in [ 'text', 'note' ]:
                 val = unicode( val ).encode( 'utf-8' )
+                copy[ key ] = val
 
             # Give a full URL for media
             elif field.get( 'type' ) in [ 'photo' ]:
@@ -73,16 +81,20 @@ class DataSerializer( object ):
                     host = settings.AWS_S3_MEDIA_DOMAIN
 
                 val = 'http://%s/%s/%s/%s' % ( host, repo_id, data_id, val )
+                copy[ key ] = val
 
             # Correctly recurse through groups
             elif field.get( 'type' ) == 'group':
 
-                val = self._serialize_data( data=val,
+                val = self.serialize_data( data=data,
                                             fields=field.get( 'children' ),
                                             repo_id=repo_id,
                                             data_id=data_id )
+                for k in val:
+                    copy[ k ] = val[ k ]
 
-            copy[ key ] = val
+            else:
+                copy[ key ] = val
 
         return copy
 

@@ -1,101 +1,89 @@
 // _tables.scss
-table.table {
+.table {
 
-	width:100%;
+  width: 100%;
 
-	tr {
-		border-bottom: 1px solid #EEE;
-	}
+  tr {
+    border-bottom: 1px solid #EEE;
+  }
 
-	tbody {
-		tr:hover {
-			background-color: #EEE;
-		}
-	}
+  tbody {
+    tr:hover {
+      background-color: #EEE;
+    }
+  }
 
-	th {
-		font-weight: bold;
-		text-align: left;
-		padding: 8px 16px;
-		color: $theme;
+  th {
+    font-weight: bold;
+    text-align: left;
+    padding: 8px 16px;
+    color: $theme;
 
-		background-color: #FFF !important;
-		white-space: nowrap;
-	}
+    background-color: #FFF !important;
+    white-space: nowrap;
+  }
 
-	td {
-		padding: 8px;
+  td {
+    padding: 8px;
+  }
 
-		a {
-			display:block;
-		}
-	}
-
-	td.selected {
-		background-color: $theme;
-		color: white;
-		font-weight: bold;
-	}
+  td.selected {
+    background-color: $theme;
+    color: white;
+    font-weight: bold;
+  }
 }
 
-table.compressed {
-	font-size: .9em;
+.compressed {
+  font-size: .9em;
 
-	td {
-		padding: 4px 8px;
+  td {
+    padding: 4px 8px;
 
-		input, select {
-			margin:0;
-		}
+    input, select {
+      margin:0;
+    }
 
-		a {
-			display: inline;
-		}
-	}
+    a {
+      display: inline;
+    }
+  }
 }
 
 
 table.fixed {
-	td, th {
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		overflow-x:hidden;
+  td, th {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x:hidden;
 
-		width: 256px;
-		min-width: 256px;
-		max-width: 256px;
-	}
+    width: 256px;
+    min-width: 256px;
+    max-width: 256px;
+  }
 
-	td:last-child {
-		width:100%;
-	}
-}
-
-// Align the sorting icons to the right.
-th {
-	i.sort-me {
-		margin-top:4px !important;
-		float:right;
-	}
+  td:last-child {
+    width:100%;
+  }
 }
 
 // Override table row hover when the table is in a modal.
 .bbm-modal__section {
 
-	tbody {
-		td:first-child {
-			vertical-align: top;
-			text-align: right;
-		}
+  tbody {
+    td:first-child {
+      vertical-align: top;
+      text-align: right;
+    }
 
-		tr:hover {
-			background-color: #FFF !important;
-		}
+    tr:hover {
+      background-color: #FFF !important;
+    }
 
-		tr:last-child {
-			border-bottom: none;
-		}
-	}
+    tr:last-child {
+      border-bottom: none;
+    }
+  }
 
 }
 
@@ -119,4 +107,9 @@ th {
   top: 0;
   display: none;
   box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+}
+
+.DataTable-sortIcon {
+  margin-top:4px !important;
+  float:right;
 }

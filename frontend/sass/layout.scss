@@ -20,30 +20,51 @@
 @import "_dashboard";
 @import "_viz";
 
-.hints {
-	font-size: 0.8em;
-	margin-top: -12px;
-	background-color: #DDD;
-	margin-bottom: 12px;
-	padding: 4px 8px;
+/* Override Skeleton styles for sticky footer
+ *
+ * 1. Height of footer
+ * */
+html {
+  position: relative;
+  height: auto;
+  min-height: 100%;
+}
+body {
+  height: auto;
+  margin-bottom: 30px; /* 1 */
 }
 
 .footer {
-	background: #EEE;
-	font-size: 75%;
+  background: #EEE;
+  font-size: 75%;
 
-	.row {
-		margin: 0;
-		padding: 4px 0;
-	}
+  .row {
+    margin: 0;
+    padding: 4px 0;
+  }
+}
+
+.sticky-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 30px;
 }
 
 img {
-	vertical-align: middle;
+  vertical-align: middle;
 }
 
 // Miscellaneous CSS that needs to be categorized
 .section {
-	margin:32px 0;
-	padding:0 8px;
+  margin:32px 0;
+  padding:0 8px;
+}
+
+.hints {
+  font-size: 0.8em;
+  margin-top: -12px;
+  background-color: #DDD;
+  margin-bottom: 12px;
+  padding: 4px 8px;
 }

@@ -34,12 +34,14 @@
 	padding: 4px 8px;
 }
 
+/* 1. Footer height */
 #vizContainer {
-	position:absolute;
+	position: absolute;
 	top: 184px;
   right: 0;
-	bottom: 0;
+	bottom: 30px;  /* 1 */
   left: 0;
+  overflow-y: scroll;
 }
 
 .active {

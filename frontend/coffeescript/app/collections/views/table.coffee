@@ -24,22 +24,26 @@ define( [ 'jquery',
             'text':     _.template( '<td><%= data %></td>' )
             'geopoint': _.template( '<td><%= data.coordinates[1] %>, <%= data.coordinates[0] %></td>' )
             'photo':    _.template( '<td><a href="<%= data %>" target="blank">Click to view photo</a></td>'  )
+            'forms': _.template $('#DT-linked-form-tpl').html()
 
-            'forms':    _.template '''
-                    <td>
-                    <% _.each(document.linked_repos, function(item) { %>
-                        <% if( model.linked[item.name]) { %>
-                            <span style="color:#00ff00"><%= item.name %></span>
-                        <% } else { %>
-                            <span style="color:#ff0000"><%= item.name %></span>
-                        <% }; %>&nbsp;&nbsp;
-                    <% }); %>
-                    </td>
-                '''
+
         initialize: (options) ->
             @fields = options.fields
             @repo   = options.repo
             @linked = options.linked
+
+        linked_form_css: (status) ->
+          if status is 'empty'
+            'linkedForm--empty'
+          else if status is 'complete'
+            'linkedForm--complete'
+          else
+            'linkedForm--incomplete'
+
+        serializeData: ->
+          data = @model.attributes
+          data.form_css = (form_status) => @linked_form_css(form_status)
+          data
 
         template: ( model ) =>
             # Based on the field type, we use a specific formatter for that
@@ -50,7 +54,7 @@ define( [ 'jquery',
                 templ.push( @data_templates[ 'forms' ]( { model: model } ) )
 
                 #callbacks to check if form is filled out for data
-                @check_filled_forms( model )
+                #@check_filled_forms( model )
 
             for field in @fields
                 tdata = { data: model.data[ field.name ] }
@@ -100,7 +104,7 @@ define( [ 'jquery',
                 <% }; %>
                 <% _.each( fields, function( item ) { %>
                     <th class="js-sort" data-field='<%= item.name %>'>
-                        <%= item.name %><i class='sort-me icon-sort'></i>
+                        <%= item.name %><i class='icon-sort DataTable-sortIcon'></i>
                     </th>
                 <% }); %>
                     <th>&nbsp;</th>
@@ -111,8 +115,6 @@ define( [ 'jquery',
           'click .js-sort': 'sort_table'
 
         sort_table: ->
-          console.log 'sort table event fired'
-
           # Sort if clicking the icon or the column
           if @$(event.target).is 'i'
             column = @$(event.target.parentElement)
@@ -185,8 +187,6 @@ define( [ 'jquery',
         # Handles hiding/showing fixed header
         detect_scroll: (event) ->
 
-          return if @$el.is ':hidden'
-
           header_row   = @$('.DataTable-table thead')
           fixed_header = @$('.DataTable-fixedHeader')
 
@@ -195,13 +195,15 @@ define( [ 'jquery',
             .empty()
             .append header_row.html()
 
-          console.log 'detecting scroll event'
-
           # If we've scrolled at all in the table, make the fixed header visible
           scrollTop = @$('.DataTable').scrollTop()
           if scrollTop > 0
-            fixed_header.show()
             fixed_header.css('position', 'fixed').css('top', @_calculate_dist_from_top '.DataTable')
+
+            # We have to shift the fixed header left to align with the table's columns
+            scrollLeft = @$('.DataTable').scrollLeft()
+            fixed_header.css('left', "-#{scrollLeft}px")
+            fixed_header.show()
           else
             fixed_header.hide()
 
@@ -226,7 +228,6 @@ define( [ 'jquery',
 
           # if you've scrolled all the way to the bottom, load more results
           if scroll_distance >= table_height
-            console.log 'triggering pagination event'
             @page_loading = true
             @collection.next( success: => @page_loading = false )
 

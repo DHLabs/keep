@@ -10,3 +10,15 @@
   </div>
 
 </script>
+
+
+
+<script id="DT-linked-form-tpl" type="text/template">
+  <td>
+  <% _.each(document.linked_repos, function(repo) { %>
+        <% css_color = model.form_css(model.linked[repo.name]); %>
+        <span class="linkedForm <%= css_color %>"><%= repo.name %></span>
+        <br>
+  <% }); %>
+  </td>
+</script>

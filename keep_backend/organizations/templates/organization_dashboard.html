@@ -4,6 +4,7 @@
 {% block title %}{{ account.name }}{% endblock %}
 
 {% block js %}
+<script src='{% static "js/vendor/jquery.js" %}'></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script src='{% static "js/vendor/underscore.js" %}'></script>
 <script src='{% static "js/vendor/jquery.cookie.js" %}'></script>
@@ -21,7 +22,7 @@
 {% block content %}
 <div class='row'>
 	<div class='three columns sidebar'>
-		<h3 style='text-align:center;'>
+		<h3 class="u-textCenter">
 			<img width='40' src='{{ account.icon }}' class='account-icon account-icon-large'>
 			<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>
 		</h3>
@@ -39,40 +40,28 @@
 
 		<div class='section'>
 			{% if is_owner %}
-				<div style='float:left;'>
+				<div class='u-floatLeft'>
 					<a href='#' class='btn btn-small btn-primary' id='add-user-btn'>
 						<i class='icon-plus-sign'></i>
 						&nbsp;Add
 					</a>
 				</div>
-				<div class='row' style='display:none;'>
-					<div class='twelve columns'>
-						<input id='add_member' type='text' style='margin:0;'>
-					</div>
-					<div class='four columns'>
-						<div style='padding: 0 8px;'>
-							<a class='btn btn-primary' href='#'>
-								<i class='icon-plus-sign'></i>&nbsp;Add
-							</a>		
-						</div>
-					</div>
-				</div>
-				<div id="user_search_list">
-				</div>
 			{% endif %}
 
 			<h4>Members</h4>
+      <input id='add_member' style="display:none;" type='text' placeholder="Username">
+      <div id="user_search_list" class="u-textLeft"></div>
 
 			<div>
 				{% if is_member %}
 				<div>
 					{% if is_owner %}
-					<div style='float:left;'>
+					<div class='u-floatLeft'>
 						<span class='label'>admin</span>
 					</div>
 					{% endif %}
 					{% if is_member.pending %}
-					<div style='float:left;'>
+					<div class='u-floatLeft'>
 						<a href='{% url "organization_member_accept" org=account.name user=user.username %}'
 						   class='btn btn-small btn-success'>
 							Join
@@ -95,12 +84,12 @@
 					{% if member.user != user %}
 					<div>
 						{% if member.is_admin %}
-						<div style='float:left;'>
+						<div class="u-floatLeft">
 							<span class='label'>administrator</span>
 						</div>
 						{% endif %}
 						{% if member.pending %}
-						<div style='float:left;'>
+						<div class="u-floatLeft">
 							<span class='label label-pending'>pending</span>
 						</div>
 						{% endif %}
@@ -120,7 +109,7 @@
 				<tr><td colspan='4'>Data Diaries</td></tr>
 				{% if repos|length == 0 %}
 					<tr>
-						<td style='text-align:center;' colspan='4'>
+						<td class='u-textCenter' colspan='4'>
 							This organization has no data diaries =[.
 						</td>
 					</tr>
