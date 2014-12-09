@@ -47,7 +47,7 @@ define( [ 'jquery',
             @numberOfQuestions = document.flat_fields.length
 
             @currentLanguage = null
-            if typeof(document.flat_fields[0].label) != "string"
+            if document.flat_fields[0].label and typeof(document.flat_fields[0].label) isnt "string"
               @currentLanguage = _.keys(document.flat_fields[0].label)[0]
               
             @repopulateForm()

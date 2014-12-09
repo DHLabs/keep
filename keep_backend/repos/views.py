@@ -313,7 +313,7 @@ def webform( request, username, repo_name ):
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
     flat_fields = repo.flatten_fields_with_group()
 
-    if isinstance( flat_fields[0]["label"] , basestring):
+    if 'label' not in flat_fields[0] or isinstance( flat_fields[0]["label"] , basestring):
         has_translations = False
     else:
         has_translations = True
