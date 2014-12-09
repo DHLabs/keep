@@ -33,6 +33,12 @@
     "backbone.modal": {
       "js": "backbone.modal.js"
     },
+    "backbone.babysitter": {
+      "js": "lib/backbone.babysitter.js"
+    },
+    "backbone.wreqr": {
+      "js": "lib/backbone.wreqr.js"
+    },
     "d3": {
       "js": "d3.js"
     },
