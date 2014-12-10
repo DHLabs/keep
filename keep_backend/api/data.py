@@ -96,13 +96,12 @@ class DataResource( MongoDBResource ):
 
             # Handle relations. No relation token is assumed to mean we want
             # an exact match.
+
             if len( values ) == 2:
                 filters[ key ] = value
             else:
-                if values[2] == 'gt':
-                    filters[ key ] = { '$gt': value }
-                elif value[2] == 'lt':
-                    filters[ key ] = { '$lt': value }
+                filters[ key ] = { "${0}".format(values[2]) : float(value) }
+
 
         return filters
 
