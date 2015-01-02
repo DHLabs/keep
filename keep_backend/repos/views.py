@@ -549,7 +549,15 @@ def repo_viz( request, username, repo_name, filter_param=None ):
         data_query[ 'data.%s' % repo.study.tracker ] = filter_param
 
     # Grab the data for this repository
-    data = db.data.find( data_query,
+
+
+    if 'doctor_id' in request.GET:
+        data = db.data.find( data_query,
+                         { 'survey_label': False,
+                           'user': False } )\
+                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )
+    else:
+        data = db.data.find( data_query,
                          { 'survey_label': False,
                            'user': False } )\
                   .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
