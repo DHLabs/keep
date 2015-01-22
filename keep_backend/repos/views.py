@@ -313,10 +313,12 @@ def webform( request, username, repo_name ):
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
     flat_fields = repo.flatten_fields_with_group()
 
-    if isinstance( flat_fields[0]["label"] , basestring):
-        has_translations = False
-    else:
+    if 'children' in flat_fields[0] and isinstance( flat_fields[0]['children'][0]['label'], dict):
         has_translations = True
+    elif isinstance( flat_fields[0]["label"] , dict):
+        has_translations = True
+    else:
+        has_translations = False
 
     flat_field_json = json.dumps(flat_fields)
 

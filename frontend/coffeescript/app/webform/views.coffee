@@ -47,8 +47,11 @@ define( [ 'jquery',
             @numberOfQuestions = document.flat_fields.length
 
             @currentLanguage = null
-            if typeof(document.flat_fields[0].label) != "string"
+            if document.flat_fields[0].label? and typeof document.flat_fields[0].label isnt 'string'
               @currentLanguage = _.keys(document.flat_fields[0].label)[0]
+            else if document.flat_fields[0].children[0].label?
+              if typeof(document.flat_fields[0].children[0].label) isnt "string"
+                @currentLanguage = _.keys(document.flat_fields[0].children[0])[0]
               
             @repopulateForm()
             @_display_form_buttons( 0, document.flat_fields[0] )
@@ -76,17 +79,15 @@ define( [ 'jquery',
           @
 
         get_label: (dictionary) ->
-          if typeof dictionary == 'string'
-            return dictionary.label
+          if dictionary.label?
+            return dictionary.label if typeof dictionary.label is 'string'
+            return dictionary.label[@currentLanguage] or 'HOLY BRAMBLEBERRIES BATMAN'
+
+          # handle groups
+          if dictionary.children[0].label[@currentLanguage]
+            return dictionary.children[0].label[@currentLanguage]
           else
-            if @currentLanguage
-              if dictionary.label[@currentLanguage]
-                return dictionary.label[@currentLanguage]
-              else
-                return dictionary
-            else
-              #just return first string if no map for language
-              return _.values(dictonary)[0]
+            return 'BY THE POWER OF GREYSKULL!!!'
 
         submit: ->
             $( ".form" ).submit()

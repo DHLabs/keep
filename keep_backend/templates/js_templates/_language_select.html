@@ -6,13 +6,20 @@
 		<div class='control-group'>
 			<ul>
 			{% if has_translations == True %}
-			{% for key in flat_fields.0.label %}
-				<li>
-					<input type="radio" name="language" value="{{ key }}"
-						id="language-{{ forloop.counter0 }}">
-					<label for="language-{{ forloop.counter0 }}">{{ key }}</label>
-				</li>
-			{% endfor %}
+        {% for key in flat_fields.0.children.0.label %}
+          <li>
+            <input type="radio" name="language" value="{{ key }}"
+              id="language-{{ forloop.counter0 }}">
+            <label for="language-{{ forloop.counter0 }}">{{ key }}</label>
+          </li>
+        {% endfor %}
+        {% for key in flat_fields.0.label %}
+          <li>
+            <input type="radio" name="language" value="{{ key }}"
+              id="language-{{ forloop.counter0 }}">
+            <label for="language-{{ forloop.counter0 }}">{{ key }}</label>
+          </li>
+        {% endfor %}
 			{% endif %}
 			</ul>
 		</div>
