@@ -312,11 +312,17 @@ def webform( request, username, repo_name ):
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
     flat_fields = repo.flatten_fields_with_group()
+    first_field = flat_fields[0]
 
-    if 'children' in flat_fields[0] and isinstance( flat_fields[0]['children'][0]['label'], dict):
+    # Check if first field is question/group with label translations.
+    if 'label' in first_field and isinstance(first_field['label'], dict):
         has_translations = True
-    elif isinstance( flat_fields[0]["label"] , dict):
+        translations = first_field['label'].keys
+    elif first_field.type is 'group' and isinstance( first_field['children'][0]['label'], dict):
+        # The first field is a group w/o a translation, so check if the first
+        # question in the group has a translation.
         has_translations = True
+        translations = first_field['children'][0]['label'].keys
     else:
         has_translations = False
 
@@ -332,6 +338,7 @@ def webform( request, username, repo_name ):
                                  'flat_fields': flat_fields,
                                  'flat_field_json':flat_field_json,
                                  'has_translations': has_translations,
+                                 'translations': translations,
                                  'repo_id': repo.mongo_id,
                                  'account': account,
                                  'data_id': data_id
