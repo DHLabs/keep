@@ -46,10 +46,8 @@ define( [ 'jquery',
             @currentQuestionIndex = 0
             @numberOfQuestions = document.flat_fields.length
 
-            @currentLanguage = null
-            if typeof(document.flat_fields[0].label) != "string"
-              @currentLanguage = _.keys(document.flat_fields[0].label)[0]
-              
+            @current_language = @set_current_language()
+
             @repopulateForm()
             @_display_form_buttons( 0, document.flat_fields[0] )
             @
@@ -72,21 +70,42 @@ define( [ 'jquery',
                 for choice in question.choices
                   $("label[for='"+question.name+"-"+index+"']").html( @get_label(choice) )
                   index++
-
           @
 
-        get_label: (dictionary) ->
-          if typeof dictionary == 'string'
-            return dictionary.label
-          else
-            if @currentLanguage
-              if dictionary.label[@currentLanguage]
-                return dictionary.label[@currentLanguage]
-              else
-                return dictionary
+        first_key: (dict) ->
+          _.keys(dict)[0]
+
+        set_current_language: ->
+          first_field = document.flat_fields[0]
+
+          if first_field.type is 'group'
+            # return first key in dict, for example:
+            # { 'English': 'cat', 'Spanish': 'gato' } => 'English'
+            return @first_key(first_field.children[0].label)
+
+          if first_field.type isnt 'group' and first_field.label?
+            if typeof first_field.label is 'object'
+              return @first_key(first_field.label)
             else
-              #just return first string if no map for language
-              return _.values(dictonary)[0]
+              # doesn't have translations
+              return null
+
+        get_label: (dictionary) ->
+          return '' if not dictionary.label?
+
+          label = dictionary.label
+
+          return label if typeof label is 'string'
+
+          # otherwise label is a translation dict
+          if label[@currentLanguage]
+            # has translation so return translated label
+            return label[@currentLanguage]
+          else
+            # has translations, but not the desired one so return first value.
+            # for example:
+            # { 'English': 'cat', 'Spanish': 'gato' } => 'cat'
+            return label[@first_key(label)]
 
         submit: ->
             $( ".form" ).submit()
@@ -95,11 +114,11 @@ define( [ 'jquery',
             # Creates submission page, takes care of corner case
             # submitChild =
             #   bind:
-            #     readonly: "true()"          
-            
+            #     readonly: "true()"
+
             # if (@input_fields[0].bind and @input_fields[0].bind.group_start) or (@input_fields[0].control and @input_fields[0].control.appearance)
             #   _groupOperations.apply(@, [0, true])
-            # else 
+            # else
             #   $( '.control-group' ).first().show().addClass( 'active' )
             #   $( '.active input' ).focus()
 
@@ -140,7 +159,7 @@ define( [ 'jquery',
               pair = idx.split('=')
               if !!pair[0]
                   result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] or '')
-          
+
           return result
 
         replaceAll: (find, replace, str) ->
@@ -170,9 +189,9 @@ define( [ 'jquery',
             obj = document.flat_fields[i]
 
             if obj.type == "group"
-              for j in [0..(obj.children.length-1)]  
+              for j in [0..(obj.children.length-1)]
                 obj2 = obj.children[j]
-                if obj2.type == 'select all that apply' 
+                if obj2.type == 'select all that apply'
                   @repop_multiple(location.search,obj2)
                 else if obj2.type == "select one"
                   $('input[value="' + result[obj2.name] + '"]').prop('checked', true)
@@ -180,7 +199,7 @@ define( [ 'jquery',
                 #    handlegeopoint( result[obj2.name] )
                 else
                   $('#'+obj2.name).val( result[obj2.name] )
-            else 
+            else
               if obj.type == 'select all that apply'
                 @repop_multiple(location.search,obj)
               else if obj.type == "select one"
@@ -202,7 +221,7 @@ define( [ 'jquery',
           operation = undefined
           parenCount = undefined
           parenCount = 0
-          
+
           # Initial paren finder and recursion to get to the start of the equation
           i = 0
           while i < equation.length
@@ -410,7 +429,7 @@ define( [ 'jquery',
               return group
 
           return null
-    
+
         switch_question: ( next_index, forward ) ->
 
             #TODO: if in group, test relevance/constraint for all children
@@ -429,7 +448,7 @@ define( [ 'jquery',
               #TODO: check if group is field-list or not first
               if forward
                 next_index = next_index + previous_question.children.length
-            
+
             # Question to switch to
             #switch_question_key = $( element ).data( 'key' )
 
@@ -452,7 +471,7 @@ define( [ 'jquery',
               return
 
             #Is this question relevant?  Or, is this question an equation?
-            if (current_question.bind and current_question.bind.calculate != null) or not 
+            if (current_question.bind and current_question.bind.calculate != null) or not
               XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()) )
                 # If its a calculation, calculate it!
                 $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
@@ -470,7 +489,7 @@ define( [ 'jquery',
 
             if @toggle_question(current_question, false)
               @toggle_question(previous_question, true)
-            
+
             # If there is a query to a previous answer, display that answer
             # subsequent = undefined
             # if (form_info.title and subsequent = form_info.title.indexOf("${")) isnt -1
@@ -494,7 +513,7 @@ define( [ 'jquery',
             # if question.info.control and question.info.control.appearance
             #     current_tree = question.info.tree
             #     question_index += 1
-            #     question_index += 1  while @input_fields[question_index].tree is current_tree 
+            #     question_index += 1  while @input_fields[question_index].tree is current_tree
 
             # Attempt to switch to the next question
             #if question_index < @input_fields.length
@@ -524,7 +543,7 @@ define( [ 'jquery',
             #     question_index -= 1
             # else
             #   question_index -= 1
-              
+
             @switch_question( @currentQuestionIndex - 1, false )
 
             @
