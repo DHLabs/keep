@@ -66,11 +66,13 @@
     </div>
     <div id='repo-actions' class='five columns'>
       <ul class='nav-list nav-inline'>
+        {% if registry %}
         <li>
-          <a class='btn' href='#'>
+          <a class='btn' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
             <i class='icon-list'></i>&nbsp;Registry
           </a>
         </li>
+        {% endif %}
         <li>
           <a id='share-btn' class='btn' href='#'>
             <i class='icon-group'></i>&nbsp;Share

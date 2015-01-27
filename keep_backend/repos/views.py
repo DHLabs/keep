@@ -366,6 +366,11 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     if repo is None:
         return HttpResponse( status=404 )
 
+    # If the repo is part of a study, grab the tracker repo
+    tracker_repo = None
+    if repo.study:
+        tracker_repo = Repository.objects.filter(study=repo.study).filter(is_tracker=True)[0]
+
     # Grab all the permissions!
     permissions = []
     if request.user.is_authenticated():
@@ -437,6 +442,7 @@ def repo_viz( request, username, repo_name, filter_param=None ):
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
+                                 'registry': tracker_repo,
 
                                  'repo_json': repo_json,
                                  'linked_json': linked_json,
