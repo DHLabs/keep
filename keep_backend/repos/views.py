@@ -280,6 +280,11 @@ def webform( request, username, repo_name ):
     if repo is None:
         return HttpResponse( status=404 )
 
+    # If the repo is part of a study, grab the tracker repo
+    tracker_repo = None
+    if repo.study:
+        tracker_repo = Repository.objects.filter(study=repo.study).filter(is_tracker=True)[0]
+
     if request.method == 'POST':
 
         if 'detail_data_id' in request.POST:
@@ -335,6 +340,7 @@ def webform( request, username, repo_name ):
 
     return render_to_response( 'webform.html',
                                { 'repo': repo,
+                                 'registry': tracker_repo,
                                  'repo_json': repo_json,
                                  'flat_fields': flat_fields,
                                  'flat_field_json':flat_field_json,

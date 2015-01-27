@@ -68,18 +68,23 @@
       <ul class='nav-list nav-inline'>
         {% if registry %}
         <li>
-          <a class='btn' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
+          <a class='btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
             <i class='icon-list'></i>&nbsp;Registry
           </a>
         </li>
         {% endif %}
+        <li>
+          <a class='btn' href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}'>
+            <i class='icon-file-alt'></i>&nbsp;Webform
+          </a>
+        </li>
         <li>
           <a id='share-btn' class='btn' href='#'>
             <i class='icon-group'></i>&nbsp;Share
           </a>
         </li>
         <li>
-          <a class='btn btn-primary' href='/api/v1/data/{{ repo.mongo_id }}?format=csv'>
+          <a class='btn' href='/api/v1/data/{{ repo.mongo_id }}?format=csv'>
             <i class='icon-download'></i>&nbsp;Download
           </a>
         </li>
