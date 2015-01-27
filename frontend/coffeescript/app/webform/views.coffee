@@ -49,7 +49,7 @@ define( [ 'jquery',
             @current_language = @set_current_language()
 
             @repopulateForm()
-            @_display_form_buttons( 0, document.flat_fields[0] )
+            @_display_form_buttons(0)
             @switch_question(1, true)
             @switch_question(0, false)
             @
@@ -111,24 +111,6 @@ define( [ 'jquery',
 
         submit: ->
             $( ".form" ).submit()
-
-        render: () ->
-            # Creates submission page, takes care of corner case
-            # submitChild =
-            #   bind:
-            #     readonly: "true()"
-
-            # if (@input_fields[0].bind and @input_fields[0].bind.group_start) or (@input_fields[0].control and @input_fields[0].control.appearance)
-            #   _groupOperations.apply(@, [0, true])
-            # else
-            #   $( '.control-group' ).first().show().addClass( 'active' )
-            #   $( '.active input' ).focus()
-
-            @_display_form_buttons( 0, null )
-
-            # Render additional Geopoint if first question is one
-            # _geopointDisplay()  if @_active_question().info.bind and @_active_question().info.bind.map
-            @
 
         # _geopointDisplay = ->
         #   onMapClick = (e) ->
@@ -347,9 +329,9 @@ define( [ 'jquery',
 
           @
 
-        _display_form_buttons: ( question_index, question ) ->
+        _display_form_buttons: (question_index) ->
           # Last question
-          if question_index is @numberOfQuestions - 1 or not question
+          if question_index >= @numberOfQuestions - 1
               $( '#prev_btn' ).show()
               $( '#submit_btn' ).show()
               $( '#next_btn' ).hide()
@@ -451,7 +433,7 @@ define( [ 'jquery',
               next_question = document.flat_fields[next_index]
 
           if not next_question
-            @_display_form_buttons( @currentQuestionIndex, next_question )
+            @_display_form_buttons(next_index)
             return
 
           #Is this question relevant?  Or, is this question an equation?
@@ -474,7 +456,7 @@ define( [ 'jquery',
           @show_question next_question
 
           @currentQuestionIndex = next_index
-          @_display_form_buttons( @currentQuestionIndex, next_question )
+          @_display_form_buttons(@currentQuestionIndex)
 
           #Start the Geopoint display if geopoint
           #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
