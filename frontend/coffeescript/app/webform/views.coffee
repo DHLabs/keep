@@ -439,33 +439,29 @@ define( [ 'jquery',
           if advancing
             return unless @passes_question_constraints()
 
-          previous_question = document.flat_fields[@currentQuestionIndex]
-          if not previous_question
-            @_display_form_buttons( @currentQuestionIndex, current_question )
-            return
+          current_question = document.flat_fields[@currentQuestionIndex]
+          return if not current_question
 
-          if previous_question.type is 'group' and next_index isnt -1
+          if current_question.type is 'group' and next_index isnt -1
             #TODO: check if group is field-list or not first
             if advancing
-              next_index = next_index + previous_question.children.length
+              next_index = next_index + current_question.children.length
 
-          current_question = document.flat_fields[next_index]
+          next_question = document.flat_fields[next_index]
           if not advancing
             #is current question within group
-            group = @get_group_for_question(current_question)
+            group = @get_group_for_question(next_question)
             if group
               next_index = next_index - group.children.length
-              current_question = document.flat_fields[next_index]
+              next_question = document.flat_fields[next_index]
 
-          if not current_question
-            @_display_form_buttons( @currentQuestionIndex, current_question )
-            return
+          return if not next_question
 
           #Is this question relevant?  Or, is this question an equation?
-          if (current_question.bind and current_question.bind.calculate != null) or not
-            XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()) )
+          if (next_question.bind and next_question.bind.calculate != null) or not
+            XFormConstraintChecker.isRelevant( next_question, @queryStringToJSON($( ".form" ).serialize()) )
               # If its a calculation, calculate it!
-              $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
+              $("#" + next_question.name).val _performCalcluate(next_question.bind.calculate)  if next_question.bind and next_question.bind.calculate
 
               # Switch to the next question!
               if advancing
@@ -476,14 +472,15 @@ define( [ 'jquery',
               @switch_question( next_index, advancing )
               return
 
-          if @toggle_question(current_question, false)
-            @toggle_question(previous_question, true)
+          # Hide the current question, show the next question
+          @toggle_question(next_question, false)
+          @toggle_question(current_question, true)
 
           @currentQuestionIndex = next_index
           #Start the Geopoint display if geopoint
           #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
 
-          @_display_form_buttons( @currentQuestionIndex, current_question )
+          @_display_form_buttons( @currentQuestionIndex, next_question )
 
           @
 
