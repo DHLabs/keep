@@ -348,36 +348,27 @@ define( [ 'jquery',
           @
 
         _display_form_buttons: ( question_index, question ) ->
+          # Last question
+          if question_index is @numberOfQuestions - 1 or not question
+              $( '#prev_btn' ).show()
+              $( '#submit_btn' ).show()
+              $( '#next_btn' ).hide()
 
-            if question_index == @numberOfQuestions - 1 or (not question)
-                $( '#prev_btn' ).show()
-                $( '#submit_btn' ).show()
-
-                $( '#next_btn' ).hide()
-                # $("html").keydown (e) ->
-                #     $("#submit_btn").click()  if e.keyCode is 13
-
-            else if question_index == 0
-                $( '#prev_btn' ).hide()
-                $( '#submit_btn' ).hide()
-
-                $( '#next_btn' ).show()
-                # $("#xform_view").keydown (e) ->
-                #     $("#next_btn").click()  if e.keyCode is 13
-            else
-                $( '#prev_btn' ).show()
-                $( '#next_btn' ).show()
-
-                $( '#submit_btn' ).hide()
-                # $("#xform_view").keydown (e) ->
-                #     $("#next_btn").click()  if e.keyCode is 13
-
-            if @currentQuestionIndex == 0
+          # First question
+          else if question_index is 0
               $( '#prev_btn' ).hide()
+              $( '#submit_btn' ).hide()
+              $( '#next_btn' ).show()
 
-            if document.getElementById( 'detail_data_id' ) != null
-                $( '#submit_btn' ).show()
-            @
+          # All other questions
+          else
+              $( '#prev_btn' ).show()
+              $( '#next_btn' ).show()
+              $( '#submit_btn' ).hide()
+
+          # Always show submit button when editing an existing record
+          $( '#submit_btn' ).show() if document.getElementById('detail_data_id') != null
+          @
 
         passes_question_constraints: ->
             #TODO: First check constraints on the question we're on
@@ -403,20 +394,24 @@ define( [ 'jquery',
 
           return answerJson[question.name]
 
-        toggle_question: (question, isHide) ->
+        show_question: (question) ->
+          @toggle_question(question, false)
 
-          if not question
-            return false
+        hide_question: (question) ->
+          @toggle_question(question, true)
 
-          if isHide
+        toggle_question: (question, hide) ->
+          return false if not question
+
+          if hide
             $('#' + question.name + '_field').hide()
           else
             $('#' + question.name + '_field').show()
 
-          if question.type == 'group'
-            for i in [0..(question.children.length-1)]
-              child = question.children[i]
-              @toggle_question( child, isHide )
+          # Hide/show all children in a group
+          if question.type is 'group'
+            for child in question.children
+              @toggle_question( child, hide )
 
           return true
 
@@ -455,7 +450,9 @@ define( [ 'jquery',
               next_index = next_index - group.children.length
               next_question = document.flat_fields[next_index]
 
-          return if not next_question
+          if not next_question
+            @_display_form_buttons( @currentQuestionIndex, next_question )
+            return
 
           #Is this question relevant?  Or, is this question an equation?
           if (next_question.bind and next_question.bind.calculate != null) or not
@@ -473,14 +470,14 @@ define( [ 'jquery',
               return
 
           # Hide the current question, show the next question
-          @toggle_question(next_question, false)
-          @toggle_question(current_question, true)
+          @hide_question current_question
+          @show_question next_question
 
           @currentQuestionIndex = next_index
+          @_display_form_buttons( @currentQuestionIndex, next_question )
+
           #Start the Geopoint display if geopoint
           #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
-
-          @_display_form_buttons( @currentQuestionIndex, next_question )
 
           @
 
