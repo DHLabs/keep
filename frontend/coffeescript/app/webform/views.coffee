@@ -50,6 +50,8 @@ define( [ 'jquery',
 
             @repopulateForm()
             @_display_form_buttons( 0, document.flat_fields[0] )
+            @switch_question(1, true)
+            @switch_question(0, false)
             @
 
         change_language: (language) ->
