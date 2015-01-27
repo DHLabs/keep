@@ -432,80 +432,60 @@ define( [ 'jquery',
 
           return null
 
-        switch_question: ( next_index, forward ) ->
+        switch_question: ( next_index, advancing ) ->
+          #TODO: if in group, test relevance/constraint for all children
 
-            #TODO: if in group, test relevance/constraint for all children
+          # Does the current active question pass our constraints?
+          if advancing
+            return unless @passes_question_constraints()
 
-            # Does the current active question pass our constraints?
-            if forward
-                if not @passes_question_constraints()
-                    return @
-
-            previous_question = document.flat_fields[@currentQuestionIndex]
-            if not previous_question
-              @_display_form_buttons( @currentQuestionIndex, current_question )
-              return
-
-            if previous_question.type == 'group' and next_index != -1
-              #TODO: check if group is field-list or not first
-              if forward
-                next_index = next_index + previous_question.children.length
-
-            # Question to switch to
-            #switch_question_key = $( element ).data( 'key' )
-
-            # Check constraints of this question before continuing
-            #question_index = -1
-            # form_info = _.find( @input_fields, ( child ) ->
-            #     @currentQuestionIndex += 1
-            #     return child.name == switch_question_key
-            # )
-            current_question = document.flat_fields[next_index]
-            if not forward
-              #is current question within group
-              group = @get_group_for_question(current_question)
-              if group
-                next_index = next_index - group.children.length
-                current_question = document.flat_fields[next_index]
-
-            if not current_question
-              @_display_form_buttons( @currentQuestionIndex, current_question )
-              return
-
-            #Is this question relevant?  Or, is this question an equation?
-            if (current_question.bind and current_question.bind.calculate != null) or not
-              XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()) )
-                # If its a calculation, calculate it!
-                $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
-
-                # Switch to the next question!
-                if forward
-                    if next_index < @numberOfQuestions
-                        next_index += 1
-                else
-                    if next_index > 0
-                        next_index -= 1
-
-                @switch_question( next_index, forward )
-                return
-
-            if @toggle_question(current_question, false)
-              @toggle_question(previous_question, true)
-
-            # If there is a query to a previous answer, display that answer
-            # subsequent = undefined
-            # if (form_info.title and subsequent = form_info.title.indexOf("${")) isnt -1
-            #   end_subsequent = form_info.title.indexOf("}", subsequent)
-            #   subsequent_st = form_info.title.substring(subsequent + 2, end_subsequent)
-            #   switch_question[0].innerHTML = switch_question[0].innerHTML.replace(/\${.+}/, $("#" + subsequent_st).val())
-
-            @currentQuestionIndex = next_index
-            #Start the Geopoint display if geopoint
-            #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
-
+          previous_question = document.flat_fields[@currentQuestionIndex]
+          if not previous_question
             @_display_form_buttons( @currentQuestionIndex, current_question )
+            return
 
-            @
+          if previous_question.type is 'group' and next_index isnt -1
+            #TODO: check if group is field-list or not first
+            if advancing
+              next_index = next_index + previous_question.children.length
+
+          current_question = document.flat_fields[next_index]
+          if not advancing
+            #is current question within group
+            group = @get_group_for_question(current_question)
+            if group
+              next_index = next_index - group.children.length
+              current_question = document.flat_fields[next_index]
+
+          if not current_question
+            @_display_form_buttons( @currentQuestionIndex, current_question )
+            return
+
+          #Is this question relevant?  Or, is this question an equation?
+          if (current_question.bind and current_question.bind.calculate != null) or not
+            XFormConstraintChecker.isRelevant( current_question, @queryStringToJSON($( ".form" ).serialize()) )
+              # If its a calculation, calculate it!
+              $("#" + current_question.name).val _performCalcluate(current_question.bind.calculate)  if current_question.bind and current_question.bind.calculate
+
+              # Switch to the next question!
+              if advancing
+                next_index += 1 if next_index < @numberOfQuestions
+              else
+                next_index -= 1 if next_index > 0
+
+              @switch_question( next_index, advancing )
+              return
+
+          if @toggle_question(current_question, false)
+            @toggle_question(previous_question, true)
+
+          @currentQuestionIndex = next_index
+          #Start the Geopoint display if geopoint
+          #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
+
+          @_display_form_buttons( @currentQuestionIndex, current_question )
+
+          @
 
         next_question: () ->
 
