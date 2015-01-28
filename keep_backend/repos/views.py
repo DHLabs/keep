@@ -281,9 +281,7 @@ def webform( request, username, repo_name ):
         return HttpResponse( status=404 )
 
     # If the repo is part of a study, grab the tracker repo
-    tracker_repo = None
-    if repo.study:
-        tracker_repo = Repository.objects.filter(study=repo.study).filter(is_tracker=True)[0]
+    tracker_repo = repo.registry()
 
     if request.method == 'POST':
 
@@ -291,10 +289,15 @@ def webform( request, username, repo_name ):
 
             repo.update_data( request.POST, request.FILES )
 
-            return HttpResponseRedirect(
-                        reverse( 'repo_visualize',
-                                  kwargs={ 'username': account.username,
-                                           'repo_name': repo_name } ) )
+            # If part of a study, return to registry
+            if tracker_repo:
+                destination = { 'repo_name': tracker_repo.name,
+                                'username': tracker_repo.owner() }
+            else:
+                destination = { 'repo_name': repo_name,
+                                'username': account.username }
+
+            return HttpResponseRedirect( reverse( 'repo_visualize', kwargs=destination) )
         else:
 
             # Do validation of the data and add to repo!
@@ -304,6 +307,13 @@ def webform( request, username, repo_name ):
             # button was clicked.  Send Non-users to thank-you page
             if not request.user.is_authenticated():
                 return render_to_response( 'finish_survey.html' )
+
+            # If part of a study, return to registry
+            elif tracker_repo:
+                destination = { 'repo_name': tracker_repo.name,
+                                'username': tracker_repo.owner() }
+
+                return HttpResponseRedirect( reverse( 'repo_visualize', kwargs=destination) )
 
             elif isinstance( account, User ):
                 return HttpResponseRedirect(
@@ -373,9 +383,7 @@ def repo_viz( request, username, repo_name, filter_param=None ):
         return HttpResponse( status=404 )
 
     # If the repo is part of a study, grab the tracker repo
-    tracker_repo = None
-    if repo.study:
-        tracker_repo = Repository.objects.filter(study=repo.study).filter(is_tracker=True)[0]
+    tracker_repo = repo.registry()
 
     # Grab all the permissions!
     permissions = []
