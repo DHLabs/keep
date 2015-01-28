@@ -74,6 +74,8 @@ define( [ 'jquery',
                   index++
           @
 
+        # return first key in dict, for example:
+        # { 'English': 'cat', 'Spanish': 'gato' } => 'English'
         first_key: (dict) ->
           _.keys(dict)[0]
 
@@ -81,9 +83,10 @@ define( [ 'jquery',
           first_field = document.flat_fields[0]
 
           if first_field.type is 'group'
-            # return first key in dict, for example:
-            # { 'English': 'cat', 'Spanish': 'gato' } => 'English'
-            return @first_key(first_field.children[0].label)
+            if typeof first_field.children[0].label is 'object'
+              return @first_key(first_field.children[0].label)
+            else
+              return first_field.children[0].label
 
           if first_field.type isnt 'group' and first_field.label?
             if typeof first_field.label is 'object'
