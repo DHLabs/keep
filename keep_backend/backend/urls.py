@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from api.data import DataResource
+from api.filters import FilterSetResource
 from api.repo import RepoResource
 from api.study import StudyResource
 from api.user import UserResource
@@ -16,6 +17,7 @@ from tastypie.api import Api
 v1_api = Api( api_name='v1' )
 
 v1_api.register( DataResource() )
+v1_api.register( FilterSetResource() )
 v1_api.register( RepoResource() )
 v1_api.register( StudyResource() )
 v1_api.register( UserResource() )

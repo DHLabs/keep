@@ -32,3 +32,19 @@ class Visualization( models.Model ):
 
     def __unicode__( self ):
         return '%s - %s' % ( self.repo.name, self.name )
+
+
+class FilterSet( models.Model ):
+    """
+        Represents a group of TastyPie filters that can be applied and viewed
+        in the Filters view.
+    """
+
+    name = models.CharField( max_length=255, blank=False )
+    repo = models.ForeignKey( 'repos.Repository', related_name='filters' )
+    user = models.ForeignKey( 'auth.User', related_name='user')
+    is_public = models.BooleanField(default=False)
+    querystring = models.CharField( max_length=1024, blank=False )
+
+    def __unicode__(self):
+        return self.name
