@@ -34,6 +34,7 @@ def validate_and_format( fields, data, files ):
     valid_data = {}
     valid_files = {}
 
+
     for element in fields:
 
         etype = element[ 'type' ]
@@ -94,9 +95,25 @@ def validate_and_format( fields, data, files ):
                   # TODO: Handle potential errors parsing the string?
                   coords = data.get( ename )
                   coords = coords.split( ' ' )
-                  # If the row doesn't have a geopoint, set to None
+
                   try:
-                    geodata[ 'coordinates' ] = [ float( coords[1] ), float( coords[0] ) ]
+                    lat = float( coords[0] )
+                    lng = float( coords[1] )
+
+                    # Bound latitude and longitude to [ -90, 90 ], [ -180, 180 ]
+                    while lat > 90:
+                        lat = lat - 180
+                    while lat < -90:
+                        lat = lat + 180
+                    while lng > 180:
+                        lng = lng - 360
+                    while lng < -180:
+                        lng = lng + 360
+
+                    # Note: MongoDB coordinates are stored [Lng, Lat]
+                    geodata[ 'coordinates' ] = [lng, lat]
+
+                  # If the row doesn't have a geopoint, set to None
                   except ValueError:
                     geodata[ 'coordinates' ] = [ None, None ]
 
