@@ -94,7 +94,7 @@
 {% block content %}
 <div class='container' id='webform'>
 	<div class='row'>
-		<div class='fourteen columns'>
+		<div class='twelve columns'>
 			<h2>
 				{% if account.username and user.is_authenticated %}
 					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>/
@@ -107,9 +107,16 @@
 				&nbsp;{{ repo.name }}
 			</h2>
 		</div>
-		<div class="two columns">
+		<div class="four columns">
+      {% if registry %}
+      <a class='btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
+        <i class='icon-list'></i>&nbsp;Registry
+      </a>
+      {% endif %}
+      &nbsp;
 			<a href='#' class='btn' id='language-select-btn'>
-				Select Language
+        <i class="icon-globe"></i>
+				Language
 			</a>
 		</div>
 	</div>

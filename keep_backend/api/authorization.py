@@ -31,14 +31,14 @@ class DataAuthorization( Authorization ):
         # that only belong to the currently logged in user
         if user is None and logged_in_user.is_authenticated():
             public = AnonymousUser()
-            return public.has_perm( 'view_data', object_detail ) or logged_in_user.has_perm( 'view_data', object_detail )
+            return public.has_perm( 'view_repository', object_detail ) or logged_in_user.has_perm( 'view_repository', object_detail )
 
         # Case 3: User query is provided. Check whether the public or the user has access
         # to this data.
         if user is not None:
             public = AnonymousUser()
             user   = User.objects.get( username=user )
-            return public.has_perm( 'view_data, object_detail' ) or user.has_perm( 'view_data', object_detail )
+            return public.has_perm( 'view_repository', object_detail ) or user.has_perm( 'view_repository', object_detail )
 
         return False
 

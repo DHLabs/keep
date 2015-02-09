@@ -15,6 +15,7 @@ django-celery==3.0.23
 django-discover-runner==0.3
 django-extensions==1.1.1
 django-guardian==1.1.1
+git+https://github.com/wesvetter/django-guardian.git@organizations-patch
 django-mailgun==0.2.2
 django-registration==0.8
 django-storages==1.1.8

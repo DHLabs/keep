@@ -280,16 +280,24 @@ def webform( request, username, repo_name ):
     if repo is None:
         return HttpResponse( status=404 )
 
+    # If the repo is part of a study, grab the tracker repo
+    tracker_repo = repo.registry()
+
     if request.method == 'POST':
 
         if 'detail_data_id' in request.POST:
 
             repo.update_data( request.POST, request.FILES )
 
-            return HttpResponseRedirect(
-                        reverse( 'repo_visualize',
-                                  kwargs={ 'username': account.username,
-                                           'repo_name': repo_name } ) )
+            # If part of a study, return to registry
+            if tracker_repo:
+                destination = { 'repo_name': tracker_repo.name,
+                                'username': tracker_repo.owner() }
+            else:
+                destination = { 'repo_name': repo_name,
+                                'username': account.username }
+
+            return HttpResponseRedirect( reverse( 'repo_visualize', kwargs=destination) )
         else:
 
             # Do validation of the data and add to repo!
@@ -299,6 +307,13 @@ def webform( request, username, repo_name ):
             # button was clicked.  Send Non-users to thank-you page
             if not request.user.is_authenticated():
                 return render_to_response( 'finish_survey.html' )
+
+            # If part of a study, return to registry
+            elif tracker_repo:
+                destination = { 'repo_name': tracker_repo.name,
+                                'username': tracker_repo.owner() }
+
+                return HttpResponseRedirect( reverse( 'repo_visualize', kwargs=destination) )
 
             elif isinstance( account, User ):
                 return HttpResponseRedirect(
@@ -318,13 +333,14 @@ def webform( request, username, repo_name ):
     if 'label' in first_field and isinstance(first_field['label'], dict):
         has_translations = True
         translations = first_field['label'].keys
-    elif first_field.type is 'group' and isinstance( first_field['children'][0]['label'], dict):
+    elif first_field['type'] is 'group' and isinstance( first_field['children'][0]['label'], dict):
         # The first field is a group w/o a translation, so check if the first
         # question in the group has a translation.
         has_translations = True
         translations = first_field['children'][0]['label'].keys
     else:
         has_translations = False
+        translations = []
 
     flat_field_json = json.dumps(flat_fields)
 
@@ -334,6 +350,7 @@ def webform( request, username, repo_name ):
 
     return render_to_response( 'webform.html',
                                { 'repo': repo,
+                                 'registry': tracker_repo,
                                  'repo_json': repo_json,
                                  'flat_fields': flat_fields,
                                  'flat_field_json':flat_field_json,
@@ -364,6 +381,9 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     repo = Repository.objects.get_by_username( repo_name, username )
     if repo is None:
         return HttpResponse( status=404 )
+
+    # If the repo is part of a study, grab the tracker repo
+    tracker_repo = repo.registry()
 
     # Grab all the permissions!
     permissions = []
@@ -436,6 +456,7 @@ def repo_viz( request, username, repo_name, filter_param=None ):
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
+                                 'registry': tracker_repo,
 
                                  'repo_json': repo_json,
                                  'linked_json': linked_json,
