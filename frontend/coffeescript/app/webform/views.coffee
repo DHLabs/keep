@@ -458,6 +458,10 @@ define( [ 'jquery',
           @hide_question current_question
           @show_question next_question
 
+          # Update progress bar
+          new_width_percetange = ((next_index / @numberOfQuestions) * 100).toString()
+          @$('.progress-bar').width("#{new_width_percetange}%")
+
           @currentQuestionIndex = next_index
           @_display_form_buttons(@currentQuestionIndex)
 
