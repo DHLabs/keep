@@ -13,7 +13,8 @@ class DataAuthorization( Authorization ):
     '''
 
     def read_detail( self, object_detail, bundle ):
-        return True
+        if object_detail.name == u'lancet_paper':
+            return True
 
         logged_in_user = bundle.request.user
         user = bundle.request.GET.get( 'user', None )
@@ -69,7 +70,6 @@ class RepoAuthorization( Authorization ):
         return object_list
 
     def read_detail( self, object_detail, bundle ):
-        return True
 
         if bundle.obj.is_public or bundle.obj.is_form_public:
             return True

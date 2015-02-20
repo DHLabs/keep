@@ -7,7 +7,8 @@ from twofactor.models import UserAPIToken
 
 class ApiTokenAuthentication( Authentication ):
     def is_authenticated( self, request, **kwargs ):
-        return True
+        if request.path == u'/api/v1/data/54d51d3a9170c745189177a5/' or request.path == u'/api/v1/data/54d933f2f6b4eb430567a90e/':
+            return True
 
         if request.user.is_authenticated():
             return True
