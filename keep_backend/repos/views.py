@@ -19,6 +19,8 @@ from backend.db import db, DataSerializer, user_or_organization
 
 from studies.models import StudySerializer
 from visualizations.models import VisualizationSerializer
+from visualizations.models import FilterSet
+from api.filters import FilterSetResource
 #from privacy import privatize_geo
 
 from .forms import NewRepoForm, NewBatchRepoForm
@@ -454,6 +456,14 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     viz_serializer = VisualizationSerializer()
     viz_json = json.dumps( viz_serializer.serialize( repo.visualizations.all() ) )
 
+    # Get JSON for filters using TastyPie serializers
+    fsr = FilterSetResource()
+    filters = FilterSet.objects.filter(repo=repo.id)
+    bundles = [fsr.build_bundle(obj=f, request=request) for f in filters]
+    filter_data = [fsr.full_dehydrate(bundle) for bundle in bundles]
+    filter_json = fsr.serialize(request, filter_data, 'application/json')
+    resource_ids = {'user_id': request.user.id, 'repo_id': repo.id }
+
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
                                  'registry': tracker_repo,
@@ -461,6 +471,8 @@ def repo_viz( request, username, repo_name, filter_param=None ):
                                  'repo_json': repo_json,
                                  'linked_json': linked_json,
                                  'viz_json': viz_json,
+                                 'filter_json': filter_json,
+                                 'resource_ids': resource_ids,
 
                                  'data': json.dumps( data ),
 

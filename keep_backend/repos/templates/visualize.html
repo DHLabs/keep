@@ -15,8 +15,10 @@
   document.repo = {{repo_json|safe}};
   document.linked_repos = {{linked_json|safe}};
   document.visualizations = {{viz_json|safe}};
+  document.saved_filters = {{filter_json|safe}};
   document.initial_data = {{data|safe}};
   document.repo_owner = '{{repo.owner}}';
+  document.resource_ids = {{resource_ids|safe}};
 </script>
 <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
 <script src='{% static 'js/vendor/require.js' %}'></script>
