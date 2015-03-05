@@ -26,7 +26,7 @@ class RegistrationFormUserProfile( RegistrationFormUniqueEmail ):
         'data', 'forms', 'maps', 'odk', 'people', 'submit', 'submission',
         'support', 'syntax', 'xls2xform', 'users', 'worldbank', 'unicef',
         'who', 'wb', 'wfp', 'save', 'ei', 'modilabs', 'mvp', 'unido',
-        'unesco', 'savethechildren', 'worldvision', 'afsis']
+        'unesco', 'savethechildren', 'worldvision', 'afsis', 'features']
 
     username = forms.CharField(widget=forms.TextInput(), max_length=30)
     email    = forms.EmailField(widget=forms.TextInput())

@@ -3,6 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.views.generic.base import TemplateView
 
 from api.data import DataResource
 from api.filters import FilterSetResource
@@ -44,6 +45,12 @@ urlpatterns = patterns( 'backend.views',
 
 )
 
+# Static pages
+urlpatterns += url(r'^features',
+    TemplateView.as_view(template_name='features.html'),
+    name='features'),
+
+
 if settings.DEBUG:
     admin.autodiscover()
     urlpatterns += patterns( '',
@@ -63,6 +70,7 @@ urlpatterns += patterns( '', url( r'', include( 'repos.urls' ) ) )
 
 # Handle the ODKCollect APIs
 urlpatterns += patterns( '', url( r'', include( 'openrosa.urls' ) ) )
+
 
 # Handle static files on local dev machine
 if settings.DEBUG:
