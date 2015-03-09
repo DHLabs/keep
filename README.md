@@ -32,12 +32,6 @@ The Front-end development environment will set up the resources needed to compil
 and minify your frontend assets. To correctly ensure that you have a working local
 development environment, follow these instructions:
 
-### Install Ruby & RubyGems
-After installing Ruby, run the following command to install the first set of
-front-end dependencies.
-
-    gem update --system && gem install compass
-
 ### Install Node.js requirements
 Make sure you are in the root of the project where the package.json file is located.
 

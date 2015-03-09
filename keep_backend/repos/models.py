@@ -382,6 +382,16 @@ class Repository( models.Model ):
         task_id = db.task.insert( task_data )
         return task_id
 
+    # If repo is part of a study, and that study has a tracker repo, returns that repo
+    def registry( self ):
+        if self.is_tracker:
+            return self
+        elif self.study:
+            study_repos = Repository.objects.filter(study=self.study).filter(is_tracker=True)
+            if study_repos:
+                return study_repos[0]
+        return None
+
     def remove_task( self, task_id ):
         return db.task.remove( { 'task': task_id } )
 

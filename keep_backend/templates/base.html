@@ -49,6 +49,8 @@
                         Logout
                     </a>
                 </div>
+                {% else %}
+                <h4 class="u-textRight" style="padding-top: 16px;"><a href='{% url "auth_login" %}'>Login</a> | <a href="{% url "registration_register" %}">Register</a></h4>
                 {% endif %}
             </div>
         </div>

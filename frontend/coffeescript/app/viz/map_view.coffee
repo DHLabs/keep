@@ -72,33 +72,68 @@ define( [ 'jquery',
             #         else if field.label.search( 'lng' ) != -1
             #             @selected_header.lng = field
 
-        _geopoint: ( datum ) ->
+        _geopoint: ( datum ) =>
+            # Ensure there is a column with geopoint data
+            return null if not @selected_header.name?
 
-            geopoint = undefined
+            # Get geopoint data
+            geopoint = datum.get('data')[ @selected_header.name ]
+            return null if not geopoint?
 
-            if @selected_header.location?
+            # Get Lat/Lng
+            [lat, lng] = [geopoint.coordinates[1],geopoint.coordinates[0]]
+            lat = parseFloat(lat)
+            lng = parseFloat(lng)
+            return null if isNaN(lat) or isNaN(lng)
 
-                geopoint = datum.get( 'data' )[ @selected_header.location.name ]
+            # Bound latitude from -90 to 90
+            lat = lat - 180 while lat > 90
+            lat = lat + 180 while lat < -90
+
+            # Bound longitude from -180 to 180
+            lng = lng - 360 while lng > 180
+            lng = lng + 360 while lng < -180
+
+            return { lat: lat, lng: lng }
+
+        render: ->
+            last_marker = undefined
+
+            for datum in @collection.models
+                geopoint = @_geopoint( datum )
 
                 if not geopoint?
-                    return null
+                    continue
 
-                geopoint = geopoint.split( ' ' )[0..2]
+                marker = L.marker( [geopoint.lat, geopoint.lng], {icon: mapIcon} )
+                #marker.data = datum.get( 'data' )
+                #marker.timestamp = new Date( datum.get( 'timestamp' ) )
 
-                if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
-                    return null
+                # if last_marker?
+                #     day = 1000 * 60 * 60 * 24
+                #     if marker.timestamp.getTime() - last_marker.timestamp.getTime() < day
+                #         pline = [ marker.getLatLng(), last_marker.getLatLng() ]
+                #         @connections.addLayer( L.polyline( pline ) )
 
-            else
-                geopoint = [ datum.get( 'data' )[ @selected_header.lat.name ],
-                             datum.get( 'data' )[ @selected_header.lng.name ] ]
+                #     last_marker = marker
+                # else
+                #     last_marker = marker
 
-            geopoint[0] = parseFloat( geopoint[0] )
-            geopoint[1] = parseFloat( geopoint[1] )
+                html = ''
+                for key, value of datum.get( 'data' )#marker.data
+                    html += "<div><strong>#{key}:</strong> #{value}</div>"
+                marker.bindPopup( html )
 
-            if isNaN( geopoint[0] ) or isNaN( geopoint[1] )
-                return null
+                @markers.addLayer( marker )
+                @clusters.addLayer( marker )
 
-            return geopoint
+                if datum.get( 'data' ).value?
+                    heatmap_value = datum.get( 'data' ).value
+
+                #heatmapData.push(
+                #    lat: geopoint[0]
+                #    lon: geopoint[1]
+                #    value: heatmap_value )
 
         _resize_map: () =>
             $( '#map' ).css( { 'height': ( @$el.parent().height() - 20 ) + 'px' } )
@@ -137,6 +172,8 @@ define( [ 'jquery',
             @controls = L.control.layers( null, layers, { collapsed: false } )
             @controls.addTo( @map )
 
+            @data_offset = 0
+
             # Listen to events
             @map.on( 'moveend', @refresh_viewport )
 
@@ -146,21 +183,20 @@ define( [ 'jquery',
                 @clusters.clearLayers() )
             @
 
+        # We aren't appending HTML to the DOM in the standard way; rather than
+        # appending HTML to the collections el, we want to render each
+        # geopoint on our Leaflet map.
         appendHtml: (collectionView, itemView, index) ->
-            # If we could not find any geofields or the user has not
-            # specified an existing one, don't do anything with the
-            # data.
-            if not collectionView.selected_header?
-                return
+
+            # If we could not find any geofields or the user has not specified
+            # an existing one, don't do anything with the data.
+            return if not collectionView.selected_header?
+            point = @_geopoint(itemView.model)
+            return if not point?
 
             # Instead of appending these views into the DOM, place them in the
             # map instead!
-            point = itemView.model.geopoint( collectionView.selected_header )
-
-            if not point?
-                return @
-
-            marker = L.marker( point, {icon: mapIcon} )
+            marker = L.marker([point.lat,  point.lng], {icon: mapIcon})
             marker.bindPopup( itemView.el )
 
             # Add marker to our different layers
@@ -177,6 +213,21 @@ define( [ 'jquery',
           # invalidateSize() doesn't work.
           @map._onResize()
 
+        get_next_page: () ->
+
+            @data_offset = @data_offset + 1
+            selfie = @
+            @collection.fetch(
+                reset: false
+                data:
+                    geofield: @selected_header.name
+                    bbox: @bounds.toBBoxString()
+                    offset: @data_offset
+                success: (collection, response, options) ->
+                    if response.meta.pages > selfie.data_offset
+                        selfie.get_next_page()
+            )
+
         refresh_viewport: ( event ) =>
             # If we could not find any geofields or the user has not
             # specified an existing one, don't do anything with the
@@ -184,14 +235,23 @@ define( [ 'jquery',
             if not @selected_header?
                 return
 
+            @data_offset = 0
+
             # Everytime we move around, grab new data from the server and
             # refresh the viewport!
-            bounds = event.target.getBounds()
+            @bounds = event.target.getBounds()
+
+            selfie = @
+
             @collection.fetch(
                 reset: true
                 data:
                     geofield: @selected_header.name
-                    bbox: bounds.toBBoxString() )
+                    bbox: @bounds.toBBoxString()
+                success: (collection, response, options) ->
+                    if response.meta.pages > 0
+                        selfie.get_next_page()
+            )
 
     return DataMapView
 )

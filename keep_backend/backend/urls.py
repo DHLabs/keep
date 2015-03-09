@@ -3,8 +3,10 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.views.generic.base import TemplateView
 
 from api.data import DataResource
+from api.filters import FilterSetResource
 from api.repo import RepoResource
 from api.study import StudyResource
 from api.user import UserResource
@@ -16,6 +18,7 @@ from tastypie.api import Api
 v1_api = Api( api_name='v1' )
 
 v1_api.register( DataResource() )
+v1_api.register( FilterSetResource() )
 v1_api.register( RepoResource() )
 v1_api.register( StudyResource() )
 v1_api.register( UserResource() )
@@ -42,6 +45,12 @@ urlpatterns = patterns( 'backend.views',
 
 )
 
+# Static pages
+urlpatterns += url(r'^features',
+    TemplateView.as_view(template_name='features.html'),
+    name='features'),
+
+
 if settings.DEBUG:
     admin.autodiscover()
     urlpatterns += patterns( '',
@@ -61,6 +70,7 @@ urlpatterns += patterns( '', url( r'', include( 'repos.urls' ) ) )
 
 # Handle the ODKCollect APIs
 urlpatterns += patterns( '', url( r'', include( 'openrosa.urls' ) ) )
+
 
 # Handle static files on local dev machine
 if settings.DEBUG:

@@ -18,7 +18,7 @@ module.exports = ( grunt ) ->
 
       styles:
         files: [ 'frontend/sass/**/*.scss' ]
-        tasks: [ 'compass:dist' ]
+        tasks: [ 'sass:dev' ]
 
       images:
         files: [ 'frontend/img/**/*' ]
@@ -51,12 +51,15 @@ module.exports = ( grunt ) ->
         dest: 'build/js'
         ext: '.js'
 
-    compass:
-      dist:
+    sass:
+      dev:
+        files:
+          '<%= pkg.static_dir %>/css/layout.css': 'frontend/sass/layout.scss'
+      prod:
         options:
-          sassDir: 'frontend/sass'
-          cssDir: '<%= pkg.static_dir %>/css'
           outputStyle: 'compressed'
+        files:
+          '<%= pkg.static_dir %>/css/layout.css': 'frontend/sass/layout.scss'
 
     copy:
       css:
@@ -110,7 +113,7 @@ module.exports = ( grunt ) ->
   grunt.loadNpmTasks( 'grunt-contrib-watch' )
   grunt.loadNpmTasks( 'grunt-contrib-requirejs' )
   grunt.loadNpmTasks( 'grunt-contrib-coffee' )
-  grunt.loadNpmTasks( 'grunt-contrib-compass' )
+  grunt.loadNpmTasks( 'grunt-sass' )
   grunt.loadNpmTasks( 'grunt-contrib-copy' )
 
   grunt.registerTask( 'default', [ 'watch' ] )
@@ -124,7 +127,7 @@ module.exports = ( grunt ) ->
                    'requirejs',
 
                    # Compile SCSS
-                   'compass:dist',
+                   'sass:dev',
 
                    # Finally copy oher basic components over to
                    # <static> folder

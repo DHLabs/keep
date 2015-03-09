@@ -13,12 +13,15 @@
 @import "elements/_tables";
 @import "elements/_forms";
 
+@import "_features";
+
 // import sheets for specific locations
 @import "_modal";
 @import "_topbar";
 @import "_landing";
 @import "_dashboard";
 @import "_viz";
+@import "_progress-bars";
 
 /* Override Skeleton styles for sticky footer
  *
