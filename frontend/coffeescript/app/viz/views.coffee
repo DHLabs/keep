@@ -46,9 +46,12 @@ define( [ 'jquery',
             'click li': 'switch_event'
 
         switch_event: ( event ) ->
+            # Prevents URL from changing back to '#'
+            event.preventDefault()
+
             target = $( event.currentTarget )
 
-            if @selected().attr( 'id' ) == target.attr( 'id' )
+            if @selected().data('type') is target.data('type')
                 return
 
             if target.hasClass( 'disabled' )
@@ -59,10 +62,9 @@ define( [ 'jquery',
 
             @trigger( 'switch:' + target.data( 'type' ) )
 
-        selected: () ->
+        selected: ->
             # Return the currently selected tab
-            return $( 'li.active', @el )
-
+            return @$('li.active')
 
     class VizChrome extends Backbone.Marionette.Region
         el: '#viz-chrome'
@@ -92,7 +94,10 @@ define( [ 'jquery',
                 settings: @settingsView
 
             # Attach and show initial view
-            @show(@rawView)
+            current_route = Backbone.history.getFragment()
+            initial_view = @views[current_route]
+            initial_view or= @rawView
+            @show(initial_view)
             @currentView.$el.show()
 
             @
@@ -101,6 +106,7 @@ define( [ 'jquery',
           @currentView.$el.hide()
           @show(@views[view], preventClose: true)
           @currentView.$el.show()
+          Backbone.history.navigate(view)
 
 
     # Instantiate and startup the new process.

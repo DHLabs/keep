@@ -169,6 +169,9 @@ define( [ 'jquery',
                 'Heatmap': @heatmap
                 'Markers': @markers
 
+            # Enable markers by default
+            @map.addLayer @markers
+
             @controls = L.control.layers( null, layers, { collapsed: false } )
             @controls.addTo( @map )
 
