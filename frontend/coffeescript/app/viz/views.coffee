@@ -83,9 +83,11 @@ define( [ 'jquery',
             'click li': 'switch_event'
 
         switch_event: ( event ) ->
+            event.preventDefault()
+
             target = $( event.currentTarget )
 
-            if @selected().attr( 'id' ) == target.attr( 'id' )
+            if @selected().data('type') is target.data('type')
                 return
 
             if target.hasClass( 'disabled' )
@@ -127,10 +129,14 @@ define( [ 'jquery',
                 line: @chartView
                 #filters: @filtersView
                 settings: @settingsView
-            @attachView( @rawView )
 
+            current_route = Backbone.history.getFragment()
+            initial_view = @views[current_route]
+            initial_view or= @rawView
+
+            @attachView(initial_view)
             @currentView.render()
-            #@filtersView.render()
+            @currentView.$el.show()
             if @currentView.showView? then @currentView.showView()
             if @currentView.onShow? then @currentView.onShow()
 
@@ -145,6 +151,8 @@ define( [ 'jquery',
 
             # Call the onShow handler if it exists in the view
             if @currentView.onShow? then @currentView.onShow()
+
+            Backbone.history.navigate(view)
 
             @
 

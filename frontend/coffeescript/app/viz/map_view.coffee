@@ -153,7 +153,7 @@ define( [ 'jquery',
             # Setup the map itself
             # TODO: Pick a smart default location to look at. Maybe the user's
             # current location?
-            @map = L.map( 'map' ).setView( [ 0, 0 ], 5 )
+            @map = L.map( 'map' ).setView( [ 0, 0 ], 2 )
             L.tileLayer( 'http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
                          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
                          maxZoom: 18 }).addTo( @map )
@@ -169,6 +169,9 @@ define( [ 'jquery',
                 'Connections': @connections
                 'Heatmap': @heatmap
                 'Markers': @markers
+
+            # Enable markers by default
+            @map.addLayer @markers
 
             @controls = L.control.layers( null, layers, { collapsed: false } )
             @controls.addTo( @map )
