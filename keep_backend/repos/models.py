@@ -332,8 +332,13 @@ class Repository( models.Model ):
         fields = self.fields()
         validated_data, valid_files = validate_and_format(fields, data, files)
 
+        # Ensure tracker id's are unique
         if self.is_tracker:
-            validated_data[self.study.tracker] = str(random.randrange(100000000,999999999))
+            while True:
+                validated_data[self.study.tracker] = str(random.randrange(100000000,999999999))
+
+                if db.data.find( { "data.{0}".format(self.study.tracker): validated_data[self.study.tracker] } ).count() == 0:
+                    break
 
         repo_data = {
             'label': self.name,

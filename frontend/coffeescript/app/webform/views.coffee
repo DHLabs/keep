@@ -415,6 +415,8 @@ define( [ 'jquery',
         switch_question: ( next_index, advancing ) ->
           #TODO: if in group, test relevance/constraint for all children
 
+          next_index = 0 if next_index < 0
+
           # Does the current active question pass our constraints?
           if advancing
             return unless @passes_question_constraints()

@@ -79,7 +79,19 @@ def create_repo_from_file( file, file_type, repo ):
         fields = SurveyReader( xform )
         fields = fields.to_json_dict()
 
-        if (not repo.is_tracker) and (repo.study is not None) and (repo.study.tracker is not None):
+        valid_tracker_field = True if repo.study and repo.study.tracker != '' else False
+
+        # if this repo is a registry, add tracker field as the second question
+        # (calculate fields can't be the first field)
+        if repo.is_tracker:
+            fields['children'].insert( 1, {
+                    'type':'calculate',
+                    'name': repo.study.tracker,
+                    'label': repo.study.tracker,
+                } )
+
+        # if this repo is not a registry but part of a study with tracked objects,
+        elif not repo.is_tracker and valid_tracker_field:
             fields['children'].insert( 0, {
                     'type':'text',
                     'name':repo.study.tracker,
