@@ -50,8 +50,6 @@ define( [ 'jquery',
 
             @repopulateForm()
             @_display_form_buttons(0)
-            @switch_question(1, true)
-            @switch_question(0, false)
             @
 
         change_language: (language) ->
@@ -438,6 +436,7 @@ define( [ 'jquery',
               next_question = document.flat_fields[next_index]
 
           if not next_question
+            @update_progress_bar(next_index)
             @_display_form_buttons(next_index)
             return
 
@@ -461,8 +460,8 @@ define( [ 'jquery',
           @show_question next_question
 
           # Update progress bar
-          new_width_percetange = ((next_index / @numberOfQuestions) * 100).toString()
-          @$('.progress-bar').width("#{new_width_percetange}%")
+          @update_progress_bar(next_index)
+
 
           @currentQuestionIndex = next_index
           @_display_form_buttons(@currentQuestionIndex)
@@ -471,6 +470,10 @@ define( [ 'jquery',
           #_geopointDisplay()  if form_info.bind isnt `undefined` and form_info.bind.map isnt `undefined`
 
           @
+
+        update_progress_bar: (next_index) ->
+          new_width_percentage = ((next_index / @numberOfQuestions) * 100).toString()
+          @$('.progress-bar').width("#{new_width_percentage}%")
 
         next_question: () ->
 
