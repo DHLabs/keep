@@ -33,7 +33,7 @@ define( [ 'jquery',
         # languages:  []
 
         language_select: ( event ) ->
-          @modalView = new LanguageSelectModal( { current: @currentLanguage, view: this } )
+          @modalView = new LanguageSelectModal( { current: @current_language, view: this } )
           $('.modal').html( @modalView.render().el )
           @modalView.onAfterRender( $( '.modal' ) )
           @
@@ -46,7 +46,7 @@ define( [ 'jquery',
             @currentQuestionIndex = 0
             @numberOfQuestions = document.flat_fields.length
 
-            @current_language = @set_current_language()
+            @change_language @set_current_language()
 
             @repopulateForm()
             @show_first_question()
@@ -59,7 +59,7 @@ define( [ 'jquery',
 
 
         change_language: (language) ->
-          @currentLanguage = language
+          @current_language = language
 
           #iterate through all the questions and switch the text
           for question in document.flat_fields
@@ -83,17 +83,23 @@ define( [ 'jquery',
         first_key: (dict) ->
           _.keys(dict)[0]
 
+        # Defaults to English if an English label is present, otherwise returns
+        # the first language it finds.
         set_current_language: ->
           first_field = document.flat_fields[0]
 
           if first_field.type is 'group'
             if typeof first_field.children[0].label is 'object'
+              # Default to English, otherwise return first label found
+              return 'English' if first_field.children[0].label['English']?
               return @first_key(first_field.children[0].label)
             else
               return first_field.children[0].label
 
           if first_field.type isnt 'group' and first_field.label?
             if typeof first_field.label is 'object'
+              # Default to English, otherwise return first label found
+              return 'English' if first_field.label['English']?
               return @first_key(first_field.label)
             else
               # doesn't have translations
@@ -107,9 +113,9 @@ define( [ 'jquery',
           return label if typeof label is 'string'
 
           # otherwise label is a translation dict
-          if label[@currentLanguage]
+          if label[@current_language]
             # has translation so return translated label
-            return label[@currentLanguage]
+            return label[@current_language]
           else
             # has translations, but not the desired one so return first value.
             # for example:
