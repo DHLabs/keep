@@ -49,8 +49,14 @@ define( [ 'jquery',
             @current_language = @set_current_language()
 
             @repopulateForm()
-            @_display_form_buttons(0)
+            @show_first_question()
             @
+
+        show_first_question: ->
+          first_question = document.flat_fields[0]
+          @toggle_question(first_question, false)
+          @_display_form_buttons(0)
+
 
         change_language: (language) ->
           @currentLanguage = language
@@ -412,39 +418,69 @@ define( [ 'jquery',
 
         switch_question: ( next_index, advancing ) ->
           #TODO: if in group, test relevance/constraint for all children
+          current_question = document.flat_fields[@currentQuestionIndex]
+          next_question = document.flat_fields[next_index]
 
-          next_index = 0 if next_index < 0
+          # Case 1: moving backwards through the form to the first question
+          # ---------------------------------------------------------------
+          #
+          # Show the first question, and hide the 'Previous' button.
+          if next_index is 0
+            @hide_question current_question
+            @show_question next_question
+            @currentQuestionIndex = 0
+            @update_progress_bar(0)
+            @_display_form_buttons(0)
+            return
 
-          # Does the current active question pass our constraints?
+          # Case 2: finished the last question in the form
+          # ----------------------------------------------
+          #
+          # Show the submit button.
+          if next_index >= @numberOfQuestions
+            return unless @passes_question_constraints()
+            @currentQuestionIndex = @numberOfQuestions
+            @update_progress_bar(next_index)
+            @_display_form_buttons(next_index)
+            return
+
+          # Case 3: general case, navigating forwards or backwards
+          # ------------------------------------------------------
+
+          # If the current question is a group, we must advance the index to
+          # the end of the group to reach the next field.
           if advancing
+            # Does the current question pass our constraints?
             return unless @passes_question_constraints()
 
-          current_question = document.flat_fields[@currentQuestionIndex]
-          return if not current_question
-
-          if current_question.type is 'group' and next_index isnt -1
-            #TODO: check if group is field-list or not first
-            if advancing
+            if current_question.type is 'group'
               next_index = next_index + current_question.children.length
+              next_question = document.flat_fields[next_index]
 
-          next_question = document.flat_fields[next_index]
-          if not advancing
-            #is current question within group
+              # If the last question is part of a group, then just show the submit button.
+              if next_index >= @numberOfQuestions
+                @update_progress_bar(next_index)
+                @_display_form_buttons(next_index)
+                return
+
+
+          # If going backwards, check if the question is in a group. If the
+          # next question is in a group, i.e. at the end of the group, then we
+          # need to move the index back to the beginning of the group.
+          else
             group = @get_group_for_question(next_question)
             if group
               next_index = next_index - group.children.length
               next_question = document.flat_fields[next_index]
 
-          if not next_question
-            @update_progress_bar(next_index)
-            @_display_form_buttons(next_index)
-            return
+          # Now that we've found the next question, we need to determine if
+          # it's relevant; it could be irrelevant based on preceding values, or
+          # a calculation.
+          if (next_question.bind?.calculate?) or not
+            XFormConstraintChecker.isRelevant( next_question, @queryStringToJSON( $( ".form" ).serialize()) )
 
-          #Is this question relevant?  Or, is this question an equation?
-          if (next_question.bind and next_question.bind.calculate != null) or not
-            XFormConstraintChecker.isRelevant( next_question, @queryStringToJSON($( ".form" ).serialize()) )
               # If its a calculation, calculate it!
-              $("#" + next_question.name).val _performCalcluate(next_question.bind.calculate)  if next_question.bind and next_question.bind.calculate
+              $("#" + next_question.name).val _performCalcluate(next_question.bind.calculate)  if next_question.bind?.calculate?
 
               # Switch to the next question!
               if advancing
@@ -455,15 +491,12 @@ define( [ 'jquery',
               @switch_question( next_index, advancing )
               return
 
-          # Hide the current question, show the next question
+          # We've found the next question, so hide the current question, show
+          # the next one, and update the controls.
           @hide_question current_question
           @show_question next_question
-
-          # Update progress bar
-          @update_progress_bar(next_index)
-
-
           @currentQuestionIndex = next_index
+          @update_progress_bar(next_index)
           @_display_form_buttons(@currentQuestionIndex)
 
           #Start the Geopoint display if geopoint
@@ -475,47 +508,12 @@ define( [ 'jquery',
           new_width_percentage = ((next_index / @numberOfQuestions) * 100).toString()
           @$('.progress-bar').width("#{new_width_percentage}%")
 
-        next_question: () ->
-
-            #currentQuestion = document.repo.children[@currentQuestionIndex]
-
-            # Set up for field lists and grid lists
-            # if question.info.control and question.info.control.appearance
-            #     current_tree = question.info.tree
-            #     question_index += 1
-            #     question_index += 1  while @input_fields[question_index].tree is current_tree
-
-            # Attempt to switch to the next question
-            #if question_index < @input_fields.length
-            #    question_index += 1
-
-            @switch_question( @currentQuestionIndex + 1, true )
-
-            @
+        next_question: ->
+          @switch_question( @currentQuestionIndex + 1, true )
+          @
 
         prev_question: () ->
-
-            # question = @_active_question()
-
-            # if question_index <= 0
-            #     return @
-
-            # current_tree = @input_fields[question_index - 1].tree
-
-            # # If we are in a group, check if we are in a field/grid list group
-            # unless current_tree is "/"
-            #   temp_idx = question_index - 1
-            #   temp_idx -= 1  while temp_idx >= 0 and @input_fields[temp_idx].tree is current_tree
-            #   temp_idx += 1
-            #   if @input_fields[temp_idx].control and @input_fields[temp_idx].control.appearance
-            #     question_index = temp_idx
-            #   else
-            #     question_index -= 1
-            # else
-            #   question_index -= 1
-
             @switch_question( @currentQuestionIndex - 1, false )
-
             @
 
     return xFormView
