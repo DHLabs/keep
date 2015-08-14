@@ -53,10 +53,10 @@
             </a>
           </td>
         </tr>
-        {% for user, value in users_perms.items %}
-        <tr data-user='{{ user }}'>
+        {% for account, value in account_perms.items %}
+        <tr data-user='{{ account }}'>
           <td>
-            {{ user }}
+            {{ account }}
           </td>
           <td>
             {% if 'change_repository' in value %}

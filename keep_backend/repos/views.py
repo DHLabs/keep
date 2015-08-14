@@ -12,7 +12,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
-from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm
+from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm, get_groups_with_perms
 
 from api.tasks import insert_csv_data
 from backend.db import db, DataSerializer, user_or_organization
@@ -428,8 +428,13 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     # if 'view_raw' not in permissions:
     #     data = privatize_geo( repo, data )
 
-    usePerms = get_users_with_perms( repo, attach_perms=True )
-    usePerms.pop( account, None )
+    # Get all accounts (users and orgs) with permissions to this repo.
+    users_with_perms = get_users_with_perms( repo, attach_perms=True )
+    # Don't want to show your own account
+    users_with_perms.pop( account, None )
+    orgs_with_perms = get_groups_with_perms( repo, attach_perms=True )
+    account_perms = users_with_perms.copy()
+    account_perms.update(orgs_with_perms)
 
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
@@ -478,5 +483,5 @@ def repo_viz( request, username, repo_name, filter_param=None ):
 
                                  'permissions': permissions,
                                  'account': account,
-                                 'users_perms': usePerms },
+                                 'account_perms': account_perms },
                                context_instance=RequestContext(request) )
