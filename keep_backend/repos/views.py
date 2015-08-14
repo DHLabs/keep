@@ -331,11 +331,16 @@ def webform( request, username, repo_name ):
     flat_fields = repo.flatten_fields_with_group()
     first_field = flat_fields[0]
 
-    # Check if first field is question/group with label translations.
+    # Check if first field is question/group with label translations. If the
+    # first field is a tracker field, then check the second field for
+    # translations. (The tracker field is added automatically and doesn't
+    # have translations).
+    if 'label' in first_field and first_field['label'] == 'id':
+        first_field = flat_fields[1]
     if 'label' in first_field and isinstance(first_field['label'], dict):
         has_translations = True
         translations = first_field['label'].keys
-    elif first_field['type'] is 'group' and isinstance( first_field['children'][0]['label'], dict):
+    elif first_field['type'] == 'group' and isinstance( first_field['children'][0]['label'], dict):
         # The first field is a group w/o a translation, so check if the first
         # question in the group has a translation.
         has_translations = True

@@ -46,7 +46,7 @@ define( [ 'jquery',
             @currentQuestionIndex = 0
             @numberOfQuestions = document.flat_fields.length
 
-            @change_language @set_current_language()
+            @change_language @get_default_language()
 
             @repopulateForm()
             @show_first_question()
@@ -83,24 +83,36 @@ define( [ 'jquery',
         first_key: (dict) ->
           _.keys(dict)[0]
 
+
+        # Returns the default language of the form.
+        get_default_language: ->
+          first_field = document.flat_fields[0]
+          second_field = document.flat_fields[1]
+
+          # The first field may be a tracker field, which is automatically
+          # inserted (and thus doesn't have translations) in which case we
+          # need to check the second field of the form.
+          if not @get_translations(first_field)
+            @get_translations(second_field)
+          else
+            @get_translations(first_field)
+
         # Defaults to English if an English label is present, otherwise returns
         # the first language it finds.
-        set_current_language: ->
-          first_field = document.flat_fields[0]
-
-          if first_field.type is 'group'
-            if typeof first_field.children[0].label is 'object'
+        get_translations: (field) ->
+          if field.type is 'group'
+            if typeof field.children[0].label is 'object'
               # Default to English, otherwise return first label found
-              return 'English' if first_field.children[0].label['English']?
-              return @first_key(first_field.children[0].label)
+              return 'English' if field.children[0].label['English']?
+              return @first_key(field.children[0].label)
             else
-              return first_field.children[0].label
+              return field.children[0].label
 
-          if first_field.type isnt 'group' and first_field.label?
-            if typeof first_field.label is 'object'
+          if field.type isnt 'group' and field.label?
+            if typeof field.label is 'object'
               # Default to English, otherwise return first label found
-              return 'English' if first_field.label['English']?
-              return @first_key(first_field.label)
+              return 'English' if field.label['English']?
+              return @first_key(field.label)
             else
               # doesn't have translations
               return null
