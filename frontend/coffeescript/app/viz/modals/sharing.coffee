@@ -69,16 +69,17 @@ define( [ 'jquery',
             @
 
         autocomplete_source: ( request, response ) ->
-            $.ajax(
-                url: "/api/v1/user"
-                data:
-                    format: 'json',
-                    username__icontains: request.term
-                success: ( data ) ->
-                    response( $.map( data.objects, ( item ) ->
-                        return { label: item.username, value: item.username }
-                    ))
-            )
+            $.ajax
+              url: "/api/autocomplete/accounts"
+              data:
+                q: request.term
+              success: (matches) ->
+                matches = JSON.parse(matches)
+                results =
+                  { label: name, value: name } for name in matches
+
+                response(results)
+
             @
 
         remove_share: ( event ) =>

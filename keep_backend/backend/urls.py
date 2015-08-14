@@ -60,6 +60,9 @@ if settings.DEBUG:
 # Add API urls
 urlpatterns += patterns( '', url(r'^api/', include( v1_api.urls ) ) )
 
+# Autocomplete url
+urlpatterns += patterns( '', url(regex=r'^api/autocomplete/(?P<endpoint>.*)/$', view='api.autocomplete.autocomplete', name='autocomplete' ) )
+
 # Account registration / login
 urlpatterns += patterns( '', url( r'^accounts/',
                                   include( 'backend.registration_urls' ) ) )
