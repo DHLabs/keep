@@ -33,7 +33,7 @@ define( [ 'jquery',
         # languages:  []
 
         language_select: ( event ) ->
-          @modalView = new LanguageSelectModal( { current: @currentLanguage, view: this } )
+          @modalView = new LanguageSelectModal( { current: @current_language, view: this } )
           $('.modal').html( @modalView.render().el )
           @modalView.onAfterRender( $( '.modal' ) )
           @
@@ -46,16 +46,20 @@ define( [ 'jquery',
             @currentQuestionIndex = 0
             @numberOfQuestions = document.flat_fields.length
 
-            @current_language = @set_current_language()
+            @change_language @get_default_language()
 
             @repopulateForm()
-            @_display_form_buttons(0)
-            @switch_question(1, true)
-            @switch_question(0, false)
+            @show_first_question()
             @
 
+        show_first_question: ->
+          first_question = document.flat_fields[0]
+          @toggle_question(first_question, false)
+          @_display_form_buttons(0)
+
+
         change_language: (language) ->
-          @currentLanguage = language
+          @current_language = language
 
           #iterate through all the questions and switch the text
           for question in document.flat_fields
@@ -79,18 +83,36 @@ define( [ 'jquery',
         first_key: (dict) ->
           _.keys(dict)[0]
 
-        set_current_language: ->
+
+        # Returns the default language of the form.
+        get_default_language: ->
           first_field = document.flat_fields[0]
+          second_field = document.flat_fields[1]
 
-          if first_field.type is 'group'
-            if typeof first_field.children[0].label is 'object'
-              return @first_key(first_field.children[0].label)
+          # The first field may be a tracker field, which is automatically
+          # inserted (and thus doesn't have translations) in which case we
+          # need to check the second field of the form.
+          if not @get_translations(first_field)
+            @get_translations(second_field)
+          else
+            @get_translations(first_field)
+
+        # Defaults to English if an English label is present, otherwise returns
+        # the first language it finds.
+        get_translations: (field) ->
+          if field.type is 'group'
+            if typeof field.children[0].label is 'object'
+              # Default to English, otherwise return first label found
+              return 'English' if field.children[0].label['English']?
+              return @first_key(field.children[0].label)
             else
-              return first_field.children[0].label
+              return field.children[0].label
 
-          if first_field.type isnt 'group' and first_field.label?
-            if typeof first_field.label is 'object'
-              return @first_key(first_field.label)
+          if field.type isnt 'group' and field.label?
+            if typeof field.label is 'object'
+              # Default to English, otherwise return first label found
+              return 'English' if field.label['English']?
+              return @first_key(field.label)
             else
               # doesn't have translations
               return null
@@ -103,9 +125,9 @@ define( [ 'jquery',
           return label if typeof label is 'string'
 
           # otherwise label is a translation dict
-          if label[@currentLanguage]
+          if label[@current_language]
             # has translation so return translated label
-            return label[@currentLanguage]
+            return label[@current_language]
           else
             # has translations, but not the desired one so return first value.
             # for example:
@@ -138,16 +160,19 @@ define( [ 'jquery',
         #   map.invalidateSize false
 
         queryStringToJSON: (url) ->
-          if (url == '')
-            return ''
-          pairs = (url or location.search).slice(1).split('&')
-          result = {}
-          for idx in pairs
-              pair = idx.split('=')
-              if !!pair[0]
-                  result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] or '')
+          return {} if url is ''
 
-          return result
+          # Slice off '?' if present
+          qs = url or location.search
+          qs = qs.slice(1) if qs[0] is '?'
+
+          pair_strings = qs.split('&')
+          result = {}
+          for str in pair_strings
+            [key, value] = str.split('=')
+            result[key] = decodeURIComponent(value) or ''
+
+          result
 
         replaceAll: (find, replace, str) ->
           return str.replace(new RegExp(find, 'g'), replace)
@@ -356,28 +381,31 @@ define( [ 'jquery',
           @
 
         passes_question_constraints: ->
-            #TODO: First check constraints on the question we're on
-            question = document.flat_fields[@currentQuestionIndex]
+          question = document.flat_fields[@currentQuestionIndex]
 
-            # Pass required?
-            # if question.bind and question.bind.required is "yes"
-            #     if @renderedForm.getValue()[ question.key ].length == 0
-            #         $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
-            #         return false
+          # Check if the question is required and whether or not a value is
+          # present. If not, raise an alert.
+          if question.bind?.required is "yes"
+            if @get_question_value(question).length is 0
+              alert "Answer is required."
+              return false
 
-            # Pass contraints?
-            # if not XFormConstraintChecker.passesConstraint( question, @renderedForm.getValue() )
-            #     $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer doesn't pass constraint:" + question.info.bind.constraint + "</span></div>"
-            #     return false
+          # Ensure that the question passes any constraints, if given. If
+          # not, raise an alert.
+          if not XFormConstraintChecker.passesConstraint( question, @get_question_value(question) )
+            alert "Answer doesn't pass constraint: #{question.info.bind.constraint}"
+            return false
 
-            return true
+          return true
 
         get_question_value: ( question ) ->
-
           answers = $( ".form" ).serialize()
-          answerJson = @queryStringToJSON(answers)
+          answer_json = @queryStringToJSON(answers)
 
-          return answerJson[question.name]
+          if answer_json[question.name]?
+            answer_json[question.name]
+          else
+            ""
 
         show_question: (question) ->
           @toggle_question(question, false)
@@ -414,36 +442,69 @@ define( [ 'jquery',
 
         switch_question: ( next_index, advancing ) ->
           #TODO: if in group, test relevance/constraint for all children
+          current_question = document.flat_fields[@currentQuestionIndex]
+          next_question = document.flat_fields[next_index]
 
-          # Does the current active question pass our constraints?
+          # Case 1: moving backwards through the form to the first question
+          # ---------------------------------------------------------------
+          #
+          # Show the first question, and hide the 'Previous' button.
+          if next_index is 0
+            @hide_question current_question
+            @show_question next_question
+            @currentQuestionIndex = 0
+            @update_progress_bar(0)
+            @_display_form_buttons(0)
+            return
+
+          # Case 2: finished the last question in the form
+          # ----------------------------------------------
+          #
+          # Show the submit button.
+          if next_index >= @numberOfQuestions
+            return unless @passes_question_constraints()
+            @currentQuestionIndex = @numberOfQuestions
+            @update_progress_bar(next_index)
+            @_display_form_buttons(next_index)
+            return
+
+          # Case 3: general case, navigating forwards or backwards
+          # ------------------------------------------------------
+
+          # If the current question is a group, we must advance the index to
+          # the end of the group to reach the next field.
           if advancing
+            # Does the current question pass our constraints?
             return unless @passes_question_constraints()
 
-          current_question = document.flat_fields[@currentQuestionIndex]
-          return if not current_question
-
-          if current_question.type is 'group' and next_index isnt -1
-            #TODO: check if group is field-list or not first
-            if advancing
+            if current_question.type is 'group'
               next_index = next_index + current_question.children.length
+              next_question = document.flat_fields[next_index]
 
-          next_question = document.flat_fields[next_index]
-          if not advancing
-            #is current question within group
+              # If the last question is part of a group, then just show the submit button.
+              if next_index >= @numberOfQuestions
+                @update_progress_bar(next_index)
+                @_display_form_buttons(next_index)
+                return
+
+
+          # If going backwards, check if the question is in a group. If the
+          # next question is in a group, i.e. at the end of the group, then we
+          # need to move the index back to the beginning of the group.
+          else
             group = @get_group_for_question(next_question)
             if group
               next_index = next_index - group.children.length
               next_question = document.flat_fields[next_index]
 
-          if not next_question
-            @_display_form_buttons(next_index)
-            return
+          # Now that we've found the next question, we need to determine if
+          # it's relevant; it could be irrelevant based on preceding values, or
+          # a calculation.
+          if (next_question.bind?.calculate?) or not
+            XFormConstraintChecker.isRelevant( next_question, @queryStringToJSON( $( ".form" ).serialize()) )
 
-          #Is this question relevant?  Or, is this question an equation?
-          if (next_question.bind and next_question.bind.calculate != null) or not
-            XFormConstraintChecker.isRelevant( next_question, @queryStringToJSON($( ".form" ).serialize()) )
               # If its a calculation, calculate it!
-              $("#" + next_question.name).val _performCalcluate(next_question.bind.calculate)  if next_question.bind and next_question.bind.calculate
+              $("#" + next_question.name).val _performCalcluate(next_question.bind.calculate)  if next_question.bind?.calculate?
 
               # Switch to the next question!
               if advancing
@@ -454,15 +515,12 @@ define( [ 'jquery',
               @switch_question( next_index, advancing )
               return
 
-          # Hide the current question, show the next question
+          # We've found the next question, so hide the current question, show
+          # the next one, and update the controls.
           @hide_question current_question
           @show_question next_question
-
-          # Update progress bar
-          new_width_percetange = ((next_index / @numberOfQuestions) * 100).toString()
-          @$('.progress-bar').width("#{new_width_percetange}%")
-
           @currentQuestionIndex = next_index
+          @update_progress_bar(next_index)
           @_display_form_buttons(@currentQuestionIndex)
 
           #Start the Geopoint display if geopoint
@@ -470,47 +528,16 @@ define( [ 'jquery',
 
           @
 
-        next_question: () ->
+        update_progress_bar: (next_index) ->
+          new_width_percentage = ((next_index / @numberOfQuestions) * 100).toString()
+          @$('.progress-bar').width("#{new_width_percentage}%")
 
-            #currentQuestion = document.repo.children[@currentQuestionIndex]
-
-            # Set up for field lists and grid lists
-            # if question.info.control and question.info.control.appearance
-            #     current_tree = question.info.tree
-            #     question_index += 1
-            #     question_index += 1  while @input_fields[question_index].tree is current_tree
-
-            # Attempt to switch to the next question
-            #if question_index < @input_fields.length
-            #    question_index += 1
-
-            @switch_question( @currentQuestionIndex + 1, true )
-
-            @
+        next_question: ->
+          @switch_question( @currentQuestionIndex + 1, true )
+          @
 
         prev_question: () ->
-
-            # question = @_active_question()
-
-            # if question_index <= 0
-            #     return @
-
-            # current_tree = @input_fields[question_index - 1].tree
-
-            # # If we are in a group, check if we are in a field/grid list group
-            # unless current_tree is "/"
-            #   temp_idx = question_index - 1
-            #   temp_idx -= 1  while temp_idx >= 0 and @input_fields[temp_idx].tree is current_tree
-            #   temp_idx += 1
-            #   if @input_fields[temp_idx].control and @input_fields[temp_idx].control.appearance
-            #     question_index = temp_idx
-            #   else
-            #     question_index -= 1
-            # else
-            #   question_index -= 1
-
             @switch_question( @currentQuestionIndex - 1, false )
-
             @
 
     return xFormView

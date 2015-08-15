@@ -37,8 +37,8 @@ def validate_and_format( fields, data, files ):
 
     for element in fields:
 
-        etype = element[ 'type' ]
-        ename = element[ 'name' ]
+        etype = element.get('type', None)
+        ename = element.get('name', None)
 
         # Flatten groups by making a recursive call
         if 'group' in etype:

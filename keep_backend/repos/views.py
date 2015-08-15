@@ -12,7 +12,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
-from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm
+from guardian.shortcuts import get_perms, assign_perm, get_users_with_perms, remove_perm, get_groups_with_perms
 
 from api.tasks import insert_csv_data
 from backend.db import db, DataSerializer, user_or_organization
@@ -331,11 +331,16 @@ def webform( request, username, repo_name ):
     flat_fields = repo.flatten_fields_with_group()
     first_field = flat_fields[0]
 
-    # Check if first field is question/group with label translations.
+    # Check if first field is question/group with label translations. If the
+    # first field is a tracker field, then check the second field for
+    # translations. (The tracker field is added automatically and doesn't
+    # have translations).
+    if 'label' in first_field and first_field['label'] == 'id':
+        first_field = flat_fields[1]
     if 'label' in first_field and isinstance(first_field['label'], dict):
         has_translations = True
         translations = first_field['label'].keys
-    elif first_field['type'] is 'group' and isinstance( first_field['children'][0]['label'], dict):
+    elif first_field['type'] == 'group' and isinstance( first_field['children'][0]['label'], dict):
         # The first field is a group w/o a translation, so check if the first
         # question in the group has a translation.
         has_translations = True
@@ -428,8 +433,13 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     # if 'view_raw' not in permissions:
     #     data = privatize_geo( repo, data )
 
-    usePerms = get_users_with_perms( repo, attach_perms=True )
-    usePerms.pop( account, None )
+    # Get all accounts (users and orgs) with permissions to this repo.
+    users_with_perms = get_users_with_perms( repo, attach_perms=True )
+    # Don't want to show your own account
+    users_with_perms.pop( account, None )
+    orgs_with_perms = get_groups_with_perms( repo, attach_perms=True )
+    account_perms = users_with_perms.copy()
+    account_perms.update(orgs_with_perms)
 
     serializer = RepoSerializer()
     repo_json = json.dumps( serializer.serialize( [repo] )[0] )
@@ -478,5 +488,5 @@ def repo_viz( request, username, repo_name, filter_param=None ):
 
                                  'permissions': permissions,
                                  'account': account,
-                                 'users_perms': usePerms },
+                                 'account_perms': account_perms },
                                context_instance=RequestContext(request) )

@@ -73,7 +73,7 @@ class RepoResource( ModelResource ):
             return orm_filters
 
         if 'study' in filters and len( filters.get( 'study' ) ) > 0:
-            orm_filters[ 'study' ] = filters.get( 'study' )[0]
+            orm_filters[ 'study' ] = filters.get( 'study' )
 
         return orm_filters
 

@@ -74,7 +74,7 @@ define( [ 'jquery',
 
         _geopoint: ( datum ) =>
             # Ensure there is a column with geopoint data
-            return null if not @selected_header.name?
+            return null if not @selected_header?.name?
 
             # Get geopoint data
             geopoint = datum.get('data')[ @selected_header.name ]

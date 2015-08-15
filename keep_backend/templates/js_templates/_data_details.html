@@ -1,6 +1,16 @@
 <script type='text/template' id='data-detail-template'>
   <div class="bbm-modal__topbar"></div>
   <div class="bbm-modal__section">
+    <div class='control-group'>
+      <h4>Details</h4>
+      <table class='table'>
+        <% _.each( attributes, function( val, key ) { %>
+          <tr>
+            <td><%= key %></td><td><%= val %></td>
+          </tr>
+        <% }); %>
+      </table>
+    </div>
     <% if( is_tracker ) { %>
     <div class='control-group' id='data-links'>
       <h4>Linked Forms</h4>
@@ -13,7 +23,7 @@
               </a>
             </td>
             <td>
-              <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/' target='_blank'>
+              <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/'>
                 <%= repo.get( 'name' ) %>
               </a>
             </td>
@@ -23,16 +33,6 @@
     </div>
     <% } %>
 
-    <div class='control-group'>
-      <h4>Details</h4>
-      <table class='table'>
-        <% _.each( attributes, function( val, key ) { %>
-          <tr>
-            <td><%= key %></td><td><%= val %></td>
-          </tr>
-        <% }); %>
-      </table>
-    </div>
   </div>
   <div class="bbm-modal__bottombar">
     <a href="#" id="edit_data_btn" style="text-align: left" class="btn">Edit Data</a>&nbsp;&nbsp;&nbsp;
