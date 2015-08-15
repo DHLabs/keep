@@ -160,16 +160,19 @@ define( [ 'jquery',
         #   map.invalidateSize false
 
         queryStringToJSON: (url) ->
-          if (url == '')
-            return ''
-          pairs = (url or location.search).slice(1).split('&')
-          result = {}
-          for idx in pairs
-              pair = idx.split('=')
-              if !!pair[0]
-                  result[pair[0].toLowerCase()] = decodeURIComponent(pair[1] or '')
+          return {} if url is ''
 
-          return result
+          # Slice off '?' if present
+          qs = url or location.search
+          qs = qs.slice(1) if qs[0] is '?'
+
+          pair_strings = qs.split('&')
+          result = {}
+          for str in pair_strings
+            [key, value] = str.split('=')
+            result[key] = decodeURIComponent(value) or ''
+
+          result
 
         replaceAll: (find, replace, str) ->
           return str.replace(new RegExp(find, 'g'), replace)
@@ -378,28 +381,31 @@ define( [ 'jquery',
           @
 
         passes_question_constraints: ->
-            #TODO: First check constraints on the question we're on
-            question = document.flat_fields[@currentQuestionIndex]
+          question = document.flat_fields[@currentQuestionIndex]
 
-            # Pass required?
-            # if question.bind and question.bind.required is "yes"
-            #     if @renderedForm.getValue()[ question.key ].length == 0
-            #         $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer is required.</span></div>"
-            #         return false
+          # Check if the question is required and whether or not a value is
+          # present. If not, raise an alert.
+          if question.bind?.required is "yes"
+            if @get_question_value(question).length is 0
+              alert "Answer is required."
+              return false
 
-            # Pass contraints?
-            # if not XFormConstraintChecker.passesConstraint( question, @renderedForm.getValue() )
-            #     $("#alert-placeholder").html "<div class=\"alert alert-error\"><a class=\"close\" data-dismiss=\"alert\">x</a><span>Answer doesn't pass constraint:" + question.info.bind.constraint + "</span></div>"
-            #     return false
+          # Ensure that the question passes any constraints, if given. If
+          # not, raise an alert.
+          if not XFormConstraintChecker.passesConstraint( question, @get_question_value(question) )
+            alert "Answer doesn't pass constraint: #{question.info.bind.constraint}"
+            return false
 
-            return true
+          return true
 
         get_question_value: ( question ) ->
-
           answers = $( ".form" ).serialize()
-          answerJson = @queryStringToJSON(answers)
+          answer_json = @queryStringToJSON(answers)
 
-          return answerJson[question.name]
+          if answer_json[question.name]?
+            answer_json[question.name]
+          else
+            ""
 
         show_question: (question) ->
           @toggle_question(question, false)
