@@ -344,6 +344,8 @@
 						<i class='icon-group'></i>&nbsp;Share
 					</a>
 				</li>
+				{% endif %}
+				{% if 'change_repository' in permissions %}
 				<li>
 					<a class='btn btn-primary' href='/api/v1/data/{{ repo.mongo_id }}?format=csv'>
 						<i class='icon-download'></i>&nbsp;Download
