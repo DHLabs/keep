@@ -13,7 +13,10 @@
 @import "elements/_tables";
 @import "elements/_forms";
 
+// Features static page
 @import "_features";
+
+@import "webform";
 
 // import sheets for specific locations
 @import "_modal";

@@ -8,7 +8,6 @@
   ],
   "devDependencies": {
     "backbone": "~1.0.0",
-    "backbone-forms": "v0.12.0",
     "backbone.modal": "git://github.com/awkward/backbone.modal#~1.0.0",
     "d3": "~3.3.11",
     "jquery": "~2.0.2",
@@ -24,11 +23,6 @@
   "exportsOverride": {
     "backbone": {
       "js": "backbone.js"
-    },
-    "backbone-forms": {
-      "js": [
-        "distribution/backbone-forms.js"
-      ]
     },
     "backbone.modal": {
       "js": "backbone.modal.js"

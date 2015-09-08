@@ -8,13 +8,12 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
-          'backbone-forms',
           'leaflet',
           'app/webform/models',
           'app/webform/constraints',
           'app/webform/modals/language' ],
 
-( $, _, Backbone, Forms, L, xFormModel, XFormConstraintChecker, LanguageSelectModal ) ->
+( $, _, Backbone, L, xFormModel, XFormConstraintChecker, LanguageSelectModal ) ->
 
     class xFormView extends Backbone.View
         # The HTML element where the form will be rendered
