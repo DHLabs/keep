@@ -42,35 +42,14 @@ define( [ 'jquery',
         el: '#map-viz'
         itemView: MarkerItemView
 
+        # Find a column that can be plotted on the map.
+        # TODO: Support lat/lngs as separate columns.
         _detect_headers: ( fields ) ->
             @map_headers = []
             @selected_header = null
 
-            for field in fields
-                if field.type in [ 'geopoint' ]
-                    @map_headers.push( field )
-
-                    if not @selected_header?
-                        @selected_header = field
-
-                else if field.label.length == 3
-                    if field.label.search( 'lat' ) != -1
-                        console.log(field)
-                        @map_headers.push( field )
-                    else if field.label.search( 'lng' ) != -1
-                        console.log(field)
-                        @map_headers.push( field )
-
-            # This means there were no geopoints... attempt to find an lat/lng
-            # combo between two columns
-            # TODO: Support separate lat/lngs somehow. Perhaps introduce a merging utility?
-            # if not @selected_header?
-            #     @selected_header = {}
-            #     for field in @map_headers
-            #         if field.label.search( 'lat' ) != -1
-            #             @selected_header.lat = field
-            #         else if field.label.search( 'lng' ) != -1
-            #             @selected_header.lng = field
+            for field in fields when field.type is 'geopoint'
+                @selected_header or= field
 
         _geopoint: ( datum ) =>
             # Ensure there is a column with geopoint data
@@ -106,18 +85,6 @@ define( [ 'jquery',
                     continue
 
                 marker = L.marker( [geopoint.lat, geopoint.lng], {icon: mapIcon} )
-                #marker.data = datum.get( 'data' )
-                #marker.timestamp = new Date( datum.get( 'timestamp' ) )
-
-                # if last_marker?
-                #     day = 1000 * 60 * 60 * 24
-                #     if marker.timestamp.getTime() - last_marker.timestamp.getTime() < day
-                #         pline = [ marker.getLatLng(), last_marker.getLatLng() ]
-                #         @connections.addLayer( L.polyline( pline ) )
-
-                #     last_marker = marker
-                # else
-                #     last_marker = marker
 
                 html = ''
                 for key, value of datum.get( 'data' )#marker.data
@@ -129,11 +96,6 @@ define( [ 'jquery',
 
                 if datum.get( 'data' ).value?
                     heatmap_value = datum.get( 'data' ).value
-
-                #heatmapData.push(
-                #    lat: geopoint[0]
-                #    lon: geopoint[1]
-                #    value: heatmap_value )
 
         _resize_map: () =>
             $( '#map' ).css( { 'height': ( @$el.parent().height() - 20 ) + 'px' } )
@@ -258,147 +220,3 @@ define( [ 'jquery',
 
     return DataMapView
 )
-
-### OLD PLAYBACK CODE. ###
-
-# pause_playback: (event) ->
-# if @is_paused
-#     $( '#pause' ).html( "<i class='icon-pause'></i>" )
-#     @is_paused = false
-
-#     # Start up playback interval if it's not already started up.
-#     if not @playback?
-#         auto = () =>
-#             @time_step() if not @is_paused
-
-#         @playback = setInterval( auto, 1000.0 / $( '#fps' ).val() )
-
-# else
-#     $( '#pause' ).html( "<i class='icon-play'></i>" )
-#     @is_paused = true
-# # resets playback
-# reset_playback: (event) ->
-#     if @playback?
-#         clearInterval( @playback )
-#         @playback = null
-
-#     # set initial lower and upper bound of our current quantum
-#     @lower_bound = @min_time
-#     @upper_bound = @min_time + @quantum
-
-#     @step_current = 0
-
-#     $( '#current_time' ).html( '' )
-
-#     $( '#progress_bar > .bar' ).width( 0 )
-
-#     $( '#pause_btn' ).html( '<icon class="icon-play"></i>' )
-#     @is_paused = false
-
-# clear_lines: (event) ->
-#     for i of @map._layers
-#         unless @map._layers[i]._path is `undefined`
-#             try
-#                 @map.removeLayer @map._layers[i]
-#             catch e
-#                 console.log "problem with " + e + @map._layers[i]
-
-# time_step: (event) ->
-
-#     @step_current += 1
-
-#     # If we've made it past the number steps, pause the playback and
-#     # return.
-#     if @step_current > @num_steps
-#         @is_paused = true
-#         return @
-
-#     # Go through each marker in the layer and enable/disable the
-#     # marker if it meets our timestamp constraints.
-#     last_marker = undefined
-#     @markers.eachLayer( ( layer ) =>
-
-#         if @lower_bound <= layer.timestamp <= @upper_bound
-#             layer.setOpacity( 1.0 )
-#             last_marker = layer
-#         else
-#             layer.setOpacity( 0.0 )
-#     )
-
-#     # Pan to the last marker that was enabled
-#     @map.panTo( last_marker.getLatLng() ) if last_marker?
-
-#     # Calculate the percent progress we have progressed.
-#     @progress = 100 * ( @upper_bound - @min_time ) / ( @max_time - @min_time )
-
-#     # display the range of the current quantum
-#     lower_bound_str = new Date( @lower_bound )
-#     upper_bound_str = new Date( @upper_bound )
-
-#     $( '#current_time' ).html( "#{lower_bound_str} through #{upper_bound_str}" )
-#     $( '#progress_bar > .bar' ).width( "#{@progress}%" )
-
-#     @upper_bound += @quantum
-
-#     @
-
-# time_c: (event) ->
-#     val = $("#tc_input").val()
-#     con = $("input:radio[name=const]:checked").val()
-#     time = $("input:radio[name=time]:checked").val()
-#     minutes = 1000 * 60
-#     hours = minutes * 60
-#     days = hours * 24
-#     secs = undefined
-#     for i of @map._layers
-#         unless @map._layers[i]._path is `undefined`
-#             try
-#                 @map.removeLayer @map._layers[i]
-#             catch e
-#                 console.log "problem with " + e + @map._layers[i]
-#     if con is "day"
-#         secs = days
-#     else if con is "hour"
-#         secs = hours
-#     else secs = minutes  if con is "minute"
-#     _ref5 = @data.models
-#     _j = 0
-#     _len1 = _ref5.length
-
-#     while _j < (_len1 - 1)
-#         datum = _ref5[_j]
-#         parseDate = d3.time.format("%Y-%m-%dT%H:%M:%S").parse
-#         if time is "date"
-#             try
-#                 start = Date.parse(@data.models[_j].attributes.data.Time)
-#             catch err
-#                 start = null
-#         else
-#             start = parseDate(@data.models[_j].get("timestamp"))
-#         d = Math.floor(start / secs)
-#         geopoint = datum.get("data")[@map_headers].split(" ")
-#         @pL = []
-#         @pL.push [parseFloat(geopoint[0]), parseFloat(geopoint[1])]
-#         _k = _j + 1
-#         _len1 = _ref5.length
-
-#         while _k < _len1
-#             break  if start = null
-#             datum2 = _ref5[_k]
-#             parseDate = d3.time.format("%Y-%m-%dT%H:%M:%S").parse
-#             if time is "date"
-#                 try
-#                     start2 = Date.parse(@data.models[_k].attributes.data.Time)
-#                 catch err
-#                     start2 = null
-#             else
-#                 start2 = parseDate(@data.models[_k].get("timestamp"))
-#             d2 = Math.floor(start2 / secs)
-#             geopoint = datum2.get("data")[@map_headers].split(" ")
-#             if val >= Math.abs(d - d2)
-#                 @pL.push [parseFloat(geopoint[0]), parseFloat(geopoint[1])]
-#                 @poly = L.polyline(@pL, @pLStyle).addTo(@map)
-#             else
-#                 break
-#             _k++
-#         _j++
