@@ -33,7 +33,7 @@
   <div id='file-drop-overlay'>
     <div class='center'>
       <p>
-        <i class='icon-file-alt' style='font-size:64px;'></i>
+        <i class='fa fa-file-alt' style='font-size:64px;'></i>
         <br/>&nbsp;<br/>
         Drop your file to upload
       </p>
@@ -46,7 +46,7 @@
     <div class='three columns sidebar'>
 
       <a class='btn btn-primary btn-block' id='new_repo_btn' href='{% url "repo_new" %}'>
-        <i class='icon-plus-sign'></i>&nbsp;New Data Diary
+        <i class='fa fa-plus-circle'></i>&nbsp;New Data Diary
       </a>
 
       <!-- STUDIES & DATA DIARIES -->
@@ -55,7 +55,7 @@
         {% if not is_other_user %}
         <div class='create-new'>
           <a href='#' class='btn btn-primary btn-small'>
-            <i class='icon-plus-sign'></i>&nbsp;New
+            <i class='fa fa-plus-circle'></i>&nbsp;New
           </a>
         </div>
         {% endif %}
@@ -74,7 +74,7 @@
         {% if not is_other_user %}
         <div style='float:left;'>
           <a href='{% url "organization_new" %}' class='btn btn-primary btn-small' id='create_org_btn'>
-            <i class='icon-plus-sign'></i>
+            <i class='fa fa-plus-circle'></i>
             &nbsp;New
           </a>
         </div>
@@ -118,7 +118,7 @@
 
       <div style='float:right;'>
         <a href='#' id='refresh-repos'>
-          <i class='icon-refresh'></i>
+          <i class='fa fa-refresh'></i>
         </a>
       </div>
 

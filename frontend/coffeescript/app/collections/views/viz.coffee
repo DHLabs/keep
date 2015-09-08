@@ -13,7 +13,7 @@ define( [ 'jquery',
         template: _.template( '''
                         <svg id='viz-<%= id %>'></svg>
                         <a href='#' data-id='<%= id %>' class='btn btn-small btn-delete'>
-                            <i class='icon-trash'></i>
+                            <i class='fa fa-trash'></i>
                             Delete
                         </a>&nbsp;
                     ''' )

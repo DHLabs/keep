@@ -172,7 +172,7 @@ function addRelevance(questionName,relevantType,relevantValue) {
 	html += "<td style='width:40px;text-align:center;'>"+
         "<button type='button' onclick='deleteConstraint(\"relevance" + relevantNum + "\")'"
         + " class='btn btn-danger'>" +
-        "   <i class='icon-trash'></i>"+
+        "   <i class='fa fa-trash'></i>"+
         "</button>"+
 		"</td>\n</tr>\n";
 
@@ -279,7 +279,7 @@ function addConstraint(constraintType, constraintValue) {
 	html += "<td style='width:40px;text-align:center;'>"+
 		"<button type='button' onclick='deleteConstraint(\"constraint" + constraintNum + "\")'"
 		+ " class='btn btn-danger'>" +
-		"   <i class='icon-trash'></i>"+
+		"   <i class='fa fa-trash'></i>"+
 		"</button>"+
 		"</td>\n</tr>\n";
 
@@ -491,7 +491,7 @@ function addChoice(name, label) {
 	html += "<td style='width:40px;text-align:center;'>"+
 							"<button type='button' onclick='deleteChoice(\"choice" + choiceNum + "\")'"
 								+" class='btn btn-danger'>"+
-							 "   <i class='icon-trash'></i>"+
+							 "   <i class='fa fa-trash'></i>"+
 							"</button>"+
 						"</td>";
 	html += '</tr>';
@@ -910,11 +910,11 @@ function getHTMLForQuestion(question) {
         + question.name +"')\""
         + " id='addQuestionForGroup' class='btn btn-small'>Add Question</button>\n" +
         "<button type='button' class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
-        "	<i class='icon-pencil'></i> Edit"+
+        "	<i class='fa fa-pencil'></i> Edit"+
         "</button>"+
         "<button type='button' onclick=\"deleteQuestion('" + question.name
         +"')\" class='btn btn-danger'>"+
-        "   <i class='icon-trash'></i> Delete"+
+        "   <i class='fa fa-trash'></i> Delete"+
         "</button></div></h4></td></tr>\n</thead>\n<tbody>";
 
         //generate html from other questions
@@ -941,13 +941,13 @@ function getHTMLForQuestion(question) {
         html += '</td>';
         html += "<td style='width:70px;text-align:center;'>" +
         "<button type='button' class='btn btn-small' data-toggle='modal' onclick=\"editQuestion('"+ question.name + "')\">"+
-        "	<i class='icon-pencil'></i> Edit"+
+        "	<i class='fa fa-pencil'></i> Edit"+
         "</button>"+
         "</td>"+
         "<td style='width:90px;text-align:center;'>"+
         "<button type='button' onclick=\"deleteQuestion('" + question.name
         +"')\" class='btn btn-danger'>"+
-        "   <i class='icon-trash'></i> Delete"+
+        "   <i class='fa fa-trash'></i> Delete"+
         "</button>"+
         "</td>";
         html += '</tr>';

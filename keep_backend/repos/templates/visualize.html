@@ -50,9 +50,9 @@
     <div id='repo-privacy' class='one columns'>
       <div>
         {% if repo.is_public %}
-          <i class='icon-unlock'></i>
+          <i class='fa fa-unlock'></i>
         {% else %}
-          <i class='icon-lock'></i>
+          <i class='fa fa-lock'></i>
         {% endif %}
       </div>
     </div>
@@ -71,23 +71,23 @@
         {% if registry %}
         <li>
           <a class='btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
-            <i class='icon-list'></i>&nbsp;Registry
+            <i class='fa fa-list'></i>&nbsp;Registry
           </a>
         </li>
         {% endif %}
         <li>
           <a class='btn' href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}'>
-            <i class='icon-file-alt'></i>&nbsp;Webform
+            <i class='fa fa-file-text-o'></i>&nbsp;Webform
           </a>
         </li>
         <li>
           <a id='share-btn' class='btn' href='#'>
-            <i class='icon-group'></i>&nbsp;Share
+            <i class='fa fa-group'></i>&nbsp;Share
           </a>
         </li>
         <li>
           <a class='btn' href='/api/v1/data/{{ repo.mongo_id }}?format=csv'>
-            <i class='icon-download'></i>&nbsp;Download
+            <i class='fa fa-download'></i>&nbsp;Download
           </a>
         </li>
       </ul>
@@ -98,28 +98,28 @@
       <ul id='viz-options' class='nav-list nav-inline'>
         <li id='raw_btn' class='active' data-type='raw'>
           <a href='#'>
-            <i class='icon-list'></i>&nbsp;Raw
+            <i class='fa fa-list'></i>&nbsp;Raw
           </a>
         </li>
         <li id='map_btn' data-type='map'>
           <a href='#'>
-            <i class='icon-map-marker'></i>&nbsp;Map
+            <i class='fa fa-map-marker'></i>&nbsp;Map
           </a>
         </li>
         <li id='line_btn' data-type='line'>
           <a href='#'>
-            <i class='icon-signal'></i>&nbsp;Analytics
+            <i class='fa fa-signal'></i>&nbsp;Analytics
           </a>
         </li>
         <li id='filter_btn' data-type='filters'>
           <a href='#'>
-            <i class='icon-filter'></i>&nbsp;Filters
+            <i class='fa fa-filter'></i>&nbsp;Filters
           </a>
         </li>
         {% if 'delete_repository' in permissions %}
         <li data-type='settings'>
           <a href='#' data-type='settings'>
-            <i class='icon-cog'></i>&nbsp;Settings
+            <i class='fa fa-cog'></i>&nbsp;Settings
           </a>
         </li>
         {% endif %}
@@ -141,7 +141,7 @@
     <div class='sixteen columns'>
       <div class='create-new'>
         <a href='#' class='btn btn-primary'>
-          <i class='icon-plus-sign'></i>&nbsp;Create Visualization
+          <i class='fa fa-plus-circle'></i>&nbsp;Create Visualization
         </a>
       </div>
       <div id='analytics-viz-list'></div>
@@ -169,7 +169,7 @@
           Once you delete a repository, <strong>ALL</strong> data will
           be removed.
         </div>
-        <div><a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'><i class='icon-trash'></i> Delete Repository</a></div>
+        <div><a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'><i class='fa fa-trash'></i> Delete Repository</a></div>
       </div>
 
       <div class="six columns">

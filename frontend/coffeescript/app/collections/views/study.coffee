@@ -12,7 +12,7 @@ define( [ 'jquery',
         tagName: 'li'
         template: _.template( '''
             <div class='study-settings'>
-                <a href='#' data-name='<%= name %>' data-study='<%= id %>'><i class='icon-cog'></i></a>
+                <a href='#' data-name='<%= name %>' data-study='<%= id %>'><i class='fa fa-cog'></i></a>
             </div>
             <a href='#' data-study='<%= id %>'><%= name %></a>''' )
 

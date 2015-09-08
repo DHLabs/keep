@@ -30,8 +30,8 @@
       <input class="filterValue u-inline" type="text" style="max-width: 150px;">
       <a href="#" class="btn btn-primary js-add">Apply</a>
     </div>
-    <a href="#" class="btn js-reset"><i class="icon-plus-sign"></i> New Filter Set</a>
-    <a href="#" class="btn js-download"><i class="icon-download-alt"></i> Download as CSV</a>
+    <a href="#" class="btn js-reset"><i class="fa fa-plus-circle"></i> New Filter Set</a>
+    <a href="#" class="btn js-download"><i class="fa fa-download"></i> Download as CSV</a>
   </div>
 </script>
 
@@ -49,7 +49,7 @@
 <script id="filter-template" type="text/template">
   <li class="appliedFilters">
     <strong><%= column_name %></strong> to values <strong><%= filter_type %> <%= filter_value %></strong>
-    <a href="#" class="js-remove"><i class="icon-remove"></i>
+    <a href="#" class="js-remove"><i class="fa fa-remove"></i>
   </li>
 </script>
 
@@ -72,8 +72,8 @@
 <!-- Saved Filter -->
 <script id="saved-filter-tmpl" type="text/template">
   <li class="Filters-savedFilter">
-    <a class="js-apply" href="#" style="color: #555;"><i class="icon-reply"></i></a>
+    <a class="js-apply" href="#" style="color: #555;"><i class="fa fa-reply"></i></a>
     <strong><%= name %></strong>
-    <a href="#" class="js-delete"><i class="icon-trash"></i>
+    <a href="#" class="js-delete"><i class="fa fa-trash"></i>
   </li>
 </script>

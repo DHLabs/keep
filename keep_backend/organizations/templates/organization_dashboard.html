@@ -42,7 +42,7 @@
 			{% if is_owner %}
 				<div class='u-floatLeft'>
 					<a href='#' class='btn btn-small btn-primary' id='add-user-btn'>
-						<i class='icon-plus-sign'></i>
+						<i class='fa fa-plus-circle'></i>
 						&nbsp;Add
 					</a>
 				</div>
@@ -118,14 +118,14 @@
 					<tr>
 						<td class='privacy'>
 							{% if repo.public %}
-								<i class='icon-unlock'></i>
+								<i class='fa fa-unlock'></i>
 							{% else %}
-								<i class='icon-lock'></i>
+								<i class='fa fa-lock'></i>
 							{% endif %}
 						</td>
 						<td class='add-data'>
 							<a href='{% url "repo_webform" username=account.name repo_name=repo.name %}' class='btn btn-small'>
-								<i class='icon-pencil'></i> Add Data
+								<i class='fa fa-pencil'></i> Add Data
 							</a>
 						</td>						
 						<td>
@@ -139,7 +139,7 @@
 							{% endif %}
 						</td>
 						<td class='submission-count'>
-							{{ repo.submissions }} <i class='icon-file-alt'></i>
+							{{ repo.submissions }} <i class='fa fa-file-alt'></i>
 						</td>
 					</tr>
 				{% endfor %}

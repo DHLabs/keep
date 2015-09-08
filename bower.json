@@ -18,7 +18,7 @@
     "moment": "~2.0.0",
     "requirejs": "~2.1.6",
     "underscore": "~1.5.1",
-    "font-awesome": "3.0.2",
+    "font-awesome": "4.4.0",
     "nvd3": "~1.1.14-beta"
   },
   "exportsOverride": {
@@ -44,7 +44,7 @@
     },
     "font-awesome": {
       "css": "css/*.min.css",
-      "font": "font/*"
+      "font": "fonts/*"
     },
     "jquery": {
       "js": "jquery.js"
