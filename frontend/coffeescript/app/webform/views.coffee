@@ -29,8 +29,6 @@ define( [ 'jquery',
             'click #prev_btn':          'prev_question'
             'click #language-select-btn':'language_select'
 
-        # languages:  []
-
         language_select: ( event ) ->
           @modalView = new LanguageSelectModal( { current: @current_language, view: this } )
           $('.modal').html( @modalView.render().el )
@@ -99,6 +97,8 @@ define( [ 'jquery',
         # Defaults to English if an English label is present, otherwise returns
         # the first language it finds.
         get_translations: (field) ->
+          return if not field?
+
           if field.type is 'group'
             if typeof field.children[0].label is 'object'
               # Default to English, otherwise return first label found
