@@ -73,12 +73,6 @@ module.exports = ( grunt ) ->
         src: [ '**/*.js' ]
         dest: 'build/js/vendor'
 
-      favicon:
-        expand: true
-        cwd: 'frontend/favicon'
-        src: [ '**/*' ]
-        dest: '<%= pkg.static_dir %>/favicon'
-
       img:
         expand: true
         cwd: 'frontend/img'
@@ -130,5 +124,4 @@ module.exports = ( grunt ) ->
                    # <static> folder
                    'copy:components',
                    'copy:css',
-                   'copy:favicon',
                    'copy:img' ] )
