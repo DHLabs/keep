@@ -32,10 +32,6 @@ def formlist( request, username ):
     return redirect( api_url )
 
 
-def submission_detail( request ):
-    pass
-
-
 def _parse_xml_submission( xml_data, root, files ):
     for element in root:
 

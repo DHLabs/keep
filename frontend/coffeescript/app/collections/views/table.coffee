@@ -104,7 +104,7 @@ define( [ 'jquery',
                 <% }; %>
                 <% _.each( fields, function( item ) { %>
                     <th class="js-sort" data-field='<%= item.name %>'>
-                        <%= item.name %><i class='icon-sort DataTable-sortIcon'></i>
+                        <%= item.name %><i class='fa fa-sort DataTable-sortIcon'></i>
                     </th>
                 <% }); %>
                     <th>&nbsp;</th>
@@ -130,13 +130,13 @@ define( [ 'jquery',
           # Sort order changes from None -> Descending -> Ascending
           if sort_order is 'none'
             sort_order = 'desc'
-            sort_icon.removeClass('icon-sort icon-sort-up').addClass('icon-sort-down')
+            sort_icon.removeClass('fa fa-sort icon-sort-up').addClass('fa fa-sort-down')
           else if sort_order is 'desc'
             sort_order = 'asc'
-            sort_icon.removeClass('icon-sort-down').addClass('icon-sort-up')
+            sort_icon.removeClass('fa fa-sort-down').addClass('fa fa-sort-up')
           else if sort_order is 'asc'
             sort_order = null
-            sort_icon.removeClass('icon-sort-up').addClass('icon-sort')
+            sort_icon.removeClass('fa fa-sort-up').addClass('fa fa-sort')
 
           column.data('order', sort_order )
 

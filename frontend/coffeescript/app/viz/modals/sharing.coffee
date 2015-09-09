@@ -19,7 +19,7 @@ define( [ 'jquery',
                     <td><%= perm %></td>
                     <td style='text-align:center'>
                         <a href='#' class='btn-delete'>
-                            <i class='icon-trash'></i>
+                            <i class='fa fa-trash'></i>
                         </a>
                     </td>
                 </tr>
@@ -100,9 +100,9 @@ define( [ 'jquery',
                     $( event.currentTarget ).attr( 'checked', response.public )
 
                     if response.public
-                        $( '#privacy > div' ).html( '<i class=\'icon-unlock\'></i>' )
+                        $( '#privacy > div' ).html( '<i class=\'fa fa-unlock\'></i>' )
                     else
-                        $( '#privacy > div' ).html( '<i class=\'icon-lock\'></i>' )
+                        $( '#privacy > div' ).html( '<i class=\'fa fa-lock\'></i>' )
             )
             @
 

@@ -1,7 +1,7 @@
 define( [ 'require' ],
 ( require ) ->
 
-	require( [ 'app/webform/views', 'forms/templates/bootstrap' ],
+	require( [ 'app/webform/views' ],
 		( xFormView ) ->
 			app = new xFormView()
 	)

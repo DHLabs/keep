@@ -8,7 +8,6 @@
   ],
   "devDependencies": {
     "backbone": "~1.0.0",
-    "backbone-forms": "v0.12.0",
     "backbone.modal": "git://github.com/awkward/backbone.modal#~1.0.0",
     "d3": "~3.3.11",
     "jquery": "~2.0.2",
@@ -18,33 +17,22 @@
     "moment": "~2.0.0",
     "requirejs": "~2.1.6",
     "underscore": "~1.5.1",
-    "font-awesome": "3.0.2",
+    "font-awesome": "4.4.0",
     "nvd3": "~1.1.14-beta"
   },
   "exportsOverride": {
     "backbone": {
       "js": "backbone.js"
     },
-    "backbone-forms": {
-      "js": [
-        "distribution/backbone-forms.js"
-      ]
-    },
     "backbone.modal": {
       "js": "backbone.modal.js"
-    },
-    "backbone.babysitter": {
-      "js": "lib/backbone.babysitter.js"
-    },
-    "backbone.wreqr": {
-      "js": "lib/backbone.wreqr.js"
     },
     "d3": {
       "js": "d3.js"
     },
     "font-awesome": {
       "css": "css/*.min.css",
-      "font": "font/*"
+      "font": "fonts/*"
     },
     "jquery": {
       "js": "jquery.js"

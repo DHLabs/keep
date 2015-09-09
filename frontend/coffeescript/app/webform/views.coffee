@@ -8,13 +8,12 @@
 define( [ 'jquery',
           'underscore',
           'backbone',
-          'backbone-forms',
           'leaflet',
           'app/webform/models',
           'app/webform/constraints',
           'app/webform/modals/language' ],
 
-( $, _, Backbone, Forms, L, xFormModel, XFormConstraintChecker, LanguageSelectModal ) ->
+( $, _, Backbone, L, xFormModel, XFormConstraintChecker, LanguageSelectModal ) ->
 
     class xFormView extends Backbone.View
         # The HTML element where the form will be rendered
@@ -29,8 +28,6 @@ define( [ 'jquery',
             'click #next_btn':          'next_question'
             'click #prev_btn':          'prev_question'
             'click #language-select-btn':'language_select'
-
-        # languages:  []
 
         language_select: ( event ) ->
           @modalView = new LanguageSelectModal( { current: @current_language, view: this } )
@@ -100,6 +97,8 @@ define( [ 'jquery',
         # Defaults to English if an English label is present, otherwise returns
         # the first language it finds.
         get_translations: (field) ->
+          return if not field?
+
           if field.type is 'group'
             if typeof field.children[0].label is 'object'
               # Default to English, otherwise return first label found

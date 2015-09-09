@@ -1,0 +1,49 @@
+Keep was originally created in 2011 by Teleomed Labs, a med-tech consulting
+firm, for the U.S. Navy. The code was released under MIT license and since
+then, has been maintained and developed by Distributed Health Labs, a research
+group at the University of California, San Diego.
+
+The following is a list of MUCH APPRECIATED contributors who have submitted
+patches, reported bugs, and generally made Keep better:
+
+    Andrew Huynh
+    Darren Won
+    David Ing
+    Eliah Aronoff-Spencer
+    Geoffrey Bugaisky
+    Han Yoo
+    Khiem
+    Patrick Wilson
+    Raul
+    Rich Stoner
+    Sean Patno
+    Sorin Chereji
+    Tmax
+    Wes Vetter
+    Yoon Hong
+    Staal Vinterbo
+
+A huge THANK YOU goes to:
+
+    Andrew Huynh, Sean Patno, and Geoffrey Bugaisky. As principal architect,
+    Andrew guided most of the technical design decisions. Sean and Geoff
+    contributed much of the functionality necessary to make Keep useful.
+
+    Eliah Aronoff-Spencer for vision in launching the project and for his
+    leadership maintaining the platform through many iterations.
+
+    Albert Yu-Min Lin for inspiration and support.
+
+    Mike Preziosi for his efforts (and patience) in piloting Keep in
+    Mozambique.
+
+    The International Society of Nephrology, for choosing Keep as the data
+    collection platform for the Global Snapshot.
+
+    Staal Vinterbo for his research on privacy-preserving code.
+
+    Faculty and students at the University of Utah, for collaborating on
+    medical form development and reporting bugs.
+
+    Sanjay Mehta for his support of the project and utilization of his
+    avant-garde HIV data set.

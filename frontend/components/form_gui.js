@@ -152,21 +152,21 @@ function jsGUIAddWindow(x, y) {
 	/*$('<button>', {
 		onclick: "jsGUIViewRelevance('" + windowID + "')",
 		type: 'button',
-		html: "<i class='icon-filter'></i> Add Relevance"
+		html: "<i class='fa fa-filter'></i> Add Relevance"
 	}).addClass( 'relevance-icon' ).appendTo('#' + windowID + ' .windowButtons');*/
 
 	//add a delete button in the lower right corner
 	$('<button>', {
 		onclick: "jsGUIDeleteWindow('" + windowID + "')",
 		type: 'button',
-		html: "<i class='icon-trash'></i> Delete"
+		html: "<i class='fa fa-trash'></i> Delete"
 	}).addClass( 'delete-icon' ).appendTo('#' + windowID + ' .windowButtons');
 
 	//add a settings button right below "Add Relevances"
 	$('<button>', {
 		onclick: "jsGUIViewGroupSettings('" + windowID + "')",
 		type: 'button',
-		html: "<i class='icon-cog'></i> Group Settings"
+		html: "<i class='fa fa-cog'></i> Group Settings"
 	}).addClass( 'group-set-icon' ).appendTo('#' + windowID + ' .windowButtons');
 
 	//add endpoints to the screen
@@ -283,7 +283,7 @@ function jsGUIAddQuestion(question, currentQuestionName, currentNum) {
 		$('<button>', {
 			onclick: "jsGUIEditQuestion('" + tempID + "')",
 			type: 'button',
-			html: "<i class='icon-edit'></i> Edit"
+			html: "<i class='fa fa-edit'></i> Edit"
 		}).addClass('edit-icon').appendTo(div);
 
 
@@ -291,7 +291,7 @@ function jsGUIAddQuestion(question, currentQuestionName, currentNum) {
 		$('<button>', {
 			onclick: "jsGUIDeleteQuestion('" + tempID + "')",
 			type: 'button',
-			html: "<i class='icon-trash'></i> Delete"
+			html: "<i class='fa fa-trash'></i> Delete"
 		}).addClass( 'delete-icon' ).appendTo(div);
 
 	  	$(div).addClass('question');
@@ -374,13 +374,13 @@ function jsGUIAddRelevance(window, relevance) {
 	$('<button>', {
 		onclick: "jsGUIEditRelevance('" + tempID + "')",
 		type: 'button',
-		html: "<i class='icon-edit'></i>"
+		html: "<i class='fa fa-edit'></i>"
 	}).addClass('edit-icon').appendTo('#' + tempID);
 
 	$('<button>', {
 		onclick: "jsGUIDeleteRelevance('" + tempID + "')",
 		type: 'button',
-		html: "<i class='icon-trash'></i>"
+		html: "<i class='fa fa-trash'></i>"
 	}).addClass('delete-icon').appendTo('#' + tempID);
 
 	// Add endpoint to the relevance

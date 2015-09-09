@@ -17,7 +17,7 @@ define( [ 'jquery',
             </td>
             <td class='add-data'>
                 <a href='<%= webform_uri %>' class='btn btn-small'>
-                    <i class='icon-pencil'></i> Add Data
+                    <i class='fa fa-pencil'></i> Add Data
                 </a>
             </td>
             <td>
@@ -25,7 +25,7 @@ define( [ 'jquery',
                     <%= name %>
                     <div class='meta-data'>
                         <% if( study ){ %>
-                            <div class='study'><i class='icon-briefcase'></i>&nbsp;<%= study %></div>
+                            <div class='study'><i class='fa fa-briefcase'></i>&nbsp;<%= study %></div>
                         <% } %>
                         <% if( description.length > 0 ) { %>
                             <div class='help-block'><%= description %></div>
@@ -34,7 +34,7 @@ define( [ 'jquery',
                 </a>
             </td>
             <td class='submission-count'>
-                <%= submissions %>&nbsp;<i class='icon-file-alt'></i>
+                <%= submissions %>&nbsp;<i class='fa fa-file-alt'></i>
             </td>''' )
 
         onRender: ->

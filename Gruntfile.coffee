@@ -30,14 +30,11 @@ module.exports = ( grunt ) ->
         options:
           targetDir: '<%= pkg.static_dir %>'
           layout: (type, component) ->
-            renamedType = type
-            if type == 'js'
-              renamedType = 'js/vendor'
-            else if type == 'css'
-              renamedType = 'css'
-            else if type == 'font'
-              renamedType = 'font'
-            return renamedType
+            switch type
+              when 'js' then 'js/vendor'
+              when 'css' then 'css'
+              when 'font' then 'fonts'
+              else type
 
     # Compile all javascript and place into our intermediary folder for
     # RequireJS optimization
@@ -75,12 +72,6 @@ module.exports = ( grunt ) ->
         cwd: 'frontend/components'
         src: [ '**/*.js' ]
         dest: 'build/js/vendor'
-
-      favicon:
-        expand: true
-        cwd: 'frontend/favicon'
-        src: [ '**/*' ]
-        dest: '<%= pkg.static_dir %>/favicon'
 
       img:
         expand: true
@@ -133,5 +124,4 @@ module.exports = ( grunt ) ->
                    # <static> folder
                    'copy:components',
                    'copy:css',
-                   'copy:favicon',
                    'copy:img' ] )

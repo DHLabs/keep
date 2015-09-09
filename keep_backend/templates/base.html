@@ -6,8 +6,8 @@
     <meta charset="utf-8">
     <title>{% block title %}Keep{% endblock %}</title>
 
-    <link rel='shortcut icon' href='{% static "favicon/favicon.ico" %}'>
-    <link rel='icon' type='image/png' href='{% static "favicon/favicon.128.png" %}'>
+    <link rel='shortcut icon' href='{% static "img/favicon.ico" %}'>
+    <link rel='icon' type='image/png' href='{% static "img/favicon.128.png" %}'>
 
     <link href='{% static "css/font-awesome.min.css" %}' rel='stylesheet'>
     <link href='{% static "css/layout.css" %}' rel='stylesheet'>
@@ -31,13 +31,7 @@
                 {% if user.is_authenticated %}
 
                 {% block searchbar %}
-
-                <div class='six columns search-bar'>
-                    <div style='padding-top:16px;'>
-                        <input type='text' style='margin:0;width:100%;' placeholder='Search Data Diaries'>
-                    </div>
-                </div>
-
+                <div class='six columns search-bar'>&nbsp;</div>
                 {% endblock %}
 
                 <div class='six columns offset-by-four user-panel'>

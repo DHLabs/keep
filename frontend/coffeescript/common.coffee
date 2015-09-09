@@ -53,12 +53,4 @@ requirejs.config(
 			deps: [ 'leaflet', 'heatmap' ]
 		leaflet_cluster:
 			deps: [ 'leaflet' ]
-
-		# Form editing stuff
-		'forms/editors/list':
-			deps: [ 'backbone', 'backbone-forms' ]
-
-		'forms/templates/bootstrap':
-			deps: [ 'backbone', 'backbone-forms', 'forms/editors/list' ]
-
 )
