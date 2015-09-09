@@ -51,7 +51,22 @@ define( [ 'jquery',
             for field in fields when field.type is 'geopoint'
                 @selected_header or= field
 
-        _geopoint: ( datum ) =>
+        # Add a geopoint to all of the map layers.
+        _add_to_layers: (datum, geopoint) ->
+
+          # Set up a pop-up so that when the marker is clicked, the fields for
+          # that data point are showed.
+          fields =
+            for key, value of datum.get( 'data' )
+              "<div><strong>#{key}:</strong> #{value}</div>"
+          marker = L.marker( [geopoint.lat, geopoint.lng], {icon: mapIcon} )
+          marker.bindPopup( fields.join('') )
+
+          @markers.addLayer( marker )
+          @clusters.addLayer( marker )
+          @heatmap.addDataPoint( {'lon': geopoint.lng, 'lat': geopoint.lat, 'value': 1 } )
+
+        _geopoint: ( datum ) ->
             # Ensure there is a column with geopoint data
             return null if not @selected_header?.name?
 
@@ -76,26 +91,10 @@ define( [ 'jquery',
             return { lat: lat, lng: lng }
 
         render: ->
-            last_marker = undefined
-
-            for datum in @collection.models
-                geopoint = @_geopoint( datum )
-
-                if not geopoint?
-                    continue
-
-                marker = L.marker( [geopoint.lat, geopoint.lng], {icon: mapIcon} )
-
-                html = ''
-                for key, value of datum.get( 'data' )#marker.data
-                    html += "<div><strong>#{key}:</strong> #{value}</div>"
-                marker.bindPopup( html )
-
-                @markers.addLayer( marker )
-                @clusters.addLayer( marker )
-
-                if datum.get( 'data' ).value?
-                    heatmap_value = datum.get( 'data' ).value
+          for datum in @collection.models
+            geopoint = @_geopoint( datum )
+            continue if not geopoint?
+            @_add_to_layers(datum, geopoint)
 
         _resize_map: () =>
             $( '#map' ).css( { 'height': ( @$el.parent().height() - 20 ) + 'px' } )
@@ -143,7 +142,7 @@ define( [ 'jquery',
             @map.on( 'moveend', @refresh_viewport )
 
             # Clear all our markers when we get another set of markers.
-            @collection.on( 'reset', ()=>
+            @collection.on( 'reset', =>
                 @markers.clearLayers()
                 @clusters.clearLayers() )
             @
@@ -161,13 +160,7 @@ define( [ 'jquery',
 
             # Instead of appending these views into the DOM, place them in the
             # map instead!
-            marker = L.marker([point.lat,  point.lng], {icon: mapIcon})
-            marker.bindPopup( itemView.el )
-
-            # Add marker to our different layers
-            collectionView.markers.addLayer( marker )
-            collectionView.clusters.addLayer( marker )
-            collectionView.heatmap.addDataPoint( {'lon': point.lng, 'lat': point.lat, 'value': 1 } )
+            @_add_to_layers(itemView.model, point)
 
         buildItemView: ( item, ItemViewType, itemViewOptions ) ->
             options = _.extend( { model: item, fields: @fields }, itemViewOptions )
@@ -178,45 +171,36 @@ define( [ 'jquery',
           # invalidateSize() doesn't work.
           @map._onResize()
 
-        get_next_page: () ->
+        get_next_page: ->
+          @data_offset = @data_offset + 1
 
-            @data_offset = @data_offset + 1
-            selfie = @
-            @collection.fetch(
-                reset: false
-                data:
-                    geofield: @selected_header.name
-                    bbox: @bounds.toBBoxString()
-                    offset: @data_offset
-                success: (collection, response, options) ->
-                    if response.meta.pages > selfie.data_offset
-                        selfie.get_next_page()
-            )
+          @collection.fetch
+            reset: false
+            data:
+              geofield: @selected_header.name
+              bbox: @bounds.toBBoxString()
+              offset: @data_offset
+            success: (collection, response, options) =>
+              @get_next_page() if response.meta.pages > @data_offset
 
+        # Everytime we move around, grab new data from the server and
+        # refresh the viewport!
         refresh_viewport: ( event ) =>
-            # If we could not find any geofields or the user has not
-            # specified an existing one, don't do anything with the
-            # data.
-            if not @selected_header?
-                return
+          # If we could not find any geofields or the user has not
+          # specified an existing one, don't do anything with the
+          # data.
+          return if not @selected_header?
 
-            @data_offset = 0
+          @data_offset = 0
+          @bounds = event.target.getBounds()
 
-            # Everytime we move around, grab new data from the server and
-            # refresh the viewport!
-            @bounds = event.target.getBounds()
-
-            selfie = @
-
-            @collection.fetch(
-                reset: true
-                data:
-                    geofield: @selected_header.name
-                    bbox: @bounds.toBBoxString()
-                success: (collection, response, options) ->
-                    if response.meta.pages > 0
-                        selfie.get_next_page()
-            )
+          @collection.fetch
+            reset: true
+            data:
+              geofield: @selected_header.name
+              bbox: @bounds.toBBoxString()
+            success: (collection, response, options) =>
+              @get_next_page() if response.meta.pages > 0
 
     return DataMapView
 )
