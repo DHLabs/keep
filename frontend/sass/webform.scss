@@ -1,0 +1,21 @@
+#xform_view {
+
+    > #form_actions {
+        padding: 16px;
+    }
+
+    > #form_fields {
+        background-color: #fafafa;
+        padding:16px;
+        min-height: 256px;
+    }
+
+    .control-group {
+        display:none;
+    }
+
+    .grid-list {
+        position:relative;
+        right: 5px;
+    }
+}

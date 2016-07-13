@@ -1,0 +1,36 @@
+#map {
+	min-height: 256px;
+	min-width: 256px;
+
+	.leaflet-control {
+		-webkit-border-radius:0px;
+		border-radius:0px;
+		opacity: 0.90;
+
+		input {
+			margin: 0 8px 0 0;
+		}
+
+		label {
+			font-weight:bold;
+			padding: 4px 8px;
+			border-bottom: 1px solid #EEE;
+			font-size: 16px;
+		}
+
+		label:last-child {
+			padding-bottom:0;
+			border:0;
+		}
+	}
+
+	.leaflet-control-layers-list {
+		margin: 0;
+	}
+}
+
+#playback-controls {
+	> div {
+		text-align:center;
+	}
+}

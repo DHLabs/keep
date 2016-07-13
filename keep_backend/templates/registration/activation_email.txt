@@ -1,0 +1,14 @@
+{% load i18n %}
+{% url "registration_activate" activation_key as register_url %}
+Welcome to DHLab Keep!
+
+Please visit the following link to activate your account:
+https://{{ site.domain }}{{ register_url }}
+
+Once you activate your account, you can log into DHLab Keep and begin collecting
+and analyzing data!
+
+If you are having any issues with your account, please don't hesitate to contact us: support@distributedhealth.org
+
+Best regards,
+DHLab Keep Team

@@ -1,0 +1,27 @@
+*.pyc
+*sublime*
+*.db
+*.db.bak
+*.log
+
+# OS files
+.DS_Store
+
+# Misc dev folders
+.pyenv
+logs
+.sass-cache
+build
+
+htmlcov
+*.coverage
+
+_artwork
+media
+node_modules
+bower_components
+.bowerrc
+static
+
+credentials.py
+credentials.pyc

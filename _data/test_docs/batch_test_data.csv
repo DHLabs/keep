@@ -1,0 +1,3 @@
+name,age,gender,photo,date,location,pizza_fan,pizza_type,favorite_toppings
+Aliya,21,,,2013-08-24T07:00:00.000Z,"-117.94921875, 33.7974087676",yes,chitown,"cheese","extra data - should be ignored"
+Aliya,21,,,2013-08-24T07:00:00.000Z,"-117.94921875, 33.7974087676",yes,chitown,"cheese","extra data - should be ignored"

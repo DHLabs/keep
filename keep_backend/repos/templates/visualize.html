@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}{{ repo.owner }} / {{ repo.name }}{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href='{% static "css/nv.d3.css" %}'>
+<link rel="stylesheet" type="text/css" href='{% static "css/leaflet.css" %}'>
+<link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.css" %}'>
+<link rel="stylesheet" type="text/css" href='{% static "css/MarkerCluster.Default.css" %}'>
+{% endblock %}
+
+{% block js %}
+<script type='text/javascript'>
+  document.repo = {{repo_json|safe}};
+  document.linked_repos = {{linked_json|safe}};
+  document.visualizations = {{viz_json|safe}};
+  document.saved_filters = {{filter_json|safe}};
+  document.initial_data = {{data|safe}};
+  document.repo_owner = '{{repo.owner}}';
+  document.resource_ids = {{resource_ids|safe}};
+</script>
+<script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
+<script src='{% static 'js/vendor/require.js' %}'></script>
+<script type='text/javascript'>
+  require([ '{% static "js/common.js" %}' ], function (common) {
+    require.config({
+      baseUrl: '{% static "js/vendor" %}'
+    });
+
+    require( [ 'app/viz/main' ] )
+
+    filepicker.setKey( 'AtFpHahSSegcEhP2STuQAz' )
+  });
+</script>
+
+<!-- include JS Templates -->
+{% include 'js_templates/_data_table.html' %}
+{% include 'js_templates/_data_details.html' %}
+{% include 'js_templates/_empty_data_set.html' %}
+{% include 'js_templates/_filters.html' %}
+{% include 'js_templates/_new_viz.html' %}
+{% include 'js_templates/_sharing_settings.html' %}
+
+{% endblock %}
+
+{% block outerspace %}
+<div id='viz-chrome'>
+  <div id='viz-actions' class='container container-padded'>
+    <div id='repo-privacy' class='one columns'>
+      <div>
+        {% if repo.is_public %}
+          <i class='fa fa-unlock'></i>
+        {% else %}
+          <i class='fa fa-lock'></i>
+        {% endif %}
+      </div>
+    </div>
+    <div id='repo-meta' class='ten columns'>
+      <h4>{{ repo.owner }} / {{ repo.name }}</h4>
+      <div style='margin-bottom: 8px;'>
+        {% if repo.description %}
+          {{ repo.description }}
+        {% else %}
+          <em>No diary description available</em>
+        {% endif %}
+      </div>
+    </div>
+    <div id='repo-actions' class='five columns'>
+      <ul class='nav-list nav-inline'>
+        {% if registry %}
+        <li>
+          <a class='btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
+            <i class='fa fa-list'></i>&nbsp;<!--Registry-->Patient List
+          </a>
+        </li>
+        {% endif %}
+        <li>
+          <a class='btn' href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}'>
+            <i class='fa fa-file-text-o'></i>&nbsp;<!--Webform-->Add Patient 
+          </a>
+        </li>
+        <!--li>
+          <a id='share-btn' class='btn' href='#'>
+            <i class='fa fa-group'></i>&nbsp;Share
+          </a>
+        </li-->
+        <!--li>
+          <a class='btn' href='/api/v1/data/{{ repo.mongo_id }}?format=csv'>
+            <i class='fa fa-download'></i>&nbsp;Download
+          </a>
+        </li-->
+      </ul>
+    </div>
+  </div>
+  <div class='container'>
+    <div class='sixteen columns'>
+      <ul id='viz-options' class='nav-list nav-inline'>
+        <li id='raw_btn' class='active' data-type='raw'>
+          <a href='#'>
+            <i class='fa fa-list'></i>&nbsp;Raw
+          </a>
+        </li>
+        <li id='map_btn' data-type='map'>
+          <a href='#'>
+            <i class='fa fa-map-marker'></i>&nbsp;Map
+          </a>
+        </li>
+        <!--li id='line_btn' data-type='line'>
+          <a href='#'>
+            <i class='fa fa-signal'></i>&nbsp;Analytics
+          </a>
+        </li>
+        <li id='filter_btn' data-type='filters'>
+          <a href='#'>
+            <i class='fa fa-filter'></i>&nbsp;Filters
+          </a>
+        </li-->
+        {% if 'delete_repository' in permissions %}
+        <li data-type='settings'>
+          <a href='#' data-type='settings'>
+            <i class='fa fa-cog'></i>&nbsp;Settings
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+<div id="vizContainer">
+  <!-- Raw data view -->
+  <div id="raw-viz" class="viz"></div>
+
+  <!-- Geospatial view of our data ( if any geopoints exist within the dataset ). -->
+  <div class='viz' id='map-viz'>
+    <div id='map'></div>
+  </div>
+
+  <!-- Time series analysis -->
+  <div class='viz container' id='analytics-viz'>
+    <div class='sixteen columns'>
+      <div class='create-new'>
+        <a href='#' class='btn btn-primary'>
+          <i class='fa fa-plus-circle'></i>&nbsp;Create Visualization
+        </a>
+      </div>
+      <div id='analytics-viz-list'></div>
+    </div>
+  </div>
+
+  <!-- Filters view -->
+  <div class='viz' id='filters-viz'>
+    <div id="filterControls" class="container" style="margin-top: 30px;"></div>
+    <div id="filteredData"></div>
+  </div>
+
+  <!-- Repository settings -->
+  {% if 'delete_repository' in permissions %}
+  <div class='viz container' id='settings-viz'>
+    <div class='row'>
+
+      <div class='six columns offset-by-one'>
+        <h4>Administration</h4>
+        <div><strong>Edit this data repository</strong></div>
+        <div><a href='{% url "repo_edit" repo_id=repo.mongo_id %}' class='btn btn-medium'>Edit Repository</a></div>
+        <br>
+        <strong>Delete this data repository</strong>
+        <div class='help-block'>
+          Once you delete a repository, <strong>ALL</strong> data will
+          be removed.
+        </div>
+        <div><a href='{% url "repo_delete" repo_id=repo.mongo_id %}' class='btn btn-danger'><i class='fa fa-trash'></i> Delete Repository</a></div>
+      </div>
+
+      <div class="six columns">
+        <h4>Diary Backup</h4>
+        <div><a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=json'>Download Diary as JSON</a></div>
+        <br>
+        <div><a class='btn' href='/api/v1/repos/{{ repo.mongo_id }}/?format=xform'>Download Diary as XForm</a></div>
+      </div>
+
+    </div><!-- /.row -->
+  </div><!-- /.container -->
+  {% endif %}
+</div>
+{% endblock %}

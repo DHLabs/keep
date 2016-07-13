@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>1. Update Referral</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/7F32FF0E-47F7-44AD-AC82-B1BE95F8FB82" uiVersion="1" version="1" name="1. Update Referral">
+					<mother_name_label />
+					<child_name_label />
+					<referral_details>
+						<dangers_signs_info />
+						<breastfeeding_info />
+						<child_danger_signs />
+						<date_symptom_start_label />
+						<comment_label />
+					</referral_details>
+					<visit_again />
+					<case_name />
+					<case_referral_type />
+					<case_danger_signs />
+					<case_chw_comment />
+					<case_date_symptoms />
+					<case_bf_issues />
+					<case_child_danger_signs />
+					<next_visit />
+					<case_CHW_name />
+				</data>
+			</instance>
+			<bind nodeset="/data/mother_name_label" relevant="/data/case_referral_type = 'mother'" />
+			<bind nodeset="/data/child_name_label" relevant="/data/case_referral_type = 'child'" />
+			<bind nodeset="/data/referral_details" />
+			<bind nodeset="/data/referral_details/dangers_signs_info" relevant="/data/case_danger_signs != ''" />
+			<bind nodeset="/data/referral_details/breastfeeding_info" relevant="/data/case_bf_issues != ''" />
+			<bind nodeset="/data/referral_details/child_danger_signs" relevant="/data/case_child_danger_signs != ''" />
+			<bind nodeset="/data/referral_details/date_symptom_start_label" />
+			<bind nodeset="/data/referral_details/comment_label" />
+			<bind nodeset="/data/visit_again" />
+			<bind nodeset="/data/case_name" />
+			<bind nodeset="/data/case_referral_type" />
+			<bind nodeset="/data/case_danger_signs" />
+			<bind nodeset="/data/case_chw_comment" />
+			<bind nodeset="/data/case_date_symptoms" />
+			<bind nodeset="/data/case_bf_issues" />
+			<bind nodeset="/data/case_child_danger_signs" />
+			<bind nodeset="/data/next_visit" calculate="date(today() + 2)" />
+			<bind nodeset="/data/case_CHW_name" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="mother_name_label-label">
+						<value>Mother: <output value="/data/case_name"/></value>
+					</text>
+					<text id="child_name_label-label">
+						<value>Child: <output value="/data/case_name"/></value>
+					</text>
+					<text id="referral_details-label">
+						<value>Referral Details</value>
+					</text>
+					<text id="dangers_signs_info-label">
+						<value>Danger Signs: <output value="/data/case_danger_signs"/></value>
+					</text>
+					<text id="breastfeeding_info-label">
+						<value>Breastfeeding Problems: <output value="/data/case_bf_issues"/></value>
+					</text>
+					<text id="child_danger_signs-label">
+						<value>Child Danger Signs: <output value="/data/case_child_danger_signs"/></value>
+					</text>
+					<text id="date_symptom_start_label-label">
+						<value>Date Symptoms Started: <output value="format-date(/data/case_date_symptoms, '%e/%n/%y')"/></value>
+					</text>
+					<text id="comment_label-label">
+						<value>Comment: <output value="/data/case_chw_comment"/></value>
+					</text>
+					<text id="visit_again-label">
+						<value>Please check again in 48 hours.</value>
+					</text>
+				</translation>
+				<translation lang="tog">
+					<text id="mother_name_label-label">
+						<value>Bamama: <output value="/data/case_name"/></value>
+					</text>
+					<text id="child_name_label-label">
+						<value>Mwana: <output value="/data/case_name"/></value>
+					</text>
+					<text id="referral_details-label">
+						<value>Bulembo Bwakutumina</value>
+					</text>
+					<text id="dangers_signs_info-label">
+						<value>Zitondezyo ziyoosya: <output value="/data/case_danger_signs"/></value>
+					</text>
+					<text id="breastfeeding_info-label">
+						<value>Buyumuyumu bwakunyosya: <output value="/data/case_bf_issues"/></value>
+					</text>
+					<text id="child_danger_signs-label">
+						<value>Zitondezyo ziyoosya zya mwana: <output value="/data/case_child_danger_signs"/></value>
+					</text>
+					<text id="date_symptom_start_label-label">
+						<value>Buzuba zitondezyo nizyakatalika: <output value="format-date(/data/case_date_symptoms, '%e/%n/%y')"/></value>
+					</text>
+					<text id="comment_label-label">
+						<value>Twambo: <output value="/data/case_chw_comment"/></value>
+					</text>
+					<text id="visit_again-label">
+						<value>Ikaka amulange alimwi kwainda mawoola makumi one amusanu atatu</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<trigger ref="/data/mother_name_label">
+			<label ref="jr:itext('mother_name_label-label')" />
+		</trigger>
+		<trigger ref="/data/child_name_label">
+			<label ref="jr:itext('child_name_label-label')" />
+		</trigger>
+		<group ref="/data/referral_details">
+			<label ref="jr:itext('referral_details-label')" />
+			<trigger ref="/data/referral_details/dangers_signs_info">
+				<label ref="jr:itext('dangers_signs_info-label')" />
+			</trigger>
+			<trigger ref="/data/referral_details/breastfeeding_info">
+				<label ref="jr:itext('breastfeeding_info-label')" />
+			</trigger>
+			<trigger ref="/data/referral_details/child_danger_signs">
+				<label ref="jr:itext('child_danger_signs-label')" />
+			</trigger>
+			<trigger ref="/data/referral_details/date_symptom_start_label">
+				<label ref="jr:itext('date_symptom_start_label-label')" />
+			</trigger>
+			<trigger ref="/data/referral_details/comment_label">
+				<label ref="jr:itext('comment_label-label')" />
+			</trigger>
+		</group>
+		<trigger ref="/data/visit_again">
+			<label ref="jr:itext('visit_again-label')" />
+		</trigger>
+	</h:body>
+</h:html>

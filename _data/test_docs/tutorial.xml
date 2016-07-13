@@ -1,0 +1,118 @@
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:orx="http://openrosa.org/xforms/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>tutorial</h:title>
+    <model>
+      <instance>
+        <tutorial id="tutorial">
+          <name/>
+          <age/>
+          <gender/>
+          <photo/>
+          <date/>
+          <location/>
+          <pizza_fan/>
+          <pizza_hater/>
+          <pizza_type/>
+          <favorite_toppings/>
+          <thanks/>
+        </tutorial>
+      </instance>
+      <bind nodeset="/tutorial/name" required="true()" type="string"/>
+      <bind constraint=". &gt; 0 and . &lt; 120" jr:constraintMsg="That's not a valid age!" nodeset="/tutorial/age" required="true()" type="int"/>
+      <bind nodeset="/tutorial/gender" type="select1"/>
+      <bind nodeset="/tutorial/photo" type="binary"/>
+      <bind nodeset="/tutorial/date" type="date"/>
+      <bind nodeset="/tutorial/location" type="geopoint"/>
+      <bind nodeset="/tutorial/pizza_fan" type="select1"/>
+      <bind nodeset="/tutorial/pizza_hater" readonly="true()" relevant="/tutorial/pizza_fan = 'no'" type="string"/>
+      <bind nodeset="/tutorial/pizza_type" relevant="/tutorial/pizza_fan = 'yes'" type="select1"/>
+      <bind nodeset="/tutorial/favorite_toppings" relevant="/tutorial/pizza_fan = 'yes'" type="select"/>
+      <bind nodeset="/tutorial/thanks" readonly="true()" type="string"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/tutorial/name">
+      <label>What's your name?</label>
+    </input>
+    <input ref="/tutorial/age">
+      <label>How old are you?</label>
+    </input>
+    <select1 ref="/tutorial/gender">
+      <label>Gender</label>
+      <item>
+        <label>Male</label>
+        <value>male</value>
+      </item>
+      <item>
+        <label>Female</label>
+        <value>female</value>
+      </item>
+    </select1>
+    <upload mediatype="image/*" ref="/tutorial/photo">
+      <label>Take a picture</label>
+    </upload>
+    <input ref="/tutorial/date">
+      <label>Date</label>
+    </input>
+    <input ref="/tutorial/location">
+      <label>Where are you?</label>
+      <hint>You need to be outside for your GPS to work.</hint>
+    </input>
+    <select1 ref="/tutorial/pizza_fan">
+      <label>Do you like pizza?</label>
+      <item>
+        <label>Yes</label>
+        <value>yes</value>
+      </item>
+      <item>
+        <label>No</label>
+        <value>no</value>
+      </item>
+    </select1>
+    <input ref="/tutorial/pizza_hater">
+      <label>That's weird!</label>
+    </input>
+    <select1 ref="/tutorial/pizza_type">
+      <label>Best pie?</label>
+      <item>
+        <label>New York think crust!</label>
+        <value>nyc</value>
+      </item>
+      <item>
+        <label>Chicago deep dish!</label>
+        <value>chitown</value>
+      </item>
+    </select1>
+    <select ref="/tutorial/favorite_toppings">
+      <label>Favorite toppings</label>
+      <hint>Select all that apply.</hint>
+      <item>
+        <label>Cheese</label>
+        <value>cheese</value>
+      </item>
+      <item>
+        <label>Pepperoni</label>
+        <value>pepperoni</value>
+      </item>
+      <item>
+        <label>Sausauge</label>
+        <value>sausauge</value>
+      </item>
+      <item>
+        <label>Green Peppers</label>
+        <value>green_peppers</value>
+      </item>
+      <item>
+        <label>Mushrooms</label>
+        <value>mushrooms</value>
+      </item>
+      <item>
+        <label>Anchovies :)</label>
+        <value>anchovies</value>
+      </item>
+    </select>
+    <input ref="/tutorial/thanks">
+      <label>Thanks for your time <output value="/tutorial/name"/>!</label>
+    </input>
+  </h:body>
+</h:html>

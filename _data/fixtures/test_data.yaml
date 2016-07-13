@@ -1,0 +1,73 @@
+- fields:
+    date_joined: 2013-06-08 19:38:13.375088+00:00
+    email: ''
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: false
+    is_superuser: false
+    last_login: 2013-06-08 19:38:13.375028+00:00
+    last_name: ''
+    password: ''
+    user_permissions: []
+    username: AnonymousUser
+  model: auth.user
+  pk: -1
+- fields:
+    date_joined: 2011-09-28 06:42:34+00:00
+    email: info@distributedhealth.org
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: false
+    is_superuser: true
+    last_login: 2013-06-09 20:57:24.230822+00:00
+    last_name: ''
+    password: pbkdf2_sha256$10000$YdIxE7Mmclfb$pDAS0cwaRfGnOAYZB7vxlvq0CoChhkzTcm6URsWNVzs=
+    user_permissions: []
+    username: admin
+  model: auth.user
+  pk: 1
+- fields:
+    date_joined: 2011-09-28 06:42:34+00:00
+    email: info@distributedhealth.org
+    first_name: ''
+    groups: []
+    is_active: true
+    is_staff: false
+    is_superuser: false
+    last_login: 2013-06-08 19:38:29.993837+00:00
+    last_name: ''
+    password: pbkdf2_sha256$10000$YdIxE7Mmclfb$pDAS0cwaRfGnOAYZB7vxlvq0CoChhkzTcm6URsWNVzs=
+    user_permissions: []
+    username: test_user
+  model: auth.user
+  pk: 3
+
+- fields: {created_datetime: !!timestamp '2012-01-31 19:04:54.015000+00:00', encrypted_seed: 0E7InBuUfUUmiScZ$f26843e37555961309583993222af9da,
+    updated_datetime: !!timestamp '2012-01-31 19:04:54.016000+00:00', user: 1}
+  model: twofactor.userauthtoken
+  pk: 1
+- fields: {created_datetime: !!timestamp '2012-01-31 19:04:54.015000+00:00', encrypted_seed: 0E7InBuUfUUmiScZ$f26843e37555961309583993222af9da,
+    updated_datetime: !!timestamp '2012-01-31 19:04:54.016000+00:00', user: 3}
+  model: twofactor.userauthtoken
+  pk: 3
+
+- fields: {created: !!timestamp '2013-10-08 21:56:18.985736+00:00', key: 35f7d1fb1890bdc05f9988d01cf1dcab, name: test, user: 1}
+  model: twofactor.userapitoken
+  pk: 1
+- fields: {created: !!timestamp '2013-10-08 21:56:18.985736+00:00', key: 35f7d1fb1890bdc05f9988d01cf1dcab, name: test, user: 3}
+  model: twofactor.userapitoken
+  pk: 2
+
+- fields: {date_created: !!timestamp '2012-01-31 19:04:54.015000+00:00',
+    date_updated: !!timestamp '2012-01-31 19:04:54.015000+00:00', description: '', is_form_public: false, is_public: true, is_tracker: false,
+    mongo_id: 51b2611580a9760dcdabb5ca, name: testing_public, org: null, study: null, user: 1}
+  model: repos.repository
+  pk: 1
+
+- fields: {date_created: !!timestamp '2012-01-31 19:04:54.015000+00:00',
+    date_updated: !!timestamp '2012-01-31 19:04:54.015000+00:00', description: '', is_form_public: false, is_public: false, is_tracker: false,
+    mongo_id: 527bc855b92df3e0f6816b87, name: testing_hidden, org: null, study: null, user: 1}
+  model: repos.repository
+  pk: 2

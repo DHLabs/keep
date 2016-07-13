@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block js %}
+{% endblock %}
+
+{% block outerspace %}
+<div class='jumbotron'>
+  <div class='container'>
+    <div class='sixteen columns'>
+      <h1>A <span class='widescreen-only'>powerful, secure</span> platform for patient-centric studies.</h1>
+    </div>
+
+    <div class='twelve columns offset-by-two'>
+      <h4>
+        KEEP is an <strong><a href='https://github.com/DHLabs/keep'>open-source platform</a></strong> that has been used in over a hundred countries to collect, analyze and share scientific data, tailored for clinical studies.
+      </h4>
+    </div>
+
+    <div class='sixteen columns'>
+      <div>
+        <img src='{% static "img/masthead/dataflow.png" %}' width='50%' style='min-width:320px;'>
+      </div>
+
+      <div>
+        <a href='{% url "registration_register" %}' class='btn btn-primary btn-large'>Get Started!</a>
+        <a href='{% url "auth_login" %}' class='btn btn-large'>Log In</a>
+      </div>
+
+      <div>
+        <a id="collect" href='#collect'>Learn More <br> <i class='fa fa-double-angle-down'></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class='banner'>
+  <div class='container'>
+    <div class='six columns offset-by-two'>
+      <div class='data-collection-banner'></div>
+    </div>
+    <div class='six columns'>
+      <a name='info-start' id='info-start'><h2>Collect data, simply.</h2></a>
+      <div>
+        <strong>Build forms</strong> to capture data for your study. Access
+        your forms and input data from any modern web browser, even mobile devices.
+        Import existing data from spreadsheets, build studies from
+        scratch, or import data using the API.
+      </div>
+      <div class='section' style='padding-left:0;'>
+        <a href='/features' class='btn btn-primary'>
+          Learn More
+          <i class='fa fa-chevron-right'></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class='banner'>
+  <div class='container'>
+    <div class='six columns offset-by-two'>
+      <h2>Explore Your Data</h2>
+      <div>
+
+        <strong>Learn more about your data</strong> using charts, maps,
+        statistics, and filters. Export data, access it using the API, or
+        share it with collaborators.
+      </div>
+      <div class='section' style='padding-left:0;'>
+        <a href='/features' class='btn btn-primary'>
+          Learn More
+          <i class='fa fa-chevron-right'></i>
+        </a>
+      </div>
+    </div>
+    <div class='six columns'>
+      <div class='analytics-banner'></div>
+    </div>
+  </div>
+</div>
+<div class='banner'>
+  <div class='container'>
+    <div class='six columns offset-by-two'>
+      <div class='management-banner'></div>
+    </div>
+    <div class='six columns'>
+      <h2>Intuitive Management</h2>
+      <div>
+        <strong>Easily manage your data</strong> in an intuitive spreadsheet-like interface
+        that was built with little and big data in mind. Add, edit,
+        and delete data all from a single place.
+      </div>
+      <div class='section' style='padding-left:0;'>
+        <a href='/features' class='btn btn-primary'>
+          Learn More
+          <i class='fa fa-chevron-right'></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

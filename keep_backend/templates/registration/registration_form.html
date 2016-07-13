@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class='section'>
+	<div class="six columns offset-by-five">
+		<h1>Sign Up</h1>
+		<p>Fields marked wth an asterisk (*) are required.</p>
+		<form method="post" action=".">
+			{% csrf_token %}
+			{% for field in form %}
+				<label for='{{ field.name }}'>
+					{% if field.field.required %}*{% endif %}
+					{{ field.label }}
+				</label>
+				{{ field }}
+				<span class='error-block'>{{ field.errors }}</span>
+	  		{% endfor %}
+	  		<button type='submit' id='register-btn' class='btn btn-primary'>Sign Up</button>
+  		</form>
+	</div>
+</div>
+</section>
+{% endblock %}

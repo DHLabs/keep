@@ -1,0 +1,67 @@
+{
+  "name": "keep",
+  "version": "0.0.1",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "devDependencies": {
+    "backbone": "~1.0.0",
+    "backbone.modal": "git://github.com/awkward/backbone.modal#~1.0.0",
+    "d3": "~3.3.11",
+    "jquery": "~2.0.2",
+    "jquery.cookie": "~1.4.0",
+    "leaflet.markerclusterer": "latest",
+    "marionette": "v1.8.8",
+    "moment": "~2.0.0",
+    "requirejs": "~2.1.6",
+    "underscore": "~1.5.1",
+    "font-awesome": "4.4.0",
+    "nvd3": "~1.1.14-beta"
+  },
+  "exportsOverride": {
+    "backbone": {
+      "js": "backbone.js"
+    },
+    "backbone.modal": {
+      "js": "backbone.modal.js"
+    },
+    "d3": {
+      "js": "d3.js"
+    },
+    "font-awesome": {
+      "css": "css/*.min.css",
+      "font": "fonts/*"
+    },
+    "jquery": {
+      "js": "jquery.js"
+    },
+    "jquery.cookie": {
+      "js": "jquery.cookie.js"
+    },
+    "leaflet.markerclusterer": {
+      "js": "dist/leaflet.markercluster.js",
+      "css": "dist/*.css"
+    },
+    "marionette": {
+      "js": "lib/backbone.marionette.js"
+    },
+    "moment": {
+      "js": "moment.js"
+    },
+    "nvd3": {
+      "js": "nv.d3.js",
+      "css": "nv.d3.css"
+    },
+    "requirejs": {
+      "js": "require.js"
+    },
+    "underscore": {
+      "js": "underscore.js"
+    }
+  },
+  "resolutions": {
+    "marionette": "v1.8.8"
+  }
+}

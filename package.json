@@ -1,0 +1,20 @@
+{
+  "name": "openkeep",
+  "version": "0.0.1",
+  "author": "Andrew Huynh",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "static_dir": "keep_backend/static",
+  "repository": {},
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-compass": "~0.7.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-requirejs": "~0.4.4",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-bower-task": "~0.4.0",
+    "grunt-sass": "^0.17.0"
+  }
+}

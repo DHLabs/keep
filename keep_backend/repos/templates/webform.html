@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+{{ repo.name }} Web Entry
+{% endblock %}
+
+{% load repo_extras %}
+
+{% block css %}
+<style type='text/css'>
+  .autocomplete-list {
+    position:absolute;
+  }
+
+  .ui-helper-hidden-accessible {
+    display:none;
+  }
+
+  .ui-autocomplete {
+    border-bottom:1px solid #EEE;
+    border-right:1px solid #EEE;
+    border-left:1px solid #EEE;
+    list-style-type: none;
+    background-color: white;
+  }
+
+  .ui-autocomplete > .ui-menu-item {
+    padding: 4px 8px;
+    cursor:pointer;
+  }
+
+  .ui-autocomplete > .selected {
+    background-color: #EEE;
+  }
+
+  .grid-list-row {
+    border-bottom: 1px solid #000;
+  }
+
+  .grid-list-cell {
+    padding: 3px 15px 2px 15px;
+    text-align: center;
+
+  }
+
+  .grid-list-label {
+    text-align: left;
+  }
+
+  input[type="radio"] {
+    width: auto;
+  }
+
+  label {
+    display: inline;
+  }
+
+</style>
+
+<!-- For Geopoint option -->
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
+{% endblock %}
+
+{% block js %}
+<script id='form_id' type='text/html'>{{ repo_id }}</script>
+<script id='user' type='text/html'>{{ user.username }}</script>
+<script type='text/javascript'>
+  document.repo = {{repo_json|safe}};
+  document.flat_fields = {{ flat_field_json|safe }};
+</script>
+
+<script src='{% static 'js/vendor/require.js' %}'></script>
+<script type='text/javascript'>
+  require([ '{% static "js/common.js" %}' ], function (common) {
+
+    require.config({
+      baseUrl: '{% static "js/vendor" %}'
+    });
+
+    require( [ 'app/webform/main' ] )
+  });
+</script>
+
+{% include 'js_templates/_language_select.html' %}
+
+{% endblock %}
+
+{% block topbar %}
+{% endblock %}
+
+{% block content %}
+<div class='container' id='webform'>
+  <div class='row'>
+    <div class='twelve columns'>
+      <h2>
+        {% if account.username and user.is_authenticated %}
+          <a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>/
+        {% elif user.is_authenticated %}
+          <a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>/
+
+        {% else %}
+
+        {% endif %}
+        &nbsp;{{ repo.name }}
+      </h2>
+    </div>
+    <div class="four columns u-textRight">
+      {% if registry %}
+      <a class='btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
+        <i class='fa fa-list'></i>&nbsp;Registry
+      </a>
+      {% endif %}
+      &nbsp;
+      <a href='#' class='btn' id='language-select-btn'>
+        <i class="fa fa-globe"></i>
+        Language
+      </a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="sixteen columns">
+      <div class="progress">
+        <div class="progress-bar progress-bar-success"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div id="autofill_list" class='autocomplete-list'></div>
+      <div id="xform_view" class="span12">
+        <div id="form_fields" class="formbox">
+          <div id="formDiv">
+            <form class="form" method="post" action="." enctype="multipart/form-data">
+
+              {% if data_id %}
+                <input type='hidden' id='detail_data_id' value='{{ data_id }}' name='detail_data_id'>
+              {% endif %}
+
+              {% for field in flat_fields %}
+                {% if forloop.counter0 == 0 %}
+              <div id="{{ field.name }}_field" class="control-group" style="display: block">
+                {% else %}
+              <div id="{{ field.name }}_field" class="control-group" style="display: none">
+                {% endif %}
+
+                <label class="control-label" for="{{ field.name }}">
+                  {{ field.label|parse_label }}
+                </label>
+
+                <div class="controls">
+
+                {% if field.type == 'group' %}
+ 				{% elif field.name == 'id' %} 
+		        	<!-- Make patient id non-editable. PM -->
+		        	
+		        	<!--label>3. Patient id:</label><br-->
+					 <span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" 	step="any" readonly="readonly" ><br></span>
+				    
+				{% elif field.name == 'datetime' %} 
+		        	<!-- Make patient id non-editable. PM -->
+		        	 <span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" 	><script>
+					var d = new Date();
+					document.getElementById("demo").innerHTML = d;
+			        </script></span>
+		        	
+                {% elif field.type == 'geopoint' %}
+                  <!-- PM: remove and make country editable. TODO -->
+                {% elif field.type == 'integer' or field.type == 'decimal' or field.type == 'integer' %}
+                  <span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" type="number" step="any"></span>
+                {% elif field.type == 'select one' or field.type == 'select one or specify other' %}
+                  {% if field.bind and field.bind.appearance == 'dropdown' %}
+                  <select name="{{ field.name }}">
+                    {% for choice in field.choices %}
+                    <option value="{{ choice.name }}">{{ choice.label|parse_label }}</option>
+                    {% endfor %}
+                    {% if field.type == 'select one or specify other' %}
+                    <option>todo</option>
+                    {% endif %}
+                  </select>
+                  {% else %}
+                  <ul id="{{ field.name }}" name="{{ field.name }}">
+                    {% for choice in field.choices %}
+                      <li><span data-editor="">
+                        <input type="radio" name="{{ field.name }}" value="{{ choice.name }}"
+                          id="{{ field.name }}-{{ forloop.counter0 }}">
+                        <label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label|parse_label }}</label>
+                        </span>
+                      </li>
+                    {% endfor %}
+                    {% if field.type == 'select one or specify other' %}
+                    TODO
+                    {% endif %}
+                  </ul>
+                  {% endif %}
+
+                {% elif field.type == 'select all that apply' or field.type == 'select all that apply or specify other'  %}
+                  <ul id="{{ field.name }}" name="{{ field.name }}">
+                    {% for choice in field.choices %}
+                      <li><span data-editor="">
+                        <input type="checkbox" name="{{ field.name }}" value="{{ choice.name }}"
+                          id="{{ field.name }}-{{ forloop.counter0 }}">
+                        <label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label|parse_label }}</label>
+                        </span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% elif field.type == 'text' %}
+                  <input id="{{ field.name }}" name="{{ field.name }}" type="text">
+                {% elif field.type == 'note' %}
+
+                {% elif field.type == 'calculate' %}
+                  <input id="{{ field.name }}" name="{{ field.name }}" type="hidden">
+                {% endif %}
+
+                </div>
+              </div>
+              {% endfor %}
+
+            </form>
+          </div>
+          <div id="alert-placeholder"></div>
+        </div>
+        <div id='form_actions' style='overflow:auto;'>
+          <div class='pull-right'>
+            <a href="#" class='btn' id="next_btn">Next</a>
+            <a href='#' class='btn btn-success' style='display:none;' id='submit_btn'>Submit</a>
+          </div>
+        <a href="#" class='btn' style='display:none;' id="prev_btn">Previous</a>
+      </div>
+      </div>
+  </div>
+</div>
+{% endblock %}

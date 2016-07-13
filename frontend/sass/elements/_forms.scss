@@ -1,0 +1,114 @@
+input[type='text'] {
+	width:100%;
+	margin-bottom:8px;
+}
+
+input[type='password'] {
+	width:100% !important;
+}
+
+input.small, select.small {
+	width: 150px;
+}
+
+input.large {
+	padding: 9px;
+	font-size: 18px;
+}
+
+div.control-group {
+	margin-bottom:20px;
+}
+
+span.error {
+	color: $theme;
+	font-weight: bold;
+}
+
+label.checkbox {
+
+	input[type=checkbox] {
+		float:left;
+		width: 24px;
+		height: 24px;
+	}
+}
+
+label.help-block {
+	font-weight: normal;
+}
+
+.help-block {
+	font-size: 13px;
+	color: ligthen( $accent, 33% );
+}
+
+.error-block {
+	font-size: .8em;
+	color: $theme;
+}
+
+.ui-state-hover {
+	color: white;
+	background-color: $theme;
+}
+
+.autocomplete-list {
+	position:absolute;
+}
+
+.ui-helper-hidden-accessible {
+	display:none;
+}
+
+.ui-autocomplete {
+	border-bottom:1px solid #EEE;
+	border-right:1px solid #EEE;
+	border-left:1px solid #EEE;
+	list-style-type: none;
+	background-color: white;
+
+	> .ui-menu-item {
+		padding: 8px;
+		cursor:pointer;
+		margin:0;
+	}
+
+	.ui-state-selected {
+		> a {
+			color: white;
+			font-weight: bold;
+		}
+
+		background-color: $theme;
+	}
+}
+
+/**
+ * Linked form status indicators
+ *
+ * 1. incompleteRequired indicates a form that is empty but should not be
+ * 2. incomplete indicates some data, whereas empty indicates no data
+ */
+.linkedForm {
+  display: inline-block;
+
+  margin: 3px 5px;
+  padding: 5px 10px;
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 3px;
+  font-weight: bold;
+  background-color: #AAA;
+
+  &.linkedForm--complete {
+    background-color: #56B156;
+  }
+  &.linkedForm--incomplete {
+    background-color: #F3A047;
+  }
+  &.linkedForm--incompleteRequired { /* 1 */
+    background-color: #FF3A3A;
+  }
+  &.linkedForm--empty { /* 2 */
+  }
+}

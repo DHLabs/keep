@@ -1,0 +1,68 @@
+{% extends "twofactor_admin/base_site.html" %}
+{% load i18n adminmedia %}
+{% load url from future %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/forms.css" />{% endblock %}
+{% block userlinks %}{% include "twofactor_admin/_userlinks.html" %}{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="../">{% trans 'Home' %}</a> &rsaquo; {% trans 'Two-factor authentication' %}</div>{% endblock %}
+
+{% block title %}{% trans 'Two-factor authentication' %}{% endblock %}
+
+{% block content %}<div id="content-main">
+
+{% if resetform.errors or disableform.errors %}
+    <p class="errornote">
+    Please correct the error below.
+    </p>
+{% endif %}
+
+<h1>{% trans 'Two-factor authentication' %}</h1>
+
+{% if has_token %}
+<p>{% trans "Two-factor authentication is <b>enabled</b> for this account. If you wish to reset your authentication token (to move to a new authenticating device) or disable two-factor authentication altogether, please confirm below:" %}</p>
+{% else %}
+<p>{% trans "Two-factor authentication is <b>disabled</b> for this account. If you wish enable authentication, please confirm below:" %}</p>
+{% endif %}
+
+<div>
+    <h2>{% if has_token %}{% trans 'Reset authentication' %}{% else %}{% trans 'Enable authentication' %}{% endif %}</h2>
+
+    <p>Create a new token.{% if has_token %} All existing authentication devices will no longer work.{% endif %}</p>
+    <form id="resetform" action="" method="post">{% csrf_token %}
+    <fieldset class="module aligned wide">
+
+    <div class="form-row">
+        {{ resetform.reset_confirmation.errors }}
+        <label for="id_reset_confirmation" class="required">{% if has_token %}{% trans 'Reset authentication' %}{% else %}{% trans 'Enable authentication' %}{% endif %}:</label>{{ resetform.reset_confirmation }}
+    </div>
+
+    </fieldset>
+
+    <div class="submit-row">
+        <input type="submit" value="{% trans 'Submit' %}" class="default" />
+    </div>
+    </form>
+</div>
+
+{% if has_token %}<div>
+    <h2>Disable two-factor authentication</h2>
+    <form id="disableform" action="" method="post">{% csrf_token %}
+    <fieldset class="module aligned wide">
+
+    <div class="form-row">
+        {{ disableform.disable_confirmation.errors }}
+        <label for="id_disable_confirmation" class="required">{% trans 'Disable authentication' %}:</label>{{ disableform.disable_confirmation }}
+    </div>
+
+    </fieldset>
+
+    <div class="submit-row">
+        <input type="submit" value="{% trans 'Submit' %}" class="default" />
+    </div>
+    </form>
+</div>{% endif %}
+
+</div>
+
+{% endblock %}
+
+

@@ -1,0 +1,99 @@
+#viz-chrome {
+	position:absolute;
+ 	width:100%;
+
+	border-bottom:	1px solid #ddd;
+	box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+
+ 	.container-padded {
+ 		padding-top:80px;
+ 	}
+
+	#repo-privacy {
+		text-align:right;
+		font-size: 3em;
+		> div {
+			padding:12px;
+		}
+	}
+
+	#repo-actions {
+		float:right;
+		text-align:right;
+		margin-top: 8px;
+
+		ul.nav-list a {
+			color: white;
+		}
+	}
+
+}
+
+#viz-data-controls {
+	background-color:#eee;
+	padding: 4px 8px;
+}
+
+/* 1. Footer height */
+#vizContainer {
+	position: absolute;
+	top: 184px;
+  right: 0;
+	bottom: 30px;  /* 1 */
+  left: 0;
+  overflow-y: scroll;
+}
+
+.active {
+	a {
+		color: $accent;
+	}
+
+}
+
+.disabled {
+	a {
+		color: lighten( $accent, 66% );
+	}
+}
+
+.viz { display: none; }
+
+
+#viz-options {
+
+	li {
+		border-top: 1px solid white;
+		border-left: 1px solid white;
+		border-right: 1px solid white;
+
+		display:inline-block;
+		text-align:center;
+		padding:8px 0;
+		width: 96px;
+
+		a {
+			color: #999;
+			i {
+				font-size: 1.2em;
+			}
+		}
+
+	}
+
+	li:hover, li.active {
+		border-color: $theme;
+
+		a {
+			color: $theme;
+		}
+	}
+}
+
+#settings-viz {
+	padding-top: 32px;
+}
+
+@import "viz/_chart_view";
+@import "viz/_map_view";
+@import "viz/_raw_view";

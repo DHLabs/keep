@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class='container'>
+	<div class='sixteen columns'>
+		<h3>API Keys</h3>
+		<table class='table'>
+			<thead>
+				<tr>
+					<th>Key Name</th>
+					<th>Secret Key</th>
+					<th>Date Created</th>
+					<th>&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<form class='form' action='/accounts/generate_key' method='GET'>
+					<td><input type='text' style='margin:0;' name='name' placeholder='iODK Key'></td>
+					<td colspan='3'>
+						<button type='submit' class='btn' style='margin:0;'>
+							Generate Key
+						</button>
+					</td>
+					</form>
+				</tr>
+				{% for token in api_tokens %}
+					<tr>
+						<td>{{ token.name }}</td>
+						<td>{{ token.key }}</td>
+						<td>{{ token.created }}</td>
+						<td>
+							<a href='/accounts/delete_key/{{ token.id }}' class='btn' style='display:inline;'>
+								<i class='fa fa-trash'></i> Delete
+							</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class='container'>
+	<div class='sixteen columns' style='padding:16px 0;'>
+		<h3>Two-Factor Auth Code</h3>
+		<img src='{{ auth_token.google_url }}'>
+	</div>
+</div>
+{% endblock %}

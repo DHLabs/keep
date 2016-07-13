@@ -1,0 +1,18 @@
+#analytics-viz {
+	padding-top:32px;
+}
+
+#line {
+	.axis {
+		path, line {
+	  		fill: none;
+	  		stroke: #000;
+	  	}
+	}
+
+	.line {
+	    fill: none;
+	    stroke: orange;
+	    stroke-width: 2px;
+	}
+}

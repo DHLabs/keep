@@ -1,0 +1,115 @@
+// _tables.scss
+.table {
+
+  width: 100%;
+
+  tr {
+    border-bottom: 1px solid #EEE;
+  }
+
+  tbody {
+    tr:hover {
+      background-color: #EEE;
+    }
+  }
+
+  th {
+    font-weight: bold;
+    text-align: left;
+    padding: 8px 16px;
+    color: $theme;
+
+    background-color: #FFF !important;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 8px;
+  }
+
+  td.selected {
+    background-color: $theme;
+    color: white;
+    font-weight: bold;
+  }
+}
+
+.compressed {
+  font-size: .9em;
+
+  td {
+    padding: 4px 8px;
+
+    input, select {
+      margin:0;
+    }
+
+    a {
+      display: inline;
+    }
+  }
+}
+
+
+table.fixed {
+  td, th {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x:hidden;
+
+    width: 256px;
+    min-width: 256px;
+    max-width: 256px;
+  }
+
+  td:last-child {
+    width:100%;
+  }
+}
+
+// Override table row hover when the table is in a modal.
+.bbm-modal__section {
+
+  tbody {
+    td:first-child {
+      vertical-align: top;
+      text-align: right;
+    }
+
+    tr:hover {
+      background-color: #FFF !important;
+    }
+
+    tr:last-child {
+      border-bottom: none;
+    }
+  }
+
+}
+
+
+.DataTable {
+  overflow: scroll;
+  max-height: 400px;
+}
+
+.DataTable--fitContainer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  max-height: none;
+}
+
+.DataTable-fixedHeader {
+  position: fixed;
+  top: 0;
+  display: none;
+  box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+}
+
+.DataTable-sortIcon {
+  margin-top:4px !important;
+  float:right;
+}
