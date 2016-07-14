@@ -136,6 +136,10 @@ define( [ 'jquery',
         submit: ->
             $( ".form" ).submit()
 
+
+        # Returns a dictionary of all the form values
+        get_form_values: -> @queryStringToJSON $(".form").serialize()
+
         # _geopointDisplay = ->
         #   onMapClick = (e) ->
         #     popup.setLatLng(e.latlng).setContent("Latitude and Longitude: " + e.latlng.toString()).openOn map
@@ -381,6 +385,20 @@ define( [ 'jquery',
 
         passes_question_constraints: ->
           question = document.flat_fields[@currentQuestionIndex]
+          answers = @get_form_values()
+
+          # If question type is group, ensure all the children pass constraints.
+          if question.type is 'group'
+            for __, child of question.children
+              if not XFormConstraintChecker.passesConstraint child, answers
+                msg = "Answer doesn't pass constraint: #{child.bind['jr:constraintMsg'] or child.bind.constraint}"
+                alert msg
+                return false
+
+            if child.bind?.required is "yes"
+              if @get_question_value(child).length is 0
+                alert "Answer is required."
+                return false
 
           # Check if the question is required and whether or not a value is
           # present. If not, raise an alert.
@@ -391,8 +409,8 @@ define( [ 'jquery',
 
           # Ensure that the question passes any constraints, if given. If
           # not, raise an alert.
-          if not XFormConstraintChecker.passesConstraint( question, @get_question_value(question) )
-            alert "Answer doesn't pass constraint: #{question.info.bind.constraint}"
+          if not XFormConstraintChecker.passesConstraint question, answers
+            alert "Answer doesn't pass constraint: #{child.bind['jr:constraintMsg'] or child.bind.constraint}"
             return false
 
           return true
@@ -500,7 +518,7 @@ define( [ 'jquery',
           # it's relevant; it could be irrelevant based on preceding values, or
           # a calculation.
           if (next_question.bind?.calculate?) or not
-            XFormConstraintChecker.isRelevant( next_question, @queryStringToJSON( $( ".form" ).serialize()) )
+            XFormConstraintChecker.isRelevant next_question, @get_form_values()
 
               # If its a calculation, calculate it!
               $("#" + next_question.name).val _performCalcluate(next_question.bind.calculate)  if next_question.bind?.calculate?
