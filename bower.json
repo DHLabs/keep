@@ -8,7 +8,7 @@
   ],
   "devDependencies": {
     "backbone": "~1.3.3",
-    "backbone.modal": "git://github.com/awkward/backbone.modal#~1.0.0",
+    "backbone.modal": "git://github.com/awkward/backbone.modal#~1.1.5",
     "d3": "~3.3.11",
     "jquery": "~2.0.2",
     "jquery.cookie": "~1.4.0",
@@ -16,7 +16,7 @@
     "marionette": "v2.4.7",
     "moment": "~2.0.0",
     "requirejs": "~2.1.6",
-    "underscore": "~1.7.0",
+    "underscore": "~1.8.3",
     "font-awesome": "4.4.0",
     "nvd3": "~1.1.14-beta"
   },
