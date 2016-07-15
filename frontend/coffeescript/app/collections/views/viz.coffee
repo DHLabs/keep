@@ -21,12 +21,12 @@ define( [ 'jquery',
 
     class VizCollectionView extends Backbone.Marionette.CollectionView
         el: $( '#analytics-viz-list' )
-        itemView: VizItemView
+        childView: VizItemView
         collection: new VizCollection
 
-        buildItemView: ( item, ItemViewType, itemViewOptions ) ->
+        buildItemView: ( item, ItemViewType, childViewOptions ) ->
             options = _.extend( { model: item },
-                                itemViewOptions,
+                                childViewOptions,
                                 { className: 'eight columns' } )
 
             return new ItemViewType( options )

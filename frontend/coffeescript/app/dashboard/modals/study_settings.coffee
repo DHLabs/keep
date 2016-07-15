@@ -20,7 +20,7 @@ define( [ 'jquery',
         delete_event: ( event ) =>
             @collection.remove( @study )
             @study.destroy()
-            @close()
+            @destroy()
 
         onRender: () =>
             $( '.study-name', @el ).html( @study.get( 'name' ) )

@@ -104,7 +104,7 @@ define( [ 'jquery',
 
         switch_view: (view) ->
           @currentView.$el.hide()
-          @show(@views[view], preventClose: true)
+          @show(@views[view], preventDestroy: true)
           @currentView.$el.show()
           Backbone.history.navigate(view)
 

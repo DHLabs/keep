@@ -142,13 +142,15 @@ define( [ 'jquery',
             # Initialize our collections!
             @repo_view = new RepoCollectionView
             @repo_view.collection.reset( document.repo_list )
+            @repo_view.render()
 
             @study_view = new StudyCollectionView
-            @study_view.on( 'render', @_apply_draggable )
             @study_view.collection.reset( document.study_list )
+            @study_view.render()
 
-            @study_view.on( 'after:item:added', @refresh_repos_event )
-            @study_view.on( 'item:removed', @refresh_repos_event )
+            @study_view.on( 'render', @_apply_draggable )
+            @study_view.on( 'add:child', @refresh_repos_event )
+            @study_view.on( 'remove:child', @refresh_repos_event )
 
             # TODO: Detect ability to read local files in the browser. This
             # is a notably HTML5 feature and should be in most if not all browsers
@@ -182,9 +184,9 @@ define( [ 'jquery',
                 study_id   = event.model.id
                 study_name = event.model.get( 'name' )
 
-                # Was this item removed or added? If isClosed is true, the item
+                # Was this item removed or added? If isDestroyed is true, the item
                 # was removed from the collection.
-                if event.isClosed
+                if event.isDestroyed
                     study_id = null
                     study_name = 'All Diaries'
 

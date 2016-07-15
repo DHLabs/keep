@@ -8,7 +8,7 @@ define( [ 'jquery',
 ( $, _, Backbone, Marionette, DataTableView) ->
 
     # Manages the data table and filter controls
-    class DataFiltersView extends Backbone.Marionette.Layout
+    class DataFiltersView extends Backbone.Marionette.LayoutView
         el: '#filters-viz'
 
         template: '#filters-layout-tmpl'
@@ -19,9 +19,11 @@ define( [ 'jquery',
           'saved_filters':   '.Filters-savedFilters'
           'filtered_data':   '.Filters-filteredData'
 
-        initialize: (options) ->
+        initialize: (options) -> @options = options
+
+        onShow: ->
           # Setup view for filtered data
-          @le_filtered_data = new FilteredDataView(options)
+          @le_filtered_data = new FilteredDataView(@options)
 
           # Setup view for saved filters
           le_saved_filters = document.saved_filters
@@ -33,17 +35,9 @@ define( [ 'jquery',
           @current_filters_view = new AppliedFiltersView(collection: @current_filter_set)
 
           # Filter controls need a list of possible column names to filter on
-          column_names = _.map(options.fields, (field) -> field.name)
+          column_names = _.map(@options.fields, (field) -> field.name)
           @filter_input = new FilterControls(columns: column_names)
 
-
-        onShow: ->
-          @applied_filters.show @current_filters_view
-          @filtered_data.show @le_filtered_data
-          @filter_controls.show @filter_input
-          @saved_filters.show @saved_filters_view
-
-        onRender: ->
           # Setup listening events
           @listenTo(@current_filters_view, 'filters:refresh_data', @_refresh_data)
           @listenTo(@current_filters_view, 'filters:save', @_save_filterset)
@@ -51,12 +45,16 @@ define( [ 'jquery',
           @listenTo(@filter_input, 'filters:reset', @_reset_filterset)
           @listenTo(@saved_filters_view, 'filters:apply', @_apply_filterset)
 
+          @filtered_data.show @le_filtered_data
+          @filter_controls.show @filter_input
+          @saved_filters.show @saved_filters_view
+          @applied_filters.show @current_filters_view
+
           # Load up the intial set of data to render.
           @_refresh_data('')
 
         # Clear the currently applied filters and create a blank FilterSet
-        _reset_filterset: ->
-          @_apply_filterset new FilterSet()
+        _reset_filterset: -> @_apply_filterset new FilterSet()
 
         _apply_filterset: (filterset) ->
           @current_filter_set = filterset
@@ -262,13 +260,13 @@ define( [ 'jquery',
     class AppliedFiltersView extends Backbone.Marionette.CompositeView
         template: '#filter-set-tmpl'
         emptyView: EmptyAppliedFilters
-        itemView: AppliedFilterView
-        itemViewContainer: '.activeFilters'
+        childView: AppliedFilterView
+        childViewContainer: '.activeFilters'
 
         events:
           'click .js-save': 'save_filterset'
 
-        itemEvents:
+        childEvents:
           'filters:remove': 'remove_filter'
 
         # We pass a FilterSet in, but actually iterate over a Filters
@@ -279,7 +277,7 @@ define( [ 'jquery',
           @collection = @filter_set.get('filters').clone()
 
         # First two parameters aren't important but passed along automatically
-        # to functions called by itemEvents.
+        # to functions called by childEvents.
         remove_filter: (__, ___, filter_model) ->
           @collection.remove(filter_model)
           @trigger('filters:refresh_data', @collection.url_params())
@@ -324,17 +322,17 @@ define( [ 'jquery',
     class SavedFiltersView extends Backbone.Marionette.CompositeView
       template: '#saved-filters-tmpl'
       emptyView: EmptySavedFilters
-      itemView: SavedFilterView
-      itemViewContainer: '.Filters-savedFilters'
+      childView: SavedFilterView
+      childViewContainer: '.Filters-savedFilters'
 
-      itemEvents:
+      childEvents:
         'filters:apply': '_apply_filter'
         'filters:delete': '_delete_filter'
 
-      _apply_filter: (__, ___, filter_set) ->
+      _apply_filter: (__, filter_set) ->
         @trigger('filters:apply', filter_set)
 
-      _delete_filter: (__, ___, filter_set) ->
+      _delete_filter: (__, filter_set) ->
         @collection.remove(filter_set)
         filter_set.destroy()
 

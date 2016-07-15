@@ -28,9 +28,9 @@ define( [ 'jquery',
 
 
         initialize: (options) ->
-            @fields = options.fields
-            @repo   = options.repo
-            @linked = options.linked
+          @fields = options.model.collection.fields
+          @repo   = options.model.collection.repo
+          @linked = options.model.collection.linked
 
         linked_form_css: (status) ->
           if status is 'empty'
@@ -91,11 +91,11 @@ define( [ 'jquery',
 
 
     class DataTableView extends Backbone.Marionette.CompositeView
-        itemView: TableRowView
+        childView: TableRowView
         emptyView: EmptyTableView
         template: '#DataTable-template'
 
-        itemViewContainer: '.DataTable-table tbody'
+        childViewContainer: '.DataTable-table tbody'
 
         header_template: _.template '''
                 <tr>
@@ -169,11 +169,11 @@ define( [ 'jquery',
 
         initialize: (options)->
 
-          @fields = options.fields
-          @repo   = options.repo
-          @linked = options.linked
-
           @collection = new DataCollection(options)
+
+          @collection.fields = @fields = options.fields
+          @collection.repo   = @repo   = options.repo
+          @collection.linked = @linked = options.linked
 
           # Setup loading indicators:
           # 1. apply opacity when request is fired
@@ -230,13 +230,6 @@ define( [ 'jquery',
           if scroll_distance >= table_height
             @page_loading = true
             @collection.next( success: => @page_loading = false )
-
-          @
-
-
-        buildItemView: (item, ItemViewType, itemViewOptions) ->
-            options = _.extend( { model: item, fields: @fields, repo: @repo, linked: @linked }, itemViewOptions )
-            return new ItemViewType( options )
 
 
     return DataTableView

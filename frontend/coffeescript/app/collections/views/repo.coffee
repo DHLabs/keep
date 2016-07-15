@@ -60,7 +60,7 @@ define( [ 'jquery',
 
     class RepoCollectionView extends Backbone.Marionette.CollectionView
         el: $( '#repo_list > tbody' )
-        itemView: RepoItemView
+        childView: RepoItemView
         collection: new RepoCollection
 
         filter: ( filter ) ->

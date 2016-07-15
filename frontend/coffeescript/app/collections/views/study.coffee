@@ -19,7 +19,7 @@ define( [ 'jquery',
 
     class StudyCollectionView extends Backbone.Marionette.CollectionView
         el: '#study_list'
-        itemView: StudyItemView
+        childView: StudyItemView
         collection: new StudyCollection
 
         selected: ()->

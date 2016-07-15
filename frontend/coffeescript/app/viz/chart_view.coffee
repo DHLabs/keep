@@ -22,7 +22,7 @@ define( [ 'jquery',
 
     class DataChartView extends Backbone.Marionette.View
         el: '#analytics-viz'
-        itemView: ChartItemView
+        childView: ChartItemView
 
         events:
             'click .create-new a': 'create_new_viz_event'

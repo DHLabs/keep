@@ -40,7 +40,7 @@ define( [ 'jquery',
 
     class DataMapView extends Backbone.Marionette.CollectionView
         el: '#map-viz'
-        itemView: MarkerItemView
+        childView: MarkerItemView
 
         # Find a column that can be plotted on the map.
         # TODO: Support lat/lngs as separate columns.
@@ -150,20 +150,20 @@ define( [ 'jquery',
         # We aren't appending HTML to the DOM in the standard way; rather than
         # appending HTML to the collections el, we want to render each
         # geopoint on our Leaflet map.
-        appendHtml: (collectionView, itemView, index) ->
+        appendHtml: (collectionView, childView, index) ->
 
             # If we could not find any geofields or the user has not specified
             # an existing one, don't do anything with the data.
             return if not collectionView.selected_header?
-            point = @_geopoint(itemView.model)
+            point = @_geopoint(childView.model)
             return if not point?
 
             # Instead of appending these views into the DOM, place them in the
             # map instead!
-            @_add_to_layers(itemView.model, point)
+            @_add_to_layers(childView.model, point)
 
-        buildItemView: ( item, ItemViewType, itemViewOptions ) ->
-            options = _.extend( { model: item, fields: @fields }, itemViewOptions )
+        buildItemView: ( item, ItemViewType, childViewOptions ) ->
+            options = _.extend( { model: item, fields: @fields }, childViewOptions )
             return new ItemViewType( options )
 
         onShow: =>
