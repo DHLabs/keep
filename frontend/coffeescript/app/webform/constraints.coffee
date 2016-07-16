@@ -22,47 +22,43 @@ define( [], ->
             else
                 return true
 
-         # Function replaces all "selected(.,'foo')" with evaluated boolean of YES or NO
-        @evaluateSelectedInExpression: (expression, answers, currentPath) ->
+        # Function replaces all "selected(.,'foo')" with evaluated boolean of YES or NO
+        @evaluateSelectedInExpression: (expr, answers, currentPath) ->
+            expression = expr
 
-            keepGoing = true
-            string = expression.toLowerCase()
+            while true
+                # Exit if there are no more "selected(" strings present.
+                start_range = expression.indexOf 'selected('
+                end_range = expression.indexOf ')', start_range
+                break if start_range is -1
 
-            while keepGoing
-                range = expression.indexOf "selected("
+                # Get the inner contents of the first "selected(...)"
+                selected = expression[(start_range+'selected('.length) .. (end_range) ]
 
-                if range != -1
-                    substring = expression[(range + 9) .. ]
-                    endRange = substring.indexOf ")"
-                    selected = substring[0 .. endRange]
+                # Get left, right parts of the string formatted as:
+                # ${foo}, "bar"
+                # Make the field name a selector if it's '.'
+                [ field_name, expected_value ] = selected.split ','
+                field_name = "${#{currentPath}}" if field_name is "."
 
-                    components = selected.split ","
+                # Remove ${} from field name, and quotes from expected value and
+                # trim whitespace.
+                field_name = field_name.replace /\s+/g, ""
+                field_name = field_name[2 .. field_name.length - 2]
+                expected_value = expected_value.replace /\s+/g, ""
+                expected_value = expected_value[1 .. expected_value.length - 2]
 
-                    # check for answer
-                    leftString = components[0].replace /\s+/g, ""
-                    rightString = components[0].replace /\s+/g, ""
+                # Replace the "selected(...)" expression with YES or NO.
+                answer = answers[field_name]
+                expr = expression[start_range .. end_range]
+                result = if answer is expected_value then 'YES' else 'NO'
+                expression = expression.replace expr, result
 
-                    if leftString is "."
-                        leftString = "${" + currentPath + "}"
-
-                    # remove quotes from rightstring
-                    rightString = rightString[1 .. rightString.length - 2]
-
-                    answer = answers[leftString]
-
-                    replaceString = expression[range .. endRange]
-                    if answer is rightString
-                        string = string.replace replaceString, "YES"
-                    else
-                        string = string.replace replaceString, "NO"
-                else
-                    keepGoing = false
-            return string
+            return expression
 
         # function recursively breaks down logical expression for individual
         # evaluation and then reconstruction back up the tree
         @evaluateExpression: (expression, answers, currentPath) ->
-            expression = expression.toLowerCase()
             # evaluate all selected
             scopeRange = expression.indexOf "("
             andRange = expression.indexOf " and "
@@ -95,7 +91,7 @@ define( [], ->
                         andLocation = leftOverString.indexOf " and "
 
                         if orLocation != 0
-                            return (@evaluateExpression(parentrString, answers, currentPath) or @evaluateExpression(leftOverString, answers, currentPath))
+                            return (@evaluateExpression(parentString, answers, currentPath) or @evaluateExpression(leftOverString, answers, currentPath))
                         else if andLocation != 0
                             return (@evaluateExpression(parentrString, answers, currentPath) and @evaluateExpression(leftOverString, answers, currentPath))
                         else if andLocation != -1 or orLocation != -1
