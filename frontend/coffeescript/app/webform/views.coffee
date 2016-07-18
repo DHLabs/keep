@@ -424,11 +424,9 @@ define( [ 'jquery',
           else
             ""
 
-        show_question: (question) ->
-          @toggle_question(question, false)
+        show_question: (question) -> @toggle_question(question, false)
 
-        hide_question: (question) ->
-          @toggle_question(question, true)
+        hide_question: (question) -> @toggle_question(question, true)
 
         toggle_question: (question, hide) ->
           return false if not question
@@ -517,20 +515,35 @@ define( [ 'jquery',
           # Now that we've found the next question, we need to determine if
           # it's relevant; it could be irrelevant based on preceding values, or
           # a calculation.
-          if (next_question.bind?.calculate?) or not
-            XFormConstraintChecker.isRelevant next_question, @get_form_values()
+          relevant = XFormConstraintChecker.isRelevant next_question, @get_form_values()
+          calculate = next_question.type is 'calculate'
+          while not relevant or calculate
 
-              # If its a calculation, calculate it!
+              # If it's a calculation, calculate it!
               $("#" + next_question.name).val _performCalcluate(next_question.bind.calculate)  if next_question.bind?.calculate?
 
               # Switch to the next question!
               if advancing
-                next_index += 1 if next_index < @numberOfQuestions
+                if next_question.type is 'group'
+                  next_index += next_question.children.length + 1
+                else
+                  next_index += 1 if next_index < @numberOfQuestions
               else
                 next_index -= 1 if next_index > 0
+                group = @get_group_for_question(next_question)
+                if group
+                  next_index = next_index - group.children.length
+                  next_question = document.flat_fields[next_index]
 
-              @switch_question( next_index, advancing )
-              return
+              next_question = document.flat_fields[next_index]
+
+              if not next_question
+                @update_progress_bar(next_index)
+                @_display_form_buttons(next_index)
+                return
+
+              relevant = XFormConstraintChecker.isRelevant next_question, @get_form_values()
+              calculate = next_question.type is 'calculate'
 
           # We've found the next question, so hide the current question, show
           # the next one, and update the controls.
@@ -549,13 +562,9 @@ define( [ 'jquery',
           new_width_percentage = ((next_index / @numberOfQuestions) * 100).toString()
           @$('.progress-bar').width("#{new_width_percentage}%")
 
-        next_question: ->
-          @switch_question( @currentQuestionIndex + 1, true )
-          @
+        next_question: -> @switch_question( @currentQuestionIndex + 1, true )
 
-        prev_question: () ->
-            @switch_question( @currentQuestionIndex - 1, false )
-            @
+        prev_question: -> @switch_question( @currentQuestionIndex - 1, false )
 
     return xFormView
 )
