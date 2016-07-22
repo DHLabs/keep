@@ -23,7 +23,11 @@ class VizResource( Resource ):
         # TODO: Make sure this API token concept works with public/private
         # data.
         authentication = MultiAuthentication( ApiTokenAuthentication(),
+<<<<<<< HEAD
                                               SessionAuthentication() )
+=======
+        SessionAuthentication() )
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
 
         authorization = VizAuthorization()
 

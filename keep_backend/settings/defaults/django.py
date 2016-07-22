@@ -91,4 +91,8 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, 'templates'),
+<<<<<<< HEAD
 )
+=======
+)
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e

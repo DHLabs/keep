@@ -22,7 +22,11 @@ class NewBatchRepoForm( forms.Form ):
     '''
         Create a new repo from a CSV file.
     '''
+<<<<<<< HEAD
 
+=======
+    print "in NewBatchRepoForm class in /repos/forms.py"
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     # File used to create/populate the new repo
     repo_file   = forms.FileField( required=True )
     # The study this repo is associated with
@@ -40,7 +44,11 @@ class NewBatchRepoForm( forms.Form ):
         self._org = None
         if 'org' in kwargs:
             self._org = kwargs.pop( 'org' )
+<<<<<<< HEAD
 
+=======
+        print " in NewBatchRepoForm/__init__ "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         super( NewBatchRepoForm, self ).__init__( *args, **kwargs )
 
     def clean( self ):
@@ -54,7 +62,11 @@ class NewBatchRepoForm( forms.Form ):
 
         if Repository.objects.repo_exists( self.cleaned_data[ 'name' ], username ):
             raise forms.ValidationError( 'Repository already exists with this name' )
+<<<<<<< HEAD
 
+=======
+        print " in NewBatchRepoForm clean "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         return self.cleaned_data
 
     def clean_study( self ):
@@ -73,7 +85,11 @@ class NewBatchRepoForm( forms.Form ):
             study = Study.objects.get( id=data, user=self._user )
         except ObjectDoesNotExist:
             raise forms.ValidationError( 'Invalid study' )
+<<<<<<< HEAD
 
+=======
+        print " in clean_study "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         return study
 
     def clean_repo_file( self ):
@@ -96,7 +112,11 @@ class NewBatchRepoForm( forms.Form ):
         self.cleaned_data[ 'file_ext' ] = file_ext
         self.cleaned_data[ 'name' ] = slugify( name.strip() )
         self.cleaned_data[ 'desc' ] = 'Automatically created using %s' % ( data.name )
+<<<<<<< HEAD
 
+=======
+        print "in forms/clean_repo_file "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         return self.cleaned_data[ 'repo_file' ]
 
     def save( self ):
@@ -107,7 +127,11 @@ class NewBatchRepoForm( forms.Form ):
             The task will handle the parsing and addition of fields and data
             into the repository.
         '''
+<<<<<<< HEAD
 
+=======
+	    #print ("in repos/forms save") 
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         # For now, the repository will have an empty field list.
         repo = { 'fields': [] }
 
@@ -120,11 +144,19 @@ class NewBatchRepoForm( forms.Form ):
                         user=self._user,
                         org=self._org,
                         is_public=False )
+<<<<<<< HEAD
+=======
+        print ("in repos/forms going to save repo in repos forms")
+        print("repo is: ")
+        print repo
+
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         new_repo.save( repo=repo )
 
         # Save the file to our storage bucket to be processed ASAP.
         if not settings.DEBUG and not settings.TESTING:
             storage.bucket_name = settings.AWS_TASK_STORAGE_BUCKET_NAME
+<<<<<<< HEAD
 
         s3_url = '%s.%s' % ( new_repo.mongo_id, self.cleaned_data[ 'file_ext' ] )
         storage.save( s3_url, self.cleaned_data[ 'repo_file' ] )
@@ -133,6 +165,26 @@ class NewBatchRepoForm( forms.Form ):
         task = create_repo_from_file.delay( file=s3_url,
                                             file_type=self.cleaned_data[ 'file_ext' ],
                                             repo=new_repo.mongo_id )
+=======
+	
+	    print ("in repos forms, settings.DEBUG is: ")
+	    print settings.DEBUG
+        s3_url = '%s.%s' % ( new_repo.mongo_id, self.cleaned_data[ 'file_ext' ] )
+        print("in repos forms going to storage.save")
+        print ("s3_url is:")
+        print s3_url
+        print ("self.cleaned_data is:")
+        print self.cleaned_data[ 'repo_file' ] 
+        print self.cleaned_data[ 'name' ], self.cleaned_data[ 'study' ],self.cleaned_data[ 'desc' ], self.cleaned_data[ 'tracker' ]
+        
+        storage.save( s3_url, self.cleaned_data[ 'repo_file' ] )
+
+        # Create a task and go!
+        
+        task = create_repo_from_file.delay( file=s3_url,
+                                            file_type=self.cleaned_data[ 'file_ext' ],
+                                            repo=new_repo.mongo_id ) 
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         new_repo.add_task( task.task_id, 'create_repo' )
 
         return new_repo
@@ -293,7 +345,11 @@ class NewRepoForm( forms.Form ):
             If everything is in place, attempt to save the new repository to
             MongoDB & our database.
         """
+<<<<<<< HEAD
 
+=======
+        print "in save "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         repo = {}
         if self.cleaned_data[ 'xform_file' ]:
             repo['fields'] = self.cleaned_data[ 'xform_file' ]['children']

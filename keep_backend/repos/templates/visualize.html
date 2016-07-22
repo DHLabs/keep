@@ -71,12 +71,17 @@
         {% if registry %}
         <li>
           <a class='btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
+<<<<<<< HEAD
             <i class='fa fa-list'></i>&nbsp;Registry
+=======
+            <i class='fa fa-list'></i>&nbsp;<!--Registry-->Patient List
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
           </a>
         </li>
         {% endif %}
         <li>
           <a class='btn' href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}'>
+<<<<<<< HEAD
             <i class='fa fa-file-text-o'></i>&nbsp;Webform
           </a>
         </li>
@@ -90,6 +95,21 @@
             <i class='fa fa-download'></i>&nbsp;Download
           </a>
         </li>
+=======
+            <i class='fa fa-file-text-o'></i>&nbsp;<!--Webform-->Add Patient 
+          </a>
+        </li>
+        <!--li>
+          <a id='share-btn' class='btn' href='#'>
+            <i class='fa fa-group'></i>&nbsp;Share
+          </a>
+        </li-->
+        <!--li>
+          <a class='btn' href='/api/v1/data/{{ repo.mongo_id }}?format=csv'>
+            <i class='fa fa-download'></i>&nbsp;Download
+          </a>
+        </li-->
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
       </ul>
     </div>
   </div>
@@ -106,7 +126,11 @@
             <i class='fa fa-map-marker'></i>&nbsp;Map
           </a>
         </li>
+<<<<<<< HEAD
         <li id='line_btn' data-type='line'>
+=======
+        <!--li id='line_btn' data-type='line'>
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
           <a href='#'>
             <i class='fa fa-signal'></i>&nbsp;Analytics
           </a>
@@ -115,7 +139,11 @@
           <a href='#'>
             <i class='fa fa-filter'></i>&nbsp;Filters
           </a>
+<<<<<<< HEAD
         </li>
+=======
+        </li-->
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         {% if 'delete_repository' in permissions %}
         <li data-type='settings'>
           <a href='#' data-type='settings'>

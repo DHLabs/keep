@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+{{ repo.name }} Web Entry
+{% endblock %}
+
+{% load repo_extras %}
+
+{% block css %}
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="{% static 'css/webform.css' %}">
+
+<style type='text/css'>
+	.autocomplete-list {
+		position:absolute;
+	}
+
+	.ui-helper-hidden-accessible {
+		display:none;
+	}
+
+	.ui-autocomplete {
+		border-bottom:1px solid #EEE;
+		border-right:1px solid #EEE;
+		border-left:1px solid #EEE;
+		list-style-type: none;
+		background-color: white;
+	}
+
+	.ui-autocomplete > .ui-menu-item {
+		padding: 4px 8px;
+		cursor:pointer;
+	}
+
+	.ui-autocomplete > .selected {
+		background-color: #EEE;
+	}
+
+	.grid-list-row {
+		border-bottom: 1px solid #000;
+	}
+
+	.grid-list-cell {
+		padding: 3px 15px 2px 15px;
+		text-align: center;
+
+	}
+
+	.grid-list-label {
+		text-align: left;
+	}
+
+	.progress .bar {
+		-webkit-transition: width 2s ease-in-out;
+		-moz-transition: width 2s ease-in-out;
+		-ms-transition: width 2s ease-in-out;
+		-o-transition: width 2s ease-in-out;
+		transition: width 2s ease-in-out;
+	}
+
+	.ui-tooltip {
+	padding: 8px;
+	position: absolute;
+	z-index: 9999;
+	{% if repo.name == 'demographics' %}
+	min-width: 700px;
+	width: 700px;
+	{% endif %}
+	max-width: 800px;
+	-webkit-box-shadow: 0 0 5px #aaa;
+	box-shadow: 0 0 5px #aaa;
+	}
+	body .ui-tooltip {
+		border-width: 2px;
+	}
+
+	input[type="radio"] {
+		width: auto;
+	}
+
+	label {
+		display: inline;
+	}
+
+</style>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
+
+<!-- For Geopoint option -->
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
+
+{% endblock %}
+
+{% block js %}
+<script id='form_id' type='text/html'>{{ repo_id }}</script>
+<script id='user' type='text/html'>{{ account.username }}</script>
+<script type='text/javascript'>
+	document.repo = {{repo_json|safe}};
+	document.flat_fields = {{ flat_field_json|safe }};
+
+</script>
+
+<script src='{% static 'js/vendor/requirejs.js' %}'></script>
+<script type='text/javascript'>
+	require([ '{% static "js/common.js" %}' ], function (common) {
+
+		require.config({
+			baseUrl: '{% static "js/vendor" %}'
+		});
+
+		require( [ 'app/webform/main' ] )
+	});
+</script>
+
+<!--
+//=================================================
+//
+// Language selection modal
+//
+//=================================================
+-->
+<script type='text/template' id='language-select'>
+	<div class="bbm-modal__topbar">
+		<h3 class="bbm-modal__title">Select Language</h3>
+	</div>
+	<div class="bbm-modal__section">
+		<div class='control-group'>
+			<ul>
+			{% if has_translations == True %}
+			{% for key in flat_fields.0.label %}
+				<li>
+					<input type="radio" name="language" value="{{ key }}" 
+						id="language-{{ forloop.counter0 }}">
+					<label for="language-{{ forloop.counter0 }}">{{ key }}</label>
+				</li>	
+			{% endfor %}
+			{% endif %}
+			</ul>
+		</div>
+	</div>
+	<div class="bbm-modal__bottombar">
+		<a href="#" class="btn btn-cancel">Cancel</a>
+		<a href="#" class="btn btn-primary">Choose</a>
+	</div>
+</script>
+{% endblock %}
+
+{% block topbar %}
+{% endblock %}
+
+{% block content %}
+<div class='container' id='webform'>
+	<div class='row'>
+		<div class='thirteen columns'>
+			<h2>
+
+				{% if not repo.study %}
+				{% if account.username and user.is_authenticated %}
+					<a href='{% url "user_dashboard" username=account.username %}'>{{ account.username }}</a>/
+				{% elif user.is_authenticated %}
+					<a href='{% url "organization_dashboard" org=account.name %}'>{{ account.name }}</a>/
+
+				{% else %}
+
+				{% endif %}
+				&nbsp;{{ repo.name }}
+
+				{% else %}
+					{{ repo.description }}
+				{% endif %}
+			</h2>
+		</div>
+		<div class="three columns">
+			<!--a href='#' class='btn' id='language-select-btn'>
+				Select Language
+			</a-->
+			{% if repo.study %}
+				<a href='#' class='btn' id='patient-list'>Return To Patient List</a>
+			{% endif %}
+		</div>
+		
+	</div>
+
+	{% if repo.name == 'demographics' %}
+	<div class="row">
+		<div class="sixteen columns">
+			<h3>
+				This is the screening demographic information form. Please fill this out according to the data that was available to you when you first suspected the patient had AKI.
+			</h3>
+		</div>
+	</div>
+	{% elif repo.name == 'clinical_data' %}
+	<div class="row">
+		<div class="sixteen columns">
+			<h3>
+				This is the clinical data form where you should fill out questions regarding the clinical information available to you on AKI confirmation day.
+				<span title='What is “Confirmed AKI”: A patient has “Confirmed AKI” if they meet at least one of the modified KDIGO Criteria<br />a) Increase or decrease in serum creatinine >0.3 mg/dl from reference<br />b) Increase or decrease in serum creatinine > 50% from reference<br /> c) Urine output <400 ml/day for adults or approximately < 0.5ml/kg/hr over 24 hrs<br /><br />This Case Report Form should be filled with the data that was available to you on “AKI Confirmation Day”<br /><br />For additional information on this topic, please refer to protocol'><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
+			</h3>
+		</div>
+	</div>
+	{% elif repo.name == 'diagnostic_treatment' %}
+	<div class="row">
+		<div class="sixteen columns">
+			<h3>
+				This is the diagnosis and treatment form where you should fill out questions regarding the diagnosis and treatment information that was available to you on AKI confirmation day.
+				<span title='What is “Confirmed AKI”: A patient has “Confirmed AKI” if they meet at least one of the modified KDIGO Criteria<br />a) Increase or decrease in serum creatinine >0.3 mg/dl from reference<br />b) Increase or decrease in serum creatinine > 50% from reference<br /> c) Urine output <400 ml/day for adults or approximately < 0.5ml/kg/hr over 24 hrs<br /><br />This Case Report Form should be filled with the data that was available to you on “AKI Confirmation Day”<br /><br />For additional information on this topic, please refer to protocol"'><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
+			</h3>
+		</div>
+	</div>
+	{% elif repo.name == 'outcomes' %}
+	<div class="row">
+		<div class="sixteen columns">
+			<h3>
+				This is the outcomes form where you should fill out questions regarding the outcome of the patient with the information available to you 7 days after AKI confirmation day. If the patient is no longer under your care 7 days after AKI confirmation, please fill the questions out to the best of your knowledge with the information that was available to you on you last observation
+				<span title='“Confirmed AKI” day is the day that the patient meets at least one of the following criteria: <br />1- An increase or decrease in serum creatinine of greater than 0.3 mg/dl (> 26.5 micromol/L)<br /> 2- An increase or decrease in serum creatinine greater than or equal to 50% from baseline<br />3- Documented oliguria UO < 400 ml per day or <0.5 ml/kg/h for the last 24 hours<br /><br />We ask that you fill out this Case Report Form to the best of your knowledge with the last data available to you closest to 7 days after “Confirmed AKI”.'><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
+			</h3>
+		</div>
+	</div>
+	{% endif %}
+
+	<div class="row">
+		<div class="sixteen columns">
+			<div id="progress-bar">
+  			<div class="progress">
+    			<div id="form_progress" class="progress-bar progress-bar-success" role="progressbar" style="width: 0%;"></div>
+  			</div>
+  		</div>
+		</div>
+	</div>
+	<div class="row">
+		<div id="autofill_list" class='autocomplete-list'></div>
+	  	<div id="xform_view" class="span12">
+	    	<div id="form_fields" class="formbox">
+		  		<div id="formDiv">
+		  			<form class="form" method="post" action="." enctype="multipart/form-data">
+
+		  				{% if data_id %}
+		  					<input type='hidden' id='detail_data_id' value='{{ data_id }}' name='detail_data_id'>
+		  				{% endif %}
+
+		  				{% if is_finished %}
+		  					<input type='hidden' id='is_finished' value='true' name='is_finished'>
+		  				{% endif %}
+
+		  				{% for field in flat_fields %}
+		  					{% if forloop.counter0 == 0 %}
+		  				<div id="{{ field.name }}_field" class="control-group" style="display: block">
+		  					{% else %}
+		  				<div id="{{ field.name }}_field" class="control-group" style="display: none">
+		  					{% endif %}
+
+		  					<label id="{{ field.name }}_mainlabel" class="control-label" for="{{ field.name }}">
+		  						{{ field.label|parse_label|safe }}
+		  						{% if 'hint' in field %}
+		  							<span title="{{ field.hint }}"><i class="icon-question-sign" style="font-size: 1.5em; color: rgb(63, 110, 146);"></i></span>
+		  						{% endif %}
+		  					</label>
+
+		  					<div class="controls">
+
+		  					{% if field.type == 'group' %}
+
+		  					{% elif field.type == 'geopoint' %}
+
+		  					{% elif field.type == 'integer' or field.type == 'decimal' or field.type == 'integer' %}
+		  						<span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" type="number" step="any"></span>
+		  					{% elif field.type == 'select one' or field.type == 'select one or specify other' %}
+		  						{% if field.bind and field.bind.appearance == 'dropdown' %}
+		  						<select name="{{ field.name }}">
+		  							{% for choice in field.choices %}
+		  							<option value="{{ choice.name }}">{{ choice.label|parse_label }}</option>
+		  							{% endfor %}
+		  							{% if field.type == 'select one or specify other' %}
+
+		  							{% endif %}
+		  						</select>
+		  						{% else %}
+		  						<ul id="{{ field.name }}" name="{{ field.name }}">
+		  							{% for choice in field.choices %}
+		  								<li><span data-editor="">
+		  									<input type="radio" name="{{ field.name }}" value="{{ choice.name }}" 
+		  										id="{{ field.name }}-{{ forloop.counter0 }}">
+		  									<label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label|parse_label }}</label>
+		  									</span>
+		  								</li>	
+		  							{% endfor %}
+		  							{% if field.type == 'select one or specify other' %}
+
+		  							{% endif %}
+		  						</ul>
+		  						{% endif %}
+                      
+		  					{% elif field.type == 'select all that apply' or field.type == 'select all that apply or specify other'  %}
+		  						<ul id="{{ field.name }}" name="{{ field.name }}">
+		  							{% for choice in field.choices %}
+		  								<li><span data-editor="">
+		  									<input type="checkbox" name="{{ field.name }}" value="{{ choice.name }}" 
+		  										id="{{ field.name }}-{{ forloop.counter0 }}">
+		  									<label for="{{ field.name }}-{{ forloop.counter0 }}">{{ choice.label|parse_label }}</label>
+		  									</span>
+		  								</li>	
+		  							{% endfor %}
+		  						</ul>
+		  					{% elif field.type == 'text' %}
+		  						<input id="{{ field.name }}" name="{{ field.name }}" type="text">
+		  					{% elif field.type == 'note' %}
+
+		  					{% elif field.type == 'calculate' %}
+		  						<input id="{{ field.name }}" name="{{ field.name }}" type="hidden">
+		  					{% endif %}
+
+		  					</div>
+		  				</div>
+		  				{% endfor %}
+
+		  			</form>
+		  		</div>
+		  		<div id="alert-placeholder"></div>
+	    	</div>
+	    	<div id='form_actions' style='overflow:auto;'>
+	    		<div class='pull-right'>
+	    			<a href="#" class='btn' id="next_btn">Next</a>
+	    			<a href='#' class='btn btn-success' style='display:none;' id='submit_btn'>Submit</a>
+	    		</div>
+				<a href="#" class='btn' style='display:none;' id="prev_btn">Previous</a>
+			</div>
+	  	</div>
+	</div>
+</div>
+{% endblock %}

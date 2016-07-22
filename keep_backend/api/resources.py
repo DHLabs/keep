@@ -23,7 +23,11 @@ class MongoDBResource(Resource):
     A base resource that allows to make CRUD operations for mongodb.
     """
     def create_response(self, request, data, response_class=HttpResponse, **response_kwargs):
+<<<<<<< HEAD
 
+=======
+	print ("in MongoDBResource in api/resources.py")
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         response = super(MongoDBResource, self).create_response(request, data)
         desired_format = self.determine_format(request)
         if desired_format == 'text/csv':

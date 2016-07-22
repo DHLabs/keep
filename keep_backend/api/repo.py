@@ -82,6 +82,11 @@ class RepoResource( ModelResource ):
             Copied from the tastypie source but modified so start with a list of
             repostiories that contain shared repos as well.
         '''
+<<<<<<< HEAD
+=======
+
+	print "in api/repo.py get... ", request
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         logged_in_user = request.user
         user = request.GET.get( 'user', None )
 
@@ -201,6 +206,10 @@ class RepoResource( ModelResource ):
         return self.create_response( request, response_data )
 
     def post_detail( self, request, **kwargs ):
+<<<<<<< HEAD
+=======
+	print " in api/repo/post_detail ", request
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
 
         repo = Repository.objects.get( mongo_id=kwargs.get( 'mongo_id' ) )
         if repo is None:
@@ -220,7 +229,12 @@ class RepoResource( ModelResource ):
         response_data = { 'success': False }
         try:
             # Check if the user has enough permission to create a new
+<<<<<<< HEAD
             # repository.
+=======
+            # repos
+	    print "in post_list in api/... "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
             bundle = self.build_bundle( request=request )
             if not self.authorized_create_list( None, bundle ):
                 return HttpUnauthorized()

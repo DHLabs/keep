@@ -34,7 +34,19 @@ ALL_REPO_PERMISSIONS = [
     ( 'edit_data', 'Edit data in Repo' ),
     ( 'delete_data', 'Delete data from Repo' ), ]
 
+<<<<<<< HEAD
 
+=======
+print ("default storage is: ")
+print ("in repos models")
+print storage
+print dir(storage)
+
+#print dir(db)
+#logger.error('testest in repos models')
+
+#logger.info('A row is deleted successfully !!!')
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
 class RepoSerializer( Serializer ):
     """
         Converts a QuerySet of Repository objects into a specific JSON format.
@@ -44,6 +56,10 @@ class RepoSerializer( Serializer ):
         # We want to refer to repos externally according to their mongo_id
         self._current[ 'id' ] = obj.mongo_id
         self._current.pop( 'mongo_id' )
+<<<<<<< HEAD
+=======
+        print "mongo_id: ", obj.mongo_id
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
 
         # Convert study id into the actual study name
         if obj.study:
@@ -87,7 +103,11 @@ class RepositoryManager( models.Manager ):
         '''
             List shared & user-owned repositories for a specific user.
         '''
+<<<<<<< HEAD
 
+=======
+        print "in repos/models RepositoryManager "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         # Grab all public repositories
         public_repos = self.filter( is_public=True )
 
@@ -244,6 +264,10 @@ class Repository( models.Model ):
                 continue
 
             field_list.append( field )
+<<<<<<< HEAD
+=======
+        print " in repos/models flatten: "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
 
         return field_list
 
@@ -251,6 +275,10 @@ class Repository( models.Model ):
         """
             Delete all data & objects related to this object
         """
+<<<<<<< HEAD
+=======
+        print "in repos/models delete "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         # Remove related data from MongoDB
         db.repo.remove( { '_id': ObjectId( self.mongo_id ) } )
         db.data.remove( { 'repo': ObjectId( self.mongo_id ) } )
@@ -281,6 +309,10 @@ class Repository( models.Model ):
                 repo = kwargs.pop( 'repo', None )
                 # Save repo field data to MongoDB and save repo metadata to a
                 # relational database
+<<<<<<< HEAD
+=======
+                
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
                 self.mongo_id = db.repo.insert( repo )
 
             super( Repository, self ).save( *args, **kwargs )
@@ -291,8 +323,15 @@ class Repository( models.Model ):
 
                 if self.org:
                     assign_perm( perm[0], self.org, self )
+<<<<<<< HEAD
         else:
             super( Repository, self ).save( *args, **kwargs )
+=======
+        
+        else:
+            super( Repository, self ).save( *args, **kwargs )
+        print "in repos/models save for object creation "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
 
     def data( self ):
         '''
@@ -305,7 +344,13 @@ class Repository( models.Model ):
             Validate and update data record with new data
         """
         #TODO: maybe remove old files??
+<<<<<<< HEAD
         fields = self.fields()
+=======
+        
+        fields = self.fields()
+        print "in repos/models update_data for ", self.fields()
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         validated_data, valid_files = validate_and_format(fields, data, files)
 
         db.data.update( {"_id":ObjectId( data['detail_data_id'] )},{"$set": { 'data': validated_data, 'timestamp':datetime.utcnow() }} )
@@ -322,13 +367,26 @@ class Repository( models.Model ):
                 s3_url = '%s/%s/%s' % ( self.mongo_id,
                                         new_data_id,
                                         file_to_upload.name )
+<<<<<<< HEAD
 
                 storage.save( s3_url, file_to_upload )
 
+=======
+		print ("in repos/models update_data going to store in s3")
+		print s3_url, file_to_upload
+                storage.save( s3_url, file_to_upload )
+
+		
+
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     def add_data( self, data, files ):
         """
             Validate and add a new data record to this repo!
         """
+<<<<<<< HEAD
+=======
+        print " in repos/add_data "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         fields = self.fields()
         validated_data, valid_files = validate_and_format(fields, data, files)
 
@@ -362,7 +420,12 @@ class Repository( models.Model ):
                 s3_url = '%s/%s/%s' % ( self.mongo_id,
                                         new_data_id,
                                         file_to_upload.name )
+<<<<<<< HEAD
 
+=======
+		print ("in repos/models add_datat going to store in s3 ")
+		
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
                 storage.save( s3_url, file_to_upload )
 
         return new_data_id

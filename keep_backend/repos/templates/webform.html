@@ -150,9 +150,27 @@
                 <div class="controls">
 
                 {% if field.type == 'group' %}
+<<<<<<< HEAD
 
                 {% elif field.type == 'geopoint' %}
                   <!-- TODO -->
+=======
+ 				{% elif field.name == 'id' %} 
+		        	<!-- Make patient id non-editable. PM -->
+		        	
+		        	<!--label>3. Patient id:</label><br-->
+					 <span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" 	step="any" readonly="readonly" ><br></span>
+				    
+				{% elif field.name == 'datetime' %} 
+		        	<!-- Make patient id non-editable. PM -->
+		        	 <span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" 	><script>
+					var d = new Date();
+					document.getElementById("demo").innerHTML = d;
+			        </script></span>
+		        	
+                {% elif field.type == 'geopoint' %}
+                  <!-- PM: remove and make country editable. TODO -->
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
                 {% elif field.type == 'integer' or field.type == 'decimal' or field.type == 'integer' %}
                   <span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" type="number" step="any"></span>
                 {% elif field.type == 'select one' or field.type == 'select one or specify other' %}

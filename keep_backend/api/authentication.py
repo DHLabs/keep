@@ -7,7 +7,11 @@ from twofactor.models import UserAPIToken
 
 class ApiTokenAuthentication( Authentication ):
     def is_authenticated( self, request, **kwargs ):
+<<<<<<< HEAD
 
+=======
+	print " in is_authenticated " 
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         if request.method == 'POST':
             username = request.POST.get( 'user', None )
             key = request.POST.get( 'key', None )

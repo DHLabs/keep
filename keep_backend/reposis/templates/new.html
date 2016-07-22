@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Create new data repository{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui-1.10.3.custom.min.css' %}" />
+<style type='text/css'>
+/* CSS for the Builder GUI */
+    #builder_gui {
+        /*height: 600px;
+        border:2px solid #000;
+        */
+        height:100%;
+        margin: 0;
+    }
+
+    .delete-icon {
+        position: relative;
+        padding:2px;
+        right: 2px;
+        float: right;
+        bottom: 0;
+    }
+
+    .edit-icon {
+        position: relative;
+        padding:2px;
+        left: 2px;
+        float: left;
+        bottom: 0;
+    }
+
+    .relevance-icon {
+        position: relative;
+        padding: 2px;
+        margin-bottom: 2px;
+        left: 2px;
+        float: left;
+        bottom: 0;
+    }
+
+    .group-set-icon {
+        position: relative;
+        padding: 2px;
+        left: 2px;
+        float: left;
+        bottom: 0;
+    }
+
+    .windowButtons {
+        position: relative;
+
+    }
+
+    .window {
+        min-height: 30em;
+        height: auto;
+        width: 15em;
+        border: 2px solid #000;
+        position: absolute;
+    }
+
+    .question {
+        min-height: 5em;
+        height: auto;
+        width: 95%;
+        margin-left: auto;
+        margin-right: auto;
+        border: 2px solid #0F0;
+    }
+
+    .relevanceList {
+        position: relative;
+        right: 0;
+        bottom: 0;
+        padding: 2px;
+        width: 98%;
+        overflow: hidden;
+    }
+
+    .relevance {
+        position: relative;
+        min-height: 2em;
+        height: auto;
+        width: 100%;
+        border: 1px solid #F00;
+        background-color: #FFF;
+    }
+
+    .sortable {
+        background: #eee;
+        padding: 5px;
+    }
+
+    .sortable li {
+        margin: 1.5px 3px 3px 3px;
+        padding-bottom: 0.5em;
+    }
+
+    .ui-state-highlight {
+        height: 1.5em;
+    }
+</style>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/vendor/jquery.js' %}"></script>
+<script src="{% static 'js/vendor/jquery-ui.js' %}"></script>
+<script src="{% static 'js/vendor/jquery.center.js' %}"></script>
+<script src="{% static 'js/vendor/form_builder.js' %}"></script>
+<script id='form_id' type='text/javascript'>
+    {% if repo_json %}
+    document.repo = {{ repo_json | safe }};
+    {% else %}
+    document.repo = null;
+    {% endif %}
+</script>
+
+<script type='text/javascript'>
+    $( function() {
+
+        $( '#questionName' ).autocomplete( {
+            appendTo: '#autofill_list',
+            minLength: 2,
+            source: function( request, response ) {
+                $.ajax( {
+                    url: "/api/v1/vocab/",
+                    data: {
+                        term__istartswith: request.term.split('_').join(' '),
+                        format: 'json'
+                    },
+                    success: function( query ) {
+                        response ( $.map( query, function( item ){
+                            return { label: item.term, value: item.term }
+                        }));
+                    }
+                });
+            }
+        });
+
+        var confirmOnExit = function(e) {
+            e = e || window.event;
+
+            var message = "Leaving this page without saving will cause you to lose your form.";
+            if (e) {
+                e.returnValue = message;
+            }
+            return message;
+        }
+        window.onbeforeunload = confirmOnExit;
+        //window.onbeforeunload = null;
+    });
+</script>
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block searchbar %}
+<div class='six columns search-bar'>
+    <div style='font-size:.9em; padding-top:16px;'>
+        <!--a href="#" class='btn' onclick="jsGUIAddWindow(10, 10);">
+            <i class='icon-plus'></i>&nbsp;Add Screen
+        </a>&nbsp;
+
+        <a href='#' id='addquestion' onclick='editQuestion(null)' class="btn">
+            <i class='icon-plus'></i>&nbsp;Add Quest.
+        </a>&nbsp;
+
+        <a href='#' id='repositoryname' onclick='editRepository()' class='btn'>
+            <i class='icon-cog'></i>&nbsp;Settings
+        </a>&nbsp;
+        <!-- For testing
+        <a href='#' id='dfsTest' onclick='jsGUIDFS()' class='btn'>
+            DFS Test
+        </a>&nbsp;
+        -->
+
+        <a href='#' id='submit_btn' onclick='saveRepository()' class='btn btn-primary'>
+            {% if repo_json %} Save
+            {% else %} Create {% endif %}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class='fourteen columns offset-by-one'>
+    <!-- Modal view for editing repository settings -->
+
+        <form id='repoEditForm' action='.' method='post' enctype='multipart/form-data'>
+            {% csrf_token %}
+            <label {% if form.name.errors %}style='color:red'{%endif%}>
+                <strong>Repository name</strong>
+            </label>
+            {{ form.name }}
+            {{ form.name.errors }}
+
+            {{ form.survey_json }}
+
+            <label>
+                <strong>Description (optional)</strong>
+            </label>
+            {{ form.desc }}
+            <!--textarea rows='5' name='desc' class='input-xxlarge'></textarea-->
+            {{ form.desc.errors }}
+            <input id='registrationType' onchange="buildSurvey()" type="checkbox">
+            <label for='registrationType'>Registration Form</label>
+            <label for='xform_file'>XLSForm: </label>
+            {{ form.xform_file }}
+            <hr />
+            Privacy Settings:
+            <label class='radio'>
+                <input type='radio' name='privacy' value='public' style='margin-top:16px;'>
+                <i class='icon-unlock'></i>
+                <strong>Public</strong>
+                <div class='help-block'>
+                    Anyone can see this repository and the data associated
+                    with it.
+                </div>
+            </label>
+            <label class='radio' style='clear:both;'>
+                <input type='radio' name='privacy' value='private' style='margin-top:16px;' checked='checked'>
+                <i class='icon-lock'></i>
+                <strong>Private</strong>
+                <div class='help-block'>
+                    You choose who can see this repository and the data
+                    associated with it.
+                </div>
+            </label>
+            <hr />
+            <input type='submit' value='Submit'>
+
+        </form>
+
+    <!-- Modal View for editing group settings -->
+    <div id='groupSettingsWindow' title="Screen Settings" style="display:none;">
+        <div>
+            Group Name:
+            <input type='text' name="groupName" id="groupName">
+        </div>
+        <div>
+            Group Label:
+            <textarea rows="4" cols="50" name="groupLabel" id="groupLabel"></textarea>
+        </div>
+        <div>
+            Group Type:
+            <select id="groupTypeToggle" name="groupTypeToggle">
+                <option value="field-list">Field List</option>
+                <option value="grid-list">Grid List</option>
+            </select>
+        </div>
+        <a href="#" data-toggle="modal" class="btn btn-primary" onclick="jsGUICloseGroupSettingsDialog();">Close</a>
+    </div>
+
+    <!-- Modal View for editing Relevances -->
+    <div id='relevanceEditWindow' title="Relevance Settings" style='display:none;'>
+        <div>
+            Relevance for Question:
+            <select id="relevanceQuestions" name="relevanceQuestions"></select>
+        </div>
+        <div>
+            Relevance Bounds: <input type="text" name="relevanceBounds" id="relevanceBounds">
+        </div>
+        <div id="windowNameTracker" style="display:none;"></div>
+        <div>
+            <a href="#" class="btn btn-primary" onclick="jsGUIEditRelevance()">OK</a>
+        </div>
+    </div>
+
+
+        <!-- Modal View For Editing Question-->
+    <div id='questionEditWindow' title='New Question' style='display:none;'>
+        <div>
+            <label>
+                Name
+                <input id="questionName" name="questionName" onKeyUp="sanitizeNameInput(this)" onChange="sanitizeNameInput(this)" type="text" />
+            </label>
+            <div id="autofill_list" class='autocomplete-list'></div>
+        </div>
+
+        <div>
+            <label>
+                Label
+                <input id="questionLabel" name="label" type="text" />
+            </label>
+        </div>
+
+        <div>
+            <label>Type</label>
+            <select id='questionType' onchange='questionTypeChanged()'>
+                <option value='note'>Note</option>
+                <option value='decimal'>Decimal</option>
+                <option value='integer'>Integer</option>
+                <option value='text'>Text</option>
+                <option value='geopoint'>GeoPoint</option>
+                <option value='time'>Time</option>
+                <option value='dateTime'>Date Time</option>
+                <option value='date'>Date</option>
+                <option value='select one'>Select One</option>
+                <option value='select all that apply'>Select Multiple</option>
+                <option value='photo'>Photo</option>
+                <option value='audio'>Audio</option>
+                <option value='video'>Video</option>
+                <option value='barcode'>Barcode</option>
+                <option value='group'>Group</option>
+            </select>
+        </div>
+
+        <div>
+            <label>
+                <input id='questionRequired' type="checkbox">
+                Required Question
+            </label>
+        </div>
+
+        <div>
+            <label for='questionHintUse'>
+                <input id='questionHintUse' type="checkbox" onclick='toggleHint();'>
+                Use Question Hint
+            </label>
+            <div id='questionHintDiv'></div>
+
+            {% if user_repos|length > 0 %}
+            <div>
+                Relationship:&nbsp;
+                <select id="formRelationship" onchange="relationshipFormChanged();">
+                    <option>None</option>
+                    {% for repo in user_repos %}
+                        <option value="{{ repo.mongo_id }}">{{ repo.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+        </div>
+        <div id="groupOptions">
+            <label for="groupFieldList">
+                <input id='groupFieldList' type="checkbox">
+                Field List
+            </label>
+        </div>
+
+        <div id="choices"></div>
+        <div id="constraints"></div>
+        <div id="relevances"></div>
+
+        <div style='margin-top:16px;'>
+            <a href="#" data-toggle="modal" class="btn" onclick="closeEditDialog();">Cancel</a>
+            <a href="#" class="btn btn-primary" onclick="okClicked();">OK</a>
+        </div>
+    </div>
+
+    <div id='builder_gui' onchange='buildSurvey()'></div>
+</div>
+
+{% endblock %}

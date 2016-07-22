@@ -12,7 +12,12 @@ from .defaults.database import *
 from .defaults.django import *
 from .defaults.logging import *
 
+<<<<<<< HEAD
 DEBUG = True
+=======
+#DEBUG = True
+DEBUG = False#PM
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
 TESTING = False
 TEMPLATE_DEBUG = DEBUG
 
@@ -66,3 +71,30 @@ ACCOUNT_ACTIVATION_DAYS = 1
 # See this page for more info:
 # http://django-tastypie.readthedocs.org/en/latest/settings.html#settings-tastypie-default-formats
 TASTYPIE_DEFAULT_FORMATS = ['json', 'xml']
+<<<<<<< HEAD
+=======
+#PM added
+LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'filters': {
+            'require_debug_false': {
+                '()': 'django.utils.log.RequireDebugFalse'
+            }
+        },
+        'handlers': {
+            'mail_admins': {
+                'level': 'ERROR',
+                'filters': ['require_debug_false'],
+                'class': 'django.utils.log.AdminEmailHandler'
+            }
+        },
+        'loggers': {
+            'django.request': {
+                'handlers': ['mail_admins'],
+                'level': 'ERROR',
+                'propagate': True,
+                },
+            }
+    }
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e

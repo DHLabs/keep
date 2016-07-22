@@ -34,7 +34,11 @@ def insert_data_into_repo( request, repo_id ):
         Insert data from a CSV into a repo. This is relayed as a task to a
         Celery worker.
     '''
+<<<<<<< HEAD
 
+=======
+    print "in insert_data_into_repo: going in, the request is: ", request
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     repo = Repository.objects.get( mongo_id=repo_id )
 
     # Place the task in the queue
@@ -93,6 +97,11 @@ def new_repo( request ):
     user_repos = Repository.objects.filter( user=request.user, org=None )
 
     repos = []
+<<<<<<< HEAD
+=======
+    
+    print "creating new repo in new_repo", request.user
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     for repo in user_repos:
         #I want a flat list of repo fields
         repo_info = {
@@ -114,12 +123,20 @@ def edit_repo( request, repo_id ):
         Takes user to Form Builder
     """
     repo = get_object_or_404( Repository, mongo_id=repo_id )
+<<<<<<< HEAD
+=======
+    print "in edit_repo "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
 
     # Check that this user has permission to edit this repo
     if not request.user.has_perm( 'delete_repository', repo ):
         return HttpResponse( 'Unauthorized', status=401 )
 
     if request.method == 'POST':
+<<<<<<< HEAD
+=======
+        print " in edit POST "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
         form = NewRepoForm( request.POST, request.FILES, user=request.user )
         repo.name = request.POST['name'].replace( ' ','_' )
         repo.description = request.POST['desc']
@@ -168,7 +185,11 @@ def delete_repo( request, repo_id ):
         Checks if the user is the original owner of the repository and removes
         the repository and the accompaning repo data.
     """
+<<<<<<< HEAD
 
+=======
+    print " in delete_repo for: ", repo_id
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     repo = get_object_or_404( Repository, mongo_id=repo_id )
 
     # Check that this user has permission to delete this repo
@@ -177,7 +198,11 @@ def delete_repo( request, repo_id ):
 
     # Delete the sucker
     repo.delete()
+<<<<<<< HEAD
 
+=======
+    print "competing delete_repo "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     return HttpResponseRedirect( '/' )
 
 
@@ -268,6 +293,10 @@ def share_repo( request, repo_id ):
 
 @csrf_exempt
 def webform( request, username, repo_name ):
+<<<<<<< HEAD
+=======
+    print "in view webform, repo name: ", repo_name
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     """
         Simply grab the survey data and send it on the webform. The webform
         will handle rendering and submission of the final data to the server.
@@ -318,6 +347,10 @@ def webform( request, username, repo_name ):
                 return HttpResponseRedirect( reverse( 'repo_visualize', kwargs=destination) )
 
             elif isinstance( account, User ):
+<<<<<<< HEAD
+=======
+                print "in repos/views.py"
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
                 return HttpResponseRedirect(
                             reverse( 'user_dashboard',
                                      kwargs={ 'username': account.username } ) )
@@ -340,11 +373,20 @@ def webform( request, username, repo_name ):
     if 'label' in first_field and isinstance(first_field['label'], dict):
         has_translations = True
         translations = first_field['label'].keys
+<<<<<<< HEAD
     elif first_field['type'] == 'group' and isinstance( first_field['children'][0]['label'], dict):
         # The first field is a group w/o a translation, so check if the first
         # question in the group has a translation.
         has_translations = True
         translations = first_field['children'][0]['label'].keys
+=======
+    #elif first_field['type'] == 'group' and isinstance( first_field['children'][0]['label'], dict):
+        # The first field is a group w/o a translation, so check if the first
+        # question in the group has a translation.
+       # has_translations = True
+        #translations = first_field['children'][0]['label'].keys
+        #PM commented out 5/2016: throwing errors on new teleconsultation crf
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     else:
         has_translations = False
         translations = []
@@ -378,7 +420,11 @@ def repo_viz( request, username, repo_name, filter_param=None ):
         Does the checks necessary to determine whether the current user has the
         authority to view the current repository.
     """
+<<<<<<< HEAD
 
+=======
+    print " in /repos/views/repo_viz "
+>>>>>>> 11d6f5f3f8fe3840e38a1cf13df3b1430a92602e
     # Grab the user/organization based on the username
     account = user_or_organization( username )
     if account is None:
