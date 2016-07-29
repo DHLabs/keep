@@ -156,6 +156,10 @@
                   <p>{{ field.hint}}</p>
                 {% endif %}
 
+                {% if 'media' in field and 'image' in field.media  %}
+                  <img class="media-image" src="{{ field.media.image }}" alt="">
+                {% endif %}
+
                 <div class="controls">
 
                 {% if field.type == 'group' %}
