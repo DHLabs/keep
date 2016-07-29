@@ -46,8 +46,20 @@ define( [ 'jquery',
             @change_language @get_default_language()
 
             @repopulateForm()
+            @setup_datepickers()
             @show_first_question()
+
             @
+
+        setup_datepickers: ->
+          # Hack to make the date an ISO string without importing MomentJS
+          # See https://github.com/dbushell/Pikaday/issues/120
+          Pikaday::toString = -> @._d.toISOString()
+
+          for elem in $('.datepicker')
+            new Pikaday
+              field: elem,
+              incrementMinuteBy: 10
 
         show_first_question: ->
           first_question = document.flat_fields[0]

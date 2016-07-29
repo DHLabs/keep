@@ -60,6 +60,9 @@
 
 <!-- For Geopoint option -->
 <link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
+
+<!-- Datepicker styles -->
+<link rel="stylesheet" href="{% static 'css/pikaday.css' %}">
 {% endblock %}
 
 {% block js %}
@@ -81,6 +84,8 @@
     require( [ 'app/webform/main' ] )
   });
 </script>
+<!-- Load datepicker utils -->
+<script src="{% static 'js/vendor/pikaday.js' %}"></script>
 
 {% include 'js_templates/_language_select.html' %}
 
@@ -153,6 +158,9 @@
 
                 {% elif field.type == 'geopoint' %}
                   <!-- TODO -->
+                {% elif field.type == 'datetime' %}
+                  <input id="{{ field.name }}" name="{{ field.name }}" class="datepicker" type="text">
+
                 {% elif field.type == 'integer' or field.type == 'decimal' or field.type == 'integer' %}
                   <span data-editor=""><input id="{{ field.name }}" name="{{ field.name }}" type="number" step="any"></span>
                 {% elif field.type == 'select one' or field.type == 'select one or specify other' %}
