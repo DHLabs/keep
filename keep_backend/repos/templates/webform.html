@@ -152,6 +152,10 @@
                   {{ field.label|parse_label }}
                 </label>
 
+                {% if 'hint' in field %}
+                  <p>{{ field.hint}}</p>
+                {% endif %}
+
                 <div class="controls">
 
                 {% if field.type == 'group' %}
