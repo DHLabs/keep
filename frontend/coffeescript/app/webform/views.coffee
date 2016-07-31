@@ -243,45 +243,31 @@ define( [ 'jquery',
             else
               $('#'+field.name).val data[field.name]
 
-        # For calculations.  Currently only supporting basic -, +, *, div
-        _performCalcluate = (equation) ->
-          evaluation = undefined
-          i = undefined
-          begin = undefined
-          end = undefined
-          side1 = undefined
-          side2 = undefined
-          operation = undefined
-          parenCount = undefined
-          parenCount = 0
+        # hard-coded calculate logic for AKI risk
+        _calculate: ->
 
-          # Initial paren finder and recursion to get to the start of the equation
-          i = 0
-          while i < equation.length
-            if equation[i] is "("
-              begin = i  if parenCount is 0
-              parenCount++
-            else if equation[i] is ")"
-              parenCount--
-              if parenCount is 0
-                end = i
-                equation = equation.replace(equation.substring(begin, end + 1), _performCalcluate(equation.substring(begin + 1, end)))
-            i++
-          side1 = equation.slice(0, equation.indexOf(" "))
-          operation = equation.slice(side1.length + 1, equation.lastIndexOf(" "))
-          side2 = equation.slice(equation.lastIndexOf(" ") + 1)
-          side1 = $("#" + side1.slice(2, -1)).val()  if side1.slice(0, 2) is "${"
-          side2 = $("#" + side2.slice(2, -1)).val()  if side2.slice(0, 2) is "${"
-          if operation is "-"
-            return (side1 - side2)
-          else if operation is "+"
-            return (side1 + side2)
-          else if operation is "*"
-            return (side1 * side2)
-          else if operation is "div"
-            return (side1 / side2)
-          else
-            return
+          # Returns n points for *each* response matching the criteria, returns 0
+          # if no response matches any criteria.
+          assign = (field_name, score, criteria) =>
+            responses = @get_form_values()[field_name]
+            responses = [responses] if not _.isArray responses
+            options = criteria.for
+            result = 0
+            result += score for option in options when _.contains responses, option
+            result
+
+          # Risk assessment for AKI
+          rules = [
+            -> assign 'ss_infectious_list',  1, for: [ 'fever' ]
+            -> assign 'ss_hypotension_list', 2, for: [ 'low_bp', 'shock' ]
+            -> assign 'ss_swelling_list',    2, for: [ 'whole' ]
+            -> assign 'ss_additional_list',  2, for: [ 'appetite_loss', 'confusion' ]
+            -> assign 'ss_urinary_list',     4, for: [ 'oliguria' ]
+          ]
+
+          sum = 0
+          sum += rule() for rule in rules
+          sum
 
         # Group Operations moved here, to hopefully better handle groups being a first question
         _groupOperations = (question, forward) ->
@@ -533,8 +519,17 @@ define( [ 'jquery',
           calculate = next_question.type is 'calculate'
           while not relevant or calculate
 
-              # If it's a calculation, calculate it!
-              $("#" + next_question.name).val _performCalcluate(next_question.bind.calculate)  if next_question.bind?.calculate?
+              # Bad hardcoding for risk assessment calcuation.
+              if next_question.name is 'risk_score'
+                # Calculate score
+                score = @_calculate()
+                $("#" + next_question.name).val score
+
+                # Update score on next question
+                $label = $('label[for="risk_assessment_points"]')
+                new_label = "26. Risk assessment points: #{score}"
+                $label.html new_label
+
 
               # Switch to the next question!
               if advancing
