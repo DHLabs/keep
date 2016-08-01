@@ -37,32 +37,26 @@ define( [ 'jquery',
             $( '#delete_data_btn', modal ).click( @deleteData )
             @
 
-        editData: (event) ->
-            new_location = '/' + document.repo_owner + '/' +
-                document.repo.name + '/webform/?data_id=' + document.data_id
 
-            for key in _.keys(document.data_detail)
-                new_location += '&' + key + '='
-                #TODO: replace spaces and ampersands in detail string
-                new_location += document.data_detail[key]
-                
-            window.location = new_location
-            @
+        # Reroute to the webform for editing
+        editData: (event) ->
+          event.preventDefault()
+          base_url = "/#{document.repo_owner}/#{document.repo.name}/webform/?"
+          data = _.extend {data_id: document.data_id}, document.data_detail
+          window.location = base_url + $.param(data)
+
 
         deleteData: (event) ->
-            the_url = '/api/v1/data/' + document.repo.id + '/?data_id=' + document.data_id
-            $.ajax({ 
-                url: the_url,
-                type:'DELETE', 
-                headers: {
-                    'X-CSRFToken': $.cookie( 'csrftoken' )
-                }
-                })
-            .done(
-                () ->
-                    location.reload()
-            )
-            @
+          url = "/api/v1/data/#{document.repo.id}/?data_id=#{document.data_id}"
+
+          request = $.ajax
+            url: url,
+            type: 'DELETE',
+            headers: 'X-CSRFToken': $.cookie('csrftoken')
+
+          # Reload the page once the item has been deleted.
+          request.done -> location.reload()
+
 
         serializeData: () ->
             # Loop through each data pair and formalize

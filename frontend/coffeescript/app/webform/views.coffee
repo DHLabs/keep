@@ -45,7 +45,7 @@ define( [ 'jquery',
 
             @change_language @get_default_language()
 
-            @repopulateForm()
+            @repopulate_form()
             @setup_datepickers()
             @show_first_question()
 
@@ -145,12 +145,28 @@ define( [ 'jquery',
             # { 'English': 'cat', 'Spanish': 'gato' } => 'cat'
             return label[@first_key(label)]
 
-        submit: ->
-            $( ".form" ).submit()
+        submit: -> $('.form').submit()
 
 
         # Returns a dictionary of all the form values
-        get_form_values: -> @queryStringToJSON $(".form").serialize()
+        get_form_values: ->
+          results = {}
+          key_value_pairs = $('.form').serializeArray()
+
+          for pair in key_value_pairs
+            [key, value] = [pair.name, pair.value]
+
+            value = '' if not value?
+
+            # If a value already exists for a given key, then we need to convert it to
+            # an array (of values). Otherwise store it on the object.
+            if results[key]?
+              results[key] = [ results[key] ] if not results[key].push?
+              results[key].push value
+            else
+              results[key] = value
+
+          results
 
         # _geopointDisplay = ->
         #   onMapClick = (e) ->
@@ -174,68 +190,58 @@ define( [ 'jquery',
         #   map.on "click", onMapClick
         #   map.invalidateSize false
 
-        queryStringToJSON: (url) ->
-          return {} if url is ''
+        # Expects a querystring serialized by jQuery.param
+        #
+        # jQuery does not provide an inverse function of jQuery.param because
+        # reasons.
+        #
+        # NOTE: The following implementation does not handle nested objects.
+        querystring_to_obj: (qs) ->
+          return {} if not qs
+
+          decode = decodeURIComponent
+          array_regex = /\[\]/
 
           # Slice off '?' if present
-          qs = url or location.search
           qs = qs.slice(1) if qs[0] is '?'
 
           pair_strings = qs.split('&')
           result = {}
           for str in pair_strings
             [key, value] = str.split('=')
-            result[key] = decodeURIComponent(value) or ''
+
+            key = decode(key)
+            value = decode(value) or ''
+
+            # Handle array keys, eg. foo[]=bar, by slicing off brackets.
+            key = key.slice(0, -2) if array_regex.test(key)
+
+            if result[key]?
+              if not _.isArray result[key]
+                result[key] = [ result[key] ]
+              result[key].push value
+            else
+              result[key] = value
 
           result
 
-        replaceAll: (find, replace, str) ->
-          return str.replace(new RegExp(find, 'g'), replace)
+        repopulate_form: ->
+          responses = @querystring_to_obj(location.search)
+          @_populate(field, responses) for field in document.flat_fields
 
-        repop_multiple: (newstring,object) ->
-          cont = newstring
-          while true
-            index = cont.indexOf(object.name);
-            if index == -1
-                break
-            cont = cont.substring(index, cont.length);
-            andindex = cont.indexOf("&");
-            value = cont.substring(object.name.length+1,andindex)
-            cont = cont.substring( object.name.length+1, cont.length )
-            $('input[value="' + value + '"]').prop('checked', true)
+        _populate: (field, data) ->
+          return if not data[field.name]
 
-          @
-
-        repopulateForm: ->
-          #contents = document.getElementById('session-data').innerHTML;
-          #contents = "?" + contents.trim();
-          #contents = replaceAll('&amp;','&', contents);
-          result = @queryStringToJSON(null)
-
-          for  i in [0..(document.flat_fields.length-1)]
-            obj = document.flat_fields[i]
-
-            if obj.type == "group"
-              for j in [0..(obj.children.length-1)]
-                obj2 = obj.children[j]
-                if obj2.type == 'select all that apply'
-                  @repop_multiple(location.search,obj2)
-                else if obj2.type == "select one"
-                  $('input[value="' + result[obj2.name] + '"]').prop('checked', true)
-                #else if( obj2.type == "geopoint" )
-                #    handlegeopoint( result[obj2.name] )
-                else
-                  $('#'+obj2.name).val( result[obj2.name] )
+          switch field.type
+            when 'group'
+              @_populate(child, data) for child in field.children
+            when 'select all that apply'
+              for response in data[field.name]
+                $("input[value='#{response}'][name='#{field.name}']").prop 'checked', true
+            when 'select one'
+              $("input[value='#{data[field.name]}'][name='#{field.name}']").prop 'checked', true
             else
-              if obj.type == 'select all that apply'
-                @repop_multiple(location.search,obj)
-              else if obj.type == "select one"
-                $('input[value="' + result[obj.name] + '"]').prop('checked', true)
-              #else if obj.type == "geopoint"
-              #handlegeopoint( result[obj.name] )
-              else
-                $('#'+obj.name).val( result[obj.name] )
-          @
+              $('#'+field.name).val data[field.name]
 
         # For calculations.  Currently only supporting basic -, +, *, div
         _performCalcluate = (equation) ->
@@ -428,13 +434,9 @@ define( [ 'jquery',
           return true
 
         get_question_value: ( question ) ->
-          answers = $( ".form" ).serialize()
-          answer_json = @queryStringToJSON(answers)
-
-          if answer_json[question.name]?
-            answer_json[question.name]
-          else
-            ""
+          responses = @get_form_values()
+          return '' if not responses[question.name]?
+          responses[question.name]
 
         show_question: (question) -> @toggle_question(question, false)
 
