@@ -554,6 +554,8 @@ define( [ 'jquery',
               relevant = XFormConstraintChecker.isRelevant next_question, @get_form_values()
               calculate = next_question.type is 'calculate'
 
+          @_shame() if next_question.name is 'key_etio_factor__grp' and document.repo.name is 'teleconsultation'
+
           # We've found the next question, so hide the current question, show
           # the next one, and update the controls.
           @hide_question current_question
@@ -574,6 +576,45 @@ define( [ 'jquery',
         next_question: -> @switch_question( @currentQuestionIndex + 1, true )
 
         prev_question: -> @switch_question( @currentQuestionIndex - 1, false )
+
+        # Show relevant AKI causes for primary AKI question
+        _shame: ->
+          # Hide all the AKI factor notes
+          is_note = (elem) -> /factor_[0-9]+_field/.test elem.id
+          elem.remove() for elem in $('.control-group') when is_note(elem)
+
+          # List of select-multiple questions
+          lists = [
+            'etio_dehydration_list',
+            'etio_shock_list',
+            'etio_cardiac_list',
+            'etio_liver_list',
+            'etio_actute_kidney_dz_list',
+            'etio_obstruction_list',
+            'etio_infections_list',
+            'etio_pregnancy_related_list',
+            'etio_systemic_list',
+            'etio_nephrotoxic_agents_list',
+            'etio_poisoning_list',
+            'etio_enveno_list',
+            'etio_post_op_list',
+          ]
+
+          # Get list of potential causes of AKI
+          causes =
+            for list in lists
+              checked_elems = $("##{list} li input:checked").siblings()
+              labels = ( elem.innerHTML for elem in checked_elems )
+              continue unless labels.length
+              labels.join('<br>') + '<br><br>' # Add two lines between sections
+          causes = causes.join('')
+
+          # Create container if one doesn't exist
+          if not $('#causes').length
+            $('#marked_etio_note_field').append '<div id="causes"></div>'
+
+          # Insert causes into container
+          $('#causes').html causes
 
     return xFormView
 )
