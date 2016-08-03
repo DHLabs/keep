@@ -611,7 +611,7 @@ define( [ 'jquery',
 
           # Create container if one doesn't exist
           if not $('#causes').length
-            $('#marked_etio_note_field').append '<div id="causes"></div>'
+            $('#etio_note_field').append '<div id="causes"></div>'
 
           # Insert causes into container
           $('#causes').html causes
