@@ -18,7 +18,7 @@ DEBUG = False
 # }
 
 # Setup S3 file storage for our static files.
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 AWS_ACCESS_KEY_ID       = AWS[ 'ACCESS_KEY_ID' ]
 AWS_SECRET_ACCESS_KEY   = AWS[ 'SECRET_KEY' ]
@@ -36,7 +36,7 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=10',
 }
 
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+#STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 # Setup Mailgun as our email backend
 # http://mailgun.net
