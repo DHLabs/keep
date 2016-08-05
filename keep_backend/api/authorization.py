@@ -56,9 +56,8 @@ class RepoAuthorization( Authorization ):
         user = bundle.request.GET.get( 'user', None )
         key  = bundle.request.GET.get( 'key', None )
 
-
         # Get the orgs that the users is a member of
-        org_users = OrganizationUser.objects.filter(user=user)
+        org_users = OrganizationUser.objects.filter(user__username=user)
         orgs = map(lambda ou: ou.organization, org_users)
 
         # A user query is provided and this is not an API call. Only
