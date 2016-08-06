@@ -28,7 +28,23 @@ define( [ 'jquery',
         el: '#viz-actions'
 
         events:
-            'click #share-btn': 'sharing_settings'
+          'click #share-btn': 'sharing_settings'
+          'click .js-webform': 'show_webform'
+          'click .js-registry': 'show_registry'
+
+        # ISN Phase 2 hack: add query params to link
+        show_registry: (e) ->
+          e.preventDefault()
+          url = $('.js-registry').attr('href')
+          url += window.location.search
+          window.location = url
+
+        # ISN Phase 2 hack: add query params to link
+        show_webform: (e) ->
+          e.preventDefault()
+          url = $('.js-webform').attr('href')
+          url += window.location.search
+          window.location = url
 
         initialize: ( options ) ->
             @options = options

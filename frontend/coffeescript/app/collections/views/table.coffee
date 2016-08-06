@@ -171,7 +171,7 @@ define( [ 'jquery',
 
           @collection = new DataCollection(options)
 
-          @collection.fields = @fields = options.fields
+          @collection.fields = @fields = options.fields.slice(1) # Hack to hide extraneous patient_id field
           @collection.repo   = @repo   = options.repo
           @collection.linked = @linked = options.linked
 

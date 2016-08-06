@@ -1,3 +1,4 @@
+import pdb
 import json
 import pymongo
 
@@ -26,6 +27,7 @@ from api.filters import FilterSetResource
 from .forms import NewRepoForm, NewBatchRepoForm
 from .models import Repository, RepoSerializer
 
+from twofactor.models import UserAPIToken
 
 @login_required
 @require_POST
@@ -287,9 +289,28 @@ def webform( request, username, repo_name ):
 
     if request.method == 'POST':
 
-        if 'detail_data_id' in request.POST:
+        if request.POST.get('detail_data_id'):
 
             repo.update_data( request.POST, request.FILES )
+
+
+            # ISN Phase 2 hack to redirect back to patient list with necessary
+            # querystring parameters.
+            #
+            ###### BEGIN HACK ######
+            if 'provider_id' in request.POST:
+                patient = db.data.find( {"label": repo_name, "_id":ObjectId(request.POST['detail_data_id'])} )[0]['data']
+                [doc, pat, cluster] = [ patient['provider_id'], patient['patient_id'], patient['cluster_id'] ]
+                token = request.POST['key']
+
+                patient_list_url = "/{0}/patient_list/".format(account.username)
+                patient_list_url += "?key={0}".format(token)
+                patient_list_url += "&provider_id={0}".format(doc)
+                patient_list_url += "&cluster_id={0}".format(cluster)
+                patient_list_url += "&patient_id={0}".format(pat)
+
+                return HttpResponseRedirect(patient_list_url)
+            ####### END HACK #######
 
             # If part of a study, return to registry
             if tracker_repo:
@@ -303,7 +324,25 @@ def webform( request, username, repo_name ):
         else:
 
             # Do validation of the data and add to repo!
-            repo.add_data( request.POST, request.FILES )
+            patient_id = repo.add_data( request.POST, request.FILES )
+
+            # ISN Phase 2 hack to redirect back to patient list with necessary
+            # querystring parameters.
+            #
+            ###### BEGIN HACK ######
+            if 'provider_id' in request.POST:
+                patient = db.data.find( {"label": repo_name, "_id": patient_id} )[0]['data']
+                [doc, pat, cluster] = [ patient['provider_id'], patient['patient_id'], patient['cluster_id'] ]
+                token = UserAPIToken.objects.filter(user=account)[0]
+
+                patient_list_url = "/{0}/patient_list/".format(account.username)
+                patient_list_url += "?key={0}".format(token.key)
+                patient_list_url += "&provider_id={0}".format(doc)
+                patient_list_url += "&cluster_id={0}".format(cluster)
+                patient_list_url += "&patient_id={0}".format(pat)
+
+                return HttpResponseRedirect(patient_list_url)
+            ####### END HACK #######
 
             # Return to organization/user dashboard based on where the "New Repo"
             # button was clicked.  Send Non-users to thank-you page
@@ -351,9 +390,7 @@ def webform( request, username, repo_name ):
 
     flat_field_json = json.dumps(flat_fields)
 
-    data_id = None
-    if 'data_id' in request.GET:
-        data_id = request.GET['data_id']
+    patient_id = request.GET.get('patient_id', None)
 
     return render_to_response( 'webform.html',
                                { 'repo': repo,
@@ -365,7 +402,7 @@ def webform( request, username, repo_name ):
                                  'translations': translations,
                                  'repo_id': repo.mongo_id,
                                  'account': account,
-                                 'data_id': data_id
+                                 'patient_id': patient_id
                                   },
                                context_instance=RequestContext( request ))
 
@@ -399,9 +436,12 @@ def repo_viz( request, username, repo_name, filter_param=None ):
         for org in request.user.organization_users.all():
             permissions.extend( get_perms( org, repo ) )
 
+    # ISN Phase 2 hacks: allow anyone to view repo
+    ######### BEGIN HACK ###########
     # Check to see if the user has access to view this survey
-    if not repo.is_public and 'view_repository' not in permissions:
-        return HttpResponse( 'Unauthorized', status=401 )
+    #if not repo.is_public and 'view_repository' not in permissions:
+    #    return HttpResponse( 'Unauthorized', status=401 )
+    ######### END HACK ##########
 
     #----------------------------------------------------------------------
     #
@@ -413,12 +453,24 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     if repo.study and filter_param:
         data_query[ 'data.%s' % repo.study.tracker ] = filter_param
 
-    # Grab the data for this repository
-    data = db.data.find( data_query,
-                         { 'survey_label': False,
-                           'user': False } )\
-                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )\
-                  .limit( 50 )
+    # ISN Phase 2 hacks: filter by provider/cluster
+    ######### BEGIN HACK ###########
+    if 'provider_id' in request.GET:
+        data_query['data.provider_id'] = request.GET['provider_id']
+    else:
+        data_query['data.nonexistentfield'] = 'returnsemptyquery'
+    if 'cluster_id' in request.GET:
+        data_query['data.cluster_id'] = request.GET['cluster_id']
+    else:
+        data_query['data.nonexistentfield'] = 'returnsemptyquery'
+
+    data = db.data.find( data_query, { 'survey_label': False, 'user': False } )\
+                  .sort( [ ('timestamp', pymongo.DESCENDING ) ] )
+
+    if not 'provider_id' in request.GET and not 'cluster_id' in request.GET:
+        data = data.limit(50)
+    ######### END HACK ##########
+
 
     data_serializer = DataSerializer()
     if repo.is_tracker and repo.study:
@@ -451,14 +503,15 @@ def repo_viz( request, username, repo_name, filter_param=None ):
         # are part of the study so that we can display data links.
         linked = []
         study_repos = Repository.objects.filter( study=repo.study ).exclude( id=repo.id )
-        orgs = request.user.organization_users.all()
+        #orgs = request.user.organization_users.all()
         for r in study_repos:
-            if repo.is_public or repo.is_form_public or request.user.has_perm( 'view_repository', repo ):
-                linked.append(r)
-            else:
-                for org in orgs:
-                    if 'view_repository' in get_perms(org, r):
-                        linked.append(r)
+            linked.append(r)
+            #if repo.is_public or repo.is_form_public or request.user.has_perm( 'view_repository', repo ):
+            #    linked.append(r)
+            #else:
+            #    for org in orgs:
+            #        if 'view_repository' in get_perms(org, r):
+            #            linked.append(r)
 
         linked_json = json.dumps( serializer.serialize( linked ) )
 
@@ -472,7 +525,9 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     bundles = [fsr.build_bundle(obj=f, request=request) for f in filters]
     filter_data = [fsr.full_dehydrate(bundle) for bundle in bundles]
     filter_json = fsr.serialize(request, filter_data, 'application/json')
-    resource_ids = {'user_id': request.user.id, 'repo_id': repo.id }
+    resource_ids = {'user_id': (request.user.id or -1), 'repo_id': repo.id }
+
+    patient_id = request.GET.get('patient_id')
 
     return render_to_response( 'visualize.html',
                                { 'repo': repo,
@@ -488,5 +543,7 @@ def repo_viz( request, username, repo_name, filter_param=None ):
 
                                  'permissions': permissions,
                                  'account': account,
-                                 'account_perms': account_perms },
+                                 'account_perms': account_perms,
+                                 'patient_id': patient_id,
+                                 },
                                context_instance=RequestContext(request) )

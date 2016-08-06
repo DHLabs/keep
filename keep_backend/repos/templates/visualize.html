@@ -19,6 +19,9 @@
   document.initial_data = {{data|safe}};
   document.repo_owner = '{{repo.owner}}';
   document.resource_ids = {{resource_ids|safe}};
+	{% if patient_id %}
+	document.patient_id = '{{ patient_id }}';
+	{% endif %}
 </script>
 <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
 <script src='{% static 'js/vendor/require.js' %}'></script>
@@ -70,16 +73,17 @@
       <ul class='nav-list nav-inline'>
         {% if registry %}
         <li>
-          <a class='btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
-            <i class='fa fa-list'></i>&nbsp;Registry
+          <a class='btn btn-primary js-registry' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
+            <i class='fa fa-list'></i>&nbsp;Patient List
           </a>
         </li>
         {% endif %}
         <li>
-          <a class='btn' href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}'>
-            <i class='fa fa-file-text-o'></i>&nbsp;Webform
+          <a class='btn js-webform' href='{% url "repo_webform" username=repo.owner repo_name=repo.name %}'>
+            <i class='fa fa-file-text-o'></i>&nbsp;Add Data
           </a>
         </li>
+        {% if 'delete_repository' in permissions %}
         <li>
           <a id='share-btn' class='btn' href='#'>
             <i class='fa fa-group'></i>&nbsp;Share
@@ -90,6 +94,7 @@
             <i class='fa fa-download'></i>&nbsp;Download
           </a>
         </li>
+        {% endif %}
       </ul>
     </div>
   </div>
@@ -101,17 +106,17 @@
             <i class='fa fa-list'></i>&nbsp;Raw
           </a>
         </li>
-        <li id='map_btn' data-type='map'>
+        <li id='map_btn' data-type='map' style="display: none;">
           <a href='#'>
             <i class='fa fa-map-marker'></i>&nbsp;Map
           </a>
         </li>
-        <li id='line_btn' data-type='line'>
+        <li id='line_btn' data-type='line' style="display: none;">
           <a href='#'>
             <i class='fa fa-signal'></i>&nbsp;Analytics
           </a>
         </li>
-        <li id='filter_btn' data-type='filters'>
+        <li id='filter_btn' data-type='filters' style="display: none;">
           <a href='#'>
             <i class='fa fa-filter'></i>&nbsp;Filters
           </a>

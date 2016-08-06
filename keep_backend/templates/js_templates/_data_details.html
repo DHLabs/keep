@@ -18,12 +18,12 @@
         <% _.each( linked, function( repo ) { %>
           <tr>
             <td>
-              <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/?{{ repo.study.tracker }}=<%= filter %>' class='btn btn-small' style="width:90px">
+              <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/webform/' class='btn btn-small js-add-data'>
                 <i class='fa fa-pencil'></i> Add Data&nbsp;&nbsp;
               </a>
             </td>
             <td>
-              <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/<%= filter %>/'>
+              <a href='/{{ account.username }}/<%= repo.get( "name" ) %>/' class='js-show-data'>
                 <%= repo.get( 'name' ) %>
               </a>
             </td>

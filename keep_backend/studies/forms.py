@@ -48,7 +48,7 @@ class NewStudyForm( forms.Form ):
         # Set the "tracker" field if the user wants to start off tracking
         # objects.
         if self.cleaned_data[ 'tracker' ]:
-            kwargs[ 'tracker' ] = 'id'
+            kwargs[ 'tracker' ] = 'patient_id'
 
         new_study = Study( **kwargs )
         new_study.save()

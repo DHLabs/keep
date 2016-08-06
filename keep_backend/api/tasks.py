@@ -88,7 +88,7 @@ def create_repo_from_file( file, file_type, repo ):
             # If new repo is a tracker repo, and the study does not currently
             # have a tracker repo/registry, set this repo as the registry.
             if repo.study.tracker == '':
-                repo.study.tracker = 'id'
+                repo.study.tracker = 'patient_id'
                 repo.study.save()
 
             fields['children'].insert( 1, {

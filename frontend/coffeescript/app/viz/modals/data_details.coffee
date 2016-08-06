@@ -12,6 +12,10 @@ define( [ 'jquery',
         template: _.template( $( '#data-detail-template' ).html() )
         cancelEl: '.btn-primary'
 
+        events:
+          'click .js-show-data': 'show_repo'
+          'click .js-add-data': 'add_data'
+
         data_templates:
             'text':     _.template( '<%= data %>' )
             'geopoint': _.template( '<img src="http://maps.googleapis.com/maps/api/staticmap?
@@ -37,6 +41,19 @@ define( [ 'jquery',
             $( '#delete_data_btn', modal ).click( @deleteData )
             @
 
+        # Redirect to appropriate repo with query params
+        add_data: (event) ->
+          event.preventDefault()
+          base_url = event.target.href
+          context = window.location.search
+          window.location = base_url + context
+
+        # Redirect to appropriate repo with query params
+        show_repo: (event) ->
+          event.preventDefault()
+          base_url = event.target.href
+          context = window.location.search
+          window.location = base_url + context
 
         # Reroute to the webform for editing
         editData: (event) ->
@@ -47,7 +64,11 @@ define( [ 'jquery',
 
 
         deleteData: (event) ->
+          event.preventDefault()
+
           url = "/api/v1/data/#{document.repo.id}/?data_id=#{document.data_id}"
+          # add the token auth but slice off the '?'
+          url += ("&" + window.location.search.slice(1))
 
           request = $.ajax
             url: url,
@@ -74,7 +95,7 @@ define( [ 'jquery',
                 else
                     attributes[ field.name ] = @data_templates[ 'text' ]( tdata )
 
-                if field.name == 'id'
+                if field.name is 'patient_id'
                     filter = attributes[ field.name ]
 
             data =

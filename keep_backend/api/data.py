@@ -158,6 +158,24 @@ class DataResource( MongoDBResource ):
             query_parameters = self._build_filters( request )
             query_parameters['repo'] = ObjectId( repo_id )
 
+
+            # ISN Phase 2 hack: filter by provider_id and cluster_id
+            ######### BEGIN HACK ##########
+            provider_id = request.GET.get('provider_id', None)
+            if provider_id:
+                query_parameters['data.provider_id'] = provider_id
+            else:
+                query_parameters['data.returnemtpyset'] = 'returnemptyset'
+
+            cluster_id = request.GET.get('cluster_id', None)
+            if cluster_id:
+                query_parameters['data.cluster_id'] = provider_id
+            else:
+                query_parameters['data.returnemtpyset'] = 'returnemptyset'
+            ######### END HACK ##########
+
+
+
             if 'bbox' in request.GET and 'geofield' in request.GET:
                 # Convert the bounding box into the $box format needed to do
                 # a geospatial search in MongoDB
@@ -187,6 +205,11 @@ class DataResource( MongoDBResource ):
             # When people download CSVs, make sure we include the entire dataset.
             limit = 50
             if request.GET.get( 'format', None ) == 'csv':
+                limit = cursor.count()
+
+
+            # ISN Phase 2 hack: don't paginate
+            if 'provider_id' in request.GET:
                 limit = cursor.count()
 
             # Determine the number of pages available.
