@@ -170,16 +170,7 @@ define( [ 'jquery',
         initialize: (options)->
 
           @collection = new DataCollection(options)
-
-          # Hack to hide extraneous patient_id field. In the process of
-          # creating a tracked repo, the tracker field is automatically
-          # inserted, even if a field is already present, as is the case with
-          # ISN forms.
-          fields = options.fields
-          extra_id_index = _.findIndex fields, (field) -> field.label is 'patient_id'
-          fields.splice(extra_id_index, 1) if extra_id_index isnt -1
-
-          @collection.fields = @fields = fields
+          @collection.fields = @fields = options.fields
           @collection.repo   = @repo   = options.repo
           @collection.linked = @linked = options.linked
 
