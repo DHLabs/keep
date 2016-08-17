@@ -28,6 +28,7 @@ define( [ 'jquery',
             'click #next_btn':          'next_question'
             'click #prev_btn':          'prev_question'
             'click #language-select-btn':'language_select'
+            'click .js-registry': 'show_registry'
 
         language_select: ( event ) ->
           @modalView = new LanguageSelectModal( { current: @current_language, view: this } )
@@ -60,6 +61,14 @@ define( [ 'jquery',
             new Pikaday
               field: elem,
               incrementMinuteBy: 10
+
+        show_registry: (e) ->
+          e.preventDefault()
+          keys = ["key", "provider_id", "cluster_id", "patient_id"]
+          params = _.pick @querystring_to_obj(location.search), keys
+          url = $('.js-registry').attr('href')
+          url += '?' + $.param params
+          window.location = url
 
         show_first_question: ->
           first_question = document.flat_fields[0]

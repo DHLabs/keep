@@ -112,7 +112,7 @@
     </div>
     <div class="four columns u-textRight">
       {% if registry %}
-      <a class='btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
+      <a class='js-registry btn btn-primary' href='{% url "repo_visualize" username=registry.owner repo_name=registry.name %}'>
         <i class='fa fa-list'></i>&nbsp;Registry
       </a>
       {% endif %}
