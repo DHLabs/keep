@@ -169,7 +169,7 @@ class DataResource( MongoDBResource ):
 
             cluster_id = request.GET.get('cluster_id', None)
             if cluster_id:
-                query_parameters['data.cluster_id'] = provider_id
+                query_parameters['data.cluster_id'] = cluster_id
             else:
                 query_parameters['data.returnemtpyset'] = 'returnemptyset'
             ######### END HACK ##########
