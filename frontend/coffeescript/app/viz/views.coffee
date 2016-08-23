@@ -32,19 +32,58 @@ define( [ 'jquery',
           'click .js-webform': 'show_webform'
           'click .js-registry': 'show_registry'
 
+
+
+        # TODO: this is duplicated in webform/views.coffee, need to extract a
+        # utils file.
+        querystring_to_obj: (qs) ->
+          return {} if not qs
+
+          decode = decodeURIComponent
+          array_regex = /\[\]/
+
+          # Slice off '?' if present
+          qs = qs.slice(1) if qs[0] is '?'
+
+          pair_strings = qs.split('&')
+          result = {}
+          for str in pair_strings
+            [key, value] = str.split('=')
+
+            key = decode(key)
+            value = decode(value) or ''
+
+            # Handle array keys, eg. foo[]=bar, by slicing off brackets.
+            key = key.slice(0, -2) if array_regex.test(key)
+
+            if result[key]?
+              if not _.isArray result[key]
+                result[key] = [ result[key] ]
+              result[key].push value
+            else
+              result[key] = value
+
+          result
+
+
         # ISN Phase 2 hack: add query params to link
         show_registry: (e) ->
           e.preventDefault()
+          keys = ["key", "provider_id", "cluster_id", "patient_id"]
+          params = _.pick @querystring_to_obj(location.search), keys
           url = $('.js-registry').attr('href')
-          url += window.location.search
+          url += '?' + $.param params
           window.location = url
 
         # ISN Phase 2 hack: add query params to link
         show_webform: (e) ->
           e.preventDefault()
+          keys = ["key", "provider_id", "cluster_id"]
+          params = _.pick @querystring_to_obj(location.search), keys
           url = $('.js-webform').attr('href')
-          url += window.location.search
+          url += '?' + $.param params
           window.location = url
+
 
         initialize: ( options ) ->
             @options = options
