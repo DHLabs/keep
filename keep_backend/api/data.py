@@ -159,21 +159,15 @@ class DataResource( MongoDBResource ):
             query_parameters['repo'] = ObjectId( repo_id )
 
 
-            # ISN Phase 2 hack: filter by provider_id and cluster_id
+            # ISN Phase 2 hack: filter by provider_id and/or cluster_id
             ######### BEGIN HACK ##########
-            provider_id = request.GET.get('provider_id', None)
-            if provider_id:
-                query_parameters['data.provider_id'] = provider_id
-            else:
-                query_parameters['data.returnemtpyset'] = 'returnemptyset'
-
-            cluster_id = request.GET.get('cluster_id', None)
-            if cluster_id:
-                query_parameters['data.cluster_id'] = cluster_id
-            else:
-                query_parameters['data.returnemtpyset'] = 'returnemptyset'
+            if 'provider_id' in request.GET:
+                query_parameters['data.provider_id'] = request.GET['provider_id']
+            if 'cluster_id' in request.GET:
+                query_parameters['data.cluster_id'] = request.GET['cluster_id']
+            if not 'cluster_id' in request.GET and not 'provider_id' in request.GET:
+                query_parameters['data.nonexistentfield'] = 'returnsemptyquery'
             ######### END HACK ##########
-
 
 
             if 'bbox' in request.GET and 'geofield' in request.GET:
@@ -206,7 +200,6 @@ class DataResource( MongoDBResource ):
             limit = 50
             if request.GET.get( 'format', None ) == 'csv':
                 limit = cursor.count()
-
 
             # ISN Phase 2 hack: don't paginate
             if 'provider_id' in request.GET:

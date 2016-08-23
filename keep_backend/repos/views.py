@@ -1,4 +1,3 @@
-import pdb
 import json
 import pymongo
 
@@ -457,11 +456,9 @@ def repo_viz( request, username, repo_name, filter_param=None ):
     ######### BEGIN HACK ###########
     if 'provider_id' in request.GET:
         data_query['data.provider_id'] = request.GET['provider_id']
-    else:
-        data_query['data.nonexistentfield'] = 'returnsemptyquery'
     if 'cluster_id' in request.GET:
         data_query['data.cluster_id'] = request.GET['cluster_id']
-    else:
+    if not 'cluster_id' in request.GET and not 'provider_id' in request.GET:
         data_query['data.nonexistentfield'] = 'returnsemptyquery'
 
     data = db.data.find( data_query, { 'survey_label': False, 'user': False } )\
