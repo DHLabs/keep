@@ -91,11 +91,25 @@ def create_repo_from_file( file, file_type, repo ):
                 repo.study.tracker = 'patient_id'
                 repo.study.save()
 
-            fields['children'].insert( 1, {
-                    'type':'calculate',
-                    'name': repo.study.tracker,
-                    'label': repo.study.tracker,
-                } )
+            has_tracker_field = False
+            flat_fields = []
+            for field in fields['children']:
+                if field['type'] != 'group':
+                    flat_fields.append(field)
+                else:
+                    for f in field['children']:
+                        flat_fields.append(f)
+
+            for field in flat_fields:
+                if field['name'] == 'patient_id':
+                    has_tracker_field = True
+
+            if not has_tracker_field:
+                fields['children'].insert( 0, {
+                        'type':'text',
+                        'name':repo.study.tracker,
+                        'label':repo.study.tracker,
+                    } )
 
         # if this repo is not a registry but part of a study with tracked
         # objects, add a tracking field to the form.

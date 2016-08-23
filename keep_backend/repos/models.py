@@ -333,7 +333,7 @@ class Repository( models.Model ):
         validated_data, valid_files = validate_and_format(fields, data, files)
 
         # Ensure tracker id's are unique
-        if self.is_tracker:
+        if self.is_tracker and not validated_data.get(self.study.tracker, None):
             while True:
                 validated_data[self.study.tracker] = str(random.randrange(100000000,999999999))
 
