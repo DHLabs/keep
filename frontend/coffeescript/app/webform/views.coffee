@@ -13,7 +13,7 @@ define( [ 'jquery',
           'app/webform/constraints',
           'app/webform/modals/language' ],
 
-( $, _, Backbone, L, xFormModel, XFormConstraintChecker, LanguageSelectModal ) ->
+( $, _, Backbone, L, xFormModel, XFormExpression, LanguageSelectModal ) ->
 
     class xFormView extends Backbone.View
         # The HTML element where the form will be rendered
@@ -252,31 +252,9 @@ define( [ 'jquery',
             else
               $('#'+field.name).val data[field.name]
 
-        # hard-coded calculate logic for AKI risk
-        _calculate: ->
-
-          # Returns n points for *each* response matching the criteria, returns 0
-          # if no response matches any criteria.
-          assign = (field_name, score, criteria) =>
-            responses = @get_form_values()[field_name]
-            responses = [responses] if not _.isArray responses
-            options = criteria.for
-            result = 0
-            result += score for option in options when _.contains responses, option
-            result
-
-          # Risk assessment for AKI
-          rules = [
-            -> assign 'ss_infectious_list',  1, for: [ 'fever' ]
-            -> assign 'ss_hypotension_list', 2, for: [ 'low_bp', 'shock' ]
-            -> assign 'ss_swelling_list',    2, for: [ 'whole' ]
-            -> assign 'ss_additional_list',  2, for: [ 'appetite_loss', 'confusion' ]
-            -> assign 'ss_urinary_list',     4, for: [ 'oliguria' ]
-          ]
-
-          sum = 0
-          sum += rule() for rule in rules
-          sum
+        # Perform calculation
+        _calculate: (field) ->
+          XFormExpression.evaluate field.bind.calculate, @get_form_values(), field
 
         # Group Operations moved here, to hopefully better handle groups being a first question
         _groupOperations = (question, forward) ->
@@ -403,7 +381,7 @@ define( [ 'jquery',
           # If question type is group, ensure all the children pass constraints.
           if question.type is 'group'
             for __, child of question.children
-              if not XFormConstraintChecker.passesConstraint child, answers
+              if not XFormExpression.passes_constraint child, answers
                 msg = "Answer doesn't pass constraint: #{child.bind['jr:constraintMsg'] or child.bind.constraint}"
                 alert msg
                 return false
@@ -422,7 +400,7 @@ define( [ 'jquery',
 
           # Ensure that the question passes any constraints, if given. If
           # not, raise an alert.
-          if not XFormConstraintChecker.passesConstraint question, answers
+          if not XFormExpression.passes_constraint question, answers
             alert "Answer doesn't pass constraint: #{child.bind['jr:constraintMsg'] or child.bind.constraint}"
             return false
 
@@ -524,14 +502,14 @@ define( [ 'jquery',
           # Now that we've found the next question, we need to determine if
           # it's relevant; it could be irrelevant based on preceding values, or
           # a calculation.
-          relevant = XFormConstraintChecker.isRelevant next_question, @get_form_values()
+          relevant = XFormExpression.is_relevant next_question, @get_form_values()
           calculate = next_question.type is 'calculate'
           while not relevant or calculate
 
               # Bad hardcoding for risk assessment calcuation.
               if next_question.name is 'risk_score'
                 # Calculate score
-                score = @_calculate()
+                score = @_calculate(next_question)
                 $("#" + next_question.name).val score
 
                 # Update score on next question
@@ -560,7 +538,7 @@ define( [ 'jquery',
                 @_display_form_buttons(next_index)
                 return
 
-              relevant = XFormConstraintChecker.isRelevant next_question, @get_form_values()
+              relevant = XFormExpression.is_relevant next_question, @get_form_values()
               calculate = next_question.type is 'calculate'
 
           @_shame() if next_question.name is 'key_etio_factor__grp' and document.repo.name is 'teleconsultation'

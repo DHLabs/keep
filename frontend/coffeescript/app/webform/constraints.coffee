@@ -11,9 +11,10 @@ define [], ->
   SEPARATOR_REGEX = ///
     \s*(\(|\))\s*                # Parenthesis
     | \s*(\+|\-\s+|\*|div)\s*    # +,-,*,div
-    | \s*(and|or|not)\s*         # and, or, not
+    | \s*(and|or|not|if)\s*      # and, or, not, if
     | \s*((\=\!)|\=)\s*          # =, !=
     | \s*(\<\=|\>\=|\>|\<)\s*    # >, <, <=, >=
+    | \s*(\,)\s*                 # Comma
   ///
 
   # Regex for checking if a token is an operand/value
@@ -27,24 +28,28 @@ define [], ->
   IS_BOOLEAN = /^YES|^NO/
   IS_SELECTOR = /^\$\{.*\}/
   IS_STRING = /^\".*\"|^\'.*\'/
+  IS_NUMBER = /^(\-|\+)?([0-9]+(\.[0-9]+)?|Infinity)$/
 
   LEFT_PAREN  = '('
   RIGHT_PAREN = ')'
 
-  OPS = [ '+', '-', '*', 'div', '=', '!=', '>', '<', '>=', '<=', 'and', 'or', 'not' ]
+  OPS = [ '+', '-', '*', 'div', '=', '!=', '>', '<', '>=', '<=', 'and', 'or', 'not', 'if' ]
+
+  RIGHT_ASSOCIATIVE = [ 'if', 'not', 'selected' ]
 
   PRECEDENCE =
-    '*'   : 5
-    'div' : 5
-    '+'   : 4
-    '-'   : 4
-    '='   : 3
-    '!='  : 3
-    '>'   : 3
-    '<'   : 3
-    '>='  : 3
-    '<='  : 3
-    'not' : 2
+    '*'   : 6
+    'div' : 6
+    '+'   : 5
+    '-'   : 5
+    '='   : 4
+    '!='  : 4
+    '>'   : 4
+    '<'   : 4
+    '>='  : 4
+    '<='  : 4
+    'not' : 3
+    'if'  : 2
     'and' : 1
     'or'  : 1
 
@@ -57,7 +62,7 @@ define [], ->
     '<'   : (a, b) -> a < b
     '>='  : (a, b) -> a >= b
     '<='  : (a, b) -> a <= b
-    'not' : (__, b) -> not b  # unary operator
+    'not' : (a) -> not a
 
   MATH =
     '+'   : (x, y) -> x + y
@@ -65,21 +70,33 @@ define [], ->
     '*'   : (x, y) -> x * y
     'div' : (x, y) -> x / y
 
+  FUNCTIONS =
+    'if'  : (x, y, z) -> if x then y else z
+    'selected': (actual, expected) ->
+      actual = [ actual ] unless actual instanceof Array
+      expected in actual
 
+  FUNCTION_ARGS =
+    'if'      : 3
+    'selected': 2
 
   # Helper methods for working with expressions
   top = -> this[this.length - 1]
 
   is_operand = (token) -> OPERAND_REGEX.test token
-  is_operator = (token) -> OPS.indexOf(token) isnt -1
+  is_operator = (token) -> token in OPS
+  is_number = (value) -> IS_NUMBER.test(value)
+  is_function = (token) -> token in ['if', 'selected']
+  is_function_separator = (token) -> token is ','
 
   precedence = (operator) -> PRECEDENCE[operator]
+  right_associative = (operator) -> operator in RIGHT_ASSOCIATIVE
+  left_associative = (operator) -> not right_associative(operator)
 
   parse_boolean = (val) -> if val is 'YES' then true else false
 
-  is_number = (value) ->
-    if /^(\-|\+)?([0-9]+(\.[0-9]+)?|Infinity)$/.test(value) \
-    then true else false
+  # Mathematical computation
+  compute = (value1, value2, operator) -> MATH[operator] value1, value2
 
   # Logical comparison
   compare = (value1, value2, operator) ->
@@ -99,165 +116,189 @@ define [], ->
         COMPARE[operator] value1, value2
 
 
-  # Mathematical computation
-  compute = (value1, value2, operator) -> MATH[operator] value1, value2
+  # Convert the expression into an array of tokens
+  tokenize = (expression) ->
+    # Split the string using our separator regex
+    tokens = expression.split(SEPARATOR_REGEX)
+
+    # Split includes 'undefined' for non-matching groups, we don't want that.
+    # Remove trailing/leading whitespace and return the tokens.
+    ( t.replace /^\s+|\s+$/g, '' for t in tokens when t? and t isnt '' )
 
 
-  class XFormConstraintChecker
 
-    @passesConstraint: ( field, answers ) ->
-      return true if not field.bind?.constraint?
-      expression = field.bind.constraint
-      expression = @replace_dot_shorthand(expression, field.name)
-      expression = @evaluateSelectedInExpression(expression, answers, field.name)
-      @evaluate_expression(expression, answers, field.name)
+  # Convert from infix notation to postfix notation, returning an array of the
+  # tokens in postfix order.
+  #
+  # Parses the tokens using the Shunting-yard algorithm:
+  # https://en.wikipedia.org/wiki/Shunting-yard_algorithm
+  infix_to_postfix = (tokens) ->
+    operator_stack = []
+    output  = []
+    operator_stack.top = top
+
+    # While there are tokens to be read:
+    for token in tokens
+
+      # If the token is an operand, then add it to the output queue.
+      if is_operand(token) then output.push token
+
+      # If the token is a function token, then push it onto the stack.
+      else if is_function(token) then operator_stack.push token
+
+      # If the token is a function argument separator (ie. a comma):
+      else if is_function_separator(token)
+        until operator_stack.top() is LEFT_PAREN
+          output.push operator_stack.pop()
+
+      # If the token is an operator, T1, then:
+      else if is_operator(token)
+
+        # Condition 1: T1 is left-associative and its precedence is less than or equal to that of T2
+        condition1 = -> left_associative(token) and precedence(token) <= precedence(operator_stack.top())
+
+        # Condition 2: T1 is right associative, and has precedence less than that of T2
+        condition2 = -> right_associative(token) and precedence(token) < precedence(operator_stack.top())
+
+        # While there is an operator token, T2, at the top of the operator
+        # stack and either condition 1 or 2 is true, pop T2 off the operator
+        # stack, onto the output queue.
+        while operator_stack.length > 0 and (condition1() or condition2())
+          output.push operator_stack.pop()
+
+        # at the end of the iteration push T1 onto the operator stack.
+        operator_stack.push token
+
+      # If the token is "(", then push it onto operator stack.
+      else if token is LEFT_PAREN then operator_stack.push token
+
+      # If the token is ")":
+      else if token is RIGHT_PAREN
+
+        # Until the token at the top of the stack is a left parenthesis, pop
+        # operators off the stack onto the output queue.
+        output.push(operator_stack.pop()) until operator_stack.top() is '('
+
+        # Pop the left parenthesis from the stack but not onto the output queue.
+        operator_stack.pop()
+
+        # If the token at the top of the stack is a function token, pop it onto
+        # the output queue.
+        output.push(operator_stack.pop()) if is_function operator_stack.top()
+
+    # When there are no more tokens to read, while there are still operator
+    # tokens in the stack, pop the operator onto the output queue.
+    until operator_stack.length is 0
+      output.push(operator_stack.pop())
+
+    output
 
 
-    @isRelevant: (field, answers) ->
-      return true if not field.bind?.relevant?
-      expression = field.bind.relevant
-      expression = @replace_dot_shorthand(expression, field.name)
-      expression = @evaluateSelectedInExpression(expression, answers, field.name)
-      @evaluate_expression(expression, answers, field.name)
+  # Evaluate a postfix expression (as an array of tokens) given the currrent
+  # field and form responses.
+  evaluate_postfix = (tokens, responses, current_field) ->
+    output  = []
+    output.top = top
 
+    # Convert the token string to the appropriate type.
+    process_operand = (token) ->
+      val = token
 
-    # Replaces instances of the "." shorthand with the current field.
-    # e.g. ". >= 0 and . =< 100" => "${grade} >= 0 and ${grade} =< 100"
-    @replace_dot_shorthand: (expr, field) -> expr.replace DOT_SHORTHAND, " ${#{field}} "
+      # If its a selector, e.g. ${foo_field}, get the field value from the form.
+      if IS_SELECTOR.test token
+        # Slice 'foo' from '${foo}'
+        field_name = token.slice(2, token.length - 1)
+        val = responses[field_name]
 
-    # Function replaces all "selected(.,'foo')" with evaluated boolean of YES or NO
-    @evaluateSelectedInExpression: (expr, answers, currentPath) ->
-      expression = expr
+      if IS_BOOLEAN.test val
+        parse_boolean(val)
+      else if is_number(val)
+        Number.parseFloat(val)
+      else if IS_STRING.test val
+        val.slice(1, val.length - 1) # Remove quotes
+      else
+        val
 
-      loop
-        # Exit if there are no more "selected(" strings present.
-        start_range = expression.indexOf 'selected('
-        end_range = expression.indexOf ')', start_range
-        break if start_range is -1
+    # Evaluate a function/operation.
+    process_operator = (token) ->
+      # If its a function:
+      if is_function(token)
+        fn = FUNCTIONS[token]
+        num_args = FUNCTION_ARGS[token]
+        args = ( output.pop() for i in [1..num_args] ).reverse()
+        fn(args...)
 
-        # Get the inner contents of the first "selected(...)"
-        selected = expression[(start_range+'selected('.length) .. (end_range) ]
+      # Otherwise its an operator
+      else
+        operator = token
 
-        # Get left, right parts of the string formatted as:
-        # ${foo}, "bar"
-        # Make the field name a selector if it's '.'
-        [ field_name, expected_value ] = selected.split ','
-        field_name = "${#{currentPath}}" if field_name is '.'
-
-        # Remove ${} from field name, and quotes from expected value and
-        # trim whitespace.
-        field_name = field_name.replace /\s+/g, ""
-        field_name = field_name[2 .. field_name.length - 2]
-        expected_value = expected_value.replace /\s+/g, ""
-        expected_value = expected_value[1 .. expected_value.length - 2]
-
-        # Replace the "selected(...)" expression with YES or NO.
-        response = answers[field_name]
-        selected = expression[start_range .. end_range]
-        result = if response is expected_value then 'YES' else 'NO'
-        expression = expression.replace selected, result
-
-      return expression
-
-
-    @evaluate_expression: (expression, responses, current_field) ->
-      tokens = @_tokenize(expression)
-      @_process tokens, responses, current_field
-
-    # Convert the expression into an array of tokens
-    @_tokenize: (expression) ->
-      # Split the string using our separator regex
-      tokens = expression.split(SEPARATOR_REGEX)
-
-      # Split includes 'undefined' for non-matching groups, we don't want that.
-      # Remove trailing/leading whitespace and return the tokens.
-      ( t.replace /^\s+|\s+$/g, '' for t in tokens when t? )
-
-    # Parse the tokens using the Shunting-yard algorithm:
-    # https://en.wikipedia.org/wiki/Shunting-yard_algorithm
-    @_process: (tokens, responses, current_field) ->
-
-      operator_stack = []
-      operand_stack  = []
-      operator_stack.top = top
-
-      # If the operand is a selector, get the value.
-      process_operand = (token) ->
-        val = token
-
-        if IS_SELECTOR.test token
-          # Slice 'foo' from '${foo}'
-          field_name = token.slice(2, token.length - 1)
-          val = responses[field_name]
-
-        if IS_BOOLEAN.test val
-          parse_boolean(val)
-        else if is_number(val)
-          Number.parseFloat(val)
-        else if IS_STRING.test val
-          val.slice(1, val.length - 1) # Remove quotes
-        else
-          val
-
-      # In the following, “process” means, (i) pop operand stack once (value1) (ii)
-      # pop operator stack once (operator) (iii) pop operand stack again (value2)
-      # (iv) compute value1 operator  value2 (v) push the value obtained in operand
-      # stack.
-      process = ->
-        value2 = operand_stack.pop()
-        value1 = operand_stack.pop()
-        operator = operator_stack.pop()
-
-        # Special case for unary "not" operator; put second value back on operand
-        # stack.
+        # Special case for unary "not" operator.
         if operator is 'not'
-          operand_stack.push value1 if value1
+          return compare(output.pop(), null, operator)
 
-        result = switch operator
+        # Perform an operation and push the result back on to the operand stack.
+        value2 = output.pop()
+        value1 = output.pop()
+        switch operator
           when '+', '-', '*', 'div'
             value1 = Number.parseFloat value1
             value2 = Number.parseFloat value2
             compute(value1, value2, operator)
           else compare(value1, value2, operator)
 
-        operand_stack.push result
+    # While there are input tokens left:
+    for token in tokens
+
+      # If the token is a value, push it to the stack.
+      if is_operand token
+        output.push process_operand(token)
+
+      # Otherwise the token is a function or operator, so process it.
+      else
+        output.push process_operator(token)
+
+    # Return the last value in the output stack.
+    output.top()
 
 
-      # Shunting-yard Algorithm:
-      #
-      # Until all tokens are processed, get one token and perform only one of
-      # the steps.
-      debugger
-      for token in tokens
+  class XFormExpression
 
-        # If the token is an operand, push it onto the operand stack.
-        if is_operand(token) then operand_stack.push process_operand(token)
+    #### Public API ####
 
-        # If the token is an operator, T1,
-        else if is_operator(token)
+    @passes_constraint: (field, answers) ->
+      return true if not field.bind?.constraint?
+      expression = field.bind.constraint
+      expression = @_rewrite_expression(expression, answers, field)
+      @evaluate(expression, answers, field)
 
-          # while there is an operator token, T2, at the top of the operator
-          # stack and the precedence of T1 is less than or equal to that of T,
-          # process.
-          while operator_stack.length > 0 \
-            and precedence(token) <= precedence(operator_stack.top()) \
-            then process()
 
-          # at the end of the iteration push T1 onto the operator stack.
-          operator_stack.push token
+    @is_relevant: (field, answers) ->
+      return true if not field.bind?.relevant?
+      expression = field.bind.relevant
+      expression = @_rewrite_expression(expression, answers, field)
+      @evaluate(expression, answers, field)
 
-        # If the token is "(", then push it onto operator stack.
-        else if token is LEFT_PAREN then operator_stack.push token
+    @evaluate: (expression, responses, current_field) ->
+      tokens = tokenize(expression)
+      tokens = infix_to_postfix tokens
+      evaluate_postfix tokens, responses, current_field
 
-        # If the token is ")", then "process" as explained above until the
-        # corresponding "(" is encountered in operator stack. At this stage POP
-        # the operator stack and ignore "(."
-        else if token is RIGHT_PAREN
-          process() until operator_stack.top() is '('
-          operator_stack.pop()
 
-      # When there are no more input characters, keep processing until the
-      # operator stack becomes empty.  The values left in the operand stack is
-      # the final result of the expression.
-      process() until operator_stack.length is 0
-      operand_stack.pop()
+    #### Private API ####
+
+    # In order to support expressions like if(..) it is easier to tokenize if
+    # we rewrite the expression to make certain things like dot operators
+    # explicit.
+    @_rewrite_expression: (expression, answers, field) ->
+      expression = @_replace_dot_shorthand(expression, field.name)
+      expression = @_rewrite_not(expression)
+      expression = @_rewrite_if(expression)
+      expression
+
+    # Replaces instances of the "." shorthand with the current field.
+    # e.g. ". >= 0 and . =< 100" => "${grade} >= 0 and ${grade} =< 100"
+    @_replace_dot_shorthand: (expr, field) -> expr.replace DOT_SHORTHAND, " ${#{field}} "
+
+    @_rewrite_not: (expr) -> expr.replace /not\(/g, "not ("
+
+    @_rewrite_if: (expr) -> expr.replace /if\(/g, "if ("
