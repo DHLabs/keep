@@ -30,6 +30,15 @@ define [], ->
   IS_STRING = /^\".*\"|^\'.*\'/
   IS_NUMBER = /^(\-|\+)?([0-9]+(\.[0-9]+)?|Infinity)$/
 
+  ISO_DATE = ///
+    # Complete precision:
+    (\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))
+    # No milliseconds:
+    | (\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))
+    # No Seconds:
+    | (\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))
+  ///
+
   LEFT_PAREN  = '('
   RIGHT_PAREN = ')'
 
@@ -76,9 +85,19 @@ define [], ->
       actual = [ actual ] unless actual instanceof Array
       expected in actual
 
+    'today': ->
+      d = new Date
+      d = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+      d.toISOString()
+
+    'now': -> (new Date).toISOString()
+
+
   FUNCTION_ARGS =
     'if'      : 3
     'selected': 2
+    'today'   : 0
+    'now'     : 0
 
   # Helper methods for working with expressions
   top = -> this[this.length - 1]
@@ -86,7 +105,8 @@ define [], ->
   is_operand = (token) -> OPERAND_REGEX.test token
   is_operator = (token) -> token in OPS
   is_number = (value) -> IS_NUMBER.test(value)
-  is_function = (token) -> token in ['if', 'selected']
+  is_date = (value) -> ISO_DATE.test(value)
+  is_function = (token) -> token in ( k for k, v of FUNCTIONS )
   is_function_separator = (token) -> token is ','
 
   precedence = (operator) -> PRECEDENCE[operator]
@@ -103,10 +123,10 @@ define [], ->
     switch operator
       when '>', '<', '>=', '<='
         # Convert values to numbers before comparing
-        return false unless is_number(value1)
-        return false unless is_number(value2)
-        value1 = Number.parseFloat value1
-        value2 = Number.parseFloat value2
+        return false unless is_number(value1) or is_date(value1)
+        return false unless is_number(value2) or is_date(value2)
+        value1 = Number.parseFloat(value1) unless is_date(value1)
+        value2 = Number.parseFloat(value2) unless is_date(value2)
         COMPARE[operator] value1, value2
       when 'and', 'or'
         value1 = parse_boolean value1.toUpperCase() if value1 instanceof String
@@ -225,7 +245,7 @@ define [], ->
       if is_function(token)
         fn = FUNCTIONS[token]
         num_args = FUNCTION_ARGS[token]
-        args = ( output.pop() for i in [1..num_args] ).reverse()
+        args = ( output.pop() for i in [0...num_args] ).reverse()
         fn(args...)
 
       # Otherwise its an operator
