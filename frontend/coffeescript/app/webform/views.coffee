@@ -401,7 +401,7 @@ define( [ 'jquery',
           # Ensure that the question passes any constraints, if given. If
           # not, raise an alert.
           if not XFormExpression.passes_constraint question, answers
-            alert "Answer doesn't pass constraint: #{child.bind['jr:constraintMsg'] or child.bind.constraint}"
+            alert "Answer doesn't pass constraint: #{question.bind['jr:constraintMsg'] or question.bind.constraint}"
             return false
 
           return true
@@ -506,12 +506,12 @@ define( [ 'jquery',
           calculate = next_question.type is 'calculate'
           while not relevant or calculate
 
-              # Bad hardcoding for risk assessment calcuation.
-              if next_question.name is 'risk_score'
-                # Calculate score
+              if next_question.bind?.calculate?
                 score = @_calculate(next_question)
                 $("#" + next_question.name).val score
 
+              # Bad hardcoding for risk assessment calcuation.
+              if next_question.name is 'risk_score'
                 # Update score on next question
                 $label = $('label[for="risk_assessment_points"]')
                 new_label = "26. Risk assessment points: #{score}"
