@@ -84,8 +84,7 @@ define( [ 'jquery',
                 fields: @fields
 
             modalView = new DataDetailsModal(options)
-            ($ '.modal').html modalView.render().el
-            modalView.onAfterRender($ '.modal')
+            $('.modal').html modalView.render().el
 
             return true
 

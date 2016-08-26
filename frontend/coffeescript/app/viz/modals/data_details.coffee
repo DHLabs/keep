@@ -8,13 +8,31 @@ define( [ 'jquery',
 
 ( $, _, Backbone, Marionette ) ->
 
+    # TODO duplicated in viz/main.coffee, extract to utils file.
+    getParameterByName = (name, url) ->
+      if not url then url = window.location.href
+      name = name.replace(/[\[\]]/g, "\\$&")
+      regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)")
+      results = regex.exec(url)
+      return null if not results
+      return '' if not results[2]
+      return decodeURIComponent(results[2].replace(/\+/g, " "))
+
+    get_auth_context = ->
+      auth_keys = ['key', 'user', 'provider_id', 'cluster_id']
+      context = {}
+      context[key] = getParameterByName(key) for key in auth_keys
+      context
+
     class DataDetailsModal extends Backbone.Modal
-        template: _.template( $( '#data-detail-template' ).html() )
-        cancelEl: '.btn-primary'
+        template: _.template $('#data-detail-template').html()
+        cancelEl: '.js-cancel'
 
         events:
           'click .js-show-data': 'show_repo'
           'click .js-add-data': 'add_data'
+          'click .js-edit': 'edit_data'
+          'click .js-delete': 'delete_data'
 
         data_templates:
             'text':     _.template( '<%= data %>' )
@@ -29,44 +47,46 @@ define( [ 'jquery',
             'photo':    _.template( '<img style="max-width:300px;" src="<%= data %>" >'  )
 
         initialize: ( options ) ->
-            @model  = options.model
-            @fields = options.fields
-            @repo   = options.repo
-            @linked = options.linked
-
-        onAfterRender: (modal) ->
-            document.data_id = @model.attributes.id
-            document.data_detail = @model.attributes.data
-            $( '#edit_data_btn', modal ).click( @editData )
-            $( '#delete_data_btn', modal ).click( @deleteData )
-            @
+          @model  = options.model
+          @fields = options.fields
+          @repo   = options.repo
+          @linked = options.linked
 
         # Redirect to appropriate repo with query params
-        add_data: (event) ->
+        add_data: (event) =>
           event.preventDefault()
           base_url = event.target.href
-          context = window.location.search
-          window.location = base_url + context
+
+          # Get patient ID and auth query params
+          context = get_auth_context()
+          context.patient_id = @model.get('data').patient_id
+
+          window.location = base_url + '?' + $.param(context)
 
         # Redirect to appropriate repo with query params
-        show_repo: (event) ->
+        show_repo: (event) =>
           event.preventDefault()
           base_url = event.target.href
-          context = window.location.search
-          window.location = base_url + context
+
+          # Get patient ID and auth query params
+          context = get_auth_context()
+          context.patient_id = @model.get('data').patient_id
+
+          window.location = base_url + '?' + $.param(context)
 
         # Reroute to the webform for editing
-        editData: (event) ->
+        edit_data: (event) =>
           event.preventDefault()
           base_url = "/#{document.repo_owner}/#{document.repo.name}/webform/?"
-          data = _.extend {data_id: document.data_id}, document.data_detail
-          window.location = base_url + $.param(data)
+          context = get_auth_context()
+          context = _.extend context, @model.get 'data'
+          window.location = base_url + $.param(context)
 
 
-        deleteData: (event) ->
+        delete_data: (event) =>
           event.preventDefault()
 
-          url = "/api/v1/data/#{document.repo.id}/?data_id=#{document.data_id}"
+          url = "/api/v1/data/#{document.repo.id}/?data_id=#{@model.get('id')}"
           # add the token auth but slice off the '?'
           url += ("&" + window.location.search.slice(1))
 
