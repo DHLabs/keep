@@ -541,7 +541,7 @@ define( [ 'jquery',
               relevant = XFormExpression.is_relevant next_question, @get_form_values()
               calculate = next_question.type is 'calculate'
 
-          @_shame() if next_question.name is 'key_etio_factor__grp' and document.repo.name is 'teleconsultation'
+          @_shame() if next_question.name is 'key_etio_factor__grp'
 
           # We've found the next question, so hide the current question, show
           # the next one, and update the controls.
