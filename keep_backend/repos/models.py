@@ -334,11 +334,22 @@ class Repository( models.Model ):
 
         # Ensure tracker id's are unique
         if self.is_tracker and not validated_data.get(self.study.tracker, None):
+            count = 0
             while True:
-                validated_data[self.study.tracker] = str(random.randrange(100000000,999999999))
+                cluster_id = validated_data.get('cluster_id', '')
+                device_id = 'W'
+                if count <= 999:
+                    num = unicode(count).zfill(3)
+                else:
+                    num = count
+                patient_id = cluster_id + device_id + num
 
-                if db.data.find( { "data.{0}".format(self.study.tracker): validated_data[self.study.tracker] } ).count() == 0:
+                validated_data[self.study.tracker] = patient_id
+
+                if db.data.find( { "data.{0}".format(self.study.tracker): patient_id } ).count() == 0:
                     break
+                else:
+                    count += 1
 
         repo_data = {
             'label': self.name,
