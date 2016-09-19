@@ -466,6 +466,10 @@ def repo_viz( request, username, repo_name, filter_param=None ):
 
     if not 'provider_id' in request.GET and not 'cluster_id' in request.GET:
         data = data.limit(50)
+    if request.user.is_authenticated() and 'view_repository' in permissions:
+        data_query.pop('data.provider_id', None)
+        data_query.pop('data.cluster_id', None)
+        data_query.pop('data.nonexistentfield', None)
     ######### END HACK ##########
 
 

@@ -167,6 +167,10 @@ class DataResource( MongoDBResource ):
                 query_parameters['data.cluster_id'] = request.GET['cluster_id']
             if not 'cluster_id' in request.GET and not 'provider_id' in request.GET:
                 query_parameters['data.nonexistentfield'] = 'returnsemptyquery'
+            if request.user.is_authenticated() and 'view_repository' in permissions:
+                data_query.pop('data.provider_id', None)
+                data_query.pop('data.cluster_id', None)
+                data_query.pop('data.nonexistentfield', None)
             ######### END HACK ##########
 
 
