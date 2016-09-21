@@ -300,10 +300,10 @@ def webform( request, username, repo_name ):
             if 'provider_id' in request.POST:
                 patient = db.data.find( {"label": repo_name, "_id":ObjectId(request.POST['detail_data_id'])} )[0]['data']
                 [doc, pat, cluster] = [ patient['provider_id'], patient['patient_id'], patient['cluster_id'] ]
-                token = request.POST['key']
+                token = UserAPIToken.objects.filter(user=account)[0]
 
                 patient_list_url = "/{0}/patient_list/".format(account.username)
-                patient_list_url += "?key={0}".format(token)
+                patient_list_url += "?key={0}".format(token.key)
                 patient_list_url += "&user=isn"
                 patient_list_url += "&provider_id={0}".format(doc)
                 patient_list_url += "&cluster_id={0}".format(cluster)
@@ -403,6 +403,7 @@ def webform( request, username, repo_name ):
                                  'translations': translations,
                                  'repo_id': repo.mongo_id,
                                  'account': account,
+                                 'data_id': request.GET.get('data_id'),
                                  'patient_id': patient_id
                                   },
                                context_instance=RequestContext( request ))

@@ -80,6 +80,8 @@ define( [ 'jquery',
           base_url = "/#{document.repo_owner}/#{document.repo.name}/webform/?"
           context = get_auth_context()
           context = _.extend context, @model.get 'data'
+          context.data_id = @model.get 'id'
+          delete context['_status']
           window.location = base_url + $.param(context)
 
 
