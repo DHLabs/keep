@@ -11,7 +11,7 @@ define [], ->
   SEPARATOR_REGEX = ///
     \s*(\(|\))\s*                # Parenthesis
     | \s*(\+|\-\s+|\*|div)\s*    # +,-,*,div
-    | \s*(and|or|not|if)\s*      # and, or, not, if
+    | \s*(and|or|not|if)\s+      # and, or, not, if
     | \s*((\=\!)|\=)\s*          # =, !=
     | \s*(\<\=|\>\=|\>|\<)\s*    # >, <, <=, >=
     | \s*(\,)\s*                 # Comma
