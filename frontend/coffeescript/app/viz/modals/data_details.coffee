@@ -86,9 +86,10 @@ define( [ 'jquery',
         delete_data: (event) =>
           event.preventDefault()
 
-          url = "/api/v1/data/#{document.repo.id}/?data_id=#{@model.get('id')}"
-          # add the token auth but slice off the '?'
-          url += ("&" + window.location.search.slice(1))
+          url = "/api/v1/data/#{document.repo.id}/?"
+          context = get_auth_context()
+          context.data_id = @model.get('id')
+          url += $.param(context)
 
           request = $.ajax
             url: url,

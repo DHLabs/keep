@@ -304,6 +304,7 @@ def webform( request, username, repo_name ):
 
                 patient_list_url = "/{0}/patient_list/".format(account.username)
                 patient_list_url += "?key={0}".format(token)
+                patient_list_url += "&user=isn"
                 patient_list_url += "&provider_id={0}".format(doc)
                 patient_list_url += "&cluster_id={0}".format(cluster)
                 patient_list_url += "&patient_id={0}".format(pat)
@@ -336,6 +337,7 @@ def webform( request, username, repo_name ):
 
                 patient_list_url = "/{0}/patient_list/".format(account.username)
                 patient_list_url += "?key={0}".format(token.key)
+                patient_list_url += "&user=isn"
                 patient_list_url += "&provider_id={0}".format(doc)
                 patient_list_url += "&cluster_id={0}".format(cluster)
                 patient_list_url += "&patient_id={0}".format(pat)

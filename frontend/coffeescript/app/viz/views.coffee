@@ -69,19 +69,19 @@ define( [ 'jquery',
         # ISN Phase 2 hack: add query params to link
         show_registry: (e) ->
           e.preventDefault()
-          keys = ["key", "provider_id", "cluster_id", "patient_id"]
+          keys = ['key', 'user', 'provider_id', 'cluster_id', 'patient_id']
           params = _.pick @querystring_to_obj(location.search), keys
           url = $('.js-registry').attr('href')
-          url += '?' + $.param params
+          url += '?' + $.param(params)
           window.location = url
 
         # ISN Phase 2 hack: add query params to link
         show_webform: (e) ->
           e.preventDefault()
-          keys = ["key", "provider_id", "cluster_id"]
+          keys = ['key', 'user', 'provider_id', 'cluster_id']
           params = _.pick @querystring_to_obj(location.search), keys
           url = $('.js-webform').attr('href')
-          url += '?' + $.param params
+          url += '?' + $.param(params)
           window.location = url
 
 
