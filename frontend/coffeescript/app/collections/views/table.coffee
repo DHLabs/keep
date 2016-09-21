@@ -21,10 +21,18 @@ define( [ 'jquery',
             'click':    'clicked'
 
         data_templates:
-            'text':     _.template( '<td><%= data %></td>' )
-            'geopoint': _.template( '<td><%= data.coordinates[1] %>, <%= data.coordinates[0] %></td>' )
-            'photo':    _.template( '<td><a href="<%= data %>" target="blank">Click to view photo</a></td>'  )
-            'forms': _.template $('#DT-linked-form-tpl').html()
+          'text'     : _.template '<td><%= data %></td>'
+          'geopoint' : _.template '<td><%= data.coordinates[1] %>, <%= data.coordinates[0] %></td>'
+          'photo'    : _.template '<td><a href="<%= data %>" target="blank">Click to view photo</a></td>'
+          'forms'    : _.template '''
+                          <td>
+                            <% _.each( document.linked_repos, function(repo) { %>
+                                <span class="linkedForm <%= form_status(repo.name) %>">
+                                  <%= repo.name %>
+                                </span><br>
+                            <% }); %>
+                          </td>
+                      '''
 
 
         initialize: (options) ->
@@ -33,16 +41,17 @@ define( [ 'jquery',
           @linked = options.model.collection.linked
 
         linked_form_css: (status) ->
-          if status is 'empty'
-            'linkedForm--empty'
-          else if status is 'complete'
-            'linkedForm--complete'
-          else
-            'linkedForm--incomplete'
+          switch status
+            when 'empty' then 'linkedForm--empty'
+            when 'complete' then 'linkedForm--complete'
+            when 'incomplete' then 'linkedForm--incomplete'
+            when 'data_required' then 'linkedForm--incompleteRequired'
+            else ''
 
         serializeData: ->
           data = @model.attributes
-          data.form_css = (form_status) => @linked_form_css(form_status)
+          data.form_status = (repo_name) =>
+            @linked_form_css @model.attributes.data._status[repo_name]
           data
 
         template: ( model ) =>
@@ -51,7 +60,7 @@ define( [ 'jquery',
             templ = []
 
             if @repo.attributes.is_tracker
-                templ.push( @data_templates[ 'forms' ]( { model: model } ) )
+                templ.push( @data_templates[ 'forms' ](@serializeData()) )
 
                 #callbacks to check if form is filled out for data
                 #@check_filled_forms( model )

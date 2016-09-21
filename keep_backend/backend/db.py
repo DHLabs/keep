@@ -1,3 +1,4 @@
+from datetime import datetime
 from bson import ObjectId
 
 from django.conf import settings
@@ -10,6 +11,9 @@ from organizations.models import Organization
 connection = MongoClient( settings.MONGODB_HOST, settings.MONGODB_PORT )
 db = connection[ settings.MONGODB_DBNAME ]
 
+RECURRING_FORMS = [
+    'p03_daily_clinical_lab_data',
+]
 
 class DataSerializer( object ):
 
@@ -28,11 +32,19 @@ class DataSerializer( object ):
             copy[ 'id' ] = str(copy.pop( '_id' ))
             copy[ 'timestamp' ] = copy[ 'timestamp' ].strftime( '%Y-%m-%dT%X' )
 
+            # ISN Hack:
+            # Options needed to determine form completeness
+            opts = {
+                'repo': repository,
+                'linked': linked,
+            }
+
             # Now serialize the data according to the field data.
             copy[ 'data' ] = self.serialize_data( data=copy[ 'data' ],
                                                   fields=fields,
                                                   repo_id=repo,
-                                                  data_id=copy[ 'id' ] )
+                                                  data_id=copy[ 'id' ],
+                                                  options=opts)
 
             if repository.is_tracker and repository.study and linked:
                 link_dict = {}
@@ -59,8 +71,51 @@ class DataSerializer( object ):
 
         return hydrated
 
-    def serialize_data( self, data, fields, repo_id, data_id ):
+    def serialize_data( self, data, fields, repo_id, data_id, options=None ):
+        options = options or {}
         copy = {}
+
+        # ISN hack: add completion status
+        ######### BEGIN HACK ###########
+        ineligible = False
+        checkin_date = data.get('checkin_dtime', None)
+        if checkin_date:
+            checkin_date = datetime.strptime(checkin_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        if 'repo' in options and options['repo'].name == 'patient_list':
+            linked = options.get('linked', [])
+            patient_id = data.get('patient_id')
+            copy['_status'] = {}
+            for repo in linked:
+                submissions = { 'repo': ObjectId(repo.mongo_id), 'data.patient_id': patient_id }
+                submissions = db.data.find(submissions)
+                recurring = repo.name in RECURRING_FORMS
+                expected_count = (datetime.now() - checkin_date).days
+                if not recurring:
+                    if submissions.count() > 0:
+                        copy['_status'][repo.name] = 'complete'
+                    elif submissions.count() == 0:
+                        copy['_status'][repo.name] = 'data_required'
+                else:
+                    if submissions.count() == 0:
+                        copy['_status'][repo.name] = 'data_required'
+                    elif submissions.count() >= expected_count:
+                        copy['_status'][repo.name] = 'complete'
+                    else:
+                        copy['_status'][repo.name] = 'incomplete'
+
+                if repo.name == 'p01_screening_form' and submissions.count() > 0:
+                    form = list(submissions)[0]
+                    enrolled = form['data'].get('enrolled', 'no')
+                    if enrolled != 'yes':
+                        ineligible = True
+
+
+        # if not enrolled, mark all forms as complete
+        if ineligible:
+            for key, __ in copy['_status'].iteritems():
+                copy['_status'][key] = 'complete'
+
+        ######### END HACK ##########
 
         for field in fields:
 
@@ -95,6 +150,7 @@ class DataSerializer( object ):
 
             else:
                 copy[ key ] = val
+
 
         return copy
 
