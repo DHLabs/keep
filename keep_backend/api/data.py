@@ -136,7 +136,15 @@ class DataResource( MongoDBResource ):
             if not data_id:
                 return HttpResponse( status=404 )
 
-            db.data.remove( { '_id': ObjectId( data_id ) } )
+            # Remove all related form submissions
+            if repo.is_tracker and repo.study:
+                tracker_data = db.data.find_one( { '_id': ObjectId( data_id ) } )
+                patient_id = tracker_data['data'][repo.study.tracker]
+                provider_id = tracker_data['data']['provider_id']
+                query =  { "data.patient_id": patient_id, "data.provider_id": provider_id }
+                db.data.remove(query)
+            else:
+                db.data.remove( { '_id': ObjectId( data_id ) } )
 
             return HttpResponse( status=200 )
 
