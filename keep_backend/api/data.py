@@ -42,8 +42,8 @@ class DataResource( MongoDBResource ):
         list_allowed_methos     = []
         detail_allowed_methods  = [ 'get','delete' ]
 
-        authentication = MultiAuthentication( ApiTokenAuthentication(),
-                                              SessionAuthentication() )
+        authentication = MultiAuthentication( SessionAuthentication(),
+                                               ApiTokenAuthentication())
 
         authorization = DataAuthorization()
 
@@ -167,10 +167,10 @@ class DataResource( MongoDBResource ):
                 query_parameters['data.cluster_id'] = request.GET['cluster_id']
             if not 'cluster_id' in request.GET and not 'provider_id' in request.GET:
                 query_parameters['data.nonexistentfield'] = 'returnsemptyquery'
-            if request.user.is_authenticated() and 'view_repository' in permissions:
-                data_query.pop('data.provider_id', None)
-                data_query.pop('data.cluster_id', None)
-                data_query.pop('data.nonexistentfield', None)
+            if request.user.is_authenticated() and request.user.username == 'isn':
+                query_parameters.pop('data.provider_id', None)
+                query_parameters.pop('data.cluster_id', None)
+                query_parameters.pop('data.nonexistentfield', None)
             ######### END HACK ##########
 
 
