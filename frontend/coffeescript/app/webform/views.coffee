@@ -41,6 +41,9 @@ define( [ 'jquery',
             @form_id  = $( '#form_id' ).html()
             @user     = $( '#user' ).html()
 
+            # ISN Hack: disable patient_id field
+            $('#patient_id').prop('disabled', true).addClass('disabled')
+
             @currentQuestionIndex = 0
             @numberOfQuestions = document.flat_fields.length
 

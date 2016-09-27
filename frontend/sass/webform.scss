@@ -21,3 +21,8 @@
 }
 
 .media-image { margin-bottom: 10px; }
+
+input.disabled {
+  background-color: #EEE;
+  cursor: not-allowed;
+}
