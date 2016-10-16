@@ -43,6 +43,8 @@ define( [ 'jquery',
 
             # ISN Hack: disable patient_id field
             $('#patient_id').prop('disabled', true).addClass('disabled')
+            $('#provider_id').prop('disabled', true).addClass('disabled')
+            $('#cluster_id').prop('disabled', true).addClass('disabled')
 
             @currentQuestionIndex = 0
             @numberOfQuestions = document.flat_fields.length
@@ -157,7 +159,11 @@ define( [ 'jquery',
             # { 'English': 'cat', 'Spanish': 'gato' } => 'cat'
             return label[@first_key(label)]
 
-        submit: -> $('.form').submit()
+        submit: ->
+          $('#patient_id').prop('disabled', false)
+          $('#provider_id').prop('disabled', false)
+          $('#cluster_id').prop('disabled', false)
+          $('.form').submit()
 
 
         # Returns a dictionary of all the form values
