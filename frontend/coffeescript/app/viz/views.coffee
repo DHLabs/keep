@@ -30,9 +30,6 @@ define( [ 'jquery',
         events:
           'click #share-btn': 'sharing_settings'
           'click .js-webform': 'show_webform'
-          'click .js-registry': 'show_registry'
-
-
 
         # TODO: this is duplicated in webform/views.coffee, need to extract a
         # utils file.
@@ -98,7 +95,18 @@ define( [ 'jquery',
         el: '#viz-options'
 
         events:
-            'click li': 'switch_event'
+          'click li': 'switch_event'
+          'click .js-registry': 'show_registry'
+          'click .js-show-cluster': 'show_cluster'
+          'click .js-show-mine': 'show_mine'
+
+        show_cluster: (e) ->
+          e.preventDefault()
+          Backbone.trigger 'fetch:cluster'
+
+        show_mine: (e) ->
+          e.preventDefault()
+          Backbone.trigger 'fetch:mine'
 
         switch_event: ( event ) ->
             # Prevents URL from changing back to '#'
