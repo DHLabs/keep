@@ -13,6 +13,7 @@ db = connection[ settings.MONGODB_DBNAME ]
 
 RECURRING_FORMS = [
     'p03_daily_clinical_lab_data',
+    'p04_new_illness',
 ]
 
 class DataSerializer( object ):
