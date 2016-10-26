@@ -1,5 +1,5 @@
 import re
-import StringIO
+from io import BytesIO
 import unicodecsv
 
 from django.utils.text import slugify
@@ -58,26 +58,24 @@ class CSVSerializer( Serializer ):
             # Converts geopoints into an X,Y coordinate string
             coords = field_value.get( 'coordinates' )
             props = field_value.get( 'properties' )
-            return '%s %s %s %s' % ( str( coords[1] ), str( coords[0]), str(props['altitude']), str(props['accuracy']) )
+            return '%s %s %s %s' % ( unicode( coords[1] ), unicode( coords[0]), unicode(props['altitude']), unicode(props['accuracy']) )
 
         elif 'select all' in field_type:
             # Converts a list into a comma-seperated list of values
             return ','.join( field_value )
         else:
-            return str( field_value )
+            return unicode( field_value )
 
     def to_csv( self, data, options=None ):
         '''
             Converts the JSON representation from the data API into a CSV file.
         '''
         options = options or {}
-
         data = self.to_simple( data, options )
-        raw_data = StringIO.StringIO()
 
-        writer = unicodecsv.DictWriter( raw_data,
-                                        [ x[ 'name' ] for x in data[ 'meta' ][ 'fields' ] ],
-                                        extrasaction='ignore')
+        output = BytesIO()
+        fieldnames = [ x['name'] for x in data['meta']['fields'] ]
+        writer = unicodecsv.DictWriter( output, fieldnames, extrasaction='ignore')
         writer.writeheader()
 
         for item in data.get( 'data', [] ):
@@ -96,7 +94,7 @@ class CSVSerializer( Serializer ):
 
             writer.writerow( row )
 
-        return raw_data.getvalue()
+        return output.getvalue()
 
     def from_csv( self, csv_data ):
         fields, data = ( [], [] )
