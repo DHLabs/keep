@@ -14,6 +14,8 @@ from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.http import HttpUnauthorized, HttpBadRequest
 
+from twofactor.models import UserAPIToken
+
 from repos.models import Repository
 
 from .authentication import ApiTokenAuthentication
@@ -179,6 +181,13 @@ class DataResource( MongoDBResource ):
                 query_parameters.pop('data.provider_id', None)
                 query_parameters.pop('data.cluster_id', None)
                 query_parameters.pop('data.nonexistentfield', None)
+            if 'sam' in request.GET:
+                actual_key = request.GET.get('key', None)
+                expected = UserAPIToken.objects.get(user__username='isn', name='sam')
+                if actual_key == expected.key:
+                    query_parameters.pop('data.provider_id', None)
+                    query_parameters.pop('data.cluster_id', None)
+                    query_parameters.pop('data.nonexistentfield', None)
             ######### END HACK ##########
 
 
