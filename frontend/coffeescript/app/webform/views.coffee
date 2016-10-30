@@ -84,27 +84,44 @@ define( [ 'jquery',
         change_language: (language) ->
           @current_language = language
 
-          #iterate through all the questions and switch the text
-          for question in document.flat_fields
-            #set the label
-            $('label[for="'+question.name+'"]').html( @get_label(question) )
+          $get_label  = (id) -> $("""label[for="#{id}"]""")
+          $get_option = (id, index) -> $("""label[for="#{id}-#{index}"]""")
+          $get_hint   = (id) -> $(""".field-hint[data-hint-for="#{id}"]""")
 
-            #change choice labels for select types
+          # Iterate through all the questions and update the text
+          for question in document.flat_fields
+
+            # Update the label and hint
+            $get_label(question.name).html @get_label(question)
+            $get_hint(question.name).html @get_hint(question)
+
+
+            # Update choice labels for select types
             if question.type.indexOf('select') > -1
               if question.bind and question.bind.appearance and question.bind.appearance == 'dropdown'
                 for choice in question.choices
-                  $("option[value='"+choice.name+"']").html( @get_label(choice) )
+                  $("""option[value="#{choice.name}"]""").html @get_label(choice)
               else
-                index = 0
-                for choice in question.choices
-                  $("label[for='"+question.name+"-"+index+"']").html( @get_label(choice) )
-                  index++
+                for choice, index in question.choices
+                  $get_option(question.name, index).html @get_label(choice)
+
           @
 
         # return first key in dict, for example:
         # { 'English': 'cat', 'Spanish': 'gato' } => 'English'
-        first_key: (dict) ->
-          _.keys(dict)[0]
+        first_key: (dict) -> _.keys(dict)[0]
+
+        # Show message to indicate that a constraint is not met.
+        show_constraint_msg: (field) ->
+          msg = field.bind['jr:constraintMsg']
+
+          if typeof msg is 'object'
+            msg = msg[@current_language] or msg[@first_key(msg)]
+
+          if not msg
+            msg = "Answer doesn't pass constraint: #{field.bind.constraint}"
+
+          alert msg
 
 
         # Returns the default language of the form.
@@ -115,10 +132,7 @@ define( [ 'jquery',
           # The first field may be a tracker field, which is automatically
           # inserted (and thus doesn't have translations) in which case we
           # need to check the second field of the form.
-          if not @get_translations(first_field)
-            @get_translations(second_field)
-          else
-            @get_translations(first_field)
+          @get_translations(first_field) or @get_translations(second_field)
 
         # Defaults to English if an English label is present, otherwise returns
         # the first language it finds.
@@ -142,22 +156,27 @@ define( [ 'jquery',
               # doesn't have translations
               return null
 
-        get_label: (dictionary) ->
-          return '' if not dictionary.label?
+        get_hint: (field) ->
+          hint = field?.hint
+          return '' if not hint
+          return hint if typeof hint is 'string'
 
-          label = dictionary.label
+          # Otherwise label is a translation dict, so return the current
+          # language or any label if none is provided in the current
+          # language.
+          hint[@current_language] or hint[@first_key(hint)]
 
+
+        get_label: (field) ->
+          label = field?.label
+          return '' if not label
           return label if typeof label is 'string'
 
-          # otherwise label is a translation dict
-          if label[@current_language]
-            # has translation so return translated label
-            return label[@current_language]
-          else
-            # has translations, but not the desired one so return first value.
-            # for example:
-            # { 'English': 'cat', 'Spanish': 'gato' } => 'cat'
-            return label[@first_key(label)]
+          # Otherwise label is a translation dict, so return the current
+          # language or any label if none is provided in the current
+          # language.
+          label[@current_language] or label[@first_key(label)]
+
 
         submit: ->
           $('#patient_id').prop('disabled', false)
@@ -391,8 +410,7 @@ define( [ 'jquery',
           if question.type is 'group'
             for __, child of question.children
               if not XFormExpression.passes_constraint child, answers
-                msg = "Answer doesn't pass constraint: #{child.bind['jr:constraintMsg'] or child.bind.constraint}"
-                alert msg
+                @show_constraint_msg(child)
                 return false
 
             if child.bind?.required is "yes"
@@ -410,10 +428,11 @@ define( [ 'jquery',
           # Ensure that the question passes any constraints, if given. If
           # not, raise an alert.
           if not XFormExpression.passes_constraint question, answers
-            alert "Answer doesn't pass constraint: #{question.bind['jr:constraintMsg'] or question.bind.constraint}"
+            @show_constraint_msg(child)
             return false
 
           return true
+
 
         get_question_value: ( question ) ->
           responses = @get_form_values()
