@@ -30,6 +30,7 @@ define( [ 'jquery',
         events:
           'click #share-btn': 'sharing_settings'
           'click .js-webform': 'show_webform'
+          'click .js-registry': 'show_registry'
 
         # TODO: this is duplicated in webform/views.coffee, need to extract a
         # utils file.
@@ -96,7 +97,6 @@ define( [ 'jquery',
 
         events:
           'click li': 'switch_event'
-          'click .js-registry': 'show_registry'
           'click .js-show-cluster': 'show_cluster'
           'click .js-show-mine': 'show_mine'
 
