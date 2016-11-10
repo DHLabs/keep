@@ -87,28 +87,29 @@ class DataSerializer( object ):
             patient_id = data.get('patient_id')
             copy['_status'] = {}
             for repo in linked:
-                submissions = { 'repo': ObjectId(repo.mongo_id), 'data.patient_id': patient_id }
-                submissions = db.data.find(submissions)
-                recurring = repo.name in RECURRING_FORMS
-                expected_count = (datetime.now() - checkin_date).days
-                if not recurring:
-                    if submissions.count() > 0:
-                        copy['_status'][repo.name] = 'complete'
-                    elif submissions.count() == 0:
-                        copy['_status'][repo.name] = 'data_required'
-                else:
-                    if submissions.count() == 0:
-                        copy['_status'][repo.name] = 'data_required'
-                    elif submissions.count() >= expected_count:
-                        copy['_status'][repo.name] = 'complete'
-                    else:
-                        copy['_status'][repo.name] = 'incomplete'
+                copy['_status'][repo.name] = ''
+                #submissions = { 'repo': ObjectId(repo.mongo_id), 'data.patient_id': patient_id }
+                #submissions = db.data.find(submissions)
+                #recurring = repo.name in RECURRING_FORMS
+                #expected_count = (datetime.now() - checkin_date).days
+                #if not recurring:
+                #    if submissions.count() > 0:
+                #        copy['_status'][repo.name] = 'complete'
+                #    elif submissions.count() == 0:
+                #        copy['_status'][repo.name] = 'data_required'
+                #else:
+                #    if submissions.count() == 0:
+                #        copy['_status'][repo.name] = 'data_required'
+                #    elif submissions.count() >= expected_count:
+                #        copy['_status'][repo.name] = 'complete'
+                #    else:
+                #        copy['_status'][repo.name] = 'incomplete'
 
-                if repo.name == 'p01_screening_form' and submissions.count() > 0:
-                    form = list(submissions)[0]
-                    enrolled = form['data'].get('enrolled', 'no')
-                    if enrolled != 'yes':
-                        ineligible = True
+                #if repo.name == 'p01_screening_form' and submissions.count() > 0:
+                #    form = list(submissions)[0]
+                #    enrolled = form['data'].get('enrolled', 'no')
+                #    if enrolled != 'yes':
+                #        ineligible = True
 
 
         # if not enrolled, mark all forms as complete
