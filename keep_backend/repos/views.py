@@ -457,6 +457,9 @@ def repo_viz( request, username, repo_name, filter_param=None ):
 
     # ISN Phase 2 hacks: filter by provider/cluster
     ######### BEGIN HACK ###########
+    # Filter out duplicates
+    data_query['_dirty'] = { '$exists': False }
+
     if 'provider_id' in request.GET:
         data_query['data.provider_id'] = request.GET['provider_id']
     if 'cluster_id' in request.GET:

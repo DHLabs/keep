@@ -171,6 +171,10 @@ class DataResource( MongoDBResource ):
 
             # ISN Phase 2 hack: filter by provider_id and/or cluster_id
             ######### BEGIN HACK ##########
+
+            # Filter out duplicates
+            query_parameters['_dirty'] = { '$exists': False }
+
             if 'provider_id' in request.GET:
                 query_parameters['data.provider_id'] = request.GET['provider_id']
             if 'cluster_id' in request.GET:
