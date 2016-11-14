@@ -227,7 +227,7 @@ class DataResource( MongoDBResource ):
                 limit = cursor.count()
 
             # ISN Phase 2 hack: don't paginate
-            if 'provider_id' in request.GET:
+            if 'provider_id' in request.GET or 'cluster_id' in request.GET:
                 limit = cursor.count()
 
             # Determine the number of pages available.
