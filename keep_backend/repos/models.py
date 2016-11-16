@@ -425,7 +425,9 @@ class Repository( models.Model ):
                         { '$set': { 'fields': fields } } )
 
     def submissions( self ):
-        return db.data.find({ 'repo': ObjectId( self.mongo_id ) } ).count()
+        # Hack for ISN to ignore duplicates
+        return db.data.find({ 'repo': ObjectId( self.mongo_id ),
+                              '_dirty': {'$exists': False} }).count()
 
     def tasks( self ):
         return db.task.find( { 'repo': ObjectId( self.mongo_id ) } )
