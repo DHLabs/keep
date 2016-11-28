@@ -47,26 +47,26 @@ class DataSerializer( object ):
                                                   data_id=copy[ 'id' ],
                                                   options=opts)
 
-            if repository.is_tracker and repository.study and linked:
-                link_dict = {}
-                tracker_id = 'data.' + repository.study.tracker
-                data_id = dict(row)['data'].get(repository.study.tracker)
+            #if repository.is_tracker and repository.study and linked:
+            #    link_dict = {}
+            #    tracker_id = 'data.' + repository.study.tracker
+            #    data_id = dict(row)['data'].get(repository.study.tracker)
 
-                # Create list of results
-                repo_datas = db.data.find( { tracker_id: data_id } )
-                repo_dict = dict( (repo['label'], repo) for repo in repo_datas )
+            #    # Create list of results
+            #    repo_datas = db.data.find( { tracker_id: data_id } )
+            #    repo_dict = dict( (repo['label'], repo) for repo in repo_datas )
 
-                # Check if data is complete or not
-                for linked_repo in linked:
-                    if linked_repo in repo_dict:
-                        if repo_dict[linked_repo]['is_finished']:
-                            link_dict[ linked_repo.name ] = 'finished'
-                        else:
-                            link_dict[ linked_repo.name ] = 'incomplete'
-                    else:
-                        link_dict[ linked_repo.name ] = 'empty'
+            #    # Check if data is complete or not
+            #    for linked_repo in linked:
+            #        if linked_repo in repo_dict:
+            #            if repo_dict[linked_repo]['is_finished']:
+            #                link_dict[ linked_repo.name ] = 'finished'
+            #            else:
+            #                link_dict[ linked_repo.name ] = 'incomplete'
+            #        else:
+            #            link_dict[ linked_repo.name ] = 'empty'
 
-                copy['linked'] = link_dict
+            #    copy['linked'] = link_dict
 
             hydrated.append( copy )
 
