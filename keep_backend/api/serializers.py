@@ -63,6 +63,10 @@ class CSVSerializer( Serializer ):
         elif 'select all' in field_type:
             # Converts a list into a comma-seperated list of values
             return ','.join( field_value )
+
+        elif field_type == 'text':
+            return unicode(field_value.replace('\n', '\\n').strip())
+
         else:
             return unicode( field_value )
 
