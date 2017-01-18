@@ -14,9 +14,11 @@ define( [ 'jquery',
         @$('.DataTable').addClass('DataTable--fitContainer')
         super
 
+      onShow: -> @delegateEvents()
+
       # Load up the intial set of data to render.
       initialize: (options) ->
-        super options
+        super
         @collection.reset(document.initial_data)
 
   return DataRawView

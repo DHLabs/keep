@@ -76,7 +76,7 @@ define( [ 'jquery',
             @attachView( @vizTabs )
 
     class VizContainer extends Backbone.Marionette.Region
-        el: '#viz-container'
+        el: '#vizContainer'
 
         initialize: (options) ->
             # Initialize the different available views.

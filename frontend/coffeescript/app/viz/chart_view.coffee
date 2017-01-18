@@ -67,7 +67,8 @@ define( [ 'jquery',
             @
 
         onShow: ->
-            $( window ).trigger( 'resize' )
+          @delegateEvents()
+          $(window).trigger('resize')
 
         create_new_viz_event: ( event ) ->
 
