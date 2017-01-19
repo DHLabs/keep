@@ -9,8 +9,8 @@ class ApiTokenAuthentication( Authentication ):
     def is_authenticated( self, request, **kwargs ):
 
         if request.method == 'POST':
-            username = request.POST.get( 'user', None )
-            key = request.POST.get( 'key', None )
+            username = request.POST.get( 'user', None ) or request.GET.get( 'user', None )
+            key = request.POST.get( 'key', None ) or request.GET.get( 'key', None )
         else:
             username = request.GET.get( 'user', None )
             key = request.GET.get( 'key', None )

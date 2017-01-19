@@ -210,6 +210,11 @@ class RepoResource( ModelResource ):
         if not self.authorized_create_detail( repo, bundle ):
             return HttpUnauthorized()
 
+        # TODO: the API doesn't accept JSON as a POST value since it's looking
+        # in request.POST which is for form data. Instead, it should check for
+        # data in either request.POST or it should run
+        # json.loads(request.body) for JSON in the request body.
+
         new_id = repo.add_data( request.POST, request.FILES )
 
         response_data = { 'success': True, 'id': str( new_id ) }

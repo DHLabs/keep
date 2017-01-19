@@ -101,8 +101,8 @@ class RepoAuthorization( Authorization ):
     def create_detail( self, object_detail, bundle ):
 
         logged_in_user = bundle.request.user
-        user = bundle.request.POST.get( 'user', None )
-        key  = bundle.request.POST.get( 'key', None )
+        user = bundle.request.POST.get( 'user', None ) or bundle.request.GET.get( 'user', None )
+        key  = bundle.request.POST.get( 'key', None ) or bundle.request.GET.get( 'key', None )
 
         # Case 1: No user query & the user is not logged in?
         if user is None and logged_in_user.is_anonymous():
