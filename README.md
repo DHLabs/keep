@@ -1,4 +1,6 @@
-# KEEP
+# KEEP (unmaintained)
+
+:construction: *This project is no longer maintained.* :construction:
 
 Keep is a general purpose platform that is designed to facilitate data
 collection and analysis while providing a robust API to support its use in
