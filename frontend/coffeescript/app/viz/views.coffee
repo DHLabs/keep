@@ -43,28 +43,33 @@ define( [ 'jquery',
         el: '#viz-options'
 
         events:
-            'click li': 'switch_event'
+          'click li': 'switch_tabs'
 
-        switch_event: ( event ) ->
-            # Prevents URL from changing back to '#'
-            event.preventDefault()
+        # Set the starting view as the active one if present, e.g. /#map
+        initialize: ->
+          current_route = Backbone.history.getFragment()
+          return if not current_route
+          @$('li.active').removeClass 'active'
+          @$("li[data-type=#{current_route}]").addClass 'active'
 
-            target = $( event.currentTarget )
+        switch_tabs: ( event ) ->
+          # Prevents URL from changing back to '#'
+          event.preventDefault()
 
-            if @selected().data('type') is target.data('type')
-                return
+          target = @$(event.currentTarget)
 
-            if target.hasClass( 'disabled' )
-                return
+          # Do nothing if the tab is disabled or is already displayed
+          return if @selected().data('type') is target.data('type')
+          return if target.hasClass 'disabled'
 
-            @selected().removeClass( 'active' )
-            target.addClass( 'active' )
+          # Otherwise set the clicked tab as the active one and trigger an
+          # event for the other components.
+          @selected().removeClass 'active'
+          target.addClass 'active'
+          @trigger "switch:#{target.data('type')}"
 
-            @trigger( 'switch:' + target.data( 'type' ) )
-
-        selected: ->
-            # Return the currently selected tab
-            return @$('li.active')
+        # Returns the currently selected tab as a jQuery element
+        selected: -> @$('li.active')
 
     class VizChrome extends Backbone.Marionette.Region
         el: '#viz-chrome'
