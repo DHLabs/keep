@@ -82,7 +82,7 @@ class DataSerializer( object ):
         checkin_date = data.get('checkin_dtime', None)
         if checkin_date:
             checkin_date = datetime.strptime(checkin_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-        if 'repo' in options and options['repo'].name == 'patient_list':
+        if 'repo' in options and 'patient_list' in options['repo'].name:
             linked = options.get('linked', [])
             patient_id = data.get('patient_id')
             copy['_status'] = {}

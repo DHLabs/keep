@@ -302,7 +302,7 @@ def webform( request, username, repo_name ):
                 [doc, pat, cluster] = [ patient['provider_id'], patient['patient_id'], patient['cluster_id'] ]
                 token = UserAPIToken.objects.filter(user=account)[0]
 
-                patient_list_url = "/{0}/patient_list/".format(account.username)
+                patient_list_url = "/{0}/{1}/".format(tracker_repo.user.username, tracker_repo.name)
                 patient_list_url += "?key={0}".format(token.key)
                 patient_list_url += "&user=isn"
                 patient_list_url += "&provider_id={0}".format(doc)
@@ -335,7 +335,7 @@ def webform( request, username, repo_name ):
                 [doc, pat, cluster] = [ patient['provider_id'], patient['patient_id'], patient['cluster_id'] ]
                 token = UserAPIToken.objects.filter(user=account)[0]
 
-                patient_list_url = "/{0}/patient_list/".format(account.username)
+                patient_list_url = "/{0}/{1}/".format(tracker_repo.user.username, tracker_repo.name)
                 patient_list_url += "?key={0}".format(token.key)
                 patient_list_url += "&user=isn"
                 patient_list_url += "&provider_id={0}".format(doc)
